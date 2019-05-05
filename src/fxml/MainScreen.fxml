@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane minHeight="300.0" minWidth="600.0" prefHeight="400.0" prefWidth="713.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.eteks.sweethome3d.swing.objstatus.framestatus.fxframes.MainScreenController">
+   <children>
+      <AnchorPane prefHeight="400.0" prefWidth="310.0" style="-fx-border-color: lightgrey; -fx-background-color: white;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <VBox alignment="CENTER" layoutX="-2.0" layoutY="9.0" prefHeight="183.0" prefWidth="342.0" AnchorPane.bottomAnchor="216.0" AnchorPane.leftAnchor="12.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <Label opacity="0.45" prefHeight="27.0" prefWidth="299.0" text="System Model" textFill="#aa14c4">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+                  <GridPane prefHeight="37.0" prefWidth="285.0">
+                    <columnConstraints>
+                      <ColumnConstraints maxWidth="138.0" minWidth="6.0" prefWidth="47.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="197.0" minWidth="0.0" prefWidth="189.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="84.0" minWidth="3.0" prefWidth="29.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="68.0" minWidth="0.0" prefWidth="7.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="126.0" minWidth="10.0" percentWidth="0.0" prefWidth="24.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label prefHeight="33.0" prefWidth="61.0" text="Name">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="lblSystemModelName" onMouseClicked="#openSystemModelFile" prefHeight="32.0" prefWidth="185.0" text="[ ]" textFill="#c30ed0" GridPane.columnIndex="1">
+                           <font>
+                              <Font name="System Bold" size="15.0" />
+                           </font>
+                        </Label>
+                        <Separator fx:id="separatorLine" orientation="VERTICAL" prefHeight="200.0" GridPane.columnIndex="3" />
+                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2">
+                           <image>
+                              <Image url="@../../../../../../../../res/img24/file+empty.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="4">
+                           <image>
+                              <Image url="@../../../../../../../../res/img24/delete_empty.png" />
+                           </image>
+                        </ImageView>
+                        <ImageView fx:id="imgOpenFile" fitHeight="25.0" fitWidth="32.0" onMouseClicked="#openSystemModelFile" pickOnBounds="true" preserveRatio="true" visible="false" GridPane.columnIndex="2">
+                           <image>
+                              <Image url="@../../../../../../../../res/img24/file.png" />
+                           </image>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </ImageView>
+                        <ImageView fx:id="imgDelete" fitHeight="20.0" fitWidth="20.0" onMouseClicked="#deleteModel" pickOnBounds="true" preserveRatio="true" visible="false" GridPane.columnIndex="4">
+                           <image>
+                              <Image url="@../../../../../../../../res/img24/delete.png" />
+                           </image>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </ImageView>
+                     </children>
+                  </GridPane>
+                  <VBox alignment="CENTER" prefHeight="82.0" prefWidth="273.0">
+                     <children>
+                        <AnchorPane prefHeight="35.0" prefWidth="286.0">
+                           <children>
+                              <ImageView fx:id="imgSuccessful" fitHeight="23.0" fitWidth="23.0" layoutX="236.0" layoutY="6.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                                 <image>
+                                    <Image url="@../../../../../../../../res/img24/correct.png" />
+                                 </image>
+                              </ImageView>
+                              <ProgressIndicator fx:id="progressIndicatorGeneration" layoutX="236.0" layoutY="6.0" prefHeight="23.0" prefWidth="23.0" visible="false" />
+                              <ImageView fx:id="imgWrong" fitHeight="23.0" fitWidth="23.0" layoutX="236.0" layoutY="5.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                                 <image>
+                                    <Image url="@../../../../../../../../res/img24/wrong.png" />
+                                 </image>
+                              </ImageView>
+                              <Button fx:id="btnGenerateSystemModel" defaultButton="true" layoutX="1.0" layoutY="-2.0" mnemonicParsing="false" onAction="#generateSystemModel" prefHeight="37.0" prefWidth="288.0" text="Generate Model" textOverrun="WORD_ELLIPSIS">
+                                 <tooltip>
+                                    <Tooltip text="Generate/update the system model" />
+                                 </tooltip>
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Button>
+                           </children>
+                        </AnchorPane>
+                        <HBox alignment="CENTER_LEFT" prefHeight="27.0" prefWidth="296.0">
+                           <children>
+                              <CheckBox fx:id="checkBoxGenerateBig" mnemonicParsing="false" prefHeight="31.0" prefWidth="98.0" selected="true" text="generate *.big" textFill="#656262">
+                                 <tooltip>
+                                    <Tooltip text="An option to generate a Bigrapher Reactive System (BRS) file based on the system model" />
+                                 </tooltip>
+                              </CheckBox>
+                              <ImageView fx:id="imgOpenBigFile" fitHeight="16.0" fitWidth="16.0" onMouseClicked="#openBigraphERFile" pickOnBounds="true" preserveRatio="true" visible="false">
+                                 <image>
+                                    <Image url="@../../../../../../../../res/img24/file.png" />
+                                 </image>
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor>
+                              </ImageView>
+                           </children>
+                           <opaqueInsets>
+                              <Insets right="2.0" top="2.0" />
+                           </opaqueInsets>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </children>
+            </VBox>
+            <Separator layoutX="17.0" layoutY="199.0" prefWidth="200.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="199.0" />
+            <VBox layoutX="14.0" layoutY="203.0" prefHeight="172.0" prefWidth="295.0" AnchorPane.bottomAnchor="26.0" AnchorPane.leftAnchor="13.0" AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="202.0">
+               <children>
+                  <Label opacity="0.45" prefHeight="46.0" prefWidth="331.0" text="System Analysis" textFill="#aa14c4">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+                  <GridPane prefHeight="34.0" prefWidth="290.0">
+                     <columnConstraints>
+                        <ColumnConstraints fillWidth="false" hgrow="SOMETIMES" maxWidth="266.0" minWidth="10.0" prefWidth="241.0" />
+                        <ColumnConstraints fillWidth="false" hgrow="SOMETIMES" maxWidth="54.0" minWidth="10.0" percentWidth="0.0" prefWidth="54.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                     <children>
+                        <TextField fx:id="textFieldSelectedFolder" prefHeight="34.0" prefWidth="239.0" promptText="States Folder" />
+                        <Button fx:id="btnSelectFolder" mnemonicParsing="false" onAction="#selectFolder" prefHeight="34.0" prefWidth="46.0" text="..." GridPane.columnIndex="1" />
+                        <ProgressBar fx:id="progressBarAnalyse" opacity="0.46" prefHeight="34.0" prefWidth="240.0" visible="false" />
+                     </children>
+                  </GridPane>
+                  <HBox alignment="CENTER_LEFT" prefHeight="34.0" prefWidth="295.0">
+                     <children>
+                        <ImageView fx:id="imgTransitionCheck" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
+                        <Pane prefHeight="20.0" prefWidth="6.0" />
+                        <Label fx:id="lblTransitionCheck" prefHeight="29.0" prefWidth="262.0">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER_LEFT" prefHeight="34.0" prefWidth="295.0">
+                     <children>
+                        <ImageView fx:id="imgStatesCheck" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" />
+                        <Pane prefHeight="20.0" prefWidth="6.0" />
+                        <Label fx:id="lblStatesCheck" prefHeight="29.0" prefWidth="262.0">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            <Button fx:id="btnEditActions" layoutX="204.0" layoutY="171.0" mnemonicParsing="false" onAction="#openActionPanel" prefHeight="25.0" prefWidth="96.0" text="Edit Actions" />
+            <Button layoutX="205.0" layoutY="365.0" mnemonicParsing="false" onAction="#openLTSGenerator" prefHeight="25.0" prefWidth="96.0" text="Generate LTS" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="205.0" />
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>

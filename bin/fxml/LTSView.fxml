@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="500.0" prefWidth="700.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.LTSGeneratorController">
+   <children>
+      <VBox layoutX="28.0" layoutY="73.0" AnchorPane.topAnchor="73.0">
+         <children>
+            <GridPane prefHeight="90.0" prefWidth="261.0">
+              <columnConstraints>
+                <ColumnConstraints fillWidth="false" hgrow="SOMETIMES" maxWidth="126.0" minWidth="10.0" prefWidth="115.0" />
+                <ColumnConstraints fillWidth="false" hgrow="SOMETIMES" maxWidth="160.0" minWidth="10.0" percentWidth="0.0" prefWidth="146.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints fillHeight="false" maxHeight="37.0" minHeight="10.0" percentHeight="0.0" prefHeight="37.0" vgrow="SOMETIMES" />
+                <RowConstraints fillHeight="false" maxHeight="39.0" minHeight="10.0" prefHeight="34.0" vgrow="SOMETIMES" />
+                <RowConstraints fillHeight="false" maxHeight="25.0" minHeight="10.0" prefHeight="19.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label prefHeight="17.0" prefWidth="146.0" text="# of States">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label text="Output Folder" GridPane.rowIndex="1">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <AnchorPane GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <children>
+                        <TextField fx:id="textFieldFolder" prefHeight="30.0" prefWidth="284.0" promptText="folder path" AnchorPane.bottomAnchor="2.0" AnchorPane.topAnchor="2.0" />
+                        <ImageView fx:id="imgOpenFolder" fitHeight="24.0" fitWidth="24.0" layoutX="256.0" layoutY="5.0" onMouseClicked="#selectFolder" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="5.0" AnchorPane.topAnchor="5.0">
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                           <image>
+                              <Image url="@../../bin/resources/images/folder.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </AnchorPane>
+                  <TextField fx:id="textFieldStatesnumber" prefHeight="30.0" prefWidth="144.0" promptText="states number" GridPane.columnIndex="1" />
+               </children>
+            </GridPane>
+            <HBox alignment="CENTER_LEFT">
+               <children>
+                  <Label alignment="CENTER" prefHeight="20.0" prefWidth="64.0" text="Generate">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <Label text="(optional)" />
+                  <VBox>
+                     <children>
+                        <CheckBox fx:id="checkBoxSVG" mnemonicParsing="false" text="States as SVG">
+                           <padding>
+                              <Insets bottom="5.0" />
+                           </padding>
+                        </CheckBox>
+                        <CheckBox fx:id="checkBoxText" mnemonicParsing="false" text="States as Text">
+                           <padding>
+                              <Insets bottom="5.0" />
+                           </padding>
+                        </CheckBox>
+                        <CheckBox fx:id="checkBoxDeclarations" mnemonicParsing="false" text="Declarations" />
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+      <HBox alignment="CENTER_LEFT" layoutX="28.0" layoutY="22.0" prefHeight="36.0" prefWidth="652.0" AnchorPane.topAnchor="22.0">
+         <children>
+            <Label prefHeight="20.0" prefWidth="101.0" text="BigraphER File">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <Pane prefHeight="51.0" prefWidth="4.0" />
+            <Label fx:id="lblBigraphERName" prefHeight="35.0" prefWidth="390.0" style="-fx-border-color: black;" textFill="#c30ed0">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+            <Pane prefHeight="51.0" prefWidth="4.0" />
+            <AnchorPane prefHeight="36.0" prefWidth="23.0">
+               <children>
+                  <ImageView fx:id="imgOpenBigrapher" fitHeight="24.0" fitWidth="24.0" layoutY="5.0" onMouseClicked="#openBigrapherFile" pickOnBounds="true" preserveRatio="true" visible="false">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                     <image>
+                        <Image url="@../../bin/resources/images/file.png" />
+                     </image>
+                  </ImageView>
+                  <ImageView fx:id="imgOpenBigrapherEmpty" fitHeight="24.0" fitWidth="24.0" layoutY="5.0" onMouseClicked="#openBigrapherFile" pickOnBounds="true" preserveRatio="true" visible="false">
+                     <image>
+                        <Image url="@../../bin/resources/images/file+empty.png" />
+                     </image>
+                  </ImageView>
+               </children>
+            </AnchorPane>
+            <Pane prefHeight="51.0" prefWidth="4.0" />
+            <Button fx:id="btnGenerateBigrapher" defaultButton="true" mnemonicParsing="false" onAction="#generateBigrapherFile" prefHeight="32.0" prefWidth="135.0" text="generate from system" />
+         </children>
+      </HBox>
+      <VBox layoutX="31.0" layoutY="240.0" AnchorPane.bottomAnchor="14.0">
+         <children>
+            <Button fx:id="btnGenerateStatement" mnemonicParsing="false" onAction="#generateBigraphERStatement" prefHeight="25.0" prefWidth="180.0" text="generate BigraphER statement" />
+            <Pane prefHeight="4.0" prefWidth="200.0" />
+            <AnchorPane>
+               <children>
+                  <TextArea fx:id="textAreaBigraphERStatement" prefHeight="151.0" prefWidth="634.0" />
+                  <Button fx:id="btnRunCommand" layoutX="565.0" layoutY="111.0" mnemonicParsing="false" onAction="#runBigrapherCommand" prefHeight="25.0" prefWidth="53.0" text="Run" />
+               </children>
+            </AnchorPane>
+         </children>
+      </VBox>
+      <Label fx:id="lblOnlyNumbers" layoutX="290.0" layoutY="83.0" prefHeight="20.0" prefWidth="114.0" text="Only numbers" textFill="#fc0707" visible="false">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>
