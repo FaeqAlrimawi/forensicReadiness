@@ -8,6 +8,7 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
@@ -17,8 +18,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
-
 
 <VBox prefHeight="500.0" prefWidth="967.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainController">
    <children>
@@ -43,14 +44,16 @@
       </MenuBar>
       <AnchorPane prefHeight="475.0" prefWidth="1092.0" style="-fx-background-color: white;">
          <children>
-            <Group layoutX="28.0" layoutY="250.0">
+            <Group layoutX="28.0" layoutY="255.0">
                <children>
                   <VBox layoutX="2.0" layoutY="46.0" prefHeight="172.0" prefWidth="295.0">
                      <children>
                         <AnchorPane>
                            <children>
                               <TextField fx:id="textFieldSelectedStatesFolder" prefHeight="34.0" prefWidth="295.0" promptText="States Folder" />
-                              <ImageView fx:id="imgOpenFolder" fitHeight="24.0" fitWidth="24.0" layoutX="261.0" layoutY="5.0" onMouseClicked="#selectStatesFolder" pickOnBounds="true" preserveRatio="true">
+                              <ProgressBar fx:id="progressBarAnalyse" opacity="0.4" prefHeight="34.0" prefWidth="295.0" visible="false" />
+                              <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="259.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
+                              <ImageView fx:id="imgOpenFolder" fitHeight="24.0" fitWidth="24.0" layoutX="263.0" layoutY="5.0" onMouseClicked="#selectStatesFolder" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../bin/resources/images/folder.png" />
                                  </image>
@@ -58,7 +61,6 @@
                                     <Cursor fx:constant="HAND" />
                                  </cursor>
                               </ImageView>
-                              <ProgressBar fx:id="progressBarAnalyse" opacity="0.4" prefHeight="34.0" prefWidth="295.0" visible="false" />
                            </children>
                         </AnchorPane>
                         <HBox alignment="CENTER_LEFT" prefHeight="34.0" prefWidth="295.0">
@@ -131,6 +133,7 @@
                                     <AnchorPane>
                                        <children>
                                           <TextField fx:id="textFieldSystemFile" prefHeight="34.0" prefWidth="295.0" promptText="Cyber-Physical System Model (*.cps)" />
+                                          <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="259.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
                                           <ImageView fx:id="imgSelectSystemFile" fitHeight="24.0" fitWidth="24.0" layoutX="262.0" layoutY="5.0" onMouseClicked="#selectSystemFile" pickOnBounds="true" preserveRatio="true">
                                              <image>
                                                 <Image url="@../../bin/resources/images/folder.png" />
@@ -156,7 +159,7 @@
                               <Pane prefHeight="7.0" prefWidth="262.0" />
                               <HBox>
                                  <children>
-                                    <Button fx:id="btnUpdateSystemModel" disable="true" mnemonicParsing="false" onAction="#updateSystemModel" prefHeight="25.0" prefWidth="78.0" text="edit">
+                                    <Button fx:id="btnUpdateSystemModel" disable="true" mnemonicParsing="false" onAction="#updateSystemModel" prefHeight="25.0" prefWidth="78.0" text="view">
                                        <tooltip>
                                           <Tooltip text="Update System model using SweetHome3D" />
                                        </tooltip>
@@ -224,7 +227,7 @@
                   </VBox>
                </children>
             </Group>
-            <Separator layoutX="28.0" layoutY="198.0" prefHeight="7.0" prefWidth="433.0" />
+            <Separator layoutX="28.0" layoutY="218.0" prefHeight="7.0" prefWidth="433.0" />
             <Separator layoutX="516.0" layoutY="17.0" orientation="VERTICAL" prefHeight="442.0" prefWidth="5.0" />
             <VBox layoutX="534.0" layoutY="14.0">
                <children>
@@ -239,6 +242,7 @@
                         <AnchorPane>
                            <children>
                               <TextField fx:id="textFieldIncidentInstance" prefHeight="34.0" prefWidth="295.0" promptText="Incident Instance Model (*.cpi)" />
+                              <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="259.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
                               <ImageView fx:id="imgSelectIncidentInstance" fitHeight="24.0" fitWidth="24.0" layoutX="262.0" layoutY="5.0" onMouseClicked="#selectIncidentInstanceFile" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../bin/resources/images/folder.png" />
@@ -254,7 +258,7 @@
                               <Font size="14.0" />
                            </font>
                         </Label>
-                        <Button mnemonicParsing="false" prefHeight="34.0" prefWidth="75.0" text="create">
+                        <Button fx:id="btnCreateIncidentInstance" mnemonicParsing="false" onAction="#createIncidentInstance" prefHeight="34.0" prefWidth="75.0" text="create">
                            <tooltip>
                               <Tooltip text="Create new system model using SweetHome3D" />
                            </tooltip>
@@ -300,6 +304,33 @@
                               </ImageView>
                            </children>
                         </Group>
+                     </children>
+                  </HBox>
+                  <Pane prefHeight="7.0" prefWidth="452.0" />
+                  <HBox prefHeight="34.0" prefWidth="292.0">
+                     <children>
+                        <ImageView fx:id="imgIncidentInstanceFileCheck" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                           <image>
+                              <Image url="@../../bin/resources/images/correct.png" />
+                           </image>
+                        </ImageView>
+                        <Pane prefHeight="20.0" prefWidth="6.0" />
+                        <Label fx:id="lblIncidentInstanceFileCheck" prefHeight="23.0" prefWidth="262.0">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <Pane prefHeight="7.0" prefWidth="452.0" />
+                  <HBox>
+                     <children>
+                        <Button fx:id="btnGenerateIncidentPattern" disable="true" mnemonicParsing="false" onAction="#generateIncidentPattern" prefHeight="34.0" prefWidth="295.0" text="Generate Incident Pattern">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Button>
+                        <ProgressIndicator fx:id="progressBarGenerateIncidentPattern" prefHeight="34.0" prefWidth="44.0" visible="false" />
                      </children>
                   </HBox>
                </children>

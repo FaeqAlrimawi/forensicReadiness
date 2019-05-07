@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="477.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.BRSDrawController">
+   <children>
+      <SplitPane dividerPositions="0.28939828080229224" layoutX="304.0" layoutY="159.0" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <items>
+          <AnchorPane maxWidth="200.0" minHeight="0.0" minWidth="100.0" prefHeight="475.0" prefWidth="100.0">
+               <children>
+                  <VBox alignment="TOP_CENTER" layoutX="14.0" layoutY="41.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <Pane prefHeight="6.0" prefWidth="200.0" />
+                        <Label prefHeight="27.0" prefWidth="182.0" text="Entities" textFill="#1a1919">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <Pane prefHeight="6.0" prefWidth="200.0" />
+                        <Accordion>
+                          <panes>
+                            <TitledPane animated="false" prefHeight="0.0" prefWidth="200.0" text="Physical Structure">
+                                 <content>
+                                    <VBox>
+                                       <children>
+                                          <Button id="building" alignment="CENTER" contentDisplay="RIGHT" graphicTextGap="5.0" mnemonicParsing="false" onAction="#createEntity" prefHeight="34.0" prefWidth="189.0" stylesheets="@../../bin/resources/styles/buttonStyle.css" text="Building">
+                                             <font>
+                                                <Font size="14.0" />
+                                             </font>
+                                             <graphic>
+                                                <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@../../bin/resources/systemImages/icons32/building.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                       </children>
+                                    </VBox>
+                                 </content>
+                              </TitledPane>
+                            <TitledPane animated="false" text="Computing Device">
+                                 <content>
+                                    <VBox>
+                                       <children>
+                                          <Button id="hvac" alignment="CENTER" contentDisplay="RIGHT" graphicTextGap="5.0" mnemonicParsing="false" onAction="#createEntity" prefHeight="34.0" prefWidth="180.0" style="-fx-background-image: \@(..\..\bin\resources\systemImages\icons32\hvac.png);" stylesheets="@../../bin/resources/styles/buttonStyle.css" text="HVAC">
+                                             <font>
+                                                <Font size="14.0" />
+                                             </font>
+                                             <graphic>
+                                                <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@../../bin/resources/systemImages/icons32/hvac.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                          <Pane prefHeight="6.0" prefWidth="200.0" />
+                                          <Button id="smartLight" alignment="CENTER" contentDisplay="RIGHT" graphicTextGap="5.0" mnemonicParsing="false" onAction="#createEntity" prefHeight="34.0" prefWidth="189.0" stylesheets="@../../bin/resources/styles/buttonStyle.css" text="Smart Light">
+                                             <font>
+                                                <Font size="14.0" />
+                                             </font>
+                                             <graphic>
+                                                <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@../../bin/resources/systemImages/icons32/smartLight.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </graphic>
+                                          </Button>
+                                       </children>
+                                    </VBox>
+                                 </content>
+                              </TitledPane>
+                              <TitledPane animated="false" text="Digital">
+                                <content>
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                </content>
+                              </TitledPane>
+                          </panes>
+                        </Accordion>
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+          <AnchorPane fx:id="drawPane" minHeight="0.0" minWidth="0.0" prefHeight="475.0" prefWidth="500.0" style="-fx-background-color: white;">
+               <children>
+                  <ButtonBar layoutY="435.0" prefHeight="40.0" prefWidth="580.0" style="-fx-background-color: lightgrey;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                    <buttons>
+                      <Button mnemonicParsing="false" stylesheets="@../../bin/resources/styles/buttonStyle.css" text="contains" />
+                    </buttons>
+                  </ButtonBar>
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+   </children>
+</AnchorPane>

@@ -12,7 +12,11 @@ import com.eteks.sweethome3d.adaptive.forensics.BigrapherStatesChecker;
 import com.eteks.sweethome3d.adaptive.forensics.SystemHandler;
 
 import application.Main;
+import cyberPhysical_Incident.IncidentDiagram;
 import environment.EnvironmentDiagram;
+import environment.Lab;
+import ie.lero.spare.franalyser.utility.ModelsHandler;
+import ie.lero.spare.pattern_extraction.IncidentPatternExtractor;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -25,6 +29,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -43,7 +48,7 @@ public class MainController {
 
 	@FXML
 	private TextField textFieldSystemFile;
-	
+
 	@FXML
 	private TextField textFieldIncidentInstance;
 
@@ -70,28 +75,34 @@ public class MainController {
 
 	@FXML
 	private ImageView imgOpenIncidentInstanceFile;
-	
+
 	@FXML
 	private ImageView imgSelectIncidentInstance;
-	
+
 	@FXML
 	private ImageView imgOpenIncidentInstanceFileEmpty;
-	
+
 	@FXML
 	private ImageView imgSelectSystemFile;
-	
+
 	@FXML
 	private ImageView imgOpenFolder;
-	
-	
+
 	@FXML
 	private ImageView imgRefresh;
 
 	@FXML
 	private ImageView imgRefreshEmpty;
+	
+	@FXML
+	private ImageView imgIncidentInstanceFileCheck;
+	
 
 	@FXML
 	private Label lblStatesCheck;
+	
+	@FXML
+	private Label lblIncidentInstanceFileCheck;
 
 	@FXML
 	private Label lblSystemFileCheck;
@@ -103,10 +114,16 @@ public class MainController {
 	private Button btnEditActions;
 
 	@FXML
+	private Button btnGenerateIncidentPattern;
+
+	@FXML
 	private ImageView imgStatesCheck;
-	
+
 	@FXML
 	private MenuBar menuBar;
+	
+	@FXML
+	private ProgressIndicator progressBarGenerateIncidentPattern;
 	
 
 	private static final String IMAGES_FOLDER = "resources/images/";
@@ -114,66 +131,66 @@ public class MainController {
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
 	private static final int INTERVAL = 3000;
 	private static final int FILE_MENU = 0;
-	
+
 	private BigrapherStatesChecker checker;
 
 	private File selectedStatesDirectory;
 	private File selectedSystemFile;
 	private File selectedIncidentInstanceFile;
 	private EnvironmentDiagram systemModel;
+
 	private SweetHome3D sh3d;
 
 	@FXML
 	public void initialize() {
 
-//		textFieldSystemFile.requestFocus();
+		// textFieldSystemFile.requestFocus();
 
 		updateMenuBar();
-		
-		textFieldSystemFile.setOnMouseClicked((e)->{
-			imgSelectSystemFile.setVisible(false);
-		});
-		
-		textFieldSystemFile.setOnMouseExited((e)->{
-			imgSelectSystemFile.setVisible(true);
-		});
-		
-		textFieldSelectedStatesFolder.setOnMouseClicked((e)->{
-			imgOpenFolder.setVisible(false);
-		});
-		
-		textFieldSelectedStatesFolder.setOnMouseExited((e)->{
-			imgOpenFolder.setVisible(true);
-		});
-		
-		textFieldIncidentInstance.setOnMouseClicked((e)->{
-			imgSelectIncidentInstance.setVisible(false);
-		});
-		
-		textFieldIncidentInstance.setOnMouseExited((e)->{
-			imgSelectIncidentInstance.setVisible(true);
-		});
-		
+
+//		textFieldSystemFile.setOnMouseClicked((e) -> {
+//			imgSelectSystemFile.setVisible(false);
+//		});
+//
+//		textFieldSystemFile.setOnMouseExited((e) -> {
+//			imgSelectSystemFile.setVisible(true);
+//		});
+//
+//		textFieldSelectedStatesFolder.setOnMouseClicked((e) -> {
+//			imgOpenFolder.setVisible(false);
+//		});
+//
+//		textFieldSelectedStatesFolder.setOnMouseExited((e) -> {
+//			imgOpenFolder.setVisible(true);
+//		});
+//
+//		textFieldIncidentInstance.setOnMouseClicked((e) -> {
+//			imgSelectIncidentInstance.setVisible(false);
+//		});
+//
+//		textFieldIncidentInstance.setOnMouseExited((e) -> {
+//			imgSelectIncidentInstance.setVisible(true);
+//		});
+
 	}
-	
+
 	protected void updateMenuBar() {
-		
-		
+
 		Menu fileMenu = menuBar.getMenus().get(FILE_MENU);
-		
-		//add open file system menu item
+
+		// add open file system menu item
 		MenuItem openSystemFileItem = new MenuItem("Open System File");
-		
-		openSystemFileItem.setOnAction((e)-> {
+
+		openSystemFileItem.setOnAction((e) -> {
 			selectSystemFile(null);
 		});
-		
+
 		fileMenu.getItems().add(0, openSystemFileItem);
-		
-		//set on close
-		MenuItem close = fileMenu.getItems().get(fileMenu.getItems().size()-1);
-		
-		close.setOnAction((e)->{
+
+		// set on close
+		MenuItem close = fileMenu.getItems().get(fileMenu.getItems().size() - 1);
+
+		close.setOnAction((e) -> {
 			System.exit(0);
 		});
 	}
@@ -262,6 +279,10 @@ public class MainController {
 				imgOpenBigrapher.setVisible(true);
 				imgOpenBigrapherEmpty.setVisible(false);
 
+				if (selectedIncidentInstanceFile != null) {
+					btnGenerateIncidentPattern.setDisable(false);
+				}
+
 			} else {
 				updateImage(IMAGE_WRONG, imgSystemFileCheck);
 				updateText("System model is not valid", lblSystemFileCheck);
@@ -270,6 +291,8 @@ public class MainController {
 				imgOpenBigrapherEmpty.setVisible(true);
 				imgRefresh.setVisible(false);
 				imgRefreshEmpty.setVisible(true);
+
+				btnGenerateIncidentPattern.setDisable(true);
 
 			}
 
@@ -288,7 +311,7 @@ public class MainController {
 		textFieldSystemFile.requestFocus();
 
 	}
-	
+
 	@FXML
 	void selectIncidentInstanceFile(MouseEvent event) {
 
@@ -320,34 +343,40 @@ public class MainController {
 
 			if (isIncidentInstanceFileValid()) {
 
-//				updateImage(IMAGE_CORRECT, imgSystemFileCheck);
-//				updateText("System model is valid", lblSystemFileCheck);
-//				btnUpdateSystemModel.setDisable(false);
-//				btnEditActions.setDisable(false);
+				 updateImage(IMAGE_CORRECT, imgIncidentInstanceFileCheck);
+				 updateText("Incident Instance model is valid", lblIncidentInstanceFileCheck);
+				// btnUpdateSystemModel.setDisable(false);
+				// btnEditActions.setDisable(false);
 				imgOpenIncidentInstanceFile.setVisible(true);
 				imgOpenIncidentInstanceFileEmpty.setVisible(false);
 
+				if (selectedSystemFile != null) {
+					btnGenerateIncidentPattern.setDisable(false);
+				}
+
 			} else {
-//				updateImage(IMAGE_WRONG, imgSystemFileCheck);
-//				updateText("System model is not valid", lblSystemFileCheck);
-//				btnUpdateSystemModel.setDisable(true);
+				 updateImage(IMAGE_WRONG, imgIncidentInstanceFileCheck);
+				 updateText("Incident Instance model is not valid", lblIncidentInstanceFileCheck);
+				// btnUpdateSystemModel.setDisable(true);
 				imgOpenIncidentInstanceFile.setVisible(false);
 				imgOpenIncidentInstanceFileEmpty.setVisible(true);
-//				imgRefresh.setVisible(false);
-//				imgRefreshEmpty.setVisible(true);
+				// imgRefresh.setVisible(false);
+				// imgRefreshEmpty.setVisible(true);
+
+				btnGenerateIncidentPattern.setDisable(true);
 
 			}
 
 			// remove the check image and text after a few secs
-//			new Timer().schedule(new TimerTask() {
-//
-//				@Override
-//				public void run() {
-//					// TODO Auto-generated method stub
-//					updateImage(null, imgSystemFileCheck);
-//					updateText("", lblSystemFileCheck);
-//				}
-//			}, INTERVAL);
+			// new Timer().schedule(new TimerTask() {
+			//
+			// @Override
+			// public void run() {
+			// // TODO Auto-generated method stub
+			// updateImage(null, imgSystemFileCheck);
+			// updateText("", lblSystemFileCheck);
+			// }
+			// }, INTERVAL);
 		}
 
 		textFieldSystemFile.requestFocus();
@@ -371,7 +400,7 @@ public class MainController {
 
 		}
 	}
-	
+
 	@FXML
 	void openIncidentInstanceFile(MouseEvent event) {
 		// open bigrapher model file
@@ -407,6 +436,25 @@ public class MainController {
 
 		// to be done
 		// create a model in SH3D based on the system model
+	}
+
+	@FXML
+	void createIncidentInstance(ActionEvent event) {
+
+		// incident.design.Activator activitor = new Activator();
+
+		try {
+			// Activator.getDefault().start(null);
+			// BundleContext bundleContext =
+			// FrameworkUtil.
+			// getBundle().
+			// getBundleContext();
+			// activitor.start(bundleContext);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	@FXML
@@ -486,23 +534,41 @@ public class MainController {
 
 	}
 
+	@FXML
+	void generateIncidentPattern(ActionEvent event) {
+
+		IncidentPatternExtractor extractor = new IncidentPatternExtractor();
+
+		progressBarGenerateIncidentPattern.setVisible(true);
+		IncidentDiagram diagram = extractor.extract(selectedIncidentInstanceFile.getAbsolutePath(),
+				selectedSystemFile.getAbsolutePath());
+		
+		progressBarGenerateIncidentPattern.setVisible(false);
+
+	}
+
 	protected boolean isSystemFileValid() {
 
 		// try creating an object from the file
 		SystemHandler.setFilePath(selectedSystemFile.getAbsolutePath());
 
-		return SystemHandler.generateSystemModel();
+		boolean isValid = SystemHandler.generateSystemModel();
+
+		return isValid;
 
 	}
-	
+
 	protected boolean isIncidentInstanceFileValid() {
 
 		// try creating an object from the file
-//		SystemHandler.setFilePath(selectedSystemFile.getAbsolutePath());
+		// SystemHandler.setFilePath(selectedSystemFile.getAbsolutePath());
 
-//		return SystemHandler.generateSystemModel();
+		boolean isValid = ModelsHandler.isValidIncidentModel(selectedIncidentInstanceFile.getAbsolutePath());
 		
-		return true;
+		
+		// return SystemHandler.generateSystemModel();
+
+		return isValid;
 
 	}
 
