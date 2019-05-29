@@ -18,7 +18,7 @@ public class Main extends Application {
 
 			FXMLLoader loader = new FXMLLoader();
 
-			URL url = Main.class.getResource("../fxml/Main.fxml");
+			URL url = Main.class.getResource("../fxml/TraceViewer.fxml");
 			
 			if(url!=null) {
 				System.out.println(url.getPath());	

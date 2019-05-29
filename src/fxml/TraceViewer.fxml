@@ -16,7 +16,7 @@
 <?import javafx.scene.text.Font?>
 
 
-<AnchorPane prefHeight="582.0" prefWidth="700.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.1">
+<AnchorPane prefHeight="582.0" prefWidth="700.0" style="-fx-background-color: white;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.1" fx:controller="controller.TraceViewerController">
    <children>
       <VBox layoutX="10.0" layoutY="10.0" prefHeight="120.0" prefWidth="680.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
          <children>
@@ -32,9 +32,9 @@
                      <children>
                         <AnchorPane>
                            <children>
-                              <TextField fx:id="textFieldSystemFile" prefHeight="34.0" prefWidth="295.0" promptText="traces file (*.json)" />
-                              <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="259.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
-                              <ImageView fx:id="imgSelectSystemFile" fitHeight="24.0" fitWidth="24.0" layoutX="262.0" layoutY="5.0" onMouseClicked="#selectSystemFile" pickOnBounds="true" preserveRatio="true">
+                              <TextField fx:id="textFieldSystemFile" prefHeight="34.0" prefWidth="451.0" promptText="traces file (*.json)" />
+                              <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="410.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
+                              <ImageView fx:id="imgSelectSystemFile" fitHeight="24.0" fitWidth="24.0" layoutX="416.0" layoutY="5.0" onMouseClicked="#selectTracesFile" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@../../bin/resources/images/folder.png" />
                                  </image>
@@ -49,12 +49,12 @@
                               <Pane prefHeight="34.0" prefWidth="9.0" />
                               <AnchorPane prefHeight="24.0" prefWidth="24.0">
                                  <children>
-                                    <ImageView fx:id="imgOpenBigrapherEmpty" fitHeight="24.0" fitWidth="24.0" layoutY="5.0" pickOnBounds="true" preserveRatio="true">
+                                    <ImageView fx:id="imgOpentracesFileEmpty" fitHeight="24.0" fitWidth="24.0" layoutY="5.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
                                           <Image url="@../../bin/resources/images/file+empty.png" />
                                        </image>
                                     </ImageView>
-                                    <ImageView fx:id="imgOpenBigrapher" fitHeight="24.0" fitWidth="24.0" layoutY="5.0" onMouseClicked="#openSystemFile" pickOnBounds="true" preserveRatio="true" visible="false">
+                                    <ImageView fx:id="imgOpentracesFile" fitHeight="24.0" fitWidth="24.0" layoutY="5.0" onMouseClicked="#openSystemFile" pickOnBounds="true" preserveRatio="true" visible="false">
                                        <cursor>
                                           <Cursor fx:constant="HAND" />
                                        </cursor>
@@ -90,7 +90,7 @@
             <Separator prefWidth="200.0" />
          </children>
       </VBox>
-      <VBox layoutX="10.0" layoutY="144.0" prefHeight="200.0" prefWidth="680.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="144.0">
+      <VBox layoutX="10.0" layoutY="144.0" prefHeight="200.0" prefWidth="680.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="144.0">
          <children>
             <Label prefHeight="34.0" prefWidth="451.0" text="Filter" textFill="#aa14c4">
                <font>
@@ -99,15 +99,13 @@
             </Label>
             <HBox prefHeight="32.0" prefWidth="680.0">
                <children>
-                  <Label prefHeight="33.0" prefWidth="68.0" text="select filter">
+                  <ChoiceBox fx:id="choiceboxFilter" prefHeight="37.0" prefWidth="459.0" />
+                  <Pane prefHeight="34.0" prefWidth="9.0" />
+                  <Button fx:id="btnAnalyse" disable="true" mnemonicParsing="false" onAction="#mineTraces" prefHeight="32.0" prefWidth="133.0" text="analyse">
                      <font>
-                        <Font size="14.0" />
+                        <Font size="16.0" />
                      </font>
-                  </Label>
-                  <Pane prefHeight="34.0" prefWidth="9.0" />
-                  <ChoiceBox prefHeight="34.0" prefWidth="375.0" />
-                  <Pane prefHeight="34.0" prefWidth="9.0" />
-                  <Button mnemonicParsing="false" prefHeight="32.0" prefWidth="133.0" text="analyse" />
+                  </Button>
                </children>
             </HBox>
          </children>
