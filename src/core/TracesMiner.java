@@ -376,6 +376,7 @@ public class TracesMiner {
 		writeToFile(content.toString(), outputFile);
 	
 	}
+	
 
 	public int identifyRelevantTracesFromFile(String fileName) {
 
@@ -466,7 +467,7 @@ public class TracesMiner {
 
 	}
 
-	void findShortestTraces() {
+	public int findShortestTraces() {
 
 		// shortest trace is set to be 3 actions (or 4 states (i.e. actions+1)
 
@@ -479,37 +480,6 @@ public class TracesMiner {
 			shortestTraces.clear();
 		}
 
-		// contains the ids separated by spaces
-		// String shortestTracesFileName =
-		// instanceFileName.substring(instanceFileName.lastIndexOf("/")+1);
-
-		// remove .json and add extension .txt
-		// String shortestTracesFileName = instanceFileName.replace(".json",
-		// "_shortestTracesIDs.txt");
-
-		// File file = new File(shortestTracesFileName);
-
-		// if shortest traces already defined for the given traces then read the
-		// file
-		// if (file.isFile()) {
-		//
-		// // read shortest traces file (contains ids separated by space)
-		// System.out.println(">>Loading shortest traces IDs from [" +
-		// shortestTracesFileName + "]");
-		// String[] tracesIDs =
-		// FileManipulator.readFileNewLine(shortestTracesFileName);
-		//
-		// tracesIDs = tracesIDs[0].split(separator);
-		//
-		// for (String id : tracesIDs) {
-		// int idInt = Integer.parseInt(id);
-		//
-		// shortestTraces.put(idInt, instances.get(idInt));
-		// }
-		//
-		// System.out.println(shortestTraces.size());
-		//
-		// } else {
 		System.out.println(">>Identifying shortest traces in [" + instanceFileName + "]");
 		for (GraphPath trace : instances.values()) {
 
@@ -526,7 +496,9 @@ public class TracesMiner {
 		// store to file
 		writeToFile(bldr.toString(), shortestTracesFileName);
 		System.out.println(">>Shortest traces IDs are stored in [" + shortestTracesFileName + "]");
-		// }
+		
+		
+		return shortestTraces.size();
 
 	}
 

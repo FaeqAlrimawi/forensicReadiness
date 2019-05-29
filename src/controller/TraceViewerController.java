@@ -7,6 +7,8 @@ import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.eclipse.jface.dialogs.ProgressIndicator;
+
 import core.TracesMiner;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -47,6 +49,15 @@ public class TraceViewerController {
     @FXML
     private ChoiceBox<String> choiceboxFilter;
     
+    @FXML
+    private ImageView imgFilter;
+
+    @FXML
+    private Label lblFilter;
+    
+    @FXML
+    private ProgressIndicator progressIndicatorFilter;
+    
     private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -57,7 +68,14 @@ public class TraceViewerController {
 //    private JSONObject jsonTraces;
     private TracesMiner tracesMiner;
     
-    private final String[] filters = {"Shortest traces with frequent sequential pattern using ClaSP"};
+    
+    private static final int SHORTEST = 0;
+    private static final int SHORTEST_CLASP = 1;
+    private final String[] filters = {
+    		"Shortest Only",
+    		"Shortest & [Frequent Sequential Pattern using ClaSP]",
+    		"Set length manually"
+    };
     
     
     @FXML
@@ -151,6 +169,20 @@ public class TraceViewerController {
     @FXML
     public void mineTraces(ActionEvent event) {
     	
+    	int selectedFilter = choiceboxFilter.getSelectionModel().getSelectedIndex();
+    	
+    	switch(selectedFilter) {
+    	
+    	case SHORTEST:
+    		progressIndicatorFilter.setVisible(true);
+    		findShortestTraces();
+    		break;
+    		
+    	case SHORTEST_CLASP:
+    		break;
+    		default:
+    			//shortest
+    	}
     }
     
     /**
@@ -168,6 +200,17 @@ public class TraceViewerController {
     	}
     	
     	return true;
+    }
+    
+    protected void findShortestTraces() {
+    
+    	int numOfShortestTraces = 0;
+    	
+    	numOfShortestTraces = tracesMiner.findShortestTraces();
+    	
+    	
+    	
+    	
     }
     
     protected void updateImage(String imgPath, ImageView imgView) {
