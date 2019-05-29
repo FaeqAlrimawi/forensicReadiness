@@ -66,6 +66,7 @@
                                  </children>
                               </AnchorPane>
                               <Pane prefHeight="36.0" prefWidth="5.0" />
+                              <ProgressIndicator fx:id="progressIndicatorLoader" visible="false" />
                            </children>
                         </HBox>
                      </children>

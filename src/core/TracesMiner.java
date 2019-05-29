@@ -489,10 +489,10 @@ public class TracesMiner {
 		}
 
 		// store to file
-		if(shortestTracesFileName != null) {
-			writeToFile(bldr.toString(), shortestTracesFileName);
-			System.out.println(">>Shortest traces IDs are stored in [" + shortestTracesFileName + "]");	
-		}
+//		if(shortestTracesFileName != null) {
+//			writeToFile(bldr.toString(), shortestTracesFileName);
+//			System.out.println(">>Shortest traces IDs are stored in [" + shortestTracesFileName + "]");	
+//		}
 		
 		
 		return shortestTraces.size();

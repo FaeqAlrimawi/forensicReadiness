@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
-
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import core.TracesMiner;
 import javafx.application.Platform;
@@ -58,6 +60,9 @@ public class TraceViewerController {
     @FXML
     private ProgressIndicator progressIndicatorFilter;
     
+    @FXML
+    private ProgressIndicator progressIndicatorLoader;
+    
     private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -68,6 +73,7 @@ public class TraceViewerController {
 //    private JSONObject jsonTraces;
     private TracesMiner tracesMiner;
     
+    private ExecutorService executor = Executors.newFixedThreadPool(3);
     
     private static final int SHORTEST = 0;
     private static final int SHORTEST_CLASP = 1;
@@ -76,6 +82,7 @@ public class TraceViewerController {
     		"Shortest & [Frequent Sequential Pattern using ClaSP]",
     		"Set length manually"
     };
+    
     
     
     @FXML
@@ -133,21 +140,34 @@ public class TraceViewerController {
 			//set file in miner
 			tracesMiner.setTracesFile(selectedTracesFile.getAbsolutePath());
 			
-			if (isTracesFileValid()) {
+			//show progress indicatior
+			progressIndicatorLoader.setVisible(true);
+			
+			executor.submit(new Runnable() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					if (isTracesFileValid()) {
 
-				updateImage(IMAGE_CORRECT, imgSystemFileCheck);
-				updateText("Number of Traces = " + tracesMiner.getNumberOfTraces(), lblSystemFileCheck);
-				imgOpentracesFile.setVisible(true);
-				imgOpentracesFileEmpty.setVisible(false);
-				btnAnalyse.setDisable(false);
+						updateImage(IMAGE_CORRECT, imgSystemFileCheck);
+						updateText("Number of Traces = " + tracesMiner.getNumberOfTraces(), lblSystemFileCheck);
+						imgOpentracesFile.setVisible(true);
+						imgOpentracesFileEmpty.setVisible(false);
+						btnAnalyse.setDisable(false);
 
-			} else {
-				updateImage(IMAGE_WRONG, imgSystemFileCheck);
-				updateText("Traces file is not valid", lblSystemFileCheck);
-				imgOpentracesFile.setVisible(false);
-				imgOpentracesFileEmpty.setVisible(true);
+					} else {
+						updateImage(IMAGE_WRONG, imgSystemFileCheck);
+						updateText("Traces file is not valid", lblSystemFileCheck);
+						imgOpentracesFile.setVisible(false);
+						imgOpentracesFileEmpty.setVisible(true);
 
-			}
+					}
+					
+					progressIndicatorLoader.setVisible(false);
+					
+				}
+			});
 			
 //			updateImage(null, imgSystemFileCheck);
 //			updateText("", lblSystemFileCheck);
@@ -167,8 +187,15 @@ public class TraceViewerController {
     	switch(selectedFilter) {
     	
     	case SHORTEST:
-    		progressIndicatorFilter.setVisible(true);
-    		findShortestTraces();
+    		
+    		executor.submit(new Runnable() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					findShortestTraces();
+				}
+			});
     		break;
     		
     	case SHORTEST_CLASP:
@@ -199,9 +226,12 @@ public class TraceViewerController {
     
     	int numOfShortestTraces = 0;
     	
+    	//show
+    	progressIndicatorFilter.setVisible(true);
+    	
     	numOfShortestTraces = tracesMiner.findShortestTraces();
     	
-    	//hid progress indicator
+    	//hide progress indicator
     	progressIndicatorFilter.setVisible(false);
     	
     	updateImage(IMAGE_CORRECT, imgFilter);
