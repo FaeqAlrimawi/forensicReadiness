@@ -7,7 +7,6 @@ import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.eclipse.jface.dialogs.ProgressIndicator;
 
 import core.TracesMiner;
 import javafx.application.Platform;
@@ -17,6 +16,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -148,17 +148,10 @@ public class TraceViewerController {
 				imgOpentracesFileEmpty.setVisible(true);
 
 			}
+			
+//			updateImage(null, imgSystemFileCheck);
+//			updateText("", lblSystemFileCheck);
 
-			// remove the check image and text after a few secs
-			new Timer().schedule(new TimerTask() {
-
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-					updateImage(null, imgSystemFileCheck);
-					updateText("", lblSystemFileCheck);
-				}
-			}, INTERVAL);
 		}
 
 		textFieldSystemFile.requestFocus();
@@ -208,6 +201,11 @@ public class TraceViewerController {
     	
     	numOfShortestTraces = tracesMiner.findShortestTraces();
     	
+    	//hid progress indicator
+    	progressIndicatorFilter.setVisible(false);
+    	
+    	updateImage(IMAGE_CORRECT, imgFilter);
+    	updateText("# of shortest traces = " + numOfShortestTraces, lblFilter);
     	
     	
     	

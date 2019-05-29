@@ -79,6 +79,7 @@ public class TracesMiner {
 
 	//errors
 	public final static int TRACES_NOT_LOADED = -1;
+	public final static int SHORTEST_FILE_NOT_SAVED = -2;
 	
 	String clusterFolder = "clusters generated";
 	String clustersOutputFileName = "clustersGenerated.txt";
@@ -157,12 +158,6 @@ public class TracesMiner {
 		if (increment == 0) {
 			increment = 1;
 		}
-
-		// for(Entry<String, Integer> set : systemActions.entrySet()) {
-		// set.setValue(index);
-		//
-		// index +=100;
-		// }
 
 	}
 
@@ -388,11 +383,11 @@ public class TracesMiner {
 
 		instanceFileName = fileName;
 
-		clustersOutputFileName = instanceFileName.replace(".json", "_relevantTraces.txt");// clustersOutputFolder
-		// clustersOutputFileName;
-		convertedInstancesFileName = instanceFileName.replace(".json", "_convertedInstances.txt");// clustersOutputFolder
-		// +
-		shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");
+//		clustersOutputFileName = instanceFileName.replace(".json", "_relevantTraces.txt");// clustersOutputFolder
+//		// clustersOutputFileName;
+//		convertedInstancesFileName = instanceFileName.replace(".json", "_convertedInstances.txt");// clustersOutputFolder
+//		// +
+//		shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");
 
 		// loads instances(or traces) from given file name
 		// and finds shortest transitions
@@ -494,13 +489,65 @@ public class TracesMiner {
 		}
 
 		// store to file
-		writeToFile(bldr.toString(), shortestTracesFileName);
-		System.out.println(">>Shortest traces IDs are stored in [" + shortestTracesFileName + "]");
+		if(shortestTracesFileName != null) {
+			writeToFile(bldr.toString(), shortestTracesFileName);
+			System.out.println(">>Shortest traces IDs are stored in [" + shortestTracesFileName + "]");	
+		}
 		
 		
 		return shortestTraces.size();
 
 	}
+	
+	public int findShortestTraces(boolean saveToFile) {
+
+		// shortest trace is set to be 3 actions (or 4 states (i.e. actions+1)
+
+		int numberOfStates = 4;
+
+		String separator = " ";
+		StringBuilder bldr = new StringBuilder();
+
+		if (shortestTraces != null) {
+			shortestTraces.clear();
+		}
+
+		System.out.println(">>Identifying shortest traces in [" + instanceFileName + "]");
+		for (GraphPath trace : instances.values()) {
+
+			if (trace.getStateTransitions().size() == numberOfStates) {
+				shortestTraces.put(trace.getInstanceID(), trace);
+				bldr.append(trace.getInstanceID()).append(separator);
+			}
+		}
+
+		if (bldr.length() > 0) {
+			bldr.deleteCharAt(bldr.length() - 1);// remove extra space
+		}
+
+		// store to file
+		if(saveToFile) {
+			
+			if(shortestTracesFileName == null) {
+				if(instanceFileName != null) {
+					shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");	
+				}
+				
+			}
+			
+			if(shortestTracesFileName == null) {
+				return SHORTEST_FILE_NOT_SAVED;
+			}
+			
+			writeToFile(bldr.toString(), shortestTracesFileName);
+			System.out.println(">>Shortest traces IDs are stored in [" + shortestTracesFileName + "]");	
+		}
+		
+		
+		return shortestTraces.size();
+
+	}
+
 
 	public List<ClusterWithMean> generateClustersUsingKMean() {
 
@@ -2076,6 +2123,16 @@ public class TracesMiner {
 	public void setTracesFile(String filePath) {
 		
 		instanceFileName = filePath;
+		
+		if(instanceFileName == null) {
+			return;
+		}
+		
+		clustersOutputFileName = instanceFileName.replace(".json", "_relevantTraces.txt");// clustersOutputFolder
+		// clustersOutputFileName;
+		convertedInstancesFileName = instanceFileName.replace(".json", "_convertedInstances.txt");// clustersOutputFolder
+		// +
+		shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");
 		
 	}
 	
