@@ -164,6 +164,8 @@
                                        <children>
                                           <Label text="-Action occurence" />
                                           <Pane prefHeight="34.0" prefWidth="9.0" />
+                                          <ChoiceBox prefHeight="25.0" prefWidth="67.0" />
+                                          <Pane prefHeight="34.0" prefWidth="3.0" />
                                           <TextField prefHeight="25.0" prefWidth="48.0" promptText="0-100" />
                                           <Pane prefHeight="34.0" prefWidth="3.0" />
                                           <Label text="\%" />
