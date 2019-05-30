@@ -127,42 +127,51 @@
                   </Label>
                </children>
             </HBox>
-            <Pane prefHeight="102.0" prefWidth="680.0">
+            <Pane disable="true" prefHeight="114.0" prefWidth="680.0">
                <children>
-                  <VBox layoutX="14.0" layoutY="10.0">
+                  <VBox layoutX="7.0" layoutY="-1.0">
                      <children>
                         <Label prefHeight="23.0" prefWidth="142.0" text="Customise  Filter">
                            <font>
                               <Font size="14.0" />
                            </font>
                         </Label>
-                        <HBox alignment="CENTER_LEFT">
+                        <HBox>
                            <children>
-                              <Label text="Sequence length" />
-                              <Pane prefHeight="34.0" prefWidth="12.0" />
-                              <ChoiceBox prefHeight="25.0" prefWidth="93.0" />
-                              <Pane prefHeight="34.0" prefWidth="4.0" />
-                              <ChoiceBox prefHeight="25.0" prefWidth="48.0" />
-                           </children>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="419.0">
-                           <children>
-                              <Label text="Contains action(s)" />
-                              <Pane prefHeight="34.0" prefWidth="4.0" />
-                              <TextField prefHeight="25.0" prefWidth="321.0" promptText="action1, action2, ...">
-                                 <tooltip>
-                                    <Tooltip text="action names separated by comma" />
-                                 </tooltip>
-                              </TextField>
-                           </children>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT">
-                           <children>
-                              <Label text="Action occurence" />
-                              <Pane prefHeight="34.0" prefWidth="9.0" />
-                              <TextField prefHeight="25.0" prefWidth="48.0" promptText="0-100" />
-                              <Pane prefHeight="34.0" prefWidth="3.0" />
-                              <Label text="\%" />
+                              <VBox prefHeight="93.0" prefWidth="306.0">
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT">
+                                       <children>
+                                          <Label text="-Sequence length" />
+                                          <Pane prefHeight="34.0" prefWidth="12.0" />
+                                          <ChoiceBox prefHeight="25.0" prefWidth="67.0" />
+                                          <Pane prefHeight="34.0" prefWidth="4.0" />
+                                          <ChoiceBox prefHeight="25.0" prefWidth="72.0" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="419.0">
+                                       <children>
+                                          <Label text="-Contains action(s)" />
+                                          <Pane prefHeight="34.0" prefWidth="4.0" />
+                                          <TextField prefHeight="25.0" prefWidth="198.0" promptText="action1, action2, ...">
+                                             <tooltip>
+                                                <Tooltip text="action names separated by comma" />
+                                             </tooltip>
+                                          </TextField>
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT">
+                                       <children>
+                                          <Label text="-Action occurence" />
+                                          <Pane prefHeight="34.0" prefWidth="9.0" />
+                                          <TextField prefHeight="25.0" prefWidth="48.0" promptText="0-100" />
+                                          <Pane prefHeight="34.0" prefWidth="3.0" />
+                                          <Label text="\%" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                              <Separator orientation="VERTICAL" prefHeight="93.0" prefWidth="3.0" />
                            </children>
                         </HBox>
                      </children>
@@ -171,6 +180,6 @@
             </Pane>
          </children>
       </VBox>
-      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#1f93ff00" height="130.0" layoutX="14.0" layoutY="266.0" stroke="BLACK" strokeType="INSIDE" width="459.0" />
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#1f93ff00" height="130.0" layoutX="14.0" layoutY="393.0" stroke="BLACK" strokeLineCap="ROUND" strokeLineJoin="ROUND" strokeType="INSIDE" width="605.0" />
    </children>
 </AnchorPane>
