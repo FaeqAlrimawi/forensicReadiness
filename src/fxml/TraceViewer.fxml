@@ -153,7 +153,7 @@
                                        <children>
                                           <Label text="-Contains action(s)" />
                                           <Pane prefHeight="34.0" prefWidth="4.0" />
-                                          <AutoCompleteTextField fx:id="textFieldActions" prefHeight="25.0" prefWidth="198.0" promptText="action1, action2, ...">
+                                          <TextField fx:id="textFieldActions" prefHeight="25.0" prefWidth="198.0" promptText="action1, action2, ...">
                                              <tooltip>
                                                 <Tooltip text="action names separated by comma" />
                                              </tooltip>

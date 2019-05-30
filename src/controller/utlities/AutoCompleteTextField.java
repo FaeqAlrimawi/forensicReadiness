@@ -1,6 +1,6 @@
 package controller.utlities;
 
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,16 +9,17 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import com.eteks.sweethome3d.adaptive.forensics.SystemHandler;
-import com.sun.javafx.scene.control.skin.TextAreaSkin;
+//import com.sun.javafx.scene.control.skin.TextAreaSkin;
+//import com.sun.javafx.scene.control.skin.TextFieldSkin;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
+//import javafx.geometry.Bounds;
 import javafx.geometry.Side;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
+//import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
 /**
@@ -38,7 +39,7 @@ public class AutoCompleteTextField {
   private int                   pos;
   private TextField textArea;
 
-  private Bounds                bound;
+//  private Bounds                bound;
   private List<Character>       stopChars;
   private char                  openConnectivityChar  = '{';
   private char                  closeConnectivityChar = '}';
@@ -201,7 +202,7 @@ public class AutoCompleteTextField {
       pos--;
     }
 
-    System.out.println("txt: " + text + " old: " + oldText + " pos: " + pos);
+//    System.out.println("txt: " + text + " old: " + oldText + " pos: " + pos);
 
     if (!canAutoComplete()) {
       return;
@@ -209,9 +210,9 @@ public class AutoCompleteTextField {
 
     // String oldText =textArea.getText();
 
-    // int pos = textArea.getCaretPosition();
-    Bounds bound = ((TextAreaSkin)textArea.getSkin()).getCaretBounds();
-
+//     int pos = textArea.getCaretPosition();
+//    Bounds bound = ((TextFieldSkin) textArea.getSkin()).get
+    	
     // System.out.println("s ["+s + "] s2 [" + s2+"]");
     // text = s2;// getText();
     int start = Math.max(0, pos - 1);
@@ -239,21 +240,21 @@ public class AutoCompleteTextField {
       return;
     }
 
-    LinkedList<String> searchResult = new LinkedList<String>();
+//    LinkedList<String> searchResult = new LinkedList<String>();
     subWord = subWord.toLowerCase(); // make sure all small
     // capitalise first letter
     // subWord = subWord.substring(0, 1).toUpperCase() + subWord.substring(1);
     SortedSet<String> res = entries.subSet(subWord, subWord + Character.MAX_VALUE);
-    for (String t : res) {
-      String type = SystemHandler.hasType(t);
-      searchResult.add(type);
-    }
+//    for (String t : res) {
+//      String type = SystemHandler.hasType(t);
+//      searchResult.add(type);
+//    }
     // searchResult.addAll();
-    if (entries.size() > 0) {
-      populatePopup(searchResult);
+    if (res.size() > 0) {
+      populatePopup(Arrays.asList(res.toArray(new String[res.size()])));
       if (!entriesPopup.isShowing()) {
         // Bounds position = ((TextAreaSkin)getSkin()).getCaretBounds();
-        entriesPopup.show(textArea, Side.TOP, bound.getMaxX() + 3, bound.getMaxY() + 3);
+        entriesPopup.show(textArea, Side.TOP, pos + 3, pos + 3);
       }
     } else {
       entriesPopup.hide();
@@ -354,7 +355,7 @@ public class AutoCompleteTextField {
     return entries;
   }
 
-  protected void setEntries(List<String> allSuggestions) {
+  public void setEntries(List<String> allSuggestions) {
 
     entries = new TreeSet<String>();
 
