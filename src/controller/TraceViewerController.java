@@ -4,14 +4,14 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import controller.utlities.AutoCompleteTextField;
 import core.TracesMiner;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -23,6 +23,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 
 public class TraceViewerController {
@@ -62,6 +63,21 @@ public class TraceViewerController {
     
     @FXML
     private ProgressIndicator progressIndicatorLoader;
+
+    @FXML
+    private Pane customisePane;
+    
+    @FXML
+    private ChoiceBox<String> choiceboxSeqLengthComparator;
+
+    @FXML
+    private ChoiceBox<String> choiceboxOccurrenceComparator;
+    
+    @FXML
+    private TextField txtFieldLength;
+    
+    @FXML
+    private TextField textFieldActions;
     
     private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
@@ -75,12 +91,23 @@ public class TraceViewerController {
     
     private ExecutorService executor = Executors.newFixedThreadPool(3);
     
-    private static final int SHORTEST = 0;
-    private static final int SHORTEST_CLASP = 1;
+    private static final String SHORTEST = "Shortest Only";
+    private static final String SHORTEST_CLASP = "Shortest & [Frequent Sequential Pattern using ClaSP]";
+    private static final String CUSTOMISE = "Customise";
+    
+    private AutoCompleteTextField autoCompleteActionsFiled;
+    
     private final String[] filters = {
-    		"Shortest Only",
-    		"Shortest & [Frequent Sequential Pattern using ClaSP]",
-    		"Set length manually"
+    		SHORTEST,
+    		SHORTEST_CLASP,
+    		"Set length manually",
+    		CUSTOMISE
+    };
+    
+    private final String[] compartiveOperators = {
+    		"=",
+    		">",
+    		"<"
     };
     
     
@@ -92,6 +119,33 @@ public class TraceViewerController {
     	
     	//update filters in choice box
     	choiceboxFilter.setItems(FXCollections.observableArrayList(filters));
+    	
+    	choiceboxFilter.valueProperty().addListener( new ChangeListener<String>() {
+
+			@Override
+			public void changed(ObservableValue<? extends String> arg0, String oldValue, String newValue) {
+				// TODO Auto-generated method stub
+				if(newValue.equals(CUSTOMISE)) {
+					//enable customise pane
+					setupCustomisePane();
+				} else {
+					if(!customisePane.isDisable()) {
+						customisePane.setDisable(true);
+					}
+					
+				}
+				
+			}
+		});
+    	
+    	//set compartive operators
+    	choiceboxOccurrenceComparator.setItems(FXCollections.observableArrayList(compartiveOperators));
+    	
+    	choiceboxSeqLengthComparator.setItems(FXCollections.observableArrayList(compartiveOperators));
+    	
+    	
+    	//auto complete
+    	autoCompleteActionsFiled = new AutoCompleteTextField();
     }
     
     
@@ -182,7 +236,7 @@ public class TraceViewerController {
     @FXML
     public void mineTraces(ActionEvent event) {
     	
-    	int selectedFilter = choiceboxFilter.getSelectionModel().getSelectedIndex();
+    	String selectedFilter = choiceboxFilter.getSelectionModel().getSelectedItem();
     	
     	switch(selectedFilter) {
     	
@@ -200,6 +254,11 @@ public class TraceViewerController {
     		
     	case SHORTEST_CLASP:
     		break;
+    		
+    	case CUSTOMISE:
+    		
+    		break;
+    		
     		default:
     			//shortest
     	}
@@ -230,7 +289,7 @@ public class TraceViewerController {
     	progressIndicatorFilter.setVisible(true);
     	
     	numOfShortestTraces = tracesMiner.findShortestTraces();
-    	
+    		
     	//hide progress indicator
     	progressIndicatorFilter.setVisible(false);
     	
@@ -294,4 +353,24 @@ public class TraceViewerController {
 
 	}
 
+	protected void setupCustomisePane(){
+		
+		customisePane.setDisable(false);
+	
+		//setup sequence length bounds
+		Platform.runLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				
+				//set length limits
+				txtFieldLength.setPromptText("length [min: " + tracesMiner.getMinimumTraceLength() + ", max: "+ tracesMiner.getMaximumTraceLength()+"]");
+				
+				//set actions filed autoComplete
+				
+			}
+		});
+		
+	}
 }

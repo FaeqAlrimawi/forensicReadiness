@@ -19,13 +19,14 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 
 /**
  * This class is a TextField which implements an "autocomplete" functionality,
  * based on a supplied list of entries.
  * @author Caleb Brinkman
  */
-public class AutoCompleteTextArea {
+public class AutoCompleteTextField {
   /** The existing autocomplete entries. */
   private SortedSet<String>     entries;
   /** The popup used to select an entry. */
@@ -35,7 +36,7 @@ public class AutoCompleteTextArea {
   private String                text;
   private String                oldText;
   private int                   pos;
-  private TextArea              textArea;
+  private TextField textArea;
 
   private Bounds                bound;
   private List<Character>       stopChars;
@@ -67,18 +68,18 @@ public class AutoCompleteTextArea {
   // this.bound = bound;
   // }
 
-  public AutoCompleteTextArea(TextArea area, String text) {
+  public AutoCompleteTextField(TextField area, String text) {
     textArea = area;
     this.text = text;
   }
 
   /** Construct a new AutoCompleteTextField. */
-  public AutoCompleteTextArea() {
+  public AutoCompleteTextField() {
     super();
 
     openCloseBracketMap = new HashMap<Integer, Integer>();
     // set system types as entries to the auto complete
-    setEntriesFromSystemTypes();
+//    setEntriesFromSystemTypes();
 
     // set stop chars
     setStopChars();
@@ -185,7 +186,7 @@ public class AutoCompleteTextArea {
 
   }
 
-  public void autoComplete(TextArea textArea, String text, String oldText) {
+  public void autoComplete(TextField textArea, String text, String oldText) {
 
     this.textArea = textArea;
     this.text = text;
@@ -353,13 +354,11 @@ public class AutoCompleteTextArea {
     return entries;
   }
 
-  protected void setEntriesFromSystemTypes() {
+  protected void setEntries(List<String> allSuggestions) {
 
     entries = new TreeSet<String>();
 
-    Collection<String> types = SystemHandler.getSystemTypes();
-
-    for (String type : types) {
+    for (String type : allSuggestions) {
       entries.add(type.toLowerCase());
     }
 

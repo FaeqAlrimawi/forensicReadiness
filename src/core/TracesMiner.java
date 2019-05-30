@@ -109,6 +109,11 @@ public class TracesMiner {
 	String shortestTracesFileName;
 
 	List<Integer> traceIDs;
+	
+	//min length
+	int minimumTraceLength;
+	int maximumTraceLength;
+	
 
 	public TracesMiner() {
 
@@ -449,9 +454,32 @@ public class TracesMiner {
 		System.out.println(">>Reading instances from [" + instanceFileName + "]");
 
 		// load instances from file
-		instances = FileManipulator.readInstantiatorInstancesFile(instanceFileName);
+		List<Integer> minMaxLengths = new LinkedList<Integer>();
+		List<String> tracesActions = new LinkedList<String>();
+		
+		instances = FileManipulator.readInstantiatorInstancesFile(instanceFileName, minMaxLengths, tracesActions);
 
-		System.out.println(">>Number of instances read = " + instances.size());
+		//set min
+		minimumTraceLength = minMaxLengths.get(0);
+		
+		//set max
+		maximumTraceLength = minMaxLengths.get(1);
+		
+		//set traces actions
+		if(tracesActions.size()>0) {
+			systemActions.clear();
+			int index = 0;
+			for(String action : tracesActions) {
+				systemActions.put(action, index);
+				index++;
+			}
+		}
+		
+		System.out.println(">>Number of instances read = " + instances.size()
+		+"\n>>Min trace length: " + minimumTraceLength +
+		"\nMax trace length: "+ maximumTraceLength +
+		"\nActions: " + systemActions);
+		
 		// System.out.println(instances.get(0).getTransitionActions());
 		if (instances == null) {
 			System.out.println("Instances are null! Exiting");
@@ -2149,6 +2177,14 @@ public class TracesMiner {
 //		// tester.clusterUsingWeka(fileName);
 //	}
 	
+	public int getMinimumTraceLength() {
+		return minimumTraceLength;
+	}
+
+	public int getMaximumTraceLength() {
+		return maximumTraceLength;
+	}
+
 	public int getNumberOfTraces() {
 		
 		if(instances != null) {
@@ -2157,5 +2193,15 @@ public class TracesMiner {
 		
 		return 0;
 	}
+	
+	public List<String> getTracesActions() {
+		
+		if(systemActions != null) {
+			return Arrays.asList(systemActions.keySet().toArray(new String[systemActions.size()]));
+		}
+		
+		return null;
+	}
 
+	
 }
