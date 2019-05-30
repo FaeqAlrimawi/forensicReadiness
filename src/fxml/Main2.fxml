@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+
+<VBox prefHeight="500.0" prefWidth="967.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.MainController">
+   <children>
+      <MenuBar fx:id="menuBar">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Close" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Edit">
+            <items>
+              <MenuItem mnemonicParsing="false" text="Delete" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem mnemonicParsing="false" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <AnchorPane prefHeight="475.0" prefWidth="1092.0" style="-fx-background-color: white;">
+         <children>
+            <Group layoutX="28.0" layoutY="255.0">
+               <children>
+                  <VBox layoutX="2.0" layoutY="46.0" prefHeight="172.0" prefWidth="295.0">
+                     <children>
+                        <AnchorPane>
+                           <children>
+                              <TextField fx:id="textFieldSelectedStatesFolder" prefHeight="34.0" prefWidth="295.0" promptText="States Folder" />
+                              <ProgressBar fx:id="progressBarAnalyse" opacity="0.4" prefHeight="34.0" prefWidth="295.0" visible="false" />
+                              <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="259.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
+                              <ImageView fx:id="imgOpenFolder" fitHeight="24.0" fitWidth="24.0" layoutX="263.0" layoutY="5.0" onMouseClicked="#selectStatesFolder" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../bin/resources/images/folder.png" />
+                                 </image>
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor>
+                              </ImageView>
+                           </children>
+                        </AnchorPane>
+                        <HBox alignment="CENTER_LEFT" prefHeight="34.0" prefWidth="295.0">
+                           <children>
+                              <ImageView fx:id="imgTransitionCheck" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                                 <image>
+                                    <Image url="@../../bin/resources/images/correct.png" />
+                                 </image>
+                              </ImageView>
+                              <Pane prefHeight="20.0" prefWidth="6.0" />
+                              <Label fx:id="lblTransitionCheck" prefHeight="29.0" prefWidth="262.0">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" prefHeight="34.0" prefWidth="295.0">
+                           <children>
+                              <ImageView fx:id="imgStatesCheck" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                                 <image>
+                                    <Image url="@../../bin/resources/images/correct.png" />
+                                 </image>
+                              </ImageView>
+                              <Pane prefHeight="20.0" prefWidth="6.0" />
+                              <Label fx:id="lblStatesCheck" prefHeight="29.0" prefWidth="262.0">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+                  <HBox layoutX="295.0" layoutY="46.0">
+                     <children>
+                        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="34.0" prefWidth="63.0" text="or">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <Button mnemonicParsing="false" onAction="#generateLTS" prefHeight="34.0" prefWidth="75.0" text="generate">
+                           <tooltip>
+                              <Tooltip text="Generate LTS from BigraphER file" />
+                           </tooltip>
+                        </Button>
+                     </children>
+                  </HBox>
+                  <Label layoutY="-6.0" prefHeight="46.0" prefWidth="443.0" text="System Labelled Transition System (LTS)" textFill="#aa14c4">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+               </children>
+            </Group>
+            <Group layoutX="28.0" layoutY="14.0">
+               <children>
+                  <VBox>
+                     <children>
+                        <Label prefHeight="34.0" prefWidth="451.0" text="System Model" textFill="#aa14c4">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <Pane prefHeight="7.0" prefWidth="452.0" />
+                        <VBox prefHeight="120.0" prefWidth="454.0">
+                           <children>
+                              <HBox prefHeight="34.0" prefWidth="456.0">
+                                 <children>
+                                    <AnchorPane>
+                                       <children>
+                                          <TextField fx:id="textFieldSystemFile" prefHeight="34.0" prefWidth="295.0" promptText="Cyber-Physical System Model (*.cps)" />
+                                          <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="259.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
+                                          <ImageView fx:id="imgSelectSystemFile" fitHeight="24.0" fitWidth="24.0" layoutX="262.0" layoutY="5.0" onMouseClicked="#selectSystemFile" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../bin/resources/images/folder.png" />
+                                             </image>
+                                             <cursor>
+                                                <Cursor fx:constant="HAND" />
+                                             </cursor>
+                                          </ImageView>
+                                       </children>
+                                    </AnchorPane>
+                                    <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="34.0" prefWidth="63.0" text="or">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <Button contentDisplay="RIGHT" mnemonicParsing="false" onAction="#modelSystem" prefHeight="34.0" prefWidth="83.0" text="create">
+                                       <tooltip>
+                                          <Tooltip text="Create new system model using SweetHome3D" />
+                                       </tooltip>
+                                       <graphic>
+                                          <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../bin/resources/icons/frameIcon32x32.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                    </Button>
+                                 </children>
+                              </HBox>
+                              <Pane prefHeight="7.0" prefWidth="262.0" />
+                              <HBox prefHeight="36.0" prefWidth="463.0">
+                                 <children>
+                                    <Button fx:id="btnUpdateSystemModel" contentDisplay="RIGHT" disable="true" mnemonicParsing="false" onAction="#updateSystemModel" prefHeight="25.0" prefWidth="78.0" text="view">
+                                       <tooltip>
+                                          <Tooltip text="View System model in SweetHome3D" />
+                                       </tooltip>
+                                       <graphic>
+                                          <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../bin/resources/icons/frameIcon32x32.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                    </Button>
+                                    <Pane prefHeight="20.0" prefWidth="6.0" />
+                                    <Button fx:id="btnEditActions" disable="true" mnemonicParsing="false" onAction="#openActionPanel" prefHeight="32.0" prefWidth="78.0" text="edit actions" />
+                                    <Pane prefHeight="36.0" prefWidth="80.0" />
+                                    <AnchorPane prefHeight="25.0" prefWidth="24.0">
+                                       <children>
+                                          <ImageView fx:id="imgOpenBigrapherEmpty" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../bin/resources/images/file+empty.png" />
+                                             </image>
+                                          </ImageView>
+                                          <ImageView fx:id="imgOpenBigrapher" fitHeight="24.0" fitWidth="24.0" onMouseClicked="#openSystemFile" pickOnBounds="true" preserveRatio="true" visible="false">
+                                             <cursor>
+                                                <Cursor fx:constant="HAND" />
+                                             </cursor>
+                                             <image>
+                                                <Image url="@../../bin/resources/images/file.png" />
+                                             </image>
+                                          </ImageView>
+                                       </children>
+                                    </AnchorPane>
+                                    <Pane prefHeight="36.0" prefWidth="5.0" />
+                                    <Group>
+                                       <children>
+                                          <ImageView fx:id="imgRefresh" fitHeight="24.0" fitWidth="24.0" onMouseClicked="#refresh" pickOnBounds="true" preserveRatio="true" visible="false">
+                                             <image>
+                                                <Image url="@../../bin/resources/images/refresh.png" />
+                                             </image>
+                                             <cursor>
+                                                <Cursor fx:constant="HAND" />
+                                             </cursor>
+                                          </ImageView>
+                                          <ImageView fx:id="imgRefreshEmpty" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../bin/resources/images/refresh_empty.png" />
+                                             </image>
+                                          </ImageView>
+                                       </children>
+                                    </Group>
+                                 </children>
+                              </HBox>
+                              <Pane prefHeight="12.0" prefWidth="433.0" />
+                              <HBox prefHeight="24.0" prefWidth="474.0">
+                                 <children>
+                                    <ImageView fx:id="imgSystemFileCheck" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                                       <image>
+                                          <Image url="@../../bin/resources/images/correct.png" />
+                                       </image>
+                                    </ImageView>
+                                    <Pane prefHeight="20.0" prefWidth="6.0" />
+                                    <Label fx:id="lblSystemFileCheck" prefHeight="23.0" prefWidth="262.0">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </HBox>
+                              <Pane prefHeight="7.0" prefWidth="262.0" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+               </children>
+            </Group>
+            <Separator layoutX="28.0" layoutY="218.0" prefHeight="7.0" prefWidth="433.0" />
+            <Separator layoutX="500.0" layoutY="17.0" orientation="VERTICAL" prefHeight="442.0" prefWidth="5.0" />
+            <VBox layoutX="534.0" layoutY="14.0">
+               <children>
+                  <Label prefHeight="34.0" prefWidth="452.0" text="Security Incident Extraction" textFill="#383339">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+                  <Pane prefHeight="7.0" prefWidth="452.0" />
+                  <HBox>
+                     <children>
+                        <AnchorPane>
+                           <children>
+                              <TextField fx:id="textFieldIncidentInstance" prefHeight="34.0" prefWidth="295.0" promptText="Incident Instance Model (*.cpi)" />
+                              <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="259.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
+                              <ImageView fx:id="imgSelectIncidentInstance" fitHeight="24.0" fitWidth="24.0" layoutX="262.0" layoutY="5.0" onMouseClicked="#selectIncidentInstanceFile" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../bin/resources/images/folder.png" />
+                                 </image>
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor>
+                              </ImageView>
+                           </children>
+                        </AnchorPane>
+                        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="34.0" prefWidth="63.0" text="or">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <Button fx:id="btnCreateIncidentInstance" mnemonicParsing="false" onAction="#createIncidentInstance" prefHeight="34.0" prefWidth="75.0" text="create">
+                           <tooltip>
+                              <Tooltip text="Create new system model using SweetHome3D" />
+                           </tooltip>
+                        </Button>
+                     </children>
+                  </HBox>
+                  <Pane prefHeight="7.0" prefWidth="452.0" />
+                  <HBox>
+                     <children>
+                        <Pane prefHeight="36.0" prefWidth="238.0" />
+                        <AnchorPane prefHeight="25.0" prefWidth="24.0">
+                           <children>
+                              <ImageView fx:id="imgOpenIncidentInstanceFileEmpty" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../bin/resources/images/file+empty.png" />
+                                 </image>
+                              </ImageView>
+                              <ImageView fx:id="imgOpenIncidentInstanceFile" fitHeight="24.0" fitWidth="24.0" onMouseClicked="#openIncidentInstanceFile" pickOnBounds="true" preserveRatio="true" visible="false">
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor>
+                                 <image>
+                                    <Image url="@../../bin/resources/images/file.png" />
+                                 </image>
+                              </ImageView>
+                           </children>
+                        </AnchorPane>
+                        <Pane prefHeight="36.0" prefWidth="5.0" />
+                        <Group>
+                           <children>
+                              <ImageView fx:id="imgRefreshIncidentInstance" fitHeight="24.0" fitWidth="24.0" onMouseClicked="#refresh" pickOnBounds="true" preserveRatio="true" visible="false">
+                                 <image>
+                                    <Image url="@../../bin/resources/images/refresh.png" />
+                                 </image>
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor>
+                              </ImageView>
+                              <ImageView fx:id="imgRefreshIncidentInstanceEmpty" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../bin/resources/images/refresh_empty.png" />
+                                 </image>
+                              </ImageView>
+                           </children>
+                        </Group>
+                     </children>
+                  </HBox>
+                  <Pane prefHeight="7.0" prefWidth="452.0" />
+                  <HBox prefHeight="7.0" prefWidth="452.0">
+                     <children>
+                        <ImageView fx:id="imgIncidentInstanceFileCheck" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                           <image>
+                              <Image url="@../../bin/resources/images/correct.png" />
+                           </image>
+                        </ImageView>
+                        <Pane prefHeight="20.0" prefWidth="6.0" />
+                        <Label fx:id="lblIncidentInstanceFileCheck" prefHeight="23.0" prefWidth="262.0">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <Pane prefHeight="7.0" prefWidth="452.0" />
+                  <HBox>
+                     <children>
+                        <Button fx:id="btnGenerateIncidentPattern" disable="true" mnemonicParsing="false" onAction="#generateIncidentPattern" prefHeight="34.0" prefWidth="295.0" text="Extract Incident Pattern">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Button>
+                        <ProgressIndicator fx:id="progressBarGenerateIncidentPattern" prefHeight="34.0" prefWidth="44.0" visible="false" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            <VBox layoutX="534.0" layoutY="255.0">
+               <children>
+                  <Label prefHeight="34.0" prefWidth="452.0" text="Security Incident Instantiation" textFill="#383339">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+                  <Pane prefHeight="7.0" prefWidth="452.0" />
+                  <HBox>
+                     <children>
+                        <AnchorPane>
+                           <children>
+                              <TextField fx:id="textFieldIncidentInstance1" prefHeight="34.0" prefWidth="295.0" promptText="Incident Pattern Model (*.cpi)" />
+                              <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="259.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
+                              <ImageView fx:id="imgSelectIncidentInstance1" fitHeight="24.0" fitWidth="24.0" layoutX="262.0" layoutY="5.0" onMouseClicked="#selectIncidentInstanceFile" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../bin/resources/images/folder.png" />
+                                 </image>
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor>
+                              </ImageView>
+                           </children>
+                        </AnchorPane>
+                        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="34.0" prefWidth="63.0" text="or">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <Button fx:id="btnCreateIncidentInstance1" mnemonicParsing="false" onAction="#createIncidentInstance" prefHeight="34.0" prefWidth="75.0" text="create">
+                           <tooltip>
+                              <Tooltip text="Create new system model using SweetHome3D" />
+                           </tooltip>
+                        </Button>
+                     </children>
+                  </HBox>
+                  <Pane prefHeight="7.0" prefWidth="452.0" />
+                  <HBox>
+                     <children>
+                        <Pane prefHeight="36.0" prefWidth="238.0" />
+                        <AnchorPane prefHeight="25.0" prefWidth="24.0">
+                           <children>
+                              <ImageView fx:id="imgOpenIncidentInstanceFileEmpty1" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../bin/resources/images/file+empty.png" />
+                                 </image>
+                              </ImageView>
+                              <ImageView fx:id="imgOpenIncidentInstanceFile1" fitHeight="24.0" fitWidth="24.0" onMouseClicked="#openIncidentInstanceFile" pickOnBounds="true" preserveRatio="true" visible="false">
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor>
+                                 <image>
+                                    <Image url="@../../bin/resources/images/file.png" />
+                                 </image>
+                              </ImageView>
+                           </children>
+                        </AnchorPane>
+                        <Pane prefHeight="36.0" prefWidth="5.0" />
+                        <Group>
+                           <children>
+                              <ImageView fx:id="imgRefreshIncidentInstance1" fitHeight="24.0" fitWidth="24.0" onMouseClicked="#refresh" pickOnBounds="true" preserveRatio="true" visible="false">
+                                 <image>
+                                    <Image url="@../../bin/resources/images/refresh.png" />
+                                 </image>
+                                 <cursor>
+                                    <Cursor fx:constant="HAND" />
+                                 </cursor>
+                              </ImageView>
+                              <ImageView fx:id="imgRefreshIncidentInstanceEmpty1" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../../bin/resources/images/refresh_empty.png" />
+                                 </image>
+                              </ImageView>
+                           </children>
+                        </Group>
+                     </children>
+                  </HBox>
+                  <Pane prefHeight="7.0" prefWidth="452.0" />
+                  <HBox prefHeight="7.0" prefWidth="452.0">
+                     <children>
+                        <ImageView fx:id="imgIncidentInstanceFileCheck1" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                           <image>
+                              <Image url="@../../bin/resources/images/correct.png" />
+                           </image>
+                        </ImageView>
+                        <Pane prefHeight="20.0" prefWidth="6.0" />
+                        <Label fx:id="lblIncidentInstanceFileCheck1" prefHeight="23.0" prefWidth="262.0">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <Pane prefHeight="7.0" prefWidth="452.0" />
+                  <HBox>
+                     <children>
+                        <Button fx:id="btnGenerateIncidentPattern1" disable="true" mnemonicParsing="false" onAction="#generateIncidentPattern" prefHeight="34.0" prefWidth="295.0" text="Instantiate Incident Pattern">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Button>
+                        <ProgressIndicator fx:id="progressBarGenerateIncidentPattern1" prefHeight="34.0" prefWidth="44.0" visible="false" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            <Separator layoutX="534.0" layoutY="218.0" prefHeight="7.0" prefWidth="433.0" />
+         </children>
+      </AnchorPane>
+   </children>
+</VBox>

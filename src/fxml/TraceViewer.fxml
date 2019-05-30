@@ -16,8 +16,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-
-<AnchorPane prefHeight="582.0" prefWidth="700.0" style="-fx-background-color: white;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.1" fx:controller="controller.TraceViewerController">
+<AnchorPane prefHeight="582.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.TraceViewerController">
    <children>
       <VBox layoutX="10.0" layoutY="10.0" prefHeight="120.0" prefWidth="680.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
          <children>
@@ -92,7 +91,7 @@
             <Separator prefWidth="200.0" />
          </children>
       </VBox>
-      <VBox layoutX="10.0" layoutY="144.0" prefHeight="200.0" prefWidth="680.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="144.0">
+      <VBox layoutX="10.0" layoutY="144.0" prefHeight="120.0" prefWidth="680.0" AnchorPane.bottomAnchor="318.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="144.0">
          <children>
             <Label prefHeight="34.0" prefWidth="451.0" text="Filter" textFill="#aa14c4">
                <font>

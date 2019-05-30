@@ -171,7 +171,7 @@ public class TraceViewerController {
 			
 //			updateImage(null, imgSystemFileCheck);
 //			updateText("", lblSystemFileCheck);
-
+												
 		}
 
 		textFieldSystemFile.requestFocus();
