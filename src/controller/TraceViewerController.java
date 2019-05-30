@@ -14,6 +14,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -22,6 +23,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
@@ -372,6 +374,13 @@ public class TraceViewerController {
 							Boolean newValue) {
 						// TODO Auto-generated method stub
 						autoCompleteActionsFiled.hidePopup();
+					}
+				});
+				
+				textFieldActions.setOnKeyPressed(e->{
+					//if control+space pressed, then show the list of possible actions
+					if(e.getCode() ==KeyCode.SPACE && e.isControlDown()) {
+						autoCompleteActionsFiled.showAllEntries(textFieldActions);
 					}
 				});
 			}
