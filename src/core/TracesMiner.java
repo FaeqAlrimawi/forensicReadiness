@@ -98,8 +98,14 @@ public class TracesMiner {
 	int longestTransition = -1;
 	int shortestTransition = -1;
 
+	// key:action name, value: id
 	Map<String, Integer> tracesActions;
+
+	// key:action name, value: occurrence
 	Map<String, Integer> tracesActionsOccurence;
+
+	// key:state number, value: occurrence
+	Map<Integer, Integer> statesOccurrences;
 
 	// shortest traces
 	Map<Integer, GraphPath> shortestTraces;
@@ -130,6 +136,8 @@ public class TracesMiner {
 
 		tracesActions = new HashMap<String, Integer>();
 		tracesActionsOccurence = new HashMap<String, Integer>();
+
+		statesOccurrences = new HashMap<Integer, Integer>();
 
 		shortestTraces = new HashMap<Integer, GraphPath>();
 
@@ -405,6 +413,42 @@ public class TracesMiner {
 
 	}
 
+	public Map<String, Integer> getHighestActionOccurrence() {
+
+		Map<String, Integer> result = new HashMap<String, Integer>();
+
+		int index = 0;
+
+		// sort occurrences
+		Collection<Integer> values = tracesActionsOccurence.values();
+		List<Integer> list = new LinkedList<Integer>(values);
+		Collections.sort(list);// ascending order
+
+//		List<Integer> topN = new LinkedList<Integer>();
+		
+		if(list.size()==0) {
+			return null;
+		}
+		
+		int highestOccur = list.get(list.size()-1);
+
+		// for now get the first n
+		for (Entry<String, Integer> entry : tracesActionsOccurence.entrySet()) {
+
+			String action = entry.getKey();
+			int occur = entry.getValue();
+
+			if (occur == highestOccur ) {
+				result.put(action, occur);
+				index++;
+			}
+
+		}
+
+		// tracesActionsOccurence.s
+		return result;
+	}
+	
 	public Map<String, Integer> getTopActionOccurrences(int numberofActions) {
 
 		Map<String, Integer> result = new HashMap<String, Integer>();
@@ -417,17 +461,17 @@ public class TracesMiner {
 		Collections.sort(list);// ascending order
 
 		List<Integer> topN = new LinkedList<Integer>();
-//		int size = list.size();
+		// int size = list.size();
 
-//		if (list.size() > 0) {
-//			for (int i = 0; i < numberofActions; i++) {
-//				if ((size - 1 - i) > 0) { // make sure it is not negative
-//					topN.add(list.get(size - 1 - i));
-//				}
-//			}
-//		}
-//		
-		for (int i = list.size()-1; i >0 ; i--) {
+		// if (list.size() > 0) {
+		// for (int i = 0; i < numberofActions; i++) {
+		// if ((size - 1 - i) > 0) { // make sure it is not negative
+		// topN.add(list.get(size - 1 - i));
+		// }
+		// }
+		// }
+		//
+		for (int i = list.size() - 1; i > 0; i--) {
 
 			if (!topN.contains(list.get(i))) {
 				topN.add(list.get(i));
@@ -1800,6 +1844,24 @@ public class TracesMiner {
 										states.add(tgtState);
 									}
 
+									// check state occurence
+									if (statesOccurrences.containsKey(srcState)) {
+										int oldOccurrence = statesOccurrences.get(srcState);
+										oldOccurrence++;
+										statesOccurrences.put(srcState, oldOccurrence);
+									} else { // if not, then create a new entry
+										statesOccurrences.put(srcState, 1);
+									}
+
+									// check state occurence
+									if (statesOccurrences.containsKey(tgtState)) {
+										int oldOccurrence = statesOccurrences.get(tgtState);
+										oldOccurrence++;
+										statesOccurrences.put(tgtState, oldOccurrence);
+									} else { // if not, then create a new entry
+										statesOccurrences.put(tgtState, 1);
+									}
+
 									// add action
 									actions.add(actionState);
 
@@ -1809,14 +1871,9 @@ public class TracesMiner {
 									// // System.out.println("adding: "+tmp);
 									// tracesActions.add(actionState);
 									// }
-									//
-									// check occurence
-									if (tracesActionsOccurence.containsKey(actionState)) { // if
-																							// it
-																							// exists
-																							// then
-																							// add
-																							// 1
+
+									// check action occurence
+									if (tracesActionsOccurence.containsKey(actionState)) {
 										int oldOccurrence = tracesActionsOccurence.get(actionState);
 										oldOccurrence++;
 										tracesActionsOccurence.put(actionState, oldOccurrence);
@@ -1849,13 +1906,8 @@ public class TracesMiner {
 								// tracesActions.add(tmp);
 								// }
 
-								// check occurence
-								if (tracesActionsOccurence.containsKey(tmp)) { // if
-																				// it
-																				// exists
-																				// then
-																				// add
-																				// 1
+								// check action occurence
+								if (tracesActionsOccurence.containsKey(tmp)) {
 									int oldOccurrence = tracesActionsOccurence.get(tmp);
 									oldOccurrence++;
 									tracesActionsOccurence.put(tmp, oldOccurrence);
@@ -1905,6 +1957,24 @@ public class TracesMiner {
 
 		return instances;
 
+	}
+
+	public int getNumberOfActions() {
+
+		if (tracesActionsOccurence != null) {
+			return tracesActionsOccurence.size();
+		}
+
+		return -1;
+	}
+
+	public int getNumberOfStates() {
+
+		if (statesOccurrences != null) {
+			return statesOccurrences.size();
+		}
+
+		return -1;
 	}
 
 }

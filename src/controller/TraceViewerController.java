@@ -119,6 +119,18 @@ public class TraceViewerController {
     @FXML
     private ChoiceBox<String> choiceBoxOccurrences;
     
+    @FXML
+    private ImageView imgNumOfActions;
+    
+    @FXML
+    private Label lblNumOfActions;
+    
+    @FXML
+    private Label lblNumOfStates;
+    
+    @FXML
+    private ImageView imgNumOfStates;
+    
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -199,7 +211,8 @@ public class TraceViewerController {
 			//if enter is pressed then refersh
 			if(e.getCode() == KeyCode.ENTER) {
 				int num = Integer.parseInt(textFieldNumofOccurrences.getText());
-				setupTopActionsChart(num);
+				String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
+				setupTopActionsChart(num, selectedOccurrenceType);
 			}
 		});
 	}
@@ -258,8 +271,21 @@ public class TraceViewerController {
 					// TODO Auto-generated method stub
 					if (isTracesFileValid()) {
 
+						//update number of traces
 						updateImage(IMAGE_CORRECT, imgSystemFileCheck);
 						updateText("Number of Traces = " + tracesMiner.getNumberOfTraces(), lblSystemFileCheck);
+						
+						//updated number of actions used
+						updateImage(IMAGE_CORRECT, imgNumOfActions);
+						updateText("Total Number of Actions: " + tracesMiner.getNumberOfActions(), lblNumOfActions);
+						
+						//updated number of states used
+						updateImage(IMAGE_CORRECT, imgNumOfStates);
+						updateText("Total Number of States: " + tracesMiner.getNumberOfStates(), lblNumOfStates);
+						
+						//display highest occurrence
+						setupTopActionsChart(1, "First-Highest");
+						
 						imgOpentracesFile.setVisible(true);
 						imgOpentracesFileEmpty.setVisible(false);
 						btnAnalyse.setDisable(false);
@@ -334,8 +360,8 @@ public class TraceViewerController {
 	public void refreshGraph(ActionEvent event) {
 		
 		int numOfOccurrences = Integer.parseInt(textFieldNumofOccurrences.getText());
-		
-		setupTopActionsChart(numOfOccurrences);
+		String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
+		setupTopActionsChart(numOfOccurrences, selectedOccurrenceType);
 	}
 
 	/**
@@ -493,15 +519,13 @@ public class TraceViewerController {
 
 	}
 
-	protected void setupTopActionsChart(int numOfOccurrences) {
+	protected void setupTopActionsChart(int numOfOccurrences, String selectedOccurrenceType) {
 
 //		int numOfOccurrences = 10;
 //		int numOfSeries = 0;
 		
 		// get actions from miner
 		Map<String, Integer> topActions;
-		
-		String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
 		
 		switch (selectedOccurrenceType) {
 		case HIGHEST:
@@ -513,8 +537,8 @@ public class TraceViewerController {
 			break;
 			
 		default:
-			//highest
-			topActions = tracesMiner.getTopActionOccurrences(numOfOccurrences);
+			//highest occurrence
+			topActions = tracesMiner.getHighestActionOccurrence();
 			break;
 		}
 		
@@ -544,6 +568,7 @@ public class TraceViewerController {
 			series.add(series1);
 		}
 
+		
 		Platform.runLater(new Runnable() {
 
 			@Override
