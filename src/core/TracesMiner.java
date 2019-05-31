@@ -48,6 +48,7 @@ import ca.pfv.spmf.algorithms.sequentialpatterns.spam.AlgoTKS;
 import ca.pfv.spmf.algorithms.sequentialpatterns.spam.PatternTKS;
 import ca.pfv.spmf.patterns.cluster.Cluster;
 import ca.pfv.spmf.patterns.cluster.ClusterWithMean;
+import controller.TraceViewerController;
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.JSONTerms;
 //import weka.clusterers.ClusterEvaluation;
@@ -424,13 +425,13 @@ public class TracesMiner {
 		List<Integer> list = new LinkedList<Integer>(values);
 		Collections.sort(list);// ascending order
 
-//		List<Integer> topN = new LinkedList<Integer>();
-		
-		if(list.size()==0) {
+		// List<Integer> topN = new LinkedList<Integer>();
+
+		if (list.size() == 0) {
 			return null;
 		}
-		
-		int highestOccur = list.get(list.size()-1);
+
+		int highestOccur = list.get(list.size() - 1);
 
 		// for now get the first n
 		for (Entry<String, Integer> entry : tracesActionsOccurence.entrySet()) {
@@ -438,7 +439,7 @@ public class TracesMiner {
 			String action = entry.getKey();
 			int occur = entry.getValue();
 
-			if (occur == highestOccur ) {
+			if (occur == highestOccur) {
 				result.put(action, occur);
 				index++;
 			}
@@ -448,7 +449,7 @@ public class TracesMiner {
 		// tracesActionsOccurence.s
 		return result;
 	}
-	
+
 	public Map<String, Integer> getTopActionOccurrences(int numberofActions) {
 
 		Map<String, Integer> result = new HashMap<String, Integer>();
@@ -498,6 +499,78 @@ public class TracesMiner {
 			// if (index == numberofActions) {
 			// break;
 			// }
+		}
+
+		// tracesActionsOccurence.s
+		return result;
+	}
+
+	public Map<String, Integer> getActionsWithOccurrencePercentage(double percentage, String operation) {
+
+		Map<String, Integer> result = new HashMap<String, Integer>();
+
+		int index = 0;
+
+		// sort occurrences
+//		Collection<Integer> values = tracesActionsOccurence.values();
+//		List<Integer> list = new LinkedList<Integer>(values);
+//		Collections.sort(list);// ascending order
+//
+//		List<Integer> topN = new LinkedList<Integer>();
+//		// int size = list.size();
+//
+
+//		for (int i = list.size() - 1; i > 0; i--) {
+//
+//			if (!topN.contains(list.get(i))) {
+//				topN.add(list.get(i));
+//				index++;
+//
+//				if (index == numberofActions) {
+//					break;
+//				}
+//			}
+//
+//		}
+		
+		System.out.println(percentage);
+		double localPerc = 0;
+int	numOfTraces = instances.size();
+
+		// for now get the first n
+		for (Entry<String, Integer> entry : tracesActionsOccurence.entrySet()) {
+
+			String action = entry.getKey();
+			int occur = entry.getValue();
+
+			localPerc = occur*1.0/numOfTraces;
+			
+			switch (operation) {
+			case TraceViewerController.EQUAL:
+				if (localPerc == percentage) {
+					result.put(action, occur);
+					index++;
+				}
+				break;
+
+			case TraceViewerController.MORE_THAN:
+				if (localPerc > percentage) {
+					result.put(action, occur);
+					index++;
+				}
+				break;
+				
+			case TraceViewerController.LESS_THAN:
+				if (localPerc < percentage) {
+					result.put(action, occur);
+					index++;
+				}
+				break;
+				
+			default:
+				break;
+			}
+			
 		}
 
 		// tracesActionsOccurence.s

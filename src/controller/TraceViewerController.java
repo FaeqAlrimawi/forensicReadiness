@@ -110,26 +110,32 @@ public class TraceViewerController {
 	@FXML
 	private NumberAxis numberAxis;
 
+	@FXML
+	private TextField textFieldNumofOccurrences;
+
+	@FXML
+	private Button btnRefresh;
+
+	@FXML
+	private ChoiceBox<String> choiceBoxOccurrences;
+
+	@FXML
+	private ImageView imgNumOfActions;
+
+	@FXML
+	private Label lblNumOfActions;
+
+	@FXML
+	private Label lblNumOfStates;
+
+	@FXML
+	private ImageView imgNumOfStates;
+
     @FXML
-    private TextField textFieldNumofOccurrences;
-    
+    private ChoiceBox<String> choiceBoxOccurrenceFilterPercentage;
+
     @FXML
-    private Button btnRefresh;
-    
-    @FXML
-    private ChoiceBox<String> choiceBoxOccurrences;
-    
-    @FXML
-    private ImageView imgNumOfActions;
-    
-    @FXML
-    private Label lblNumOfActions;
-    
-    @FXML
-    private Label lblNumOfStates;
-    
-    @FXML
-    private ImageView imgNumOfStates;
+    private TextField textFieldOccurrenceFilterPercentage;
     
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
@@ -148,15 +154,21 @@ public class TraceViewerController {
 	private static final String CUSTOMISE = "Customise";
 	private static final String HIGHEST = "Highest";
 	private static final String LOWEST = "Lowest";
+	private static final String PERCENTAGE = "percent";
+	public static final String EQUAL = "=";
+	public static final String MORE_THAN = ">";
+	public static final String LESS_THAN = "<";
 	
 	private AutoCompleteTextField autoCompleteActionsFiled;
 
 	private final String[] filters = { SHORTEST, SHORTEST_CLASP, CUSTOMISE };
 
-	private final String[] compartiveOperators = { "=", ">", "<" };
-	
-	private final String[] occurrencesOptions = { HIGHEST, LOWEST};
+	private final String[] compartiveOperators = {MORE_THAN, LESS_THAN, EQUAL, };
 
+	private final String[] occurrencesOptions = { HIGHEST, LOWEST };
+
+	String chartTitle = "";
+	
 	@FXML
 	public void initialize() {
 
@@ -187,32 +199,41 @@ public class TraceViewerController {
 		choiceboxOccurrenceComparator.setItems(FXCollections.observableArrayList(compartiveOperators));
 
 		choiceboxSeqLengthComparator.setItems(FXCollections.observableArrayList(compartiveOperators));
+		
+		choiceBoxOccurrenceFilterPercentage.setItems(FXCollections.observableArrayList(compartiveOperators));
 
 		choiceBoxOccurrences.setItems(FXCollections.observableArrayList(occurrencesOptions));
-		
-		//defualt selection
+
+		// defualt selection
 		Platform.runLater(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
 				choiceboxOccurrenceComparator.getSelectionModel().select(0);
 				choiceboxFilter.getSelectionModel().select(0);
 				choiceBoxOccurrences.getSelectionModel().select(0);
+				choiceBoxOccurrenceFilterPercentage.getSelectionModel().select(0);
 				choiceboxSeqLengthComparator.getSelectionModel().select(0);
 			}
 		});
-		
+
 		// auto complete
 		autoCompleteActionsFiled = new AutoCompleteTextField();
-		
-		textFieldNumofOccurrences.setOnKeyPressed(e->{
-			
-			//if enter is pressed then refersh
-			if(e.getCode() == KeyCode.ENTER) {
-				int num = Integer.parseInt(textFieldNumofOccurrences.getText());
+
+		textFieldNumofOccurrences.setOnKeyPressed(e -> {
+
+			// if enter is pressed then refersh
+			if (e.getCode() == KeyCode.ENTER) {
 				String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
-				setupTopActionsChart(num, selectedOccurrenceType);
+				setupTopActionsChart(selectedOccurrenceType);
+			}
+		});
+		
+		textFieldOccurrenceFilterPercentage.setOnKeyPressed(e -> {
+			// if enter is pressed then refersh
+			if (e.getCode() == KeyCode.ENTER) {
+				setupTopActionsChart(PERCENTAGE);
 			}
 		});
 	}
@@ -271,34 +292,34 @@ public class TraceViewerController {
 					// TODO Auto-generated method stub
 					if (isTracesFileValid()) {
 
-						//update number of traces
+						// update number of traces
 						updateImage(IMAGE_CORRECT, imgSystemFileCheck);
 						updateText("Number of Traces = " + tracesMiner.getNumberOfTraces(), lblSystemFileCheck);
-						
-						//updated number of actions used
+
+						// updated number of actions used
 						updateImage(IMAGE_CORRECT, imgNumOfActions);
 						updateText("Total Number of Actions: " + tracesMiner.getNumberOfActions(), lblNumOfActions);
-						
-						//updated number of states used
+
+						// updated number of states used
 						updateImage(IMAGE_CORRECT, imgNumOfStates);
 						updateText("Total Number of States: " + tracesMiner.getNumberOfStates(), lblNumOfStates);
-						
-						//display highest occurrence
-						setupTopActionsChart(1, "First-Highest");
-						
+
+						// display highest occurrence
+						setupTopActionsChart("1st-Highest");
+
 						imgOpentracesFile.setVisible(true);
 						imgOpentracesFileEmpty.setVisible(false);
 						btnAnalyse.setDisable(false);
 						btnRefresh.setDisable(false);
 						// show top actions
-//						setupTopActionsChart();
+						// setupTopActionsChart();
 
 					} else {
 						updateImage(IMAGE_WRONG, imgSystemFileCheck);
 						updateText("Traces file is not valid", lblSystemFileCheck);
 						imgOpentracesFile.setVisible(false);
 						imgOpentracesFileEmpty.setVisible(true);
-						
+
 					}
 
 					progressIndicatorLoader.setVisible(false);
@@ -355,13 +376,20 @@ public class TraceViewerController {
 			// shortest
 		}
 	}
-	
+
 	@FXML
 	public void refreshGraph(ActionEvent event) {
+
+		String perc = textFieldOccurrenceFilterPercentage.getText();
 		
-		int numOfOccurrences = Integer.parseInt(textFieldNumofOccurrences.getText());
-		String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
-		setupTopActionsChart(numOfOccurrences, selectedOccurrenceType);
+		//higher precedence for percentage
+		if(perc != null && !perc.isEmpty()) {
+			setupTopActionsChart(PERCENTAGE);
+		} else {
+			String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
+			setupTopActionsChart(selectedOccurrenceType);
+		}
+		
 	}
 
 	/**
@@ -519,33 +547,55 @@ public class TraceViewerController {
 
 	}
 
-	protected void setupTopActionsChart(int numOfOccurrences, String selectedOccurrenceType) {
+	protected void setupTopActionsChart(String selectedOccurrenceType) {
 
-//		int numOfOccurrences = 10;
-//		int numOfSeries = 0;
-		
+		// int numOfOccurrences = 10;
+		// int numOfSeries = 0;
+
 		// get actions from miner
 		Map<String, Integer> topActions;
+		int num =0;
 		
 		switch (selectedOccurrenceType) {
 		case HIGHEST:
-			topActions = tracesMiner.getTopActionOccurrences(numOfOccurrences);
+			num = Integer.parseInt(textFieldNumofOccurrences.getText());
+			chartTitle = "Actions with " + selectedOccurrenceType + " "
+					+ num + " Occurrences";
+					
+			topActions = tracesMiner.getTopActionOccurrences(num);
 			break;
 
 		case LOWEST:
-			topActions = tracesMiner.getLowestActionOccurrences(numOfOccurrences);
+			num = Integer.parseInt(textFieldNumofOccurrences.getText());
+			chartTitle = "Actions with " + selectedOccurrenceType + " "
+			+ num + " Occurrences";
+			
+			topActions = tracesMiner.getLowestActionOccurrences(num);
+			
+			break;
+
+		case PERCENTAGE:
+			num = Integer.parseInt(textFieldOccurrenceFilterPercentage.getText());
+			double perc = num*1.0/100;
+			String op = choiceBoxOccurrenceFilterPercentage.getSelectionModel().getSelectedItem();
+			chartTitle = "Actions with Occurrence % " + op + " " + num + "%";
+			
+			topActions = tracesMiner.getActionsWithOccurrencePercentage(perc, op);
+			
 			break;
 			
 		default:
-			//highest occurrence
+			// highest occurrence
+			chartTitle = "Actions with " + selectedOccurrenceType + " Occurrence";
 			topActions = tracesMiner.getHighestActionOccurrence();
+			
 			break;
 		}
-		
-		if(topActions == null) {
+
+		if (topActions == null) {
 			return;
 		}
-		
+
 		List<String> actions = Arrays.asList(topActions.keySet().toArray(new String[topActions.size()]));
 		List<Integer> occurrences = Arrays.asList(topActions.values().toArray(new Integer[topActions.size()]));
 
@@ -568,7 +618,6 @@ public class TraceViewerController {
 			series.add(series1);
 		}
 
-		
 		Platform.runLater(new Runnable() {
 
 			@Override
@@ -579,7 +628,7 @@ public class TraceViewerController {
 				// Defining the y axis
 				numberAxis.setLabel("Action Occurrences");
 
-				barChartActions.setTitle("Top " + numOfActions + " Actions with " +selectedOccurrenceType+ " "+ numOfOccurrences+" Occurrences");
+				barChartActions.setTitle(chartTitle);
 
 				barChartActions.getData().clear();
 				// TODO Auto-generated method stub
