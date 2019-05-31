@@ -102,12 +102,12 @@ public class TraceViewerController {
 	private ExecutorService executor = Executors.newFixedThreadPool(3);
 
 	private static final String SHORTEST = "Shortest Only";
-	private static final String SHORTEST_CLASP = "Shortest & [Frequent Sequential Pattern using ClaSP]";
+	private static final String SHORTEST_CLASP = "Shortest length & Share longest partial sequence (ClaSP)";
 	private static final String CUSTOMISE = "Customise";
 
 	private AutoCompleteTextField autoCompleteActionsFiled;
 
-	private final String[] filters = { SHORTEST, SHORTEST_CLASP, "Set length manually", CUSTOMISE };
+	private final String[] filters = { SHORTEST, SHORTEST_CLASP, CUSTOMISE };
 
 	private final String[] compartiveOperators = { "=", ">", "<" };
 
@@ -248,6 +248,16 @@ public class TraceViewerController {
 			break;
 
 		case SHORTEST_CLASP:
+			
+			executor.submit(new Runnable() {
+
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					mineShortestTracesUsingClaSP();
+				}
+			});
+			
 			break;
 
 		case CUSTOMISE:
@@ -290,6 +300,23 @@ public class TraceViewerController {
 
 		updateImage(IMAGE_CORRECT, imgFilter);
 		updateText("# of shortest traces = " + numOfShortestTraces, lblFilter);
+
+	}
+	
+	protected void mineShortestTracesUsingClaSP() {
+
+		int numofTraces = 0;
+
+		// show
+		progressIndicatorFilter.setVisible(true);
+
+		numofTraces = tracesMiner.mineShortestClosedSequencesUsingClaSPAlgo(6);
+
+		// hide progress indicator
+		progressIndicatorFilter.setVisible(false);
+
+		updateImage(IMAGE_CORRECT, imgFilter);
+		updateText("# of retrieved traces = " + numofTraces, lblFilter);
 
 	}
 
