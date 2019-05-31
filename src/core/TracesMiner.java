@@ -8,14 +8,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
+import java.util.TreeMap;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -120,7 +124,7 @@ public class TracesMiner {
 	int maximumTraceLength;
 
 	// system data
-	int numberOfStates = 10000; //should be adjusted
+	int numberOfStates = 10000; // should be adjusted
 
 	public TracesMiner() {
 
@@ -133,8 +137,10 @@ public class TracesMiner {
 
 		PADDING_STATE = -1 * numberOfStates;
 
-		PADDING_ACTION_INT = -1; //initial. should be changed according to actions in the system or actions in the traces
-		
+		PADDING_ACTION_INT = -1; // initial. should be changed according to
+									// actions in the system or actions in the
+									// traces
+
 		/** Need to set system actions (all possible system actions) **/
 		// some actions
 		// systemActions.put("EnterRoom", 0);
@@ -160,8 +166,6 @@ public class TracesMiner {
 		// systemActions.put("TurnOffTVMicrophone", 20);
 		// systemActions.put("TurnONTVCamera", 21);
 		// systemActions.put("TurnOffTVCamera", 22);
-
-	
 
 		// set value of actions as more than the max number of states. This is
 		// done to avoid mixing with states numbering
@@ -364,7 +368,7 @@ public class TracesMiner {
 
 		// load instances from file
 		List<Integer> minMaxLengths = new LinkedList<Integer>();
-//		List<String> tracesActs = new LinkedList<String>();
+		// List<String> tracesActs = new LinkedList<String>();
 
 		instances = readInstantiatorInstancesFile(instanceFileName, minMaxLengths);
 
@@ -385,8 +389,8 @@ public class TracesMiner {
 		}
 
 		System.out.println(">>Number of instances read = " + instances.size() + "\n>>Min trace length: "
-				+ minimumTraceLength + "\n>>Max trace length: " + maximumTraceLength + "\n>>Actions: " + tracesActions +
-				"\n>>Occurrences: " + tracesActionsOccurence);
+				+ minimumTraceLength + "\n>>Max trace length: " + maximumTraceLength + "\n>>Actions: " + tracesActions
+				+ "\n>>Occurrences: " + tracesActionsOccurence);
 
 		// used when converting traces to mining format
 		PADDING_ACTION_INT = -1 * tracesActions.size();
@@ -399,6 +403,108 @@ public class TracesMiner {
 
 		return instances.size();
 
+	}
+
+	public Map<String, Integer> getTopActionOccurrences(int numberofActions) {
+
+		Map<String, Integer> result = new HashMap<String, Integer>();
+
+		int index = 0;
+
+		// sort occurrences
+		Collection<Integer> values = tracesActionsOccurence.values();
+		List<Integer> list = new LinkedList<Integer>(values);
+		Collections.sort(list);// ascending order
+
+		List<Integer> topN = new LinkedList<Integer>();
+//		int size = list.size();
+
+//		if (list.size() > 0) {
+//			for (int i = 0; i < numberofActions; i++) {
+//				if ((size - 1 - i) > 0) { // make sure it is not negative
+//					topN.add(list.get(size - 1 - i));
+//				}
+//			}
+//		}
+//		
+		for (int i = list.size()-1; i >0 ; i--) {
+
+			if (!topN.contains(list.get(i))) {
+				topN.add(list.get(i));
+				index++;
+
+				if (index == numberofActions) {
+					break;
+				}
+			}
+
+		}
+
+		// for now get the first n
+		for (Entry<String, Integer> entry : tracesActionsOccurence.entrySet()) {
+
+			String action = entry.getKey();
+			int occur = entry.getValue();
+
+			if (topN.contains(occur)) {
+				result.put(action, occur);
+				index++;
+			}
+
+			// if (index == numberofActions) {
+			// break;
+			// }
+		}
+
+		// tracesActionsOccurence.s
+		return result;
+	}
+
+	public Map<String, Integer> getLowestActionOccurrences(int numberofActions) {
+
+		Map<String, Integer> result = new HashMap<String, Integer>();
+
+		int index = 0;
+
+		// sort occurrences
+		Collection<Integer> values = tracesActionsOccurence.values();
+		List<Integer> list = new LinkedList<Integer>(values);
+		Collections.sort(list);// ascending order
+
+		List<Integer> topN = new LinkedList<Integer>();
+		int size = list.size();
+
+		for (int i = 0; i < list.size(); i++) {
+
+			if (!topN.contains(list.get(i))) {
+				topN.add(list.get(i));
+				index++;
+
+				if (index == numberofActions) {
+					break;
+				}
+			}
+
+		}
+
+		// for now get the first n
+		for (Entry<String, Integer> entry : tracesActionsOccurence.entrySet()) {
+
+			String action = entry.getKey();
+			int occur = entry.getValue();
+
+			if (topN.contains(occur)) {
+				result.put(action, occur);
+				index++;
+			}
+
+			// if (index == numberofActions) {
+			// break;
+			// }
+		}
+
+		// tracesActionsOccurence.s
+		return result;
 	}
 
 	public int findShortestTraces() {
@@ -946,21 +1052,21 @@ public class TracesMiner {
 	}
 
 	public int mineShortestClosedSequencesUsingClaSPAlgo(int minimumTraces) {
-		
-//		if(shortestTraces==null || shortestTraces.isEmpty()) {
-			findShortestTraces();	
-//		}
-		
+
+		// if(shortestTraces==null || shortestTraces.isEmpty()) {
+		findShortestTraces();
+		// }
+
 		return mineClosedSequencesUsingClaSPAlgo(shortestTraces.values(), minimumTraces);
-		
+
 	}
-	
+
 	public int mineClosedSequencesUsingClaSPAlgo(int minimumTraces) {
-	
+
 		return mineClosedSequencesUsingClaSPAlgo(instances.values(), minimumTraces);
-		
+
 	}
-	
+
 	public int mineClosedSequencesUsingClaSPAlgo(Collection<GraphPath> traces, int minimumTraces) {
 
 		convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
@@ -1029,14 +1135,14 @@ public class TracesMiner {
 	}
 
 	public int mineShortestClosedSequencesUsingClaSPAlgo() {
-		
-//		if(shortestTraces==null || shortestTraces.isEmpty()) {
-			findShortestTraces();	
-//		}
-		
+
+		// if(shortestTraces==null || shortestTraces.isEmpty()) {
+		findShortestTraces();
+		// }
+
 		return mineClosedSequencesUsingClaSPAlgo(shortestTraces.values());
 	}
-	
+
 	public int mineClosedSequencesUsingClaSPAlgo(Collection<GraphPath> traces) {
 
 		convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
@@ -1698,17 +1804,23 @@ public class TracesMiner {
 									actions.add(actionState);
 
 									// add to the list of all actions
-//									if (tracesActions != null && !tracesActions.contains(actionState)) {
-//										// System.out.println("adding: "+tmp);
-//										tracesActions.add(actionState);
-//									}
-//									
-									//check occurence
-									if(tracesActionsOccurence.containsKey(actionState)) { //if it exists then add 1
+									// if (tracesActions != null &&
+									// !tracesActions.contains(actionState)) {
+									// // System.out.println("adding: "+tmp);
+									// tracesActions.add(actionState);
+									// }
+									//
+									// check occurence
+									if (tracesActionsOccurence.containsKey(actionState)) { // if
+																							// it
+																							// exists
+																							// then
+																							// add
+																							// 1
 										int oldOccurrence = tracesActionsOccurence.get(actionState);
 										oldOccurrence++;
 										tracesActionsOccurence.put(actionState, oldOccurrence);
-									} else { //if not, then create a new entry
+									} else { // if not, then create a new entry
 										tracesActionsOccurence.put(actionState, 1);
 									}
 								}
@@ -1731,17 +1843,23 @@ public class TracesMiner {
 								actions.add(tmp);
 
 								// add to the list of all actions
-//								if (tracesActions != null && !tracesActions.contains(tmp)) {
-//									// System.out.println("adding: "+tmp);
-//									tracesActions.add(tmp);
-//								}
-								
-								//check occurence
-								if(tracesActionsOccurence.containsKey(tmp)) { //if it exists then add 1
+								// if (tracesActions != null &&
+								// !tracesActions.contains(tmp)) {
+								// // System.out.println("adding: "+tmp);
+								// tracesActions.add(tmp);
+								// }
+
+								// check occurence
+								if (tracesActionsOccurence.containsKey(tmp)) { // if
+																				// it
+																				// exists
+																				// then
+																				// add
+																				// 1
 									int oldOccurrence = tracesActionsOccurence.get(tmp);
 									oldOccurrence++;
 									tracesActionsOccurence.put(tmp, oldOccurrence);
-								} else { //if not, then create a new entry
+								} else { // if not, then create a new entry
 									tracesActionsOccurence.put(tmp, 1);
 								}
 							}

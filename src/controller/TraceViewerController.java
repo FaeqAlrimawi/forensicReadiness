@@ -4,8 +4,16 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import javax.print.attribute.standard.NumberOfDocuments;
 
 import controller.utlities.AutoCompleteTextField;
 import core.TracesMiner;
@@ -16,6 +24,11 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.StackedBarChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -84,11 +97,28 @@ public class TraceViewerController {
 
 	@FXML
 	private CheckBox checkBoxInOrder;
-	
+
 	@FXML
 	private CheckBox checkboxFromStart;
-	
-	
+
+	@FXML
+	private BarChart<String, Integer> barChartActions;
+
+	@FXML
+	private CategoryAxis categoryAxis;
+
+	@FXML
+	private NumberAxis numberAxis;
+
+    @FXML
+    private TextField textFieldNumofOccurrences;
+    
+    @FXML
+    private Button btnRefresh;
+    
+    @FXML
+    private ChoiceBox<String> choiceBoxOccurrences;
+    
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -104,12 +134,16 @@ public class TraceViewerController {
 	private static final String SHORTEST = "Shortest Only";
 	private static final String SHORTEST_CLASP = "Shortest length & Share longest partial sequence (ClaSP)";
 	private static final String CUSTOMISE = "Customise";
-
+	private static final String HIGHEST = "Highest";
+	private static final String LOWEST = "Lowest";
+	
 	private AutoCompleteTextField autoCompleteActionsFiled;
 
 	private final String[] filters = { SHORTEST, SHORTEST_CLASP, CUSTOMISE };
 
 	private final String[] compartiveOperators = { "=", ">", "<" };
+	
+	private final String[] occurrencesOptions = { HIGHEST, LOWEST};
 
 	@FXML
 	public void initialize() {
@@ -142,8 +176,32 @@ public class TraceViewerController {
 
 		choiceboxSeqLengthComparator.setItems(FXCollections.observableArrayList(compartiveOperators));
 
+		choiceBoxOccurrences.setItems(FXCollections.observableArrayList(occurrencesOptions));
+		
+		//defualt selection
+		Platform.runLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				choiceboxOccurrenceComparator.getSelectionModel().select(0);
+				choiceboxFilter.getSelectionModel().select(0);
+				choiceBoxOccurrences.getSelectionModel().select(0);
+				choiceboxSeqLengthComparator.getSelectionModel().select(0);
+			}
+		});
+		
 		// auto complete
 		autoCompleteActionsFiled = new AutoCompleteTextField();
+		
+		textFieldNumofOccurrences.setOnKeyPressed(e->{
+			
+			//if enter is pressed then refersh
+			if(e.getCode() == KeyCode.ENTER) {
+				int num = Integer.parseInt(textFieldNumofOccurrences.getText());
+				setupTopActionsChart(num);
+			}
+		});
 	}
 
 	@FXML
@@ -205,13 +263,16 @@ public class TraceViewerController {
 						imgOpentracesFile.setVisible(true);
 						imgOpentracesFileEmpty.setVisible(false);
 						btnAnalyse.setDisable(false);
+						btnRefresh.setDisable(false);
+						// show top actions
+//						setupTopActionsChart();
 
 					} else {
 						updateImage(IMAGE_WRONG, imgSystemFileCheck);
 						updateText("Traces file is not valid", lblSystemFileCheck);
 						imgOpentracesFile.setVisible(false);
 						imgOpentracesFileEmpty.setVisible(true);
-
+						
 					}
 
 					progressIndicatorLoader.setVisible(false);
@@ -248,7 +309,7 @@ public class TraceViewerController {
 			break;
 
 		case SHORTEST_CLASP:
-			
+
 			executor.submit(new Runnable() {
 
 				@Override
@@ -257,7 +318,7 @@ public class TraceViewerController {
 					mineShortestTracesUsingClaSP();
 				}
 			});
-			
+
 			break;
 
 		case CUSTOMISE:
@@ -267,6 +328,14 @@ public class TraceViewerController {
 		default:
 			// shortest
 		}
+	}
+	
+	@FXML
+	public void refreshGraph(ActionEvent event) {
+		
+		int numOfOccurrences = Integer.parseInt(textFieldNumofOccurrences.getText());
+		
+		setupTopActionsChart(numOfOccurrences);
 	}
 
 	/**
@@ -302,7 +371,7 @@ public class TraceViewerController {
 		updateText("# of shortest traces = " + numOfShortestTraces, lblFilter);
 
 	}
-	
+
 	protected void mineShortestTracesUsingClaSP() {
 
 		int numofTraces = 0;
@@ -419,6 +488,77 @@ public class TraceViewerController {
 						autoCompleteActionsFiled.showAllEntries(textFieldActions);
 					}
 				});
+			}
+		});
+
+	}
+
+	protected void setupTopActionsChart(int numOfOccurrences) {
+
+//		int numOfOccurrences = 10;
+//		int numOfSeries = 0;
+		
+		// get actions from miner
+		Map<String, Integer> topActions;
+		
+		String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
+		
+		switch (selectedOccurrenceType) {
+		case HIGHEST:
+			topActions = tracesMiner.getTopActionOccurrences(numOfOccurrences);
+			break;
+
+		case LOWEST:
+			topActions = tracesMiner.getLowestActionOccurrences(numOfOccurrences);
+			break;
+			
+		default:
+			//highest
+			topActions = tracesMiner.getTopActionOccurrences(numOfOccurrences);
+			break;
+		}
+		
+		if(topActions == null) {
+			return;
+		}
+		
+		List<String> actions = Arrays.asList(topActions.keySet().toArray(new String[topActions.size()]));
+		List<Integer> occurrences = Arrays.asList(topActions.values().toArray(new Integer[topActions.size()]));
+
+		final int numOfActions = actions.size();
+
+		List<XYChart.Series<String, Integer>> series = new LinkedList<XYChart.Series<String, Integer>>();
+
+		// XYChart.Series<String, Integer> series1 = new XYChart.Series<String,
+		// Integer>();
+
+		for (int i = 0; i < numOfActions; i++) {
+			XYChart.Series<String, Integer> series1 = new XYChart.Series<String, Integer>();
+
+			// bug does not allow the correct order of labels
+			int occur = occurrences.get(i);
+			series1.getData().add(new XYChart.Data<String, Integer>("", occur));
+
+			series1.setName(actions.get(i));
+
+			series.add(series1);
+		}
+
+		Platform.runLater(new Runnable() {
+
+			@Override
+			public void run() {
+				// Defining the x axis
+				categoryAxis.setLabel("Actions");
+
+				// Defining the y axis
+				numberAxis.setLabel("Action Occurrences");
+
+				barChartActions.setTitle("Top " + numOfActions + " Actions with " +selectedOccurrenceType+ " "+ numOfOccurrences+" Occurrences");
+
+				barChartActions.getData().clear();
+				// TODO Auto-generated method stub
+				barChartActions.getData().addAll(series);
 			}
 		});
 
