@@ -310,7 +310,7 @@ public class TraceViewerController {
 		// show
 		progressIndicatorFilter.setVisible(true);
 
-		numofTraces = tracesMiner.mineShortestClosedSequencesUsingClaSPAlgo(6);
+		numofTraces = tracesMiner.mineShortestClosedSequencesUsingClaSPAlgo();
 
 		// hide progress indicator
 		progressIndicatorFilter.setVisible(false);

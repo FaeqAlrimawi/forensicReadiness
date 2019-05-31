@@ -947,9 +947,9 @@ public class TracesMiner {
 
 	public int mineShortestClosedSequencesUsingClaSPAlgo(int minimumTraces) {
 		
-		if(shortestTraces==null || shortestTraces.isEmpty()) {
+//		if(shortestTraces==null || shortestTraces.isEmpty()) {
 			findShortestTraces();	
-		}
+//		}
 		
 		return mineClosedSequencesUsingClaSPAlgo(shortestTraces.values(), minimumTraces);
 		
@@ -1028,6 +1028,15 @@ public class TracesMiner {
 
 	}
 
+	public int mineShortestClosedSequencesUsingClaSPAlgo() {
+		
+//		if(shortestTraces==null || shortestTraces.isEmpty()) {
+			findShortestTraces();	
+//		}
+		
+		return mineClosedSequencesUsingClaSPAlgo(shortestTraces.values());
+	}
+	
 	public int mineClosedSequencesUsingClaSPAlgo(Collection<GraphPath> traces) {
 
 		convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
