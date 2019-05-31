@@ -224,8 +224,11 @@ public class AutoCompleteTextField {
 
 		// int pos = textArea.getCaretPosition();
 //		 @SuppressWarnings("restriction")
-//		Point2D bound = ((TextFieldSkin) textArea.getSkin()).getMenuPosition();
-		 Bounds bounds = textArea.getLayoutBounds();
+//		Point2D bound = ((TextFieldSkin) textArea.getSkin()).getNode().getLayoutX();
+		double menuX = ((TextFieldSkin) textArea.getSkin()).getNode().getTranslateX();
+		double menuY = ((TextFieldSkin) textArea.getSkin()).getNode().getTranslateY();
+		
+//		 Bounds bounds = textArea.localTo(textArea.getBoundsInLocal());
 
 		// System.out.println("s ["+s + "] s2 [" + s2+"]");
 		// text = s2;// getText();
@@ -266,11 +269,15 @@ public class AutoCompleteTextField {
 		}
 		// searchResult.addAll();
 		if (searchResult.size() > 0) {
+			
+			//populate the popup menu
 			populatePopup(searchResult);
+			
 			if (!entriesPopup.isShowing()) {
 				// Bounds position = ((TextAreaSkin)getSkin()).getCaretBounds();
-				entriesPopup.show(textArea, Side.TOP, bounds.getMaxX() + text.length()+3, bounds.getMaxY() + 3);
+				entriesPopup.show(textArea, Side.TOP, textArea.getWidth()/2, textArea.getHeight()+3);
 			}
+			
 		} else {
 			entriesPopup.hide();
 		}
@@ -281,6 +288,8 @@ public class AutoCompleteTextField {
 
 		this.pos = textField.getCaretPosition();
 		this.text = textField.getText();
+		this.textArea = textField;
+		
 		this.subWord = "";
 
 		populatePopup(Arrays
@@ -288,7 +297,7 @@ public class AutoCompleteTextField {
 
 		if (!entriesPopup.isShowing()) {
 			// Bounds position = ((TextAreaSkin)getSkin()).getCaretBounds();
-			entriesPopup.show(textArea, Side.TOP, pos + 3, pos + 3);
+			entriesPopup.show(textArea, Side.TOP, textArea.getWidth()/2, textField.getHeight() + 3);
 		} else {
 			entriesPopup.hide();
 		}

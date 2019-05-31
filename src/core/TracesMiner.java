@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
@@ -12,9 +13,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.Random;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 //import com.beust.jcommander.internal.Lists;
 
@@ -38,8 +44,8 @@ import ca.pfv.spmf.algorithms.sequentialpatterns.spam.AlgoTKS;
 import ca.pfv.spmf.algorithms.sequentialpatterns.spam.PatternTKS;
 import ca.pfv.spmf.patterns.cluster.Cluster;
 import ca.pfv.spmf.patterns.cluster.ClusterWithMean;
-import ca.pfv.spmf.patterns.cluster.DoubleArray;
 import ie.lero.spare.franalyser.utility.FileManipulator;
+import ie.lero.spare.franalyser.utility.JSONTerms;
 //import weka.clusterers.ClusterEvaluation;
 //import weka.clusterers.Clusterer;
 //import weka.clusterers.Cobweb;
@@ -77,10 +83,10 @@ public class TracesMiner {
 	public final static String ATTRIBUTE_STATE_NAME = "state-";
 	public final static String ATTRIBUTE_ACTION_NAME = "action-";
 
-	//errors
+	// errors
 	public final static int TRACES_NOT_LOADED = -1;
 	public final static int SHORTEST_FILE_NOT_SAVED = -2;
-	
+
 	String clusterFolder = "clusters generated";
 	String clustersOutputFileName = "clustersGenerated.txt";
 	String clustersOutputFolder;
@@ -88,9 +94,8 @@ public class TracesMiner {
 	int longestTransition = -1;
 	int shortestTransition = -1;
 
-	
-	
-	Map<String, Integer> systemActions;
+	Map<String, Integer> tracesActions;
+	Map<String, Integer> tracesActionsOccurence;
 
 	// shortest traces
 	Map<Integer, GraphPath> shortestTraces;
@@ -109,60 +114,65 @@ public class TracesMiner {
 	String shortestTracesFileName;
 
 	List<Integer> traceIDs;
-	
-	//min length
+
+	// min length
 	int minimumTraceLength;
 	int maximumTraceLength;
-	
+
+	// system data
+	int numberOfStates = 10000; //should be adjusted
 
 	public TracesMiner() {
 
-		systemActions = new HashMap<String, Integer>();
+		tracesActions = new HashMap<String, Integer>();
+		tracesActionsOccurence = new HashMap<String, Integer>();
 
 		shortestTraces = new HashMap<Integer, GraphPath>();
 
-		int numberOfStates = 10000;
-		// PADDING_ACTION = 0;
+		numberOfStates = 10000;
+
 		PADDING_STATE = -1 * numberOfStates;
 
-		/** Need to set system actions (all possible system actions)**/
-		// some actions 
-		systemActions.put("EnterRoom", 0);
-		systemActions.put("ConnectIPDevice", 1);
-		systemActions.put("DisconnectIPDevice", 2);
-		systemActions.put("ConnectBusDevice", 3);
-		systemActions.put("DisconnectBusDevice", 4);
-		systemActions.put("SendData", 5);
-		systemActions.put("SendMalware", 6);
-		systemActions.put("DisableHVAC", 7);
-		systemActions.put("EnterRoomWithoutCardReader", 8);
-		systemActions.put("ChangeAccessToCardRequired", 9);
-		systemActions.put("ChangeAccessToCardNotRequired", 10);
-		systemActions.put("ChangeContextToOutSideWorkingHours", 11);
-		systemActions.put("ChangeContextToWorkingHours", 12);
-		systemActions.put("TurnOnHVAC", 13);
-		systemActions.put("TurnOffHVAC", 14);
-		systemActions.put("TurnOnSmartTV", 15);
-		systemActions.put("TurnOffSmartTV", 16);
-		systemActions.put("GenerateData", 17);
-		systemActions.put("CollectData", 18);
-		systemActions.put("TurnONTVMicrophone", 19);
-		systemActions.put("TurnOffTVMicrophone", 20);
-		systemActions.put("TurnONTVCamera", 21);
-		systemActions.put("TurnOffTVCamera", 22);
+		PADDING_ACTION_INT = -1; //initial. should be changed according to actions in the system or actions in the traces
+		
+		/** Need to set system actions (all possible system actions) **/
+		// some actions
+		// systemActions.put("EnterRoom", 0);
+		// systemActions.put("ConnectIPDevice", 1);
+		// systemActions.put("DisconnectIPDevice", 2);
+		// systemActions.put("ConnectBusDevice", 3);
+		// systemActions.put("DisconnectBusDevice", 4);
+		// systemActions.put("SendData", 5);
+		// systemActions.put("SendMalware", 6);
+		// systemActions.put("DisableHVAC", 7);
+		// systemActions.put("EnterRoomWithoutCardReader", 8);
+		// systemActions.put("ChangeAccessToCardRequired", 9);
+		// systemActions.put("ChangeAccessToCardNotRequired", 10);
+		// systemActions.put("ChangeContextToOutSideWorkingHours", 11);
+		// systemActions.put("ChangeContextToWorkingHours", 12);
+		// systemActions.put("TurnOnHVAC", 13);
+		// systemActions.put("TurnOffHVAC", 14);
+		// systemActions.put("TurnOnSmartTV", 15);
+		// systemActions.put("TurnOffSmartTV", 16);
+		// systemActions.put("GenerateData", 17);
+		// systemActions.put("CollectData", 18);
+		// systemActions.put("TurnONTVMicrophone", 19);
+		// systemActions.put("TurnOffTVMicrophone", 20);
+		// systemActions.put("TurnONTVCamera", 21);
+		// systemActions.put("TurnOffTVCamera", 22);
 
-		PADDING_ACTION_INT = -1 * systemActions.size();
+	
 
 		// set value of actions as more than the max number of states. This is
 		// done to avoid mixing with states numbering
 
-		int index = 1;
-		int increment = (int) (numberOfStates * .05); // 1% of the number of
-														// states
-
-		if (increment == 0) {
-			increment = 1;
-		}
+		// int index = 1;
+		// int increment = (int) (numberOfStates * .05); // 1% of the number of
+		// // states
+		//
+		// if (increment == 0) {
+		// increment = 1;
+		// }
 
 	}
 
@@ -192,114 +202,6 @@ public class TracesMiner {
 
 		return true;
 	}
-
-//	void generateClustersFromFolder(String folderPath) {
-//
-//		File inputFolder = new File(folderPath);
-//
-//		for (File file : inputFolder.listFiles()) {
-//
-//			if (file.isFile()) {
-//				String filePath = file.getAbsolutePath();
-//
-//				if (filePath.endsWith(".json")) {
-//					System.out.println("###### Generating clusters ######");
-//					System.out.println("*File: " + filePath);
-//
-//					generateClustersFromFile(filePath);
-//
-//					System.out.println("\n");
-//				}
-//
-//			}
-//		}
-//	}
-
-//	void generateClustersFromFile(String fileName) {
-//
-//		if (!checkFile(fileName)) {
-//
-//			return;
-//		}
-//
-//		instanceFileName = fileName;
-//
-//		File outputFolder = new File(clustersOutputFolder);
-//
-//		if (!outputFolder.exists()) {
-//			outputFolder.mkdir();
-//		}
-//
-//		clustersOutputFileName = instanceFileName.replace(".json", "_relevantTraces.txt");// clustersOutputFolder
-//		// clustersOutputFileName;
-//		convertedInstancesFileName = instanceFileName.replace(".json", "_convertedInstances.txt");// clustersOutputFolder
-//		// +
-//		shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");
-//
-//		// loads instances(or traces) from given file name
-//		// and finds shortest transitions
-//		readTracesFromFile();
-//
-//		// System.out.println(">>Converting instances to data mining tech
-//		// format...");
-//
-//		// convertedInstancesFileName =
-//		// convertInstancesToMiningFormat(instances);
-//
-//		// ==For text mining (i.e. clustering based on actions names)
-//		// convertedInstancesFileName =
-//		// convertInstancesToTextMiningFormat(instances);
-//
-//		// jaccard distance function is used for vectors that has only 0,1
-//		// values
-//		// distanceFunction = new DistanceEuclidian();
-//
-//		/** apply cluster algorithm (K-mean) **/
-//		// clusters = generateClustersUsingKMean();
-//		// printClustersWithMean(clusters);
-//
-//		/** apply cluster algorithm (BiSect implementation) **/
-//		// generateClustersUsingKMeanUsingBiSect();
-//		// printClusters();
-//
-//		/** using OPTIC algorithm to find clusters **/
-//		List<Cluster> clus = generateClustersUsingOPTICS();
-//		printClustersOPTIC(clus);
-//
-//		/** using DBSCAN algorithm **/
-//		// List<Cluster> clus = generateClustersUsingDBSCAN();
-//		// printClustersOPTIC(clus);
-//
-//		/** ======text based clustering **/
-//		// convertedInstancesFileName = convertInstancesToTextMiningFormat();
-//		// generateClustersUsingTextMining();
-//
-//		System.out.println("\n>>DONE");
-//
-//	}
-
-//	void generateClusters(String fileName) {
-//
-//		// instanceFileName = fileName;
-//
-//		File inputFile = new File(fileName);
-//
-//		if (inputFile.isFile()) {
-//			clustersOutputFolder = fileName.substring(0, fileName.lastIndexOf("/")) + "/" + clusterFolder;
-//
-//			instanceFileName = fileName;
-//			generateClustersFromFile(fileName);
-//
-//		} else if (inputFile.isDirectory()) {
-//			clustersOutputFolder = fileName + "/" + clusterFolder;
-//			generateClustersFromFolder(fileName);
-//
-//		} else {
-//			System.err.println(fileName + " given file name is niether a FILE nor a FOLDER. Exiting");
-//			return;
-//		}
-//
-//	}
 
 	/**
 	 * Identify relevant traces (currently defined as shortest and has common
@@ -337,13 +239,15 @@ public class TracesMiner {
 
 		String linSeparator = System.getProperty("line.separator");
 
-		content.append("*Summary containing relevant traces (shortest & have common sequential patterns) identified from each file in folder [" + folderPath + "]*")
+		content.append(
+				"*Summary containing relevant traces (shortest & have common sequential patterns) identified from each file in folder ["
+						+ folderPath + "]*")
 				.append(linSeparator).append(linSeparator);
 		content.append("Format: ").append(linSeparator);
 		content.append("[File-name]").append(linSeparator);
 		content.append("[# of relevant traces]").append(linSeparator);
 		content.append("[relevant traces IDs]").append(linSeparator).append(linSeparator);
-		
+
 		int numOfRelevantTraces = 0;
 		for (File file : inputFolder.listFiles()) {
 
@@ -355,17 +259,17 @@ public class TracesMiner {
 					System.out.println("*File: " + filePath);
 					System.out.println("\n");
 
-					//identify relevant traces
+					// identify relevant traces
 					numOfRelevantTraces = identifyRelevantTracesFromFile(filePath);
 
-					//file path
+					// file path
 					content.append("#").append(filePath).append(linSeparator)
-					//number of relevant traces
-					.append(numOfRelevantTraces).append(linSeparator);
-					//IDs
+							// number of relevant traces
+							.append(numOfRelevantTraces).append(linSeparator);
+					// IDs
 					Integer[] ary = traceIDs.toArray(new Integer[traceIDs.size()]);
 					content.append(Arrays.toString(ary)).append(linSeparator).append(linSeparator);
-					
+
 				}
 			}
 		}
@@ -374,9 +278,8 @@ public class TracesMiner {
 		String outputFile = folderPath + "/relevantTraces_Summary.txt";
 
 		writeToFile(content.toString(), outputFile);
-	
+
 	}
-	
 
 	public int identifyRelevantTracesFromFile(String fileName) {
 
@@ -388,11 +291,14 @@ public class TracesMiner {
 
 		instanceFileName = fileName;
 
-//		clustersOutputFileName = instanceFileName.replace(".json", "_relevantTraces.txt");// clustersOutputFolder
-//		// clustersOutputFileName;
-//		convertedInstancesFileName = instanceFileName.replace(".json", "_convertedInstances.txt");// clustersOutputFolder
-//		// +
-//		shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");
+		// clustersOutputFileName = instanceFileName.replace(".json",
+		// "_relevantTraces.txt");// clustersOutputFolder
+		// // clustersOutputFileName;
+		// convertedInstancesFileName = instanceFileName.replace(".json",
+		// "_convertedInstances.txt");// clustersOutputFolder
+		// // +
+		// shortestTracesFileName = instanceFileName.replace(".json",
+		// "_shortestTracesIDs.txt");
 
 		// loads instances(or traces) from given file name
 		// and finds shortest transitions
@@ -404,13 +310,16 @@ public class TracesMiner {
 		/**
 		 * ======Mine Frequent sequential patterns using the prefixspan algo
 		 **/
-//		numOfRelevantTraces = mineSequencesUsingPrefixSpanAlgo(shortestTraces.values());
+		// numOfRelevantTraces =
+		// mineSequencesUsingPrefixSpanAlgo(shortestTraces.values());
 
-//		 int minimumNumOfTracesForPattern = 5;
-//		 numOfRelevantTraces = mineSequencesUsingPrefixSpanAlgo(shortestTraces.values(),minimumNumOfTracesForPattern);
+		// int minimumNumOfTracesForPattern = 5;
+		// numOfRelevantTraces =
+		// mineSequencesUsingPrefixSpanAlgo(shortestTraces.values(),minimumNumOfTracesForPattern);
 
 		/** ======Mine Closed Frequent sequential patterns using the ClaSP **/
-//		numOfRelevantTraces = mineClosedSequencesUsingClaSPAlgo(shortestTraces.values());
+		// numOfRelevantTraces =
+		// mineClosedSequencesUsingClaSPAlgo(shortestTraces.values());
 
 		int minimumNumOfTracesForPattern = 5;
 		numOfRelevantTraces = mineClosedSequencesUsingClaSPAlgo(shortestTraces.values(), minimumNumOfTracesForPattern);
@@ -455,37 +364,39 @@ public class TracesMiner {
 
 		// load instances from file
 		List<Integer> minMaxLengths = new LinkedList<Integer>();
-		List<String> tracesActions = new LinkedList<String>();
-		
-		instances = FileManipulator.readInstantiatorInstancesFile(instanceFileName, minMaxLengths, tracesActions);
+//		List<String> tracesActs = new LinkedList<String>();
 
-		//set min
+		instances = readInstantiatorInstancesFile(instanceFileName, minMaxLengths);
+
+		// set min
 		minimumTraceLength = minMaxLengths.get(0);
-		
-		//set max
+
+		// set max
 		maximumTraceLength = minMaxLengths.get(1);
-		
-		//set traces actions
-		if(tracesActions.size()>0) {
-			systemActions.clear();
+
+		// set traces actions
+		if (tracesActionsOccurence.size() > 0) {
+			tracesActions.clear();
 			int index = 0;
-			for(String action : tracesActions) {
-				systemActions.put(action, index);
+			for (String action : tracesActionsOccurence.keySet()) {
+				tracesActions.put(action, index);
 				index++;
 			}
 		}
-		
-		System.out.println(">>Number of instances read = " + instances.size()
-		+"\n>>Min trace length: " + minimumTraceLength +
-		"\nMax trace length: "+ maximumTraceLength +
-		"\nActions: " + systemActions);
-		
+
+		System.out.println(">>Number of instances read = " + instances.size() + "\n>>Min trace length: "
+				+ minimumTraceLength + "\n>>Max trace length: " + maximumTraceLength + "\n>>Actions: " + tracesActions +
+				"\n>>Occurrences: " + tracesActionsOccurence);
+
+		// used when converting traces to mining format
+		PADDING_ACTION_INT = -1 * tracesActions.size();
+
 		// System.out.println(instances.get(0).getTransitionActions());
 		if (instances == null) {
 			System.out.println("Instances are null! Exiting");
 			return TRACES_NOT_LOADED;
 		}
-		
+
 		return instances.size();
 
 	}
@@ -517,16 +428,16 @@ public class TracesMiner {
 		}
 
 		// store to file
-//		if(shortestTracesFileName != null) {
-//			writeToFile(bldr.toString(), shortestTracesFileName);
-//			System.out.println(">>Shortest traces IDs are stored in [" + shortestTracesFileName + "]");	
-//		}
-		
-		
+		// if(shortestTracesFileName != null) {
+		// writeToFile(bldr.toString(), shortestTracesFileName);
+		// System.out.println(">>Shortest traces IDs are stored in [" +
+		// shortestTracesFileName + "]");
+		// }
+
 		return shortestTraces.size();
 
 	}
-	
+
 	public int findShortestTraces(boolean saveToFile) {
 
 		// shortest trace is set to be 3 actions (or 4 states (i.e. actions+1)
@@ -554,28 +465,26 @@ public class TracesMiner {
 		}
 
 		// store to file
-		if(saveToFile) {
-			
-			if(shortestTracesFileName == null) {
-				if(instanceFileName != null) {
-					shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");	
+		if (saveToFile) {
+
+			if (shortestTracesFileName == null) {
+				if (instanceFileName != null) {
+					shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");
 				}
-				
+
 			}
-			
-			if(shortestTracesFileName == null) {
+
+			if (shortestTracesFileName == null) {
 				return SHORTEST_FILE_NOT_SAVED;
 			}
-			
+
 			writeToFile(bldr.toString(), shortestTracesFileName);
-			System.out.println(">>Shortest traces IDs are stored in [" + shortestTracesFileName + "]");	
+			System.out.println(">>Shortest traces IDs are stored in [" + shortestTracesFileName + "]");
 		}
-		
-		
+
 		return shortestTraces.size();
 
 	}
-
 
 	public List<ClusterWithMean> generateClustersUsingKMean() {
 
@@ -787,7 +696,7 @@ public class TracesMiner {
 				builder.append(states.get(i)).append(DATA_SEPARATOR);
 
 				// add action
-				builder.append(systemActions.get(transitionActions.get(i))).append(DATA_SEPARATOR);
+				builder.append(tracesActions.get(transitionActions.get(i))).append(DATA_SEPARATOR);
 			}
 
 			// add last state
@@ -987,7 +896,7 @@ public class TracesMiner {
 			}
 
 			System.out.println(">>Minimum traces is " + mid);
-			
+
 			return mineSequencesUsingPrefixSpanAlgo(traces, mid);
 
 		} catch (IOException e) {
@@ -1588,481 +1497,6 @@ public class TracesMiner {
 	/*******************************************/
 	/*******************************************/
 
-//	protected void clusterUsingWeka() {
-//
-//		System.out.println(">>Reading instances from [" + instanceFileName + "]");
-//		instances = FileManipulator.readInstantiatorInstancesFile(instanceFileName);
-//
-//		System.out.println(">>Converting instances into ARFF");
-//
-//		// convert instances to ARFF (Attribute Relation File Format)
-//		// generated file contains as the first field in a row the instance id
-//		wekaInstancesFilePath = convertInstancesActionsToARFF(instances.values());
-//
-//		try {
-//
-//			// ===== get weka instances
-//			DataSource source = new DataSource(wekaInstancesFilePath);
-//			Instances wekaInstances = source.getDataSet();
-//
-//			// ===== remove first field (i.e. instance id)
-//			String[] options = new String[2];
-//			options[0] = "-R"; // remove
-//			options[1] = "1"; // first item
-//
-//			Remove remove = new Remove();
-//			remove.setOptions(options);
-//			remove.setInputFormat(wekaInstances);
-//
-//			// new weka instances without the id field
-//			wekaInstances = Filter.useFilter(wekaInstances, remove);
-//
-//			// ==== converts string to vector so that it can be processed by
-//			// other algorithms
-//			// StringToWordVector vector = new StringToWordVector();
-//
-//			// String[] fliterOptions = Utils.splitOptions("-R first-last -W
-//			// 5000 -prune-rate 20.0 -T -I -N 0 -L -stemmer weka" +
-//			// ".core.stemmers.NullStemmer -M 1 -tokenizer
-//			// \"weka.core.tokenizers.WordTokenizer -delimiters \\\"
-//			// \\\\r\\\\n\\\\t.,;:\\\\\\'\\\\\\\"()?!\\\"\"");
-//
-//			// vector.setInputFormat(wekaInstances);
-//			// vector.setOptions(fliterOptions);
-//			// vector.setIDFTransform(true);
-//			// vector.setLowerCaseTokens(true);
-//			// vector.setStemmer(new LovinsStemmer());
-//			// vector.setAttributeIndices("first-last");
-//			// vector.setTokenizer(new WordTokenizer());
-//
-//			// System.out.println(wekaInstances.get(0));
-//			// System.out.println(wekaInstances.get(4));
-//			//
-//			// wekaInstances = Filter.useFilter(wekaInstances, vector);
-//			// System.out.println(wekaInstances.get(0));
-//			// System.out.println(wekaInstances.get(4));
-//
-//			// ===== cluster using CobWeb algorithm
-//			// clusterUsingWekaCobWeb(wekaInstances);
-//
-//			// ===== cluster using EM algorithm
-//			clusterUsingWekaEM(wekaInstances);
-//
-//			// ===== cluster using KMEANS
-//			// clusterUsingWekaKMEANS(wekaInstances);
-//
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//		System.out.println("\n>>DONE");
-//	}
-
-//	void clusterUsingWekaCobWeb(Instances wekaInstances) {
-//
-//		// ====== generate clusters using CobWeb algorithm
-//		Cobweb cobWebClusterer = new Cobweb();
-//		try {
-//
-//			cobWebClusterer.buildClusterer(wekaInstances);
-//
-//			/**
-//			 * A way to incremently cluster instances. Taken from:
-//			 * https://waikato.github.io/weka-wiki/use_weka_in_your_java_code/
-//			 **/
-//			// for (Instance wekaInstance : wekaInstances) {
-//			// cobWebClusterer.updateClusterer(wekaInstance);
-//			// }
-//			// cobWebClusterer.updateFinished();
-//
-//			// System.out.println(cobWebClusterer);
-//
-//			evaluateWekaClusterer(cobWebClusterer, wekaInstances);
-//
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//	}
-
-//	void clusterUsingWekaEM(Instances wekaInstances) {
-//
-//		// ====== generate clusters using EM (expectation maximisation)
-//		EM emClusterer = new EM();
-//
-//		String[] options = new String[2];
-//
-//		try {
-//
-//			options[0] = "-I"; // iterations
-//			options[1] = "100"; // -I 100 sets max iterations to 100
-//
-//			emClusterer.setOptions(options);
-//
-//			// generate clusters
-//			emClusterer.buildClusterer(wekaInstances);
-//
-//			// System.out.println(emClusterer);
-//
-//			evaluateWekaClusterer(emClusterer, wekaInstances);
-//
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//	}
-
-//	void clusterUsingWekaKMEANS(Instances wekaInstances) {
-//
-//		SimpleKMeans clusterer = new SimpleKMeans();
-//
-//		try {
-//
-//			numberOFClusters = 5;
-//			clusterer.setNumClusters(numberOFClusters);
-//			clusterer.buildClusterer(wekaInstances);
-//
-//			// System.out.println(Arrays.toString(clusterer.getClusterSizes()));
-//
-//			evaluateWekaClusterer(clusterer, wekaInstances);
-//
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
-
-//	void evaluateWekaClusterer(Clusterer clusterer, Instances wekaInstances) {
-//
-//		// evaluation
-//		ClusterEvaluation eval = new ClusterEvaluation();
-//
-//		try {
-//
-//			clusterer.buildClusterer(wekaInstances);
-//
-//			eval.setClusterer(clusterer);
-//
-//			eval.evaluateClusterer(wekaInstances);
-//
-//			System.out.println(eval.clusterResultsToString());
-//			System.out.println(Arrays.toString(eval.getClusterAssignments()));
-//
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//	}
-
-//	public void clusterUsingWeka(String fileName) {
-//
-//		instanceFileName = fileName;
-//
-//		clustersOutputFolder = instanceFileName.substring(0, instanceFileName.lastIndexOf("/")) + "/" + clusterFolder;
-//
-//		File outputFolder = new File(clustersOutputFolder);
-//
-//		if (!outputFolder.exists()) {
-//			outputFolder.mkdir();
-//
-//		}
-//
-//		clustersOutputFileName = clustersOutputFolder + "/" + clustersOutputFileName;
-//		wekaInstancesFilePath = clustersOutputFolder + "/" + wekaInstancesFilePath;
-//
-//		clusterUsingWeka();
-//
-//	}
-
-//	public String convertInstancesToARFF(List<GraphPath> instances) {
-//
-//		// convert instances to ARFF format:
-//		// @RELATION="instance name"
-//		String relationName = "@RELATION";
-//		// @ATTRIBUTE="attribute name"
-//		String attributeName = "@ATTRIBUTE";
-//		// attribute can have value NUMERIC, string, nominal (e.g., {nam1,
-//		// name2, ...}), and date
-//		String numericAttributeValue = "NUMERIC";
-//		String stringAttributeValue = "string";
-//		// data is deifned by @DATA
-//		String dataTag = "@DATA";
-//		// data is defined in a row separated by commas. Each row is an
-//		// instance. Each comma-separated value corresponds to an attribute
-//		// column
-//		// e.g., 1,2,weka,{up, down}
-//		// % are used for comments
-//
-//		// a dummy relation value
-//		String relationValue = "\"Potential Incident Instance\"";
-//
-//		// instance id attribute name
-//		String instanceIDAttribute = "Instance_ID";
-//		/**
-//		 * all data array should be of the same length so states that are short
-//		 * than the longest are padded with -1
-//		 **/
-//		// create a text file to hold the data
-//
-//		String fileLinSeparator = System.getProperty("line.separator");
-//
-//		StringBuilder builder = new StringBuilder();
-//
-//		if (instances != null && !instances.isEmpty()) {
-//			shortestTransition = instances.get(0).getStateTransitions().size();
-//		}
-//
-//		// find longest and shortest transitions
-//		for (GraphPath path : instances) {
-//			List<Integer> tmp = path.getStateTransitions();
-//
-//			if (tmp.size() > longestTransition) {
-//				longestTransition = tmp.size();
-//			} else if (tmp.size() < shortestTransition) {
-//				shortestTransition = tmp.size();
-//			}
-//		}
-//
-//		numberOFClusters = longestTransition - shortestTransition + 1;
-//
-//		// ========relation
-//		builder.append(relationName).append(" ").append(relationValue).append(fileLinSeparator);
-//
-//		// ========instance id attribute
-//		builder.append(attributeName).append(" ").append(instanceIDAttribute).append(" ").append(numericAttributeValue)
-//				.append(fileLinSeparator);
-//
-//		// ========states attributes (state-0, state-1, number of maximum
-//		// states)
-//		for (int i = 0; i < longestTransition; i++) {
-//
-//			// add attribute name e.g., "state-0 state-1 ..."
-//			builder.append(attributeName).append(" ") // attribute tag
-//					.append(ATTRIBUTE_STATE_NAME).append(i).append(" ") // attribute
-//					// name
-//					.append(numericAttributeValue) // attribute type
-//					.append(fileLinSeparator);
-//		}
-//
-//		// ========actions attribute (actions names)
-//		for (String action : systemActions.keySet()) {
-//			builder.append(attributeName).append(" ").append(action).append(" ").append(numericAttributeValue)
-//					.append(fileLinSeparator);
-//		}
-//
-//		// ========set data
-//		// set data tag (i.e. @DATA)
-//		builder.append(dataTag).append(fileLinSeparator);
-//
-//		for (GraphPath path : instances) {
-//
-//			// set instance id
-//			builder.append(path.getInstanceID()).append(WEKA_DATA_SEPARATOR);
-//
-//			// set data to be the state transitions
-//			List<Integer> states = path.getStateTransitions();
-//
-//			int i = 0;
-//			for (i = 0; i < states.size() - 1; i++) {
-//				// add state
-//				builder.append(states.get(i)).append(WEKA_DATA_SEPARATOR);
-//			}
-//			// add last state
-//			builder.append(states.get(states.size() - 1));
-//
-//			// pad the transition with -1
-//			if (states.size() < longestTransition) {
-//
-//				builder.append(WEKA_DATA_SEPARATOR);
-//
-//				for (i = 0; i < longestTransition - states.size() - 1; i++) {
-//
-//					builder.append(PADDING_STATE).append(WEKA_DATA_SEPARATOR);
-//				}
-//
-//				builder.append(PADDING_STATE);
-//			}
-//
-//			// add action data
-//			// 0 for missing the action from the transition actions. 1 if it
-//			// exists
-//			List<String> transitionActions = path.getTransitionActions();
-//
-//			if (transitionActions != null && !transitionActions.isEmpty()) {
-//
-//				builder.append(WEKA_DATA_SEPARATOR);
-//
-//				for (i = 0; i < systemActions.size() - 1; i++) {
-//
-//					if (transitionActions.contains(systemActions.get(i))) {
-//						builder.append(ACTION_PERFORMED).append(WEKA_DATA_SEPARATOR);
-//					} else {
-//						builder.append(ACTION_NOT_PERFORMED).append(WEKA_DATA_SEPARATOR);
-//					}
-//				}
-//
-//				// check last action
-//				if (transitionActions.contains(systemActions.get(i))) {
-//					builder.append(ACTION_PERFORMED);
-//				} else {
-//					builder.append(ACTION_NOT_PERFORMED);
-//				}
-//			}
-//
-//			builder.append(fileLinSeparator);
-//		}
-//
-//		// save string to file
-//
-//		try {
-//			BufferedWriter writer = new BufferedWriter(
-//					new OutputStreamWriter(new FileOutputStream(wekaInstancesFilePath), "utf-8"));
-//
-//			writer.write(builder.toString());
-//
-//			writer.close();
-//
-//			return wekaInstancesFilePath;
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//		return null;
-//	}
-
-//	public String convertInstancesActionsToARFF(Collection<GraphPath> instances) {
-//
-//		/**
-//		 * Convert instances action into ARFF
-//		 * 
-//		 */
-//
-//		// convert instances to ARFF format:
-//		// @RELATION="instance name"
-//		String relationName = "@RELATION";
-//		// @ATTRIBUTE="attribute name"
-//		String attributeName = "@ATTRIBUTE";
-//		// attribute can have value NUMERIC, string, nominal (e.g., {nam1,
-//		// name2, ...}), and date
-//		String numericAttributeValue = "NUMERIC";
-//		String stringAttributeValue = "string";
-//		// data is deifned by @DATA
-//		String dataTag = "@DATA";
-//		// data is defined in a row separated by commas. Each row is an
-//		// instance. Each comma-separated value corresponds to an attribute
-//		// column
-//		// e.g., 1,2,weka,{up, down}
-//		// % are used for comments
-//
-//		// a dummy relation value
-//		String relationValue = "\"Potential Incident Instance\"";
-//
-//		// instance id attribute name
-//		String instanceIDAttribute = "Instance_ID";
-//
-//		/**
-//		 * all data array should be of the same length so states that are short
-//		 * than the longest are padded with -1
-//		 **/
-//		// create a text file to hold the data
-//
-//		String fileLinSeparator = System.getProperty("line.separator");
-//
-//		StringBuilder builder = new StringBuilder();
-//
-//		if (instances != null && !instances.isEmpty()) {
-//			shortestTransition = 100;// instances.get(0).getStateTransitions().size();
-//		}
-//
-//		// find longest and shortest transitions
-//		for (GraphPath path : instances) {
-//			List<Integer> tmp = path.getStateTransitions();
-//
-//			if (tmp.size() > longestTransition) {
-//				longestTransition = tmp.size();
-//			} else if (tmp.size() < shortestTransition) {
-//				shortestTransition = tmp.size();
-//			}
-//		}
-//
-//		numberOFClusters = longestTransition - shortestTransition + 1;
-//
-//		int numberOfActions = longestTransition - 1;
-//
-//		// ========relation
-//		builder.append(relationName).append(" ").append(relationValue).append(fileLinSeparator);
-//
-//		// ========instance id attribute
-//		builder.append(attributeName).append(" ").append(instanceIDAttribute).append(" ").append(numericAttributeValue)
-//				.append(fileLinSeparator);
-//
-//		// ========actions attribute (action-0, action-1)
-//		// number of actions = longest transition-1
-//		// instances with less actions are padded with NULL as action
-//		for (int i = 0; i < numberOfActions; i++) {
-//			builder.append(attributeName).append(" ").append(ATTRIBUTE_ACTION_NAME).append(i).append(" ")
-//					.append(numericAttributeValue).append(fileLinSeparator);
-//		}
-//
-//		// ========set data
-//		// set data tag (i.e. @DATA)
-//		builder.append(dataTag).append(fileLinSeparator);
-//
-//		for (GraphPath path : instances) {
-//
-//			// ===== instance ID
-//			builder.append(path.getInstanceID()).append(WEKA_DATA_SEPARATOR);
-//
-//			// ==== set data to be the actions
-//			List<String> actions = path.getTransitionActions();
-//
-//			int i = 0;
-//			for (i = 0; i < actions.size() - 1; i++) {
-//				// add action
-//				builder.append(systemActions.get(actions.get(i))).append(WEKA_DATA_SEPARATOR);
-//			}
-//			// add last action
-//			builder.append(systemActions.get(actions.get(i)));
-//
-//			// pad the transition with NULL
-//			if (actions.size() < numberOfActions) {
-//
-//				builder.append(WEKA_DATA_SEPARATOR);
-//
-//				for (i = 0; i < numberOfActions - actions.size() - 1; i++) {
-//
-//					builder.append(PADDING_ACTION).append(WEKA_DATA_SEPARATOR);
-//				}
-//
-//				builder.append(PADDING_ACTION);
-//			}
-//
-//			builder.append(fileLinSeparator);
-//		}
-//
-//		// ===== save string to file
-//		try {
-//			BufferedWriter writer = new BufferedWriter(
-//					new OutputStreamWriter(new FileOutputStream(wekaInstancesFilePath), "utf-8"));
-//
-//			writer.write(builder.toString());
-//
-//			writer.close();
-//
-//			return wekaInstancesFilePath;
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//		return null;
-//	}
-
 	/********* Utilities *********/
 	/**************************/
 	/**************************/
@@ -2073,110 +1507,36 @@ public class TracesMiner {
 	/**************************/
 	/**************************/
 
-//	public void printClusters(List<Cluster> clusters) {
-//
-//		int id = 0;
-//
-//		// used to print a few sets
-//		// int length = 5;
-//		Random rand = new Random();
-//
-//		for (Cluster cluster : clusters) {
-//			System.out.println("Cluster " + id++);
-//			// For each data point: [first entry is the instance name]
-//			List<DoubleArray> dataPoints = cluster.getVectors();
-//			System.out.println("  number of instances = " + dataPoints.size());
-//
-//			for (int i = 0; i < lengthToPrint && i < dataPoints.size(); i++) {
-//				System.out.println("   " + dataPoints.get(rand.nextInt(dataPoints.size())));
-//			}
-//
-//			if (dataPoints.size() > lengthToPrint) {
-//				System.out.println("   ...");
-//			}
-//		}
-//
-//	}
-
-//	public void printClustersWithMean(List<ClusterWithMean> clusters) {
-//
-//		int id = 0;
-//
-//		// used to print a few sets
-//		// int length = 5;
-//		Random rand = new Random();
-//
-//		for (ClusterWithMean cluster : clusters) {
-//			System.out.println("Cluster " + id++);
-//			// For each data point: [first entry is the instance name]
-//			List<DoubleArray> dataPoints = cluster.getVectors();
-//			System.out.println("  number of instances = " + dataPoints.size());
-//
-//			for (int i = 0; i < lengthToPrint && i < dataPoints.size(); i++) {
-//				System.out.println("   " + dataPoints.get(rand.nextInt(dataPoints.size())));
-//			}
-//
-//			if (dataPoints.size() > lengthToPrint) {
-//				System.out.println("   ...");
-//			}
-//		}
-//
-//	}
-
-//	public void printClustersOPTIC(List<Cluster> clusters) {
-//
-//		int id = 0;
-//
-//		// used to print a few sets
-//		// int length = 5;
-//		Random rand = new Random();
-//
-//		for (Cluster cluster : clusters) {
-//			System.out.println("Cluster " + id++);
-//			// For each data point: [first entry is the instance name]
-//			List<DoubleArray> dataPoints = cluster.getVectors();
-//			System.out.println("  number of instances = " + dataPoints.size());
-//
-//			for (int i = 0; i < lengthToPrint && i < dataPoints.size(); i++) {
-//				System.out.println("   " + dataPoints.get(rand.nextInt(dataPoints.size())));
-//			}
-//
-//			if (dataPoints.size() > lengthToPrint) {
-//				System.out.println("   ...");
-//			}
-//		}
-//
-//	}
-
 	public void setTracesFile(String filePath) {
-		
+
 		instanceFileName = filePath;
-		
-		if(instanceFileName == null) {
+
+		if (instanceFileName == null) {
 			return;
 		}
-		
+
 		clustersOutputFileName = instanceFileName.replace(".json", "_relevantTraces.txt");// clustersOutputFolder
 		// clustersOutputFileName;
 		convertedInstancesFileName = instanceFileName.replace(".json", "_convertedInstances.txt");// clustersOutputFolder
 		// +
 		shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");
-		
+
 	}
-	
-//	public static void main(String[] args) {
-//
-//		IncidentInstancesClusterGenerator tester = new IncidentInstancesClusterGenerator();
-//
-//		String fileName = "D:/Bigrapher data/lero/lero100K/output";
-//
-//		// using SPMF library
-//		tester.identifyRelevantTraces(fileName);
-//
-//		// using Weka
-//		// tester.clusterUsingWeka(fileName);
-//	}
-	
+
+	// public static void main(String[] args) {
+	//
+	// IncidentInstancesClusterGenerator tester = new
+	// IncidentInstancesClusterGenerator();
+	//
+	// String fileName = "D:/Bigrapher data/lero/lero100K/output";
+	//
+	// // using SPMF library
+	// tester.identifyRelevantTraces(fileName);
+	//
+	// // using Weka
+	// // tester.clusterUsingWeka(fileName);
+	// }
+
 	public int getMinimumTraceLength() {
 		return minimumTraceLength;
 	}
@@ -2186,22 +1546,222 @@ public class TracesMiner {
 	}
 
 	public int getNumberOfTraces() {
-		
-		if(instances != null) {
+
+		if (instances != null) {
 			return instances.size();
 		}
-		
+
 		return 0;
 	}
-	
+
 	public List<String> getTracesActions() {
-		
-		if(systemActions != null) {
-			return Arrays.asList(systemActions.keySet().toArray(new String[systemActions.size()]));
+
+		if (tracesActions != null) {
+			return Arrays.asList(tracesActions.keySet().toArray(new String[tracesActions.size()]));
 		}
-		
+
 		return null;
 	}
 
-	
+	public Map<Integer, GraphPath> readInstantiatorInstancesFile(String fileName, List<Integer> values) {
+
+		if (fileName == null || fileName.isEmpty()) {
+			System.err.println("Error reading file: " + fileName + ". File name is empty.");
+			return null;
+		}
+
+		if (!fileName.endsWith(".json")) {
+			System.err.println("Error reading file: " + fileName + ". File should be in JSON format.");
+			return null;
+		}
+
+		File instancesFile = new File(fileName);
+
+		if (!instancesFile.isFile()) {
+			System.err.println(fileName + " is not a file");
+			return null;
+		}
+
+		Map<Integer, GraphPath> instances = new HashMap<Integer, GraphPath>();
+
+		int minTraceLength = 1000000;
+		int maxTraceLength = -1;
+
+		FileReader reader;
+		boolean isCompactFormat = true;
+
+		try {
+
+			reader = new FileReader(instancesFile);
+
+			// reading the json file and converting each instance into a
+			// GraphPath object
+			JSONParser parser = new JSONParser();
+
+			JSONObject obj = (JSONObject) parser.parse(reader);
+
+			// check if there are instance generated
+			if (obj.containsKey(JSONTerms.INSTANCE_POTENTIAL)) {
+				JSONObject objInstances = (JSONObject) obj.get(JSONTerms.INSTANCE_POTENTIAL);
+
+				// check the instances again. if there are instances then read
+				// them
+				if (objInstances.containsKey(JSONTerms.INSTANCE_POTENTIAL_INSTANCES)) {
+
+					// get instances
+					JSONArray aryInstances = (JSONArray) objInstances.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES);
+
+					// each instance currently has an instance_id (integer),
+					// transitions (array of integers of states), and actions
+					// (sequence of strings that correspond to the sequence of
+					// transitions)
+					// e.g., {
+					// "instance_id":0,
+					// "transitions":[1,64,271,937],
+					// "actions":["EnterRoom","ConnectBusDevice","CollectData"]
+					// }
+					// this is a compact format. Another format exists in which
+					// transitions are in the format
+					// "transitions": [{"action": "EnterRoom", "source":
+					// 1,"target": 64},
+
+					// get transitions
+					ListIterator<JSONObject> instancesList = aryInstances.listIterator();
+
+					while (instancesList.hasNext()) {
+						JSONObject instance = instancesList.next();
+
+						// get instance id
+						int instanceID = Integer
+								.parseInt(instance.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_ID).toString());
+
+						// get transitions
+						JSONArray transitions = (JSONArray) instance
+								.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS);
+
+						List<Integer> states = new LinkedList<Integer>();
+						List<String> actions = new LinkedList<String>();
+
+						for (Object objState : transitions) {
+
+							try {
+
+								if (isCompactFormat) {
+									Integer state = Integer.parseInt(objState.toString());
+									// compact format
+									states.add(state);
+								} else {
+									JSONObject objTransition = (JSONObject) objState;
+									// expanded format
+									// transition=[{src,trg, action}]
+									Integer srcState = Integer.parseInt(objTransition
+											.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_SOURCE).toString());
+									Integer tgtState = Integer.parseInt(objTransition
+											.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_TARGET).toString());
+									String actionState = objTransition
+											.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_ACTION).toString();
+
+									if (!states.contains(srcState)) {
+										states.add(srcState);
+									}
+
+									if (!states.contains(tgtState)) {
+										states.add(tgtState);
+									}
+
+									// add action
+									actions.add(actionState);
+
+									// add to the list of all actions
+//									if (tracesActions != null && !tracesActions.contains(actionState)) {
+//										// System.out.println("adding: "+tmp);
+//										tracesActions.add(actionState);
+//									}
+//									
+									//check occurence
+									if(tracesActionsOccurence.containsKey(actionState)) { //if it exists then add 1
+										int oldOccurrence = tracesActionsOccurence.get(actionState);
+										oldOccurrence++;
+										tracesActionsOccurence.put(actionState, oldOccurrence);
+									} else { //if not, then create a new entry
+										tracesActionsOccurence.put(actionState, 1);
+									}
+								}
+
+							} catch (NumberFormatException e) {
+								isCompactFormat = false;
+							}
+						}
+
+						// get actions (if compact)
+						if (instance.containsKey(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_ACTIONS)) {
+							JSONArray actionsAry = (JSONArray) instance
+									.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_ACTIONS);
+
+							for (Object objAction : actionsAry) {
+
+								String tmp = objAction.toString();
+								// System.out.println(tmp);
+
+								actions.add(tmp);
+
+								// add to the list of all actions
+//								if (tracesActions != null && !tracesActions.contains(tmp)) {
+//									// System.out.println("adding: "+tmp);
+//									tracesActions.add(tmp);
+//								}
+								
+								//check occurence
+								if(tracesActionsOccurence.containsKey(tmp)) { //if it exists then add 1
+									int oldOccurrence = tracesActionsOccurence.get(tmp);
+									oldOccurrence++;
+									tracesActionsOccurence.put(tmp, oldOccurrence);
+								} else { //if not, then create a new entry
+									tracesActionsOccurence.put(tmp, 1);
+								}
+							}
+						}
+
+						// create a new path/incident
+						GraphPath tmpPath = new GraphPath();
+						tmpPath.setInstanceID(instanceID);
+						tmpPath.setStateTransitions(states);
+						tmpPath.setTransitionActions(actions);
+
+						// add to the list
+						instances.put(instanceID, tmpPath);
+
+						// set min trace length
+						if (values != null) {
+							int size = actions.size();
+							if (minTraceLength > size) {
+								minTraceLength = size;
+							}
+
+							// set max
+							if (maxTraceLength < size) {
+								maxTraceLength = size;
+							}
+						}
+
+					}
+
+					reader.close();
+				}
+			}
+		} catch (IOException | ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// set min & max trace lengths
+		if (values != null) {
+			values.add(minTraceLength);
+			values.add(maxTraceLength);
+		}
+
+		return instances;
+
+	}
+
 }

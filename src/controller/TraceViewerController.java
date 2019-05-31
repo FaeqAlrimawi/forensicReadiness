@@ -17,6 +17,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -81,6 +82,13 @@ public class TraceViewerController {
 	@FXML
 	private TextField textFieldActions;
 
+	@FXML
+	private CheckBox checkBoxInOrder;
+	
+	@FXML
+	private CheckBox checkboxFromStart;
+	
+	
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -376,10 +384,11 @@ public class TraceViewerController {
 						autoCompleteActionsFiled.hidePopup();
 					}
 				});
-				
-				textFieldActions.setOnKeyPressed(e->{
-					//if control+space pressed, then show the list of possible actions
-					if(e.getCode() ==KeyCode.SPACE && e.isControlDown()) {
+
+				textFieldActions.setOnKeyPressed(e -> {
+					// if control+space pressed, then show the list of possible
+					// actions
+					if (e.getCode() == KeyCode.SPACE && e.isControlDown()) {
 						autoCompleteActionsFiled.showAllEntries(textFieldActions);
 					}
 				});
