@@ -7,5 +7,7 @@ public interface TracesMinerListener {
 	
 	//a single trace is loaded from file
 	public void onTracesLoaded(int numOfTracesLoaded);
+	
+	public void onLoadingJSONFile();
 
 }

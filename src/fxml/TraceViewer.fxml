@@ -28,7 +28,7 @@
          <children>
             <VBox prefHeight="199.0" prefWidth="618.0">
                <children>
-                  <Label prefHeight="34.0" prefWidth="451.0" text="Load Traces" textFill="#aa14c4">
+                  <Label prefHeight="34.0" prefWidth="451.0" text="Potential Incident Traces" textFill="#aa14c4">
                      <font>
                         <Font size="18.0" />
                      </font>
@@ -50,7 +50,7 @@
                                           <Cursor fx:constant="HAND" />
                                        </cursor>
                                     </ImageView>
-                                    <ProgressBar fx:id="progressBarTraces" opacity="0.5" prefHeight="34.0" prefWidth="451.0" progress="0.0" visible="false" />
+                                    <ProgressBar fx:id="progressBarTraces" opacity="0.5" prefHeight="34.0" prefWidth="415.0" progress="0.0" visible="false" />
                                  </children>
                               </AnchorPane>
                               <HBox prefHeight="25.0" prefWidth="400.0">

@@ -38,7 +38,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 
-public class TraceViewerController implements TracesMinerListener{
+public class TraceViewerController implements TracesMinerListener {
 
 	@FXML
 	private TextField textFieldSystemFile;
@@ -127,18 +127,18 @@ public class TraceViewerController implements TracesMinerListener{
 	@FXML
 	private ImageView imgNumOfStates;
 
-    @FXML
-    private ChoiceBox<String> choiceBoxOccurrenceFilterPercentage;
+	@FXML
+	private ChoiceBox<String> choiceBoxOccurrenceFilterPercentage;
 
-    @FXML
-    private TextField textFieldOccurrenceFilterPercentage;
-    
-    @FXML
-    private ProgressBar progressBarTraces;
+	@FXML
+	private TextField textFieldOccurrenceFilterPercentage;
 
-    @FXML
-    private Label lblProgressTraces;
-    
+	@FXML
+	private ProgressBar progressBarTraces;
+
+	@FXML
+	private Label lblProgressTraces;
+
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -150,11 +150,11 @@ public class TraceViewerController implements TracesMinerListener{
 	private TracesMiner tracesMiner;
 
 	private int numberOfTraces = -1;
-	
-	//used for progress bar
+
+	// used for progress bar
 	private double singleTraceProgressValue = 0.1;
 	private int currentTraceNumber = 0;
-	
+
 	private ExecutorService executor = Executors.newFixedThreadPool(3);
 
 	private static final String SHORTEST = "Shortest Only";
@@ -166,25 +166,25 @@ public class TraceViewerController implements TracesMinerListener{
 	public static final String EQUAL = "=";
 	public static final String MORE_THAN = ">";
 	public static final String LESS_THAN = "<";
-	
+
 	private AutoCompleteTextField autoCompleteActionsFiled;
 
 	private final String[] filters = { SHORTEST, SHORTEST_CLASP, CUSTOMISE };
 
-	private final String[] compartiveOperators = {MORE_THAN, LESS_THAN, EQUAL, };
+	private final String[] compartiveOperators = { MORE_THAN, LESS_THAN, EQUAL, };
 
 	private final String[] occurrencesOptions = { HIGHEST, LOWEST };
 
 	String chartTitle = "";
-	
+
 	@FXML
 	public void initialize() {
 
 		tracesMiner = new TracesMiner();
-		
-		//set miner listener
+
+		// set miner listener
 		tracesMiner.setListener(this);
-		
+
 		// update filters in choice box
 		choiceboxFilter.setItems(FXCollections.observableArrayList(filters));
 
@@ -210,7 +210,7 @@ public class TraceViewerController implements TracesMinerListener{
 		choiceboxOccurrenceComparator.setItems(FXCollections.observableArrayList(compartiveOperators));
 
 		choiceboxSeqLengthComparator.setItems(FXCollections.observableArrayList(compartiveOperators));
-		
+
 		choiceBoxOccurrenceFilterPercentage.setItems(FXCollections.observableArrayList(compartiveOperators));
 
 		choiceBoxOccurrences.setItems(FXCollections.observableArrayList(occurrencesOptions));
@@ -240,7 +240,7 @@ public class TraceViewerController implements TracesMinerListener{
 				setupTopActionsChart(selectedOccurrenceType);
 			}
 		});
-		
+
 		textFieldOccurrenceFilterPercentage.setOnKeyPressed(e -> {
 			// if enter is pressed then refersh
 			if (e.getCode() == KeyCode.ENTER) {
@@ -290,9 +290,6 @@ public class TraceViewerController implements TracesMinerListener{
 				}
 			});
 
-			// set file in miner
-			tracesMiner.setTracesFile(selectedTracesFile.getAbsolutePath());
-
 			// show progress indicatior
 			progressIndicatorLoader.setVisible(true);
 
@@ -301,7 +298,7 @@ public class TraceViewerController implements TracesMinerListener{
 				@Override
 				public void run() {
 					// TODO Auto-generated method stub
-					if (isTracesFileValid()) {
+					if (isTracesFileValid(selectedTracesFile.getAbsolutePath())) {
 
 						// update number of traces
 						updateImage(IMAGE_CORRECT, imgSystemFileCheck);
@@ -392,15 +389,15 @@ public class TraceViewerController implements TracesMinerListener{
 	public void refreshGraph(ActionEvent event) {
 
 		String perc = textFieldOccurrenceFilterPercentage.getText();
-		
-		//higher precedence for percentage
-		if(perc != null && !perc.isEmpty()) {
+
+		// higher precedence for percentage
+		if (perc != null && !perc.isEmpty()) {
 			setupTopActionsChart(PERCENTAGE);
 		} else {
 			String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
 			setupTopActionsChart(selectedOccurrenceType);
 		}
-		
+
 	}
 
 	/**
@@ -408,7 +405,13 @@ public class TraceViewerController implements TracesMinerListener{
 	 * 
 	 * @return
 	 */
-	protected boolean isTracesFileValid() {
+	protected boolean isTracesFileValid(String filePath) {
+
+		// reset if already loaded something before
+		resetLoadingGUI();
+		
+		// set file in miner
+		tracesMiner.setTracesFile(filePath);
 
 		int numberOfTraces = tracesMiner.readTracesFromFile();
 
@@ -418,6 +421,17 @@ public class TraceViewerController implements TracesMinerListener{
 		}
 
 		return true;
+	}
+
+	protected void resetLoadingGUI() {
+
+		updateImage(null, imgSystemFileCheck);
+		updateImage(null, imgNumOfActions);
+		updateImage(null, imgNumOfStates);
+		
+		updateText(null, lblSystemFileCheck);
+		updateText(null, lblNumOfActions);
+		updateText(null, lblNumOfStates);
 	}
 
 	protected void findShortestTraces() {
@@ -492,6 +506,10 @@ public class TraceViewerController implements TracesMinerListener{
 		if (label == null) {
 			return;
 
+		}
+
+		if (msg == null) {
+			label.setVisible(false);
 		} else {
 
 			label.setVisible(true);
@@ -565,41 +583,39 @@ public class TraceViewerController implements TracesMinerListener{
 
 		// get actions from miner
 		Map<String, Integer> topActions;
-		int num =0;
-		
+		int num = 0;
+
 		switch (selectedOccurrenceType) {
 		case HIGHEST:
 			num = Integer.parseInt(textFieldNumofOccurrences.getText());
-			chartTitle = "Actions with " + selectedOccurrenceType + " "
-					+ num + " Occurrences";
-					
+			chartTitle = "Actions with " + selectedOccurrenceType + " " + num + " Occurrences";
+
 			topActions = tracesMiner.getTopActionOccurrences(num);
 			break;
 
 		case LOWEST:
 			num = Integer.parseInt(textFieldNumofOccurrences.getText());
-			chartTitle = "Actions with " + selectedOccurrenceType + " "
-			+ num + " Occurrences";
-			
+			chartTitle = "Actions with " + selectedOccurrenceType + " " + num + " Occurrences";
+
 			topActions = tracesMiner.getLowestActionOccurrences(num);
-			
+
 			break;
 
 		case PERCENTAGE:
 			num = Integer.parseInt(textFieldOccurrenceFilterPercentage.getText());
-			double perc = num*1.0/100;
+			double perc = num * 1.0 / 100;
 			String op = choiceBoxOccurrenceFilterPercentage.getSelectionModel().getSelectedItem();
 			chartTitle = "Actions with Occurrence % " + op + " " + num + "%";
-			
+
 			topActions = tracesMiner.getActionsWithOccurrencePercentage(perc, op);
-			
+
 			break;
-			
+
 		default:
 			// highest occurrence
 			chartTitle = "Actions with " + selectedOccurrenceType + " Occurrence";
 			topActions = tracesMiner.getHighestActionOccurrence();
-			
+
 			break;
 		}
 
@@ -651,56 +667,70 @@ public class TraceViewerController implements TracesMinerListener{
 
 	@Override
 	public void onNumberOfTracesRead(int numOfTraces) {
-		
-		//number of traces is read by the traces miner
-		
+
+		// number of traces is read by the traces miner
+
 		numberOfTraces = numOfTraces;
-		
-		//set progress value for a single trace read
-//		singleTraceProgressValue = 1.0/numberOfTraces;
+
+		// set progress value for a single trace read
+		// singleTraceProgressValue = 1.0/numberOfTraces;
 		currentTraceNumber = 0;
-		
+
 		Platform.runLater(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-			
-				//show progress bar and its label
+
+				// show progress bar and its label
 				progressBarTraces.setVisible(true);
 				lblProgressTraces.setVisible(true);
-				
-				lblProgressTraces.setText(currentTraceNumber+"/"+numberOfTraces);
-				
-				//hide the the indefinit indicator
+
+				lblProgressTraces.setText(currentTraceNumber + "/" + numberOfTraces);
+
+				// hide the the indefinit indicator
 				progressIndicatorLoader.setVisible(false);
 			}
 		});
-		
-	
+
 	}
 
 	@Override
 	public void onTracesLoaded(int numberOfTracesLoaded) {
 		// TODO Auto-generated method stub
-		//update progress bar and its label
-		
-		currentTraceNumber+=numberOfTracesLoaded;
-		double progressValue = progressBarTraces.getProgress()+ (numberOfTracesLoaded*1.0/numberOfTraces);
-		
+		// update progress bar and its label
+
+		currentTraceNumber += numberOfTracesLoaded;
+		double progressValue = currentTraceNumber*1.0/numberOfTraces;//progressBarTraces.getProgress() + (numberOfTracesLoaded * 1.0 / numberOfTraces);
+
 		Platform.runLater(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
 				progressBarTraces.setProgress(progressValue);
-				lblProgressTraces.setText(currentTraceNumber+"/"+numberOfTraces);
-				
-				//if complete
-				if(currentTraceNumber == numberOfTraces) {
+				lblProgressTraces.setText(currentTraceNumber + "/" + numberOfTraces);
+
+				// if complete
+				if (currentTraceNumber == numberOfTraces) {
 					progressBarTraces.setVisible(false);
-					lblProgressTraces.setVisible(false);
+					 lblProgressTraces.setVisible(false);
 				}
+			}
+		});
+	}
+
+	@Override
+	public void onLoadingJSONFile() {
+		// TODO Auto-generated method stub
+
+		Platform.runLater(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				lblProgressTraces.setVisible(true);
+				lblProgressTraces.setText("Loading File...");
 			}
 		});
 	}

@@ -96,7 +96,7 @@ public class TracesMiner {
 	int numberOfTraces = -1;
 
 	// notify listener every n traces loaded
-	int tracesLoadedNotifierNumber = 10;
+	int tracesLoadedNotifierNumber = 30;
 
 	// key:action name, value: id
 	Map<String, Integer> tracesActions;
@@ -1908,7 +1908,7 @@ public class TracesMiner {
 
 		// int minTraceLength = 1000000;
 		// int maxTraceLength = -1;
-		int currentLoadedTracesNum = 0;
+//		int currentLoadedTracesNum = 0;
 
 		FileReader reader;
 		boolean isCompactFormat = true;
@@ -1921,6 +1921,11 @@ public class TracesMiner {
 			// GraphPath object
 			JSONParser parser = new JSONParser();
 
+			//notify listener of loading json file
+			if(listener != null) {
+				listener.onLoadingJSONFile();
+			}
+			
 			JSONObject obj = (JSONObject) parser.parse(reader);
 
 			// check if there are instance generated
