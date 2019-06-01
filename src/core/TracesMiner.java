@@ -23,6 +23,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.w3c.dom.ls.LSInput;
 
 //import com.beust.jcommander.internal.Lists;
 
@@ -92,6 +93,10 @@ public class TracesMiner {
 
 	int longestTransition = -1;
 	int shortestTransition = -1;
+	int numberOfTraces = -1;
+
+	// notify listener every n traces loaded
+	int tracesLoadedNotifierNumber = 10;
 
 	// key:action name, value: id
 	Map<String, Integer> tracesActions;
@@ -130,6 +135,9 @@ public class TracesMiner {
 
 	// system data
 	int numberOfStates = 10000; // should be adjusted
+
+	// listener (from GUI)
+	TracesMinerListener listener;
 
 	public TracesMiner() {
 
@@ -1771,7 +1779,7 @@ public class TracesMiner {
 
 	public void setTracesFile(String filePath) {
 
-//		System.out.println(filePath);
+		// System.out.println(filePath);
 		// if file path contains \, convert to /
 		int tries = 10000;
 
@@ -1783,7 +1791,7 @@ public class TracesMiner {
 			tries--;
 		}
 
-//		System.out.println(filePath);
+		// System.out.println(filePath);
 
 		instanceFileName = filePath;
 
@@ -1793,7 +1801,7 @@ public class TracesMiner {
 		String onlyPath = "";
 		String onlyName = "";
 		boolean isFolderCreated = false;
-		
+
 		int index = instanceFileName.lastIndexOf(File.separator);
 		if (index >= 0) {
 			onlyPath = instanceFileName.substring(0, instanceFileName.lastIndexOf(File.separator) + 1);
@@ -1858,11 +1866,14 @@ public class TracesMiner {
 
 	public int getNumberOfTraces() {
 
-		if (instances != null) {
-			return instances.size();
+		if (numberOfTraces != -1) {
+			return numberOfTraces;
+		} else if (instances != null) {
+			numberOfTraces = instances.size();
+			return numberOfTraces;
 		}
 
-		return 0;
+		return -1;
 	}
 
 	public List<String> getTracesActions() {
@@ -1895,8 +1906,9 @@ public class TracesMiner {
 
 		Map<Integer, GraphPath> instances = new HashMap<Integer, GraphPath>();
 
-		int minTraceLength = 1000000;
-		int maxTraceLength = -1;
+		// int minTraceLength = 1000000;
+		// int maxTraceLength = -1;
+		int currentLoadedTracesNum = 0;
 
 		FileReader reader;
 		boolean isCompactFormat = true;
@@ -1915,6 +1927,18 @@ public class TracesMiner {
 			if (obj.containsKey(JSONTerms.INSTANCE_POTENTIAL)) {
 				JSONObject objInstances = (JSONObject) obj.get(JSONTerms.INSTANCE_POTENTIAL);
 
+				if (objInstances.containsKey(JSONTerms.INSTANCE_POTENTIAL_COUNT)) {
+					// get instances number
+					numberOfTraces = Integer.parseInt(objInstances.get(JSONTerms.INSTANCE_POTENTIAL_COUNT).toString());
+
+					// if there's a listener, then notify
+					if (listener != null) {
+						listener.onNumberOfTracesRead(numberOfTraces);
+					}
+
+				}
+
+				System.out.println("nuuum " + numberOfTraces);
 				// check the instances again. if there are instances then read
 				// them
 				if (objInstances.containsKey(JSONTerms.INSTANCE_POTENTIAL_INSTANCES)) {
@@ -2061,6 +2085,26 @@ public class TracesMiner {
 
 						// add to the list
 						instances.put(instanceID, tmpPath);
+						
+//						currentLoadedTracesNum++;
+						
+						// notify listener
+						if (listener != null) {
+
+							if(instances.size() % tracesLoadedNotifierNumber == 0) {
+								listener.onTracesLoaded(tracesLoadedNotifierNumber);	
+							} else if(instances.size() == numberOfTraces){
+								listener.onTracesLoaded(instances.size() % tracesLoadedNotifierNumber);
+							}
+							
+//							if(numberOfTraces / instances.size() == 0) {
+//								listener.onTracesLoaded(numberOfTraces % instances.size());
+//							} else{
+//								listener.onTracesLoaded(tracesLoadedNotifierNumber);	
+////								currentLoadedTracesNum+=tracesLoadedNotifierNumber;
+//							}
+							
+						}
 
 						// set min trace length
 						// if (values != null) {
@@ -2121,4 +2165,7 @@ public class TracesMiner {
 		return -1;
 	}
 
+	public void setListener(TracesMinerListener listener) {
+		this.listener = listener;
+	}
 }

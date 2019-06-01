@@ -5,34 +5,30 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.print.attribute.standard.NumberOfDocuments;
-
 import controller.utlities.AutoCompleteTextField;
 import core.TracesMiner;
+import core.TracesMinerListener;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.StackedBarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -42,7 +38,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 
-public class TraceViewerController {
+public class TraceViewerController implements TracesMinerListener{
 
 	@FXML
 	private TextField textFieldSystemFile;
@@ -137,6 +133,12 @@ public class TraceViewerController {
     @FXML
     private TextField textFieldOccurrenceFilterPercentage;
     
+    @FXML
+    private ProgressBar progressBarTraces;
+
+    @FXML
+    private Label lblProgressTraces;
+    
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -147,6 +149,12 @@ public class TraceViewerController {
 	// private JSONObject jsonTraces;
 	private TracesMiner tracesMiner;
 
+	private int numberOfTraces = -1;
+	
+	//used for progress bar
+	private double singleTraceProgressValue = 0.1;
+	private int currentTraceNumber = 0;
+	
 	private ExecutorService executor = Executors.newFixedThreadPool(3);
 
 	private static final String SHORTEST = "Shortest Only";
@@ -173,7 +181,10 @@ public class TraceViewerController {
 	public void initialize() {
 
 		tracesMiner = new TracesMiner();
-
+		
+		//set miner listener
+		tracesMiner.setListener(this);
+		
 		// update filters in choice box
 		choiceboxFilter.setItems(FXCollections.observableArrayList(filters));
 
@@ -636,5 +647,61 @@ public class TraceViewerController {
 			}
 		});
 
+	}
+
+	@Override
+	public void onNumberOfTracesRead(int numOfTraces) {
+		
+		//number of traces is read by the traces miner
+		
+		numberOfTraces = numOfTraces;
+		
+		//set progress value for a single trace read
+//		singleTraceProgressValue = 1.0/numberOfTraces;
+		currentTraceNumber = 0;
+		
+		Platform.runLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+			
+				//show progress bar and its label
+				progressBarTraces.setVisible(true);
+				lblProgressTraces.setVisible(true);
+				
+				lblProgressTraces.setText(currentTraceNumber+"/"+numberOfTraces);
+				
+				//hide the the indefinit indicator
+				progressIndicatorLoader.setVisible(false);
+			}
+		});
+		
+	
+	}
+
+	@Override
+	public void onTracesLoaded(int numberOfTracesLoaded) {
+		// TODO Auto-generated method stub
+		//update progress bar and its label
+		
+		currentTraceNumber+=numberOfTracesLoaded;
+		double progressValue = progressBarTraces.getProgress()+ (numberOfTracesLoaded*1.0/numberOfTraces);
+		
+		Platform.runLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				progressBarTraces.setProgress(progressValue);
+				lblProgressTraces.setText(currentTraceNumber+"/"+numberOfTraces);
+				
+				//if complete
+				if(currentTraceNumber == numberOfTraces) {
+					progressBarTraces.setVisible(false);
+					lblProgressTraces.setVisible(false);
+				}
+			}
+		});
 	}
 }

@@ -8,6 +8,7 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
@@ -23,9 +24,9 @@
 
 <AnchorPane prefHeight="582.0" prefWidth="1262.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.TraceViewerController">
    <children>
-      <VBox layoutX="19.0" layoutY="17.0" prefHeight="451.0" prefWidth="609.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="638.0" AnchorPane.topAnchor="15.0">
+      <VBox layoutX="19.0" layoutY="17.0" prefHeight="451.0" prefWidth="628.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="619.0" AnchorPane.topAnchor="15.0">
          <children>
-            <VBox prefHeight="199.0" prefWidth="609.0">
+            <VBox prefHeight="199.0" prefWidth="618.0">
                <children>
                   <Label prefHeight="34.0" prefWidth="451.0" text="Load Traces" textFill="#aa14c4">
                      <font>
@@ -33,9 +34,9 @@
                      </font>
                   </Label>
                   <Pane prefHeight="7.0" prefWidth="452.0" />
-                  <VBox prefHeight="138.0" prefWidth="609.0">
+                  <VBox prefHeight="138.0" prefWidth="619.0">
                      <children>
-                        <HBox prefHeight="34.0" prefWidth="456.0">
+                        <HBox prefHeight="34.0" prefWidth="620.0">
                            <children>
                               <AnchorPane>
                                  <children>
@@ -49,6 +50,7 @@
                                           <Cursor fx:constant="HAND" />
                                        </cursor>
                                     </ImageView>
+                                    <ProgressBar fx:id="progressBarTraces" opacity="0.5" prefHeight="34.0" prefWidth="451.0" progress="0.0" visible="false" />
                                  </children>
                               </AnchorPane>
                               <HBox prefHeight="25.0" prefWidth="400.0">
@@ -71,7 +73,8 @@
                                           </ImageView>
                                        </children>
                                     </AnchorPane>
-                                    <Pane prefHeight="36.0" prefWidth="5.0" />
+                                    <Pane prefHeight="34.0" prefWidth="9.0" />
+                                    <Label fx:id="lblProgressTraces" alignment="CENTER" prefHeight="39.0" prefWidth="94.0" />
                                     <ProgressIndicator fx:id="progressIndicatorLoader" visible="false" />
                                  </children>
                               </HBox>
