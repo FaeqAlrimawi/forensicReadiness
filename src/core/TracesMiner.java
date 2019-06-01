@@ -1229,7 +1229,7 @@ public class TracesMiner {
 		// Load a sequence database
 		double support = numberOfTraces * 1.0 / traces.size();
 
-		boolean keepPatterns = false; // if set to true, then generated result
+		boolean keepPatterns = true; // if set to true, then generated result
 										// is stored in the given file
 		boolean verbose = true;
 		boolean findClosedPatterns = true;
@@ -1294,7 +1294,7 @@ public class TracesMiner {
 		// Load a sequence database
 		double support = 0;
 
-		boolean keepPatterns = false;
+		boolean keepPatterns = true;
 		boolean verbose = false;
 		boolean findClosedPatterns = true;
 		boolean executePruningMethods = true;
