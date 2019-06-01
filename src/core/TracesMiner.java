@@ -195,7 +195,7 @@ public class TracesMiner {
 
 	}
 
-	boolean checkFile(String fileName) {
+	public boolean checkFile(String fileName) {
 
 		if (fileName == null || fileName.isEmpty()) {
 			System.err.println("Given file name is NULL");
@@ -385,6 +385,11 @@ public class TracesMiner {
 		// List<Integer> minMaxLengths = new LinkedList<Integer>();
 		// List<String> tracesActs = new LinkedList<String>();
 
+		//reset
+		tracesActionsOccurence.clear();
+		minimumTraceLength = 100000;
+		maximumTraceLength = -1;
+		
 		instances = readInstantiatorInstancesFile(instanceFileName);
 
 		// // set min
@@ -1943,7 +1948,7 @@ public class TracesMiner {
 
 				}
 
-				System.out.println("nuuum " + numberOfTraces);
+//				System.out.println("nuuum " + numberOfTraces);
 				// check the instances again. if there are instances then read
 				// them
 				if (objInstances.containsKey(JSONTerms.INSTANCE_POTENTIAL_INSTANCES)) {
@@ -1982,10 +1987,12 @@ public class TracesMiner {
 						List<Integer> states = new LinkedList<Integer>();
 						List<String> actions = new LinkedList<String>();
 
-						for (Object objState : transitions) {
-
+						for (int i=0;i< transitions.size();i++) {
+							
+							Object objState = transitions.get(i);
+							
 							try {
-
+								
 								if (isCompactFormat) {
 									Integer state = Integer.parseInt(objState.toString());
 									// compact format
@@ -2001,6 +2008,7 @@ public class TracesMiner {
 									String actionState = objTransition
 											.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_ACTION).toString();
 
+									//add state
 									if (!states.contains(srcState)) {
 										states.add(srcState);
 									}
@@ -2009,6 +2017,10 @@ public class TracesMiner {
 										states.add(tgtState);
 									}
 
+									// add action
+									actions.add(actionState);
+
+									
 									// check state occurence
 									if (statesOccurrences.containsKey(srcState)) {
 										int oldOccurrence = statesOccurrences.get(srcState);
@@ -2027,16 +2039,6 @@ public class TracesMiner {
 										statesOccurrences.put(tgtState, 1);
 									}
 
-									// add action
-									actions.add(actionState);
-
-									// add to the list of all actions
-									// if (tracesActions != null &&
-									// !tracesActions.contains(actionState)) {
-									// // System.out.println("adding: "+tmp);
-									// tracesActions.add(actionState);
-									// }
-
 									// check action occurence
 									if (tracesActionsOccurence.containsKey(actionState)) {
 										int oldOccurrence = tracesActionsOccurence.get(actionState);
@@ -2049,6 +2051,9 @@ public class TracesMiner {
 
 							} catch (NumberFormatException e) {
 								isCompactFormat = false;
+								
+								//to account for the lost iteration from exception
+								i = -1; 
 							}
 						}
 
@@ -2091,7 +2096,6 @@ public class TracesMiner {
 						// add to the list
 						instances.put(instanceID, tmpPath);
 						
-//						currentLoadedTracesNum++;
 						
 						// notify listener
 						if (listener != null) {
@@ -2102,23 +2106,16 @@ public class TracesMiner {
 								listener.onTracesLoaded(instances.size() % tracesLoadedNotifierNumber);
 							}
 							
-//							if(numberOfTraces / instances.size() == 0) {
-//								listener.onTracesLoaded(numberOfTraces % instances.size());
-//							} else{
-//								listener.onTracesLoaded(tracesLoadedNotifierNumber);	
-////								currentLoadedTracesNum+=tracesLoadedNotifierNumber;
-//							}
-							
 						}
 
-						// set min trace length
-						// if (values != null) {
-						// int size = actions.size();
-						// if (minTraceLength > size) {
-						// minTraceLength = size;
-						// }
+						if(actions.size() == 2) {
+							System.out.println(instanceID + " " + actions);	
+						}
+						
+						
 						int size = actions.size();
 
+						//set min and max trace lengths
 						if (minimumTraceLength > size) {
 							minimumTraceLength = size;
 						}
@@ -2126,11 +2123,6 @@ public class TracesMiner {
 						if (maximumTraceLength < size) {
 							maximumTraceLength = size;
 						}
-						// set max
-						// if (maxTraceLength < size) {
-						// maxTraceLength = size;
-						// }
-						// }
 
 					}
 
@@ -2141,13 +2133,7 @@ public class TracesMiner {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		// set min & max trace lengths
-		// if (values != null) {
-		// values.add(minTraceLength);
-		// values.add(maxTraceLength);
-		// }
-
+		
 		return instances;
 
 	}

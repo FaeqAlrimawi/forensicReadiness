@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -31,11 +33,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 
 public class TraceViewerController implements TracesMinerListener {
@@ -241,6 +245,23 @@ public class TraceViewerController implements TracesMinerListener {
 			}
 		});
 
+		textFieldSystemFile.setOnKeyPressed(e -> {
+
+			// if enter is pressed then refersh
+			if (e.getCode() == KeyCode.ENTER) {
+				String filePath = textFieldSystemFile.getText();
+				
+				//check it is a file
+				boolean isValid = tracesMiner.checkFile(filePath);
+				
+				if(isValid) {
+					loadTracesFile(filePath);
+				} else {
+					showFiledError(textFieldSystemFile);
+				}
+			}
+		});
+
 		textFieldOccurrenceFilterPercentage.setOnKeyPressed(e -> {
 			// if enter is pressed then refersh
 			if (e.getCode() == KeyCode.ENTER) {
@@ -265,6 +286,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 	@FXML
 	void selectTracesFile(MouseEvent event) {
+		
 		FileChooser fileChooser = new FileChooser();
 
 		if (selectedTracesFile != null) {
@@ -280,7 +302,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 		selectedTracesFile = fileChooser.showOpenDialog(null);
 
-		if (selectedTracesFile != null) {
+		if(selectedTracesFile != null) {
 			Platform.runLater(new Runnable() {
 
 				@Override
@@ -289,58 +311,10 @@ public class TraceViewerController implements TracesMinerListener {
 					textFieldSystemFile.setText(selectedTracesFile.getAbsolutePath());
 				}
 			});
-
-			// show progress indicatior
-			progressIndicatorLoader.setVisible(true);
-
-			executor.submit(new Runnable() {
-
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-					if (isTracesFileValid(selectedTracesFile.getAbsolutePath())) {
-
-						// update number of traces
-						updateImage(IMAGE_CORRECT, imgSystemFileCheck);
-						updateText("Number of Traces = " + tracesMiner.getNumberOfTraces(), lblSystemFileCheck);
-
-						// updated number of actions used
-						updateImage(IMAGE_CORRECT, imgNumOfActions);
-						updateText("Total Number of Actions: " + tracesMiner.getNumberOfActions(), lblNumOfActions);
-
-						// updated number of states used
-						updateImage(IMAGE_CORRECT, imgNumOfStates);
-						updateText("Total Number of States: " + tracesMiner.getNumberOfStates(), lblNumOfStates);
-
-						// display highest occurrence
-						setupTopActionsChart("1st-Highest");
-
-						imgOpentracesFile.setVisible(true);
-						imgOpentracesFileEmpty.setVisible(false);
-						btnAnalyse.setDisable(false);
-						btnRefresh.setDisable(false);
-						// show top actions
-						// setupTopActionsChart();
-
-					} else {
-						updateImage(IMAGE_WRONG, imgSystemFileCheck);
-						updateText("Traces file is not valid", lblSystemFileCheck);
-						imgOpentracesFile.setVisible(false);
-						imgOpentracesFileEmpty.setVisible(true);
-
-					}
-
-					progressIndicatorLoader.setVisible(false);
-
-				}
-			});
-
-			// updateImage(null, imgSystemFileCheck);
-			// updateText("", lblSystemFileCheck);
-
+			
+			loadTracesFile(selectedTracesFile.getAbsolutePath());
 		}
-
-		textFieldSystemFile.requestFocus();
+		
 
 	}
 
@@ -400,16 +374,72 @@ public class TraceViewerController implements TracesMinerListener {
 
 	}
 
+	protected void loadTracesFile(String filePath) {
+		
+		if (filePath != null) {
+
+			// show progress indicatior
+			progressIndicatorLoader.setVisible(true);
+
+			executor.submit(new Runnable() {
+
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					if (loadTraces(filePath)) {
+
+						// update number of traces
+						updateImage(IMAGE_CORRECT, imgSystemFileCheck);
+						updateText("Number of Traces = " + tracesMiner.getNumberOfTraces(), lblSystemFileCheck);
+
+						// updated number of actions used
+						updateImage(IMAGE_CORRECT, imgNumOfActions);
+						updateText("Total Number of Actions: " + tracesMiner.getNumberOfActions(), lblNumOfActions);
+
+						// updated number of states used
+						updateImage(IMAGE_CORRECT, imgNumOfStates);
+						updateText("Total Number of States: " + tracesMiner.getNumberOfStates(), lblNumOfStates);
+
+						// display highest occurrence
+						setupTopActionsChart("1st-Highest");
+
+						imgOpentracesFile.setVisible(true);
+						imgOpentracesFileEmpty.setVisible(false);
+						btnAnalyse.setDisable(false);
+						btnRefresh.setDisable(false);
+						// show top actions
+						// setupTopActionsChart();
+
+					} else {
+						updateImage(IMAGE_WRONG, imgSystemFileCheck);
+						updateText("Traces file is not valid", lblSystemFileCheck);
+						imgOpentracesFile.setVisible(false);
+						imgOpentracesFileEmpty.setVisible(true);
+
+					}
+
+					progressIndicatorLoader.setVisible(false);
+
+				}
+			});
+
+
+		}
+
+		textFieldSystemFile.requestFocus();
+	}
+
 	/**
 	 * checks if the selected file can be read as a json file
 	 * 
 	 * @return
 	 */
-	protected boolean isTracesFileValid(String filePath) {
+	protected boolean loadTraces(String filePath) {
 
 		// reset if already loaded something before
 		resetLoadingGUI();
-		
+
+		resetFilterGUI();
 		// set file in miner
 		tracesMiner.setTracesFile(filePath);
 
@@ -428,10 +458,17 @@ public class TraceViewerController implements TracesMinerListener {
 		updateImage(null, imgSystemFileCheck);
 		updateImage(null, imgNumOfActions);
 		updateImage(null, imgNumOfStates);
-		
+
 		updateText(null, lblSystemFileCheck);
 		updateText(null, lblNumOfActions);
 		updateText(null, lblNumOfStates);
+	}
+
+	protected void resetFilterGUI() {
+
+		updateImage(null, imgFilter);
+
+		updateText(null, lblFilter);
 	}
 
 	protected void findShortestTraces() {
@@ -701,7 +738,7 @@ public class TraceViewerController implements TracesMinerListener {
 		// update progress bar and its label
 
 		currentTraceNumber += numberOfTracesLoaded;
-		double progressValue = currentTraceNumber*1.0/numberOfTraces;//progressBarTraces.getProgress() + (numberOfTracesLoaded * 1.0 / numberOfTraces);
+		double progressValue = currentTraceNumber * 1.0 / numberOfTraces;
 
 		Platform.runLater(new Runnable() {
 
@@ -714,7 +751,7 @@ public class TraceViewerController implements TracesMinerListener {
 				// if complete
 				if (currentTraceNumber == numberOfTraces) {
 					progressBarTraces.setVisible(false);
-					 lblProgressTraces.setVisible(false);
+					lblProgressTraces.setVisible(false);
 				}
 			}
 		});
@@ -733,5 +770,41 @@ public class TraceViewerController implements TracesMinerListener {
 				lblProgressTraces.setText("Loading File...");
 			}
 		});
+	}
+	
+	protected DropShadow createBorderGlow(int depth, Color color) {
+
+		DropShadow borderGlow = new DropShadow();
+		borderGlow.setOffsetY(0f);
+		borderGlow.setOffsetX(0f);
+		borderGlow.setColor(color);
+		borderGlow.setWidth(depth);
+		borderGlow.setHeight(depth);
+
+		return borderGlow;
+	}
+	
+	protected void showFiledError(TextField textField) {
+
+		DropShadow borderGlow = createBorderGlow(35, Color.RED);
+		
+		Platform.runLater(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				textField.setEffect(borderGlow);
+				Timer t = new Timer();
+				t.schedule(new TimerTask() {
+
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						textField.setEffect(null);
+					}
+				}, INTERVAL);
+			}
+		});
+
 	}
 }
