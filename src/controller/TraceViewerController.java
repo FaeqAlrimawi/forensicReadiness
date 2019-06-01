@@ -433,7 +433,7 @@ public class TraceViewerController {
 		// show
 		progressIndicatorFilter.setVisible(true);
 
-		numofTraces = tracesMiner.mineShortestClosedSequencesUsingClaSPAlgo();
+		numofTraces = tracesMiner.mineClosedSequencesUsingClaSPAlgo(TracesMiner.SHORTEST);
 
 		// hide progress indicator
 		progressIndicatorFilter.setVisible(false);
@@ -623,10 +623,10 @@ public class TraceViewerController {
 			@Override
 			public void run() {
 				// Defining the x axis
-				categoryAxis.setLabel("Actions");
+				categoryAxis.setLabel("Action");
 
 				// Defining the y axis
-				numberAxis.setLabel("Action Occurrences");
+				numberAxis.setLabel("Occurrence");
 
 				barChartActions.setTitle(chartTitle);
 

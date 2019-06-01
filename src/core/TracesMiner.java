@@ -8,7 +8,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,7 +18,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
-import java.util.TreeMap;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -51,15 +49,6 @@ import ca.pfv.spmf.patterns.cluster.ClusterWithMean;
 import controller.TraceViewerController;
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.JSONTerms;
-//import weka.clusterers.ClusterEvaluation;
-//import weka.clusterers.Clusterer;
-//import weka.clusterers.Cobweb;
-//import weka.clusterers.EM;
-//import weka.clusterers.SimpleKMeans;
-//import weka.core.Instances;
-//import weka.core.converters.ConverterUtils.DataSource;
-//import weka.filters.Filter;
-//import weka.filters.unsupervised.attribute.Remove;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 
 public class TracesMiner {
@@ -91,6 +80,11 @@ public class TracesMiner {
 	// errors
 	public final static int TRACES_NOT_LOADED = -1;
 	public final static int SHORTEST_FILE_NOT_SAVED = -2;
+
+	// constants for mining operators
+	public final static int SHORTEST = 0;
+	public final static int ALL = 1;
+	// public final static int CLASP = 2;
 
 	String clusterFolder = "clusters generated";
 	String clustersOutputFileName = "clustersGenerated.txt";
@@ -126,9 +120,13 @@ public class TracesMiner {
 
 	List<Integer> traceIDs;
 
-	// min length
-	int minimumTraceLength;
-	int maximumTraceLength;
+	String outputFolder;
+
+	// min action length
+	int minimumTraceLength = 1000000;
+
+	// max action length
+	int maximumTraceLength = -1;
 
 	// system data
 	int numberOfStates = 10000; // should be adjusted
@@ -376,16 +374,16 @@ public class TracesMiner {
 		System.out.println(">>Reading instances from [" + instanceFileName + "]");
 
 		// load instances from file
-		List<Integer> minMaxLengths = new LinkedList<Integer>();
+		// List<Integer> minMaxLengths = new LinkedList<Integer>();
 		// List<String> tracesActs = new LinkedList<String>();
 
-		instances = readInstantiatorInstancesFile(instanceFileName, minMaxLengths);
+		instances = readInstantiatorInstancesFile(instanceFileName);
 
-		// set min
-		minimumTraceLength = minMaxLengths.get(0);
-
-		// set max
-		maximumTraceLength = minMaxLengths.get(1);
+		// // set min
+		// minimumTraceLength = minMaxLengths.get(0);
+		//
+		// // set max
+		// maximumTraceLength = minMaxLengths.get(1);
 
 		// set traces actions
 		if (tracesActionsOccurence.size() > 0) {
@@ -512,30 +510,30 @@ public class TracesMiner {
 		int index = 0;
 
 		// sort occurrences
-//		Collection<Integer> values = tracesActionsOccurence.values();
-//		List<Integer> list = new LinkedList<Integer>(values);
-//		Collections.sort(list);// ascending order
-//
-//		List<Integer> topN = new LinkedList<Integer>();
-//		// int size = list.size();
-//
+		// Collection<Integer> values = tracesActionsOccurence.values();
+		// List<Integer> list = new LinkedList<Integer>(values);
+		// Collections.sort(list);// ascending order
+		//
+		// List<Integer> topN = new LinkedList<Integer>();
+		// // int size = list.size();
+		//
 
-//		for (int i = list.size() - 1; i > 0; i--) {
-//
-//			if (!topN.contains(list.get(i))) {
-//				topN.add(list.get(i));
-//				index++;
-//
-//				if (index == numberofActions) {
-//					break;
-//				}
-//			}
-//
-//		}
-		
+		// for (int i = list.size() - 1; i > 0; i--) {
+		//
+		// if (!topN.contains(list.get(i))) {
+		// topN.add(list.get(i));
+		// index++;
+		//
+		// if (index == numberofActions) {
+		// break;
+		// }
+		// }
+		//
+		// }
+
 		System.out.println(percentage);
 		double localPerc = 0;
-int	numOfTraces = instances.size();
+		int numOfTraces = instances.size();
 
 		// for now get the first n
 		for (Entry<String, Integer> entry : tracesActionsOccurence.entrySet()) {
@@ -543,8 +541,8 @@ int	numOfTraces = instances.size();
 			String action = entry.getKey();
 			int occur = entry.getValue();
 
-			localPerc = occur*1.0/numOfTraces;
-			
+			localPerc = occur * 1.0 / numOfTraces;
+
 			switch (operation) {
 			case TraceViewerController.EQUAL:
 				if (localPerc == percentage) {
@@ -559,18 +557,18 @@ int	numOfTraces = instances.size();
 					index++;
 				}
 				break;
-				
+
 			case TraceViewerController.LESS_THAN:
 				if (localPerc < percentage) {
 					result.put(action, occur);
 					index++;
 				}
 				break;
-				
+
 			default:
 				break;
 			}
-			
+
 		}
 
 		// tracesActionsOccurence.s
@@ -628,7 +626,7 @@ int	numOfTraces = instances.size();
 
 		// shortest trace is set to be 3 actions (or 4 states (i.e. actions+1)
 
-		int numberOfStates = 4;
+		int minimumStates = minimumTraceLength + 1;
 
 		String separator = " ";
 		StringBuilder bldr = new StringBuilder();
@@ -640,7 +638,7 @@ int	numOfTraces = instances.size();
 		System.out.println(">>Identifying shortest traces in [" + instanceFileName + "]");
 		for (GraphPath trace : instances.values()) {
 
-			if (trace.getStateTransitions().size() == numberOfStates) {
+			if (trace.getStateTransitions().size() == minimumStates) {
 				shortestTraces.put(trace.getInstanceID(), trace);
 				bldr.append(trace.getInstanceID()).append(separator);
 			}
@@ -651,11 +649,10 @@ int	numOfTraces = instances.size();
 		}
 
 		// store to file
-		// if(shortestTracesFileName != null) {
-		// writeToFile(bldr.toString(), shortestTracesFileName);
-		// System.out.println(">>Shortest traces IDs are stored in [" +
-		// shortestTracesFileName + "]");
-		// }
+		if (shortestTracesFileName != null) {
+			writeToFile(bldr.toString(), shortestTracesFileName);
+			System.out.println(">>Shortest traces IDs are stored in [" + shortestTracesFileName + "]");
+		}
 
 		return shortestTraces.size();
 
@@ -1168,19 +1165,44 @@ int	numOfTraces = instances.size();
 		return 0;
 	}
 
-	public int mineShortestClosedSequencesUsingClaSPAlgo(int minimumTraces) {
+	/**
+	 * Finds all traces using the ClaSP algorithm (sequential mining algorithm)
+	 * 
+	 * @param tracesToAnalyse
+	 *            (indicates which traces to use for analysis
+	 * @return
+	 */
+	public int mineClosedSequencesUsingClaSPAlgo(int tracesToAnalyse) {
 
-		// if(shortestTraces==null || shortestTraces.isEmpty()) {
-		findShortestTraces();
-		// }
+		switch (tracesToAnalyse) {
+		case SHORTEST: // shortest
+			findShortestTraces();
+			return mineClosedSequencesUsingClaSPAlgo(shortestTraces.values());
 
-		return mineClosedSequencesUsingClaSPAlgo(shortestTraces.values(), minimumTraces);
+		case ALL: // all
+			return mineClosedSequencesUsingClaSPAlgo(instances.values());
+
+		default:
+			return -1;
+
+		}
 
 	}
 
-	public int mineClosedSequencesUsingClaSPAlgo(int minimumTraces) {
+	public int mineClosedSequencesUsingClaSPAlgo(int tracesToAnalyse, int minimumTraces) {
 
-		return mineClosedSequencesUsingClaSPAlgo(instances.values(), minimumTraces);
+		switch (tracesToAnalyse) {
+		case SHORTEST:
+			findShortestTraces();
+			return mineClosedSequencesUsingClaSPAlgo(shortestTraces.values(), minimumTraces);
+
+		case ALL:
+			return mineClosedSequencesUsingClaSPAlgo(instances.values(), minimumTraces);
+
+		default:
+			return -1;
+
+		}
 
 	}
 
@@ -1194,7 +1216,8 @@ int	numOfTraces = instances.size();
 		// Load a sequence database
 		double support = numberOfTraces * 1.0 / traces.size();
 
-		boolean keepPatterns = true;
+		boolean keepPatterns = false; // if set to true, then generated result
+										// is stored in the given file
 		boolean verbose = true;
 		boolean findClosedPatterns = true;
 		boolean executePruningMethods = true;
@@ -1251,15 +1274,6 @@ int	numOfTraces = instances.size();
 
 	}
 
-	public int mineShortestClosedSequencesUsingClaSPAlgo() {
-
-		// if(shortestTraces==null || shortestTraces.isEmpty()) {
-		findShortestTraces();
-		// }
-
-		return mineClosedSequencesUsingClaSPAlgo(shortestTraces.values());
-	}
-
 	public int mineClosedSequencesUsingClaSPAlgo(Collection<GraphPath> traces) {
 
 		convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
@@ -1267,7 +1281,7 @@ int	numOfTraces = instances.size();
 		// Load a sequence database
 		double support = 0;
 
-		boolean keepPatterns = true;
+		boolean keepPatterns = false;
 		boolean verbose = false;
 		boolean findClosedPatterns = true;
 		boolean executePruningMethods = true;
@@ -1757,17 +1771,66 @@ int	numOfTraces = instances.size();
 
 	public void setTracesFile(String filePath) {
 
+//		System.out.println(filePath);
+		// if file path contains \, convert to /
+		int tries = 10000;
+
+		while (filePath.contains("\\") && tries > 0) {
+
+			// remove \
+			filePath = filePath.replace("\\", File.separator);
+
+			tries--;
+		}
+
+//		System.out.println(filePath);
+
 		instanceFileName = filePath;
 
 		if (instanceFileName == null) {
 			return;
 		}
+		String onlyPath = "";
+		String onlyName = "";
+		boolean isFolderCreated = false;
+		
+		int index = instanceFileName.lastIndexOf(File.separator);
+		if (index >= 0) {
+			onlyPath = instanceFileName.substring(0, instanceFileName.lastIndexOf(File.separator) + 1);
+			onlyName = instanceFileName.substring(instanceFileName.lastIndexOf(File.separator) + 1,
+					instanceFileName.lastIndexOf("."));
+			// set folder
+			outputFolder = onlyPath + "minigOutput" + File.separator;
 
-		clustersOutputFileName = instanceFileName.replace(".json", "_relevantTraces.txt");// clustersOutputFolder
-		// clustersOutputFileName;
-		convertedInstancesFileName = instanceFileName.replace(".json", "_convertedInstances.txt");// clustersOutputFolder
-		// +
-		shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");
+			// make sure output folder is created
+			if (outputFolder != null && !outputFolder.isEmpty()) {
+				File out = new File(outputFolder);
+
+				if (!out.isDirectory()) {
+					isFolderCreated = out.mkdir();
+				}
+			}
+
+		}
+
+		// create output files in output folder
+		if (outputFolder != null && !outputFolder.isEmpty() && isFolderCreated) {
+			clustersOutputFileName = outputFolder + onlyName + "_relevantTraces.txt";// instanceFileName.replace(".json",
+																						// "_relevantTraces.txt");
+			// clustersOutputFileName;
+			convertedInstancesFileName = outputFolder + onlyName + "_convertedInstances.txt";
+			// +
+			shortestTracesFileName = outputFolder + onlyName + "_shortestTracesIDs.txt";
+		}
+		// store files where the traces are
+		else {
+			clustersOutputFileName = instanceFileName.replace(".json", "_relevantTraces.txt");
+			// clustersOutputFileName;
+			convertedInstancesFileName = instanceFileName.replace(".json", "_convertedInstances.txt");
+			// +
+			shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");
+
+		}
 
 	}
 
@@ -1811,7 +1874,7 @@ int	numOfTraces = instances.size();
 		return null;
 	}
 
-	public Map<Integer, GraphPath> readInstantiatorInstancesFile(String fileName, List<Integer> values) {
+	public Map<Integer, GraphPath> readInstantiatorInstancesFile(String fileName) {
 
 		if (fileName == null || fileName.isEmpty()) {
 			System.err.println("Error reading file: " + fileName + ". File name is empty.");
@@ -2000,17 +2063,25 @@ int	numOfTraces = instances.size();
 						instances.put(instanceID, tmpPath);
 
 						// set min trace length
-						if (values != null) {
-							int size = actions.size();
-							if (minTraceLength > size) {
-								minTraceLength = size;
-							}
+						// if (values != null) {
+						// int size = actions.size();
+						// if (minTraceLength > size) {
+						// minTraceLength = size;
+						// }
+						int size = actions.size();
 
-							// set max
-							if (maxTraceLength < size) {
-								maxTraceLength = size;
-							}
+						if (minimumTraceLength > size) {
+							minimumTraceLength = size;
 						}
+
+						if (maximumTraceLength < size) {
+							maximumTraceLength = size;
+						}
+						// set max
+						// if (maxTraceLength < size) {
+						// maxTraceLength = size;
+						// }
+						// }
 
 					}
 
@@ -2023,10 +2094,10 @@ int	numOfTraces = instances.size();
 		}
 
 		// set min & max trace lengths
-		if (values != null) {
-			values.add(minTraceLength);
-			values.add(maxTraceLength);
-		}
+		// if (values != null) {
+		// values.add(minTraceLength);
+		// values.add(maxTraceLength);
+		// }
 
 		return instances;
 
