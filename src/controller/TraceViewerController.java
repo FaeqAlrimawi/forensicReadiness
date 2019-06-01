@@ -32,6 +32,8 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
@@ -69,6 +71,9 @@ public class TraceViewerController implements TracesMinerListener {
 	private ChoiceBox<String> choiceboxFilter;
 
 	@FXML
+	private ChoiceBox<String> choiceBoxFilterSelector;
+
+	@FXML
 	private ImageView imgFilter;
 
 	@FXML
@@ -89,8 +94,8 @@ public class TraceViewerController implements TracesMinerListener {
 	@FXML
 	private ChoiceBox<String> choiceboxOccurrenceComparator;
 
-	@FXML
-	private TextField txtFieldLength;
+	// @FXML
+	// private TextField txtFieldLength;
 
 	@FXML
 	private TextField textFieldActions;
@@ -143,6 +148,9 @@ public class TraceViewerController implements TracesMinerListener {
 	@FXML
 	private Label lblProgressTraces;
 
+	@FXML
+	private Spinner<Integer> spinnerFilterLength;
+
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -170,6 +178,8 @@ public class TraceViewerController implements TracesMinerListener {
 	public static final String EQUAL = "=";
 	public static final String MORE_THAN = ">";
 	public static final String LESS_THAN = "<";
+	public static final String ACTIONS = "Actions";
+	public static final String STATES = "States";
 
 	private AutoCompleteTextField autoCompleteActionsFiled;
 
@@ -178,6 +188,8 @@ public class TraceViewerController implements TracesMinerListener {
 	private final String[] compartiveOperators = { MORE_THAN, LESS_THAN, EQUAL, };
 
 	private final String[] occurrencesOptions = { HIGHEST, LOWEST };
+
+	private final String[] FilterSelectors = { ACTIONS, STATES };
 
 	String chartTitle = "";
 
@@ -236,25 +248,16 @@ public class TraceViewerController implements TracesMinerListener {
 		// auto complete
 		autoCompleteActionsFiled = new AutoCompleteTextField();
 
-		textFieldNumofOccurrences.setOnKeyPressed(e -> {
-
-			// if enter is pressed then refersh
-			if (e.getCode() == KeyCode.ENTER) {
-				String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
-				setupTopActionsChart(selectedOccurrenceType);
-			}
-		});
-
 		textFieldSystemFile.setOnKeyPressed(e -> {
 
 			// if enter is pressed then refersh
 			if (e.getCode() == KeyCode.ENTER) {
 				String filePath = textFieldSystemFile.getText();
-				
-				//check it is a file
+
+				// check it is a file
 				boolean isValid = tracesMiner.checkFile(filePath);
-				
-				if(isValid) {
+
+				if (isValid) {
 					loadTracesFile(filePath);
 				} else {
 					showFiledError(textFieldSystemFile);
@@ -262,10 +265,58 @@ public class TraceViewerController implements TracesMinerListener {
 			}
 		});
 
+		// filter actions/states in chart
+		textFieldNumofOccurrences.setOnKeyPressed(e -> {
+
+			// if enter is pressed then refersh
+			if (e.getCode() == KeyCode.ENTER) {
+
+				String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
+
+				String selection = choiceBoxFilterSelector.getSelectionModel().getSelectedItem();
+
+				switch (selection) {
+				case ACTIONS:
+					setupTopActionsChart(selectedOccurrenceType);
+					break;
+
+				case STATES:
+					setupTopStatesChart(selectedOccurrenceType);
+				default:
+					break;
+				}
+
+			}
+		});
+
+		// filter actions/states in chart
 		textFieldOccurrenceFilterPercentage.setOnKeyPressed(e -> {
 			// if enter is pressed then refersh
 			if (e.getCode() == KeyCode.ENTER) {
-				setupTopActionsChart(PERCENTAGE);
+				String selection = choiceBoxFilterSelector.getSelectionModel().getSelectedItem();
+
+				switch (selection) {
+				case ACTIONS:
+					setupTopActionsChart(PERCENTAGE);
+					break;
+
+				case STATES:
+					setupTopStatesChart(PERCENTAGE);
+				default:
+					break;
+				}
+
+			}
+		});
+
+		// setup choicebox filter selector
+		Platform.runLater(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				choiceBoxFilterSelector.setItems(FXCollections.observableArrayList(FilterSelectors));
+				choiceBoxFilterSelector.getSelectionModel().select(0);
 			}
 		});
 	}
@@ -286,7 +337,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 	@FXML
 	void selectTracesFile(MouseEvent event) {
-		
+
 		FileChooser fileChooser = new FileChooser();
 
 		if (selectedTracesFile != null) {
@@ -302,7 +353,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 		selectedTracesFile = fileChooser.showOpenDialog(null);
 
-		if(selectedTracesFile != null) {
+		if (selectedTracesFile != null) {
 			Platform.runLater(new Runnable() {
 
 				@Override
@@ -311,10 +362,9 @@ public class TraceViewerController implements TracesMinerListener {
 					textFieldSystemFile.setText(selectedTracesFile.getAbsolutePath());
 				}
 			});
-			
+
 			loadTracesFile(selectedTracesFile.getAbsolutePath());
 		}
-		
 
 	}
 
@@ -362,20 +412,36 @@ public class TraceViewerController implements TracesMinerListener {
 	@FXML
 	public void refreshGraph(ActionEvent event) {
 
+		String operation = "";
+		
 		String perc = textFieldOccurrenceFilterPercentage.getText();
-
+		String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
+		
+		String selection = choiceBoxFilterSelector.getSelectionModel().getSelectedItem();
+		
 		// higher precedence for percentage
 		if (perc != null && !perc.isEmpty()) {
-			setupTopActionsChart(PERCENTAGE);
+			operation = perc;
 		} else {
-			String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
-			setupTopActionsChart(selectedOccurrenceType);
+			operation = selectedOccurrenceType;
 		}
+		
+		switch (selection) {
+		case ACTIONS:
+			setupTopActionsChart(operation);
+			break;
+
+		case STATES:
+			setupTopStatesChart(operation);
+		default:
+			break;
+		}
+		
 
 	}
 
 	protected void loadTracesFile(String filePath) {
-		
+
 		if (filePath != null) {
 
 			// show progress indicatior
@@ -401,7 +467,7 @@ public class TraceViewerController implements TracesMinerListener {
 						updateText("Total Number of States: " + tracesMiner.getNumberOfStates(), lblNumOfStates);
 
 						// display highest occurrence
-						setupTopActionsChart("1st-Highest");
+						setupTopActionsChart("Highest-Ranked");
 
 						imgOpentracesFile.setVisible(true);
 						imgOpentracesFileEmpty.setVisible(false);
@@ -422,7 +488,6 @@ public class TraceViewerController implements TracesMinerListener {
 
 				}
 			});
-
 
 		}
 
@@ -569,6 +634,11 @@ public class TraceViewerController implements TracesMinerListener {
 		// set actions in auto completer
 		autoCompleteActionsFiled.setEntries(tracesMiner.getTracesActions());
 
+		// Value factory.
+		SpinnerValueFactory<Integer> valueFactory = //
+				new SpinnerValueFactory.IntegerSpinnerValueFactory(tracesMiner.getMinimumTraceLength(),
+						tracesMiner.getMaximumTraceLength(), tracesMiner.getMinimumTraceLength());
+
 		// setup sequence length bounds
 		Platform.runLater(new Runnable() {
 
@@ -577,8 +647,10 @@ public class TraceViewerController implements TracesMinerListener {
 				// TODO Auto-generated method stub
 
 				// set length limits
-				txtFieldLength.setPromptText("length [min: " + tracesMiner.getMinimumTraceLength() + ", max: "
-						+ tracesMiner.getMaximumTraceLength() + "]");
+				spinnerFilterLength.setValueFactory(valueFactory);
+				// txtFieldLength.setPromptText("length [min: " +
+				// tracesMiner.getMinimumTraceLength() + ", max: "
+				// + tracesMiner.getMaximumTraceLength() + "]");
 
 				// set actions filed autoComplete
 				textFieldActions.textProperty().addListener(new ChangeListener<String>() {
@@ -702,6 +774,95 @@ public class TraceViewerController implements TracesMinerListener {
 
 	}
 
+	protected void setupTopStatesChart(String selectedOccurrenceType) {
+
+		// int numOfOccurrences = 10;
+		// int numOfSeries = 0;
+
+		// get actions from miner
+		Map<Integer, Integer> topStates = null;
+		int num = 0;
+
+		switch (selectedOccurrenceType) {
+		case HIGHEST:
+			num = Integer.parseInt(textFieldNumofOccurrences.getText());
+			chartTitle = "States with " + selectedOccurrenceType + " " + num + " Occurrences";
+
+			topStates = tracesMiner.getTopStatesOccurrences(num);
+			break;
+
+		case LOWEST:
+			num = Integer.parseInt(textFieldNumofOccurrences.getText());
+			chartTitle = "States with " + selectedOccurrenceType + " " + num + " Occurrences";
+
+			 topStates = tracesMiner.getLowestStateOccurrences(num);
+
+			break;
+
+		case PERCENTAGE:
+			num = Integer.parseInt(textFieldOccurrenceFilterPercentage.getText());
+			double perc = num * 1.0 / 100;
+			String op = choiceBoxOccurrenceFilterPercentage.getSelectionModel().getSelectedItem();
+			chartTitle = "States with Occurrence % " + op + " " + num + "%";
+
+			topStates = tracesMiner.getStatesWithOccurrencePercentage(perc, op);
+
+			break;
+
+		default:
+			// highest occurrence
+			chartTitle = "States with " + selectedOccurrenceType + " Occurrence";
+			// topActions = tracesMiner.getHighestActionOccurrence();
+
+			break;
+		}
+
+		if (topStates == null) {
+			return;
+		}
+
+		List<Integer> states = Arrays.asList(topStates.keySet().toArray(new Integer[topStates.size()]));
+		List<Integer> occurrences = Arrays.asList(topStates.values().toArray(new Integer[topStates.size()]));
+
+		final int numOfActions = states.size();
+
+		List<XYChart.Series<String, Integer>> series = new LinkedList<XYChart.Series<String, Integer>>();
+
+		// XYChart.Series<String, Integer> series1 = new XYChart.Series<String,
+		// Integer>();
+
+		for (int i = 0; i < numOfActions; i++) {
+			XYChart.Series<String, Integer> series1 = new XYChart.Series<String, Integer>();
+
+			// bug does not allow the correct order of labels
+			int occur = occurrences.get(i);
+			series1.getData().add(new XYChart.Data<String, Integer>("", occur));
+
+			series1.setName("" + states.get(i));
+
+			series.add(series1);
+		}
+
+		Platform.runLater(new Runnable() {
+
+			@Override
+			public void run() {
+				// Defining the x axis
+				categoryAxis.setLabel("State");
+
+				// Defining the y axis
+				numberAxis.setLabel("Occurrence");
+
+				barChartActions.setTitle(chartTitle);
+
+				barChartActions.getData().clear();
+				// TODO Auto-generated method stub
+				barChartActions.getData().addAll(series);
+			}
+		});
+
+	}
+
 	@Override
 	public void onNumberOfTracesRead(int numOfTraces) {
 
@@ -771,7 +932,7 @@ public class TraceViewerController implements TracesMinerListener {
 			}
 		});
 	}
-	
+
 	protected DropShadow createBorderGlow(int depth, Color color) {
 
 		DropShadow borderGlow = new DropShadow();
@@ -783,11 +944,11 @@ public class TraceViewerController implements TracesMinerListener {
 
 		return borderGlow;
 	}
-	
+
 	protected void showFiledError(TextField textField) {
 
 		DropShadow borderGlow = createBorderGlow(35, Color.RED);
-		
+
 		Platform.runLater(new Runnable() {
 
 			@Override
