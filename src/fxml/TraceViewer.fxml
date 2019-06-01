@@ -25,7 +25,7 @@
 
 <AnchorPane prefHeight="582.0" prefWidth="1262.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.TraceViewerController">
    <children>
-      <VBox layoutX="19.0" layoutY="17.0" prefHeight="389.0" prefWidth="628.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="619.0" AnchorPane.topAnchor="15.0">
+      <VBox layoutX="19.0" layoutY="17.0" prefHeight="389.0" prefWidth="628.0" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="15.0">
          <children>
             <VBox prefHeight="149.0" prefWidth="628.0">
                <children>
@@ -222,7 +222,7 @@
             </VBox>
          </children>
       </VBox>
-      <BarChart fx:id="barChartActions" layoutX="810.0" layoutY="15.0" prefHeight="355.0" prefWidth="438.0">
+      <BarChart fx:id="barChartActions" layoutX="715.0" layoutY="15.0" prefHeight="406.0" prefWidth="533.0">
         <xAxis>
           <CategoryAxis fx:id="categoryAxis" side="BOTTOM" />
         </xAxis>

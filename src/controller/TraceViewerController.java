@@ -415,14 +415,15 @@ public class TraceViewerController implements TracesMinerListener {
 		String operation = "";
 		
 		String perc = textFieldOccurrenceFilterPercentage.getText();
-		String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
+		
 		
 		String selection = choiceBoxFilterSelector.getSelectionModel().getSelectedItem();
 		
 		// higher precedence for percentage
 		if (perc != null && !perc.isEmpty()) {
-			operation = perc;
+			operation = PERCENTAGE;
 		} else {
+			String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
 			operation = selectedOccurrenceType;
 		}
 		
@@ -433,6 +434,8 @@ public class TraceViewerController implements TracesMinerListener {
 
 		case STATES:
 			setupTopStatesChart(operation);
+			break;
+			
 		default:
 			break;
 		}
@@ -747,7 +750,10 @@ public class TraceViewerController implements TracesMinerListener {
 
 			// bug does not allow the correct order of labels
 			int occur = occurrences.get(i);
-			series1.getData().add(new XYChart.Data<String, Integer>("", occur));
+			
+			//convert occurrence into percentage 
+			int occurPerc = (int)Math.floor((occur*1.0/numberOfTraces)*100);
+			series1.getData().add(new XYChart.Data<String, Integer>("", occurPerc));
 
 			series1.setName(actions.get(i));
 
@@ -836,7 +842,11 @@ public class TraceViewerController implements TracesMinerListener {
 
 			// bug does not allow the correct order of labels
 			int occur = occurrences.get(i);
-			series1.getData().add(new XYChart.Data<String, Integer>("", occur));
+			
+			//convert occurrence into percentage 
+			int occurPerc = (int)Math.floor((occur*1.0/numberOfTraces)*100);
+			
+			series1.getData().add(new XYChart.Data<String, Integer>("", occurPerc));
 
 			series1.setName("" + states.get(i));
 
