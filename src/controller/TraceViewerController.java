@@ -879,14 +879,14 @@ public class TraceViewerController implements TracesMinerListener {
 		switch (selectedOccurrenceType) {
 		case HIGHEST:
 			num = Integer.parseInt(textFieldNumofOccurrences.getText());
-			chartTitle = "States with " + selectedOccurrenceType + " " + num + " Occurrences in" + tracesToFilter;
+			chartTitle = "States with " + selectedOccurrenceType + " " + num + " Occurrences in " + tracesToFilter;
 
 			topStates = tracesMiner.getTopStatesOccurrences(num, tracesToFilter);
 			break;
 
 		case LOWEST:
 			num = Integer.parseInt(textFieldNumofOccurrences.getText());
-			chartTitle = "States with " + selectedOccurrenceType + " " + num + " Occurrences in"+ tracesToFilter;
+			chartTitle = "States with " + selectedOccurrenceType + " " + num + " Occurrences in "+ tracesToFilter;
 
 			topStates = tracesMiner.getLowestStateOccurrences(num, tracesToFilter);
 
@@ -896,7 +896,7 @@ public class TraceViewerController implements TracesMinerListener {
 			num = Integer.parseInt(textFieldOccurrenceFilterPercentage.getText());
 			double perc = num * 1.0 / 100;
 			String op = choiceBoxOccurrenceFilterPercentage.getSelectionModel().getSelectedItem();
-			chartTitle = "States with Occurrence-% " + op + " " + num + "% in" + tracesToFilter;
+			chartTitle = "States with Occurrence-% " + op + " " + num + "% in " + tracesToFilter;
 
 			topStates = tracesMiner.getStatesWithOccurrencePercentage(perc, op, tracesToFilter);
 
@@ -904,7 +904,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 		default:
 			// highest occurrence
-			chartTitle = "States with " + selectedOccurrenceType + " Occurrence";
+			chartTitle = "States with " + selectedOccurrenceType + " Occurrence in All Traces";
 			// topActions = tracesMiner.getHighestActionOccurrence();
 
 			break;

@@ -951,7 +951,13 @@ public class TracesMiner {
 			}
 		}
 
-		System.out.println(result);
+		for(Entry<Integer, Integer> entr:  result.entrySet()) {
+			if(entr.getValue()==5) {
+				System.out.println(entr);	
+			}
+			
+		}
+//		System.out.println(result);
 
 		return result;
 	}
