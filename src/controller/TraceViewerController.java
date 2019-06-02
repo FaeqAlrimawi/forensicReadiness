@@ -786,6 +786,8 @@ public class TraceViewerController implements TracesMinerListener {
 			chartTitle = "Actions with Occurrence-% " + op + " " + num + "% in " + tracesToFilter;
 
 			topActions = tracesMiner.getActionsWithOccurrencePercentage(perc, op, tracesToFilter);
+			
+			System.out.println(topActions);
 			break;
 
 		default:

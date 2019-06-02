@@ -487,6 +487,7 @@ public class TracesMiner {
 				occurrences = shortestActionsOccurence;
 			} else {
 				occurrences = getOccurrence(shortestTraces);
+				shortestActionsOccurence = occurrences;
 			}
 
 			break;
@@ -581,11 +582,12 @@ public class TracesMiner {
 		Map<String, Integer> occurrences = null;
 
 		double localPerc = 0;
-		int numOfTraces = instances.size();
+		int numOfTraces = -1;
 
 		switch (tracesToFilter) {
 		case TraceViewerController.ALL_TRACES:
 			occurrences = tracesActionsOccurence;
+			numOfTraces = instances.size();
 			break;
 
 		case TraceViewerController.SHORTEST_TRACES:
@@ -593,8 +595,10 @@ public class TracesMiner {
 				occurrences = shortestActionsOccurence;
 			} else {
 				occurrences = getOccurrence(shortestTraces);
+				shortestActionsOccurence = occurrences;
 			}
 
+			numOfTraces = shortestTraces.size();
 			break;
 
 		default:
@@ -603,6 +607,7 @@ public class TracesMiner {
 
 		if (occurrences != null) {
 
+			System.out.println("miner " + occurrences);
 			// for now get the first n
 			for (Entry<String, Integer> entry : occurrences.entrySet()) {
 
@@ -711,6 +716,7 @@ public class TracesMiner {
 				occurrences = shortestActionsOccurence;
 			} else {
 				occurrences = getOccurrence(shortestTraces);
+				shortestActionsOccurence = occurrences;
 			}
 
 			break;
