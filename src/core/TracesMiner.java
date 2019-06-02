@@ -23,7 +23,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.w3c.dom.ls.LSInput;
 
 //import com.beust.jcommander.internal.Lists;
 
@@ -107,6 +106,10 @@ public class TracesMiner {
 	// key:state number, value: occurrence
 	Map<Integer, Integer> statesOccurrences;
 
+	// key:action name, value: occurrence
+	// key:action name, value: occurrence
+	Map<String, Integer> shortestActionsOccurence;
+
 	// shortest traces
 	Map<Integer, GraphPath> shortestTraces;
 
@@ -143,10 +146,15 @@ public class TracesMiner {
 
 		tracesActions = new HashMap<String, Integer>();
 		tracesActionsOccurence = new HashMap<String, Integer>();
+		shortestActionsOccurence = new HashMap<String, Integer>();
 
 		statesOccurrences = new HashMap<Integer, Integer>();
 
 		shortestTraces = new HashMap<Integer, GraphPath>();
+
+		// instances = new HashMap<Integer, GraphPath>();
+
+		traceIDs = new LinkedList<Integer>();
 
 		numberOfStates = 10000;
 
@@ -467,26 +475,6 @@ public class TracesMiner {
 
 		int index = 0;
 
-		// sort occurrences
-		Collection<Integer> values = tracesActionsOccurence.values();
-		List<Integer> list = new LinkedList<Integer>(values);
-		Collections.sort(list);// ascending order
-
-		List<Integer> topN = new LinkedList<Integer>();
-
-		for (int i = list.size() - 1; i > 0; i--) {
-
-			if (!topN.contains(list.get(i))) {
-				topN.add(list.get(i));
-				index++;
-
-				if (index == numberofActions) {
-					break;
-				}
-			}
-
-		}
-
 		// for now get the first n from traces
 		switch (tracesToFilter) {
 
@@ -495,7 +483,11 @@ public class TracesMiner {
 			break;
 
 		case TraceViewerController.SHORTEST_TRACES:
-			occurrences = getOccurrence(shortestTraces);
+			if (shortestActionsOccurence != null && !shortestActionsOccurence.isEmpty()) {
+				occurrences = shortestActionsOccurence;
+			} else {
+				occurrences = getOccurrence(shortestTraces);
+			}
 
 			break;
 
@@ -504,6 +496,26 @@ public class TracesMiner {
 		}
 
 		if (occurrences != null) {
+			// sort occurrences
+			Collection<Integer> values = occurrences.values();
+			List<Integer> list = new LinkedList<Integer>(values);
+			Collections.sort(list);// ascending order
+
+			List<Integer> topN = new LinkedList<Integer>();
+
+			for (int i = list.size() - 1; i > 0; i--) {
+
+				if (!topN.contains(list.get(i))) {
+					topN.add(list.get(i));
+					index++;
+
+					if (index == numberofActions) {
+						break;
+					}
+				}
+
+			}
+
 			for (Entry<String, Integer> entry : occurrences.entrySet()) {
 
 				String action = entry.getKey();
@@ -562,47 +574,70 @@ public class TracesMiner {
 		return result;
 	}
 
-	public Map<String, Integer> getActionsWithOccurrencePercentage(double percentage, String operation) {
+	public Map<String, Integer> getActionsWithOccurrencePercentage(double percentage, String operation,
+			String tracesToFilter) {
 
 		Map<String, Integer> result = new HashMap<String, Integer>();
+		Map<String, Integer> occurrences = null;
 
 		double localPerc = 0;
 		int numOfTraces = instances.size();
 
-		// for now get the first n
-		for (Entry<String, Integer> entry : tracesActionsOccurence.entrySet()) {
+		switch (tracesToFilter) {
+		case TraceViewerController.ALL_TRACES:
+			occurrences = tracesActionsOccurence;
+			break;
 
-			String action = entry.getKey();
-			int occur = entry.getValue();
-
-			localPerc = occur * 1.0 / numOfTraces;
-
-			switch (operation) {
-			case TraceViewerController.EQUAL:
-				if (localPerc == percentage) {
-					result.put(action, occur);
-					// index++;
-				}
-				break;
-
-			case TraceViewerController.MORE_THAN:
-				if (localPerc > percentage) {
-					result.put(action, occur);
-					// index++;
-				}
-				break;
-
-			case TraceViewerController.LESS_THAN:
-				if (localPerc < percentage) {
-					result.put(action, occur);
-					// index++;
-				}
-				break;
-
-			default:
-				break;
+		case TraceViewerController.SHORTEST_TRACES:
+			if (shortestActionsOccurence != null && !shortestActionsOccurence.isEmpty()) {
+				occurrences = shortestActionsOccurence;
+			} else {
+				occurrences = getOccurrence(shortestTraces);
 			}
 
+			break;
+
+		default:
+			break;
+		}
+
+		if (occurrences != null) {
+
+			// for now get the first n
+			for (Entry<String, Integer> entry : occurrences.entrySet()) {
+
+				String action = entry.getKey();
+				int occur = entry.getValue();
+
+				localPerc = occur * 1.0 / numOfTraces;
+
+				switch (operation) {
+				case TraceViewerController.EQUAL:
+					if (localPerc == percentage) {
+						result.put(action, occur);
+						// index++;
+					}
+					break;
+
+				case TraceViewerController.MORE_THAN:
+					if (localPerc > percentage) {
+						result.put(action, occur);
+						// index++;
+					}
+					break;
+
+				case TraceViewerController.LESS_THAN:
+					if (localPerc < percentage) {
+						result.put(action, occur);
+						// index++;
+					}
+					break;
+
+				default:
+					break;
+				}
+
+			}
 		}
 
 		// tracesActionsOccurence.s
@@ -658,50 +693,67 @@ public class TracesMiner {
 		return result;
 	}
 
-	public Map<String, Integer> getLowestActionOccurrences(int numberofActions) {
+	public Map<String, Integer> getLowestActionOccurrences(int numberofActions, String tracesToFilter) {
 
 		Map<String, Integer> result = new HashMap<String, Integer>();
-
+		Map<String, Integer> occurrences = null;
 		int index = 0;
 
-		// sort occurrences
-		Collection<Integer> values = tracesActionsOccurence.values();
-		List<Integer> list = new LinkedList<Integer>(values);
-		Collections.sort(list);// ascending order
+		// for now get the first n from traces
+		switch (tracesToFilter) {
 
-		List<Integer> topN = new LinkedList<Integer>();
-		int size = list.size();
+		case TraceViewerController.ALL_TRACES:
+			occurrences = tracesActionsOccurence;
+			break;
 
-		for (int i = 0; i < list.size(); i++) {
+		case TraceViewerController.SHORTEST_TRACES:
+			if (shortestActionsOccurence != null && !shortestActionsOccurence.isEmpty()) {
+				occurrences = shortestActionsOccurence;
+			} else {
+				occurrences = getOccurrence(shortestTraces);
+			}
 
-			if (!topN.contains(list.get(i))) {
-				topN.add(list.get(i));
-				index++;
+			break;
 
-				if (index == numberofActions) {
-					break;
+		default:
+			break;
+		}
+
+		if (occurrences != null) {
+			Collection<Integer> values = occurrences.values();
+			List<Integer> list = new LinkedList<Integer>(values);
+			Collections.sort(list);// ascending order
+
+			List<Integer> topN = new LinkedList<Integer>();
+			int size = list.size();
+
+			for (int i = 0; i < list.size(); i++) {
+
+				if (!topN.contains(list.get(i))) {
+					topN.add(list.get(i));
+					index++;
+
+					if (index == numberofActions) {
+						break;
+					}
 				}
+
 			}
 
-		}
+			// for now get the first n
+			for (Entry<String, Integer> entry : occurrences.entrySet()) {
 
-		// for now get the first n
-		for (Entry<String, Integer> entry : tracesActionsOccurence.entrySet()) {
+				String action = entry.getKey();
+				int occur = entry.getValue();
 
-			String action = entry.getKey();
-			int occur = entry.getValue();
+				if (topN.contains(occur)) {
+					result.put(action, occur);
+					index++;
+				}
 
-			if (topN.contains(occur)) {
-				result.put(action, occur);
-				index++;
 			}
-
-			// if (index == numberofActions) {
-			// break;
-			// }
 		}
 
-		// tracesActionsOccurence.s
 		return result;
 	}
 
@@ -1616,7 +1668,7 @@ public class TracesMiner {
 		StringBuilder str = new StringBuilder();
 		// String separator = " ";
 		String fileLinSeparator = System.getProperty("line.separator");
-		traceIDs = new LinkedList<Integer>();
+		// traceIDs = new LinkedList<Integer>();
 
 		str.append("trace-ID").append(fileLinSeparator);
 
@@ -1992,21 +2044,17 @@ public class TracesMiner {
 
 		}
 
-	}
+		// reset data
+		if (instances != null) {
+			instances.clear();
+		}
 
-	// public static void main(String[] args) {
-	//
-	// IncidentInstancesClusterGenerator tester = new
-	// IncidentInstancesClusterGenerator();
-	//
-	// String fileName = "D:/Bigrapher data/lero/lero100K/output";
-	//
-	// // using SPMF library
-	// tester.identifyRelevantTraces(fileName);
-	//
-	// // using Weka
-	// // tester.clusterUsingWeka(fileName);
-	// }
+		traceIDs.clear();
+		tracesActionsOccurence.clear();
+		shortestTraces.clear();
+		shortestActionsOccurence.clear();
+
+	}
 
 	public int getMinimumTraceLength() {
 		return minimumTraceLength;
@@ -2304,13 +2352,13 @@ public class TracesMiner {
 	public void setListener(TracesMinerListener listener) {
 		this.listener = listener;
 	}
-	
+
 	public int getShortestTracesNumber() {
-		
-		if(shortestTraces != null) {
+
+		if (shortestTraces != null) {
 			return shortestTraces.size();
 		}
-		
+
 		return -1;
 	}
 }

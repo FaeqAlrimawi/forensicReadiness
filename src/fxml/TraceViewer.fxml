@@ -23,7 +23,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="582.0" prefWidth="1262.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.TraceViewerController">
+<AnchorPane prefHeight="659.0" prefWidth="1262.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.TraceViewerController">
    <children>
       <VBox layoutX="19.0" layoutY="17.0" prefHeight="389.0" prefWidth="628.0" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="15.0">
          <children>
@@ -230,13 +230,13 @@
           <NumberAxis fx:id="numberAxis" side="LEFT" />
         </yAxis>
       </BarChart>
-      <VBox layoutX="1037.0" layoutY="495.0">
+      <VBox layoutX="1037.0" layoutY="534.0">
          <children>
             <HBox>
                <children>
-                  <ChoiceBox fx:id="choiceBoxFilterSelector" prefHeight="25.0" prefWidth="123.0" />
+                  <ChoiceBox fx:id="choiceBoxChartFilterTraces" prefHeight="25.0" prefWidth="123.0" />
                   <Pane prefHeight="6.0" prefWidth="5.0" />
-                  <Button fx:id="btnRefresh" disable="true" mnemonicParsing="false" onAction="#refreshGraph" prefHeight="25.0" prefWidth="80.0" text="refresh" />
+                  <ChoiceBox fx:id="choiceBoxFilterSelector" prefHeight="25.0" prefWidth="81.0" />
                </children>
             </HBox>
             <Pane prefHeight="6.0" prefWidth="211.0" />
@@ -291,6 +291,6 @@
             </Label>
          </children>
       </HBox>
-      <ChoiceBox fx:id="choiceBoxChartFilterTraces" layoutX="1037.0" layoutY="463.0" prefHeight="25.0" prefWidth="211.0" />
+      <Button fx:id="btnRefresh" disable="true" layoutX="1168.0" layoutY="620.0" mnemonicParsing="false" onAction="#refreshGraph" prefHeight="25.0" prefWidth="80.0" text="refresh" />
    </children>
 </AnchorPane>

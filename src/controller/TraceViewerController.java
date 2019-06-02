@@ -152,9 +152,9 @@ public class TraceViewerController implements TracesMinerListener {
 	@FXML
 	private Spinner<Integer> spinnerFilterLength;
 
-    @FXML
-    private ChoiceBox<String> choiceBoxChartFilterTraces;
-    
+	@FXML
+	private ChoiceBox<String> choiceBoxChartFilterTraces;
+
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -168,7 +168,7 @@ public class TraceViewerController implements TracesMinerListener {
 	private int numberOfTraces = -1;
 
 	// used for progress bar
-//	private double singleTraceProgressValue = 0.1;
+	// private double singleTraceProgressValue = 0.1;
 	private int currentTraceNumber = 0;
 
 	private ExecutorService executor = Executors.newFixedThreadPool(3);
@@ -196,7 +196,7 @@ public class TraceViewerController implements TracesMinerListener {
 	private final String[] occurrencesOptions = { HIGHEST, LOWEST };
 
 	private final String[] FilterSelectors = { ACTIONS, STATES };
-	
+
 	private List<String> chartFilterTraces = new ArrayList<String>();
 
 	String chartTitle = "";
@@ -421,12 +421,11 @@ public class TraceViewerController implements TracesMinerListener {
 	public void refreshGraph(ActionEvent event) {
 
 		String operation = "";
-		
+
 		String perc = textFieldOccurrenceFilterPercentage.getText();
-		
-		
+
 		String selection = choiceBoxFilterSelector.getSelectionModel().getSelectedItem();
-		
+
 		// higher precedence for percentage
 		if (perc != null && !perc.isEmpty()) {
 			operation = PERCENTAGE;
@@ -434,7 +433,7 @@ public class TraceViewerController implements TracesMinerListener {
 			String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
 			operation = selectedOccurrenceType;
 		}
-		
+
 		switch (selection) {
 		case ACTIONS:
 			setupTopActionsChart(operation);
@@ -443,11 +442,10 @@ public class TraceViewerController implements TracesMinerListener {
 		case STATES:
 			setupTopStatesChart(operation);
 			break;
-			
+
 		default:
 			break;
 		}
-		
 
 	}
 
@@ -458,7 +456,6 @@ public class TraceViewerController implements TracesMinerListener {
 			// show progress indicatior
 			progressIndicatorLoader.setVisible(true);
 
-			
 			executor.submit(new Runnable() {
 
 				@Override
@@ -486,23 +483,23 @@ public class TraceViewerController implements TracesMinerListener {
 		// set file in miner
 		tracesMiner.setTracesFile(filePath);
 
-		int numberOfTraces = tracesMiner.readTracesFromFile();
+		numberOfTraces = tracesMiner.readTracesFromFile();
 
 		boolean isLoaded = false;
 		if (numberOfTraces == TracesMiner.TRACES_NOT_LOADED) {
 
 			isLoaded = false;
-		} else{
-			isLoaded  = true;
+		} else {
+			isLoaded = true;
 		}
 
 		setupGUIpostLoading(isLoaded);
-		
+
 		return isLoaded;
 	}
 
 	protected void setupGUIpostLoading(boolean isLoaded) {
-		
+
 		if (isLoaded) {
 
 			// update number of traces
@@ -523,24 +520,26 @@ public class TraceViewerController implements TracesMinerListener {
 			btnRefresh.setDisable(false);
 			// show top actions
 			// setupTopActionsChart();
-			
-			//set traces filter to be All
-			chartFilterTraces.add(ALL_TRACES);
-			choiceBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
-			
+
 			Platform.runLater(new Runnable() {
-				
+
 				@Override
 				public void run() {
 					// TODO Auto-generated method stub
-					choiceBoxChartFilterTraces.getSelectionModel().select(0);
+					// set traces filter to be All
+					if(!chartFilterTraces.contains(ALL_TRACES)) {
+						chartFilterTraces.add(ALL_TRACES);	
+						choiceBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
+						choiceBoxChartFilterTraces.getSelectionModel().select(0);
+					}
+					
+					
 				}
 			});
-		
-			
+
 			// display highest occurrence
 			setupTopActionsChart("Highest-Ranked");
-			
+
 		} else {
 			updateImage(IMAGE_WRONG, imgSystemFileCheck);
 			updateText("Traces file is not valid", lblSystemFileCheck);
@@ -551,7 +550,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 		progressIndicatorLoader.setVisible(false);
 	}
-	
+
 	protected void resetLoadingGUI() {
 
 		updateImage(null, imgSystemFileCheck);
@@ -584,17 +583,19 @@ public class TraceViewerController implements TracesMinerListener {
 
 		updateImage(IMAGE_CORRECT, imgFilter);
 		updateText("# of shortest traces = " + numOfShortestTraces, lblFilter);
-		
-		
+
 		Platform.runLater(new Runnable() {
-			
+
 			@Override
 			public void run() {
+
+				// add a shortest traces entry to chart filter choice box
+				if(!chartFilterTraces.contains(SHORTEST_TRACES)) {
+					chartFilterTraces.add(SHORTEST_TRACES);	
+					choiceBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
+					choiceBoxChartFilterTraces.getSelectionModel().select(0);
+				}
 				
-				//add a shortest traces entry to chart filter choice box
-				chartFilterTraces.add(SHORTEST_TRACES);
-				choiceBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
-				choiceBoxChartFilterTraces.getSelectionModel().select(0);
 			}
 		});
 
@@ -741,10 +742,11 @@ public class TraceViewerController implements TracesMinerListener {
 		Map<String, Integer> topActions;
 		int num = 0;
 
-		String tracesToFilter = choiceBoxChartFilterTraces.getSelectionModel().getSelectedItem();
-		
-		int numberOfTracesInSelection = 0;
-		
+		String tracesToFilter = choiceBoxChartFilterTraces.getSelectionModel().getSelectedItem() + "";
+
+		int numberOfTracesInSelection = -1;
+
+		// set number of actions based on selection
 		switch (tracesToFilter) {
 		case ALL_TRACES:
 			numberOfTracesInSelection = numberOfTraces;
@@ -753,13 +755,15 @@ public class TraceViewerController implements TracesMinerListener {
 		case SHORTEST_TRACES:
 			numberOfTracesInSelection = tracesMiner.getShortestTracesNumber();
 			break;
-			
+
 		default:
 			numberOfTracesInSelection = numberOfTraces;
 			break;
 		}
+
+		//invoke operation from the miner based on selection
 		switch (selectedOccurrenceType) {
-		
+
 		case HIGHEST:
 			num = Integer.parseInt(textFieldNumofOccurrences.getText());
 			chartTitle = "Actions with " + selectedOccurrenceType + " " + num + " Occurrences in " + tracesToFilter;
@@ -769,9 +773,9 @@ public class TraceViewerController implements TracesMinerListener {
 
 		case LOWEST:
 			num = Integer.parseInt(textFieldNumofOccurrences.getText());
-			chartTitle = "Actions with " + selectedOccurrenceType + " " + num + " Occurrences";
+			chartTitle = "Actions with " + selectedOccurrenceType + " " + num + " Occurrences in " + tracesToFilter;
 
-			topActions = tracesMiner.getLowestActionOccurrences(num);
+			topActions = tracesMiner.getLowestActionOccurrences(num, tracesToFilter);
 
 			break;
 
@@ -779,15 +783,14 @@ public class TraceViewerController implements TracesMinerListener {
 			num = Integer.parseInt(textFieldOccurrenceFilterPercentage.getText());
 			double perc = num * 1.0 / 100;
 			String op = choiceBoxOccurrenceFilterPercentage.getSelectionModel().getSelectedItem();
-			chartTitle = "Actions with Occurrence % " + op + " " + num + "%";
+			chartTitle = "Actions with Occurrence-% " + op + " " + num + "% in " + tracesToFilter;
 
-			topActions = tracesMiner.getActionsWithOccurrencePercentage(perc, op);
-
+			topActions = tracesMiner.getActionsWithOccurrencePercentage(perc, op, tracesToFilter);
 			break;
 
 		default:
-			// highest occurrence
-			chartTitle = "Actions with " + selectedOccurrenceType + " Occurrence";
+			// highest occurrence in all
+			chartTitle = "Actions with " + selectedOccurrenceType + " Occurrence in All Traces";
 			topActions = tracesMiner.getHighestActionOccurrence();
 
 			break;
@@ -812,9 +815,9 @@ public class TraceViewerController implements TracesMinerListener {
 
 			// bug does not allow the correct order of labels
 			int occur = occurrences.get(i);
-			
-			//convert occurrence into percentage 
-			int occurPerc = (int)Math.floor((occur*1.0/numberOfTracesInSelection)*100);
+
+			// convert occurrence into percentage
+			int occurPerc = (int) Math.floor((occur * 1.0 / numberOfTracesInSelection) * 100);
 			series1.getData().add(new XYChart.Data<String, Integer>("", occurPerc));
 
 			series1.setName(actions.get(i));
@@ -830,7 +833,7 @@ public class TraceViewerController implements TracesMinerListener {
 				categoryAxis.setLabel("Action");
 
 				// Defining the y axis
-				numberAxis.setLabel("Occurrence");
+				numberAxis.setLabel("Occurrence %");
 
 				barChartActions.setTitle(chartTitle);
 
@@ -863,7 +866,7 @@ public class TraceViewerController implements TracesMinerListener {
 			num = Integer.parseInt(textFieldNumofOccurrences.getText());
 			chartTitle = "States with " + selectedOccurrenceType + " " + num + " Occurrences";
 
-			 topStates = tracesMiner.getLowestStateOccurrences(num);
+			topStates = tracesMiner.getLowestStateOccurrences(num);
 
 			break;
 
@@ -904,10 +907,10 @@ public class TraceViewerController implements TracesMinerListener {
 
 			// bug does not allow the correct order of labels
 			int occur = occurrences.get(i);
-			
-			//convert occurrence into percentage 
-			int occurPerc = (int)Math.floor((occur*1.0/numberOfTraces)*100);
-			
+
+			// convert occurrence into percentage
+			int occurPerc = (int) Math.floor((occur * 1.0 / numberOfTraces) * 100);
+
 			series1.getData().add(new XYChart.Data<String, Integer>("", occurPerc));
 
 			series1.setName("" + states.get(i));
