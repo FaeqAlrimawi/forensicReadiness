@@ -107,8 +107,10 @@ public class TracesMiner {
 	Map<Integer, Integer> statesOccurrences;
 
 	// key:action name, value: occurrence
-	// key:action name, value: occurrence
 	Map<String, Integer> shortestActionsOccurence;
+
+	// key:state, value: occurrence
+	Map<Integer, Integer> shortestStatesOccurence;
 
 	// shortest traces
 	Map<Integer, GraphPath> shortestTraces;
@@ -151,6 +153,7 @@ public class TracesMiner {
 		statesOccurrences = new HashMap<Integer, Integer>();
 
 		shortestTraces = new HashMap<Integer, GraphPath>();
+		shortestStatesOccurence = new HashMap<Integer, Integer>();
 
 		// instances = new HashMap<Integer, GraphPath>();
 
@@ -533,41 +536,66 @@ public class TracesMiner {
 		return result;
 	}
 
-	public Map<Integer, Integer> getTopStatesOccurrences(int numberofActions) {
+	public Map<Integer, Integer> getTopStatesOccurrences(int numberofActions, String tracesToFilter) {
 
 		Map<Integer, Integer> result = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> occurrences = null;
 
 		int index = 0;
 
-		// sort occurrences
-		Collection<Integer> values = statesOccurrences.values();
-		List<Integer> list = new LinkedList<Integer>(values);
-		Collections.sort(list);// ascending order
+		// for now get the first n from traces
+		switch (tracesToFilter) {
 
-		List<Integer> topN = new LinkedList<Integer>();
+		case TraceViewerController.ALL_TRACES:
+			occurrences = statesOccurrences;
+			break;
 
-		for (int i = list.size() - 1; i > 0; i--) {
-
-			if (!topN.contains(list.get(i))) {
-				topN.add(list.get(i));
-				index++;
-
-				if (index == numberofActions) {
-					break;
-				}
+		case TraceViewerController.SHORTEST_TRACES:
+			if (shortestStatesOccurence != null && !shortestStatesOccurence.isEmpty()) {
+				occurrences = shortestStatesOccurence;
+			} else {
+				occurrences = getStateOccurrence(shortestTraces);
+				shortestStatesOccurence = occurrences;
 			}
 
+			break;
+
+		default:
+			break;
 		}
 
-		// for now get the first n
-		for (Entry<Integer, Integer> entry : statesOccurrences.entrySet()) {
+		if (occurrences != null) {
+			// sort occurrences
+			Collection<Integer> values = occurrences.values();
+			List<Integer> list = new LinkedList<Integer>(values);
+			Collections.sort(list);// ascending order
 
-			Integer state = entry.getKey();
-			int occur = entry.getValue();
+			List<Integer> topN = new LinkedList<Integer>();
 
-			if (topN.contains(occur)) {
-				result.put(state, occur);
-				index++;
+			for (int i = list.size() - 1; i > 0; i--) {
+
+				if (!topN.contains(list.get(i))) {
+					topN.add(list.get(i));
+					index++;
+
+					if (index == numberofActions) {
+						break;
+					}
+				}
+
+			}
+
+			// for now get the first n
+			for (Entry<Integer, Integer> entry : occurrences.entrySet()) {
+
+				Integer state = entry.getKey();
+				int occur = entry.getValue();
+
+				if (topN.contains(occur)) {
+					result.put(state, occur);
+					index++;
+				}
+
 			}
 
 		}
@@ -649,52 +677,77 @@ public class TracesMiner {
 		return result;
 	}
 
-	public Map<Integer, Integer> getStatesWithOccurrencePercentage(double percentage, String operation) {
+	public Map<Integer, Integer> getStatesWithOccurrencePercentage(double percentage, String operation,
+			String tracesToFilter) {
 
 		Map<Integer, Integer> result = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> occurrences = null;
 
 		int index = 0;
+		int numOfTraces = -1;
 
-		double localPerc = 0;
-		int numOfTraces = instances.size();
+		switch (tracesToFilter) {
 
-		// for now get the first n
-		for (Entry<Integer, Integer> entry : statesOccurrences.entrySet()) {
+		case TraceViewerController.ALL_TRACES:
+			occurrences = statesOccurrences;
+			numOfTraces = instances.size();
+			break;
 
-			Integer state = entry.getKey();
-			int occur = entry.getValue();
-
-			localPerc = occur * 1.0 / numOfTraces;
-
-			switch (operation) {
-			case TraceViewerController.EQUAL:
-				if (localPerc == percentage) {
-					result.put(state, occur);
-					index++;
-				}
-				break;
-
-			case TraceViewerController.MORE_THAN:
-				if (localPerc > percentage) {
-					result.put(state, occur);
-					index++;
-				}
-				break;
-
-			case TraceViewerController.LESS_THAN:
-				if (localPerc < percentage) {
-					result.put(state, occur);
-					index++;
-				}
-				break;
-
-			default:
-				break;
+		case TraceViewerController.SHORTEST_TRACES:
+			if (shortestStatesOccurence != null && !shortestStatesOccurence.isEmpty()) {
+				occurrences = shortestStatesOccurence;
+			} else {
+				occurrences = getStateOccurrence(shortestTraces);
+				shortestStatesOccurence = occurrences;
 			}
 
+			numOfTraces = shortestTraces.size();
+			break;
+
+		default:
+			break;
 		}
 
-		// tracesActionsOccurence.s
+		if(occurrences !=null) {
+			double localPerc = 0;
+
+			// for now get the first n
+			for (Entry<Integer, Integer> entry : occurrences.entrySet()) {
+
+				Integer state = entry.getKey();
+				int occur = entry.getValue();
+
+				localPerc = occur * 1.0 / numOfTraces;
+
+				switch (operation) {
+				case TraceViewerController.EQUAL:
+					if (localPerc == percentage) {
+						result.put(state, occur);
+						index++;
+					}
+					break;
+
+				case TraceViewerController.MORE_THAN:
+					if (localPerc > percentage) {
+						result.put(state, occur);
+						index++;
+					}
+					break;
+
+				case TraceViewerController.LESS_THAN:
+					if (localPerc < percentage) {
+						result.put(state, occur);
+						index++;
+					}
+					break;
+
+				default:
+					break;
+				}
+
+			}
+		}
+		
 		return result;
 	}
 
@@ -763,53 +816,82 @@ public class TracesMiner {
 		return result;
 	}
 
-	public Map<Integer, Integer> getLowestStateOccurrences(int numberofStates) {
+	public Map<Integer, Integer> getLowestStateOccurrences(int numberofStates, String tracesToFilter) {
 
 		Map<Integer, Integer> result = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> occurrences = null;
 
 		int index = 0;
 
-		// sort occurrences
-		Collection<Integer> values = statesOccurrences.values();
-		List<Integer> list = new LinkedList<Integer>(values);
-		Collections.sort(list);// ascending order
+		switch (tracesToFilter) {
 
-		List<Integer> topN = new LinkedList<Integer>();
-		int size = list.size();
+		case TraceViewerController.ALL_TRACES:
+			occurrences = statesOccurrences;
+			break;
 
-		for (int i = 0; i < list.size(); i++) {
-
-			if (!topN.contains(list.get(i))) {
-				topN.add(list.get(i));
-				index++;
-
-				if (index == numberofStates) {
-					break;
-				}
+		case TraceViewerController.SHORTEST_TRACES:
+			if (shortestStatesOccurence != null && !shortestStatesOccurence.isEmpty()) {
+				occurrences = shortestStatesOccurence;
+			} else {
+				occurrences = getStateOccurrence(shortestTraces);
+				shortestStatesOccurence = occurrences;
 			}
 
+			break;
+
+		default:
+			break;
 		}
 
-		// for now get the first n
-		for (Entry<Integer, Integer> entry : statesOccurrences.entrySet()) {
+		if (occurrences != null) {
+			// sort occurrences
+			Collection<Integer> values = occurrences.values();
+			List<Integer> list = new LinkedList<Integer>(values);
+			Collections.sort(list);// ascending order
 
-			Integer state = entry.getKey();
-			int occur = entry.getValue();
+			List<Integer> topN = new LinkedList<Integer>();
+			int size = list.size();
 
-			if (topN.contains(occur)) {
-				result.put(state, occur);
-				index++;
+			for (int i = 0; i < list.size(); i++) {
+
+				if (!topN.contains(list.get(i))) {
+					topN.add(list.get(i));
+					index++;
+
+					if (index == numberofStates) {
+						break;
+					}
+				}
+
 			}
 
-			// if (index == numberofActions) {
-			// break;
-			// }
+			// for now get the first n
+			for (Entry<Integer, Integer> entry : occurrences.entrySet()) {
+
+				Integer state = entry.getKey();
+				int occur = entry.getValue();
+
+				if (topN.contains(occur)) {
+					result.put(state, occur);
+					index++;
+				}
+
+				// if (index == numberofActions) {
+				// break;
+				// }
+			}
 		}
 
 		// tracesActionsOccurence.s
 		return result;
 	}
 
+	/**
+	 * Finds Action occurrrences for the given traces
+	 * 
+	 * @param traces
+	 * @return
+	 */
 	public Map<String, Integer> getOccurrence(Map<Integer, GraphPath> traces) {
 
 		Map<String, Integer> result = new HashMap<String, Integer>();
@@ -831,6 +913,40 @@ public class TracesMiner {
 					// else create new entry for the action
 				} else {
 					result.put(action, 1);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Finds States occurrences for the given traces
+	 * 
+	 * @param traces
+	 * @return
+	 */
+	public Map<Integer, Integer> getStateOccurrence(Map<Integer, GraphPath> traces) {
+
+		Map<Integer, Integer> result = new HashMap<Integer, Integer>();
+
+		for (GraphPath trace : traces.values()) {
+
+			// get actions
+			List<Integer> states = trace.getStateTransitions();
+
+			for (Integer state : states) {
+
+				// if action already exist then add one to current occurrence
+				// value
+				if (result.containsKey(state)) {
+					int oldValue = result.get(state);
+					oldValue++;
+					result.put(state, oldValue);
+
+					// else create new entry for the action
+				} else {
+					result.put(state, 1);
 				}
 			}
 		}
@@ -2059,6 +2175,7 @@ public class TracesMiner {
 		tracesActionsOccurence.clear();
 		shortestTraces.clear();
 		shortestActionsOccurence.clear();
+		shortestStatesOccurence.clear();
 
 	}
 

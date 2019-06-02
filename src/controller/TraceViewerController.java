@@ -856,19 +856,39 @@ public class TraceViewerController implements TracesMinerListener {
 		Map<Integer, Integer> topStates = null;
 		int num = 0;
 
+		String tracesToFilter = choiceBoxChartFilterTraces.getSelectionModel().getSelectedItem() + "";
+
+		int numberOfTracesInSelection = -1;
+
+		// set number of actions based on selection
+		switch (tracesToFilter) {
+		case ALL_TRACES:
+			numberOfTracesInSelection = numberOfTraces;
+			break;
+
+		case SHORTEST_TRACES:
+			numberOfTracesInSelection = tracesMiner.getShortestTracesNumber();
+			break;
+
+		default:
+			numberOfTracesInSelection = numberOfTraces;
+			break;
+		}
+
+		
 		switch (selectedOccurrenceType) {
 		case HIGHEST:
 			num = Integer.parseInt(textFieldNumofOccurrences.getText());
-			chartTitle = "States with " + selectedOccurrenceType + " " + num + " Occurrences";
+			chartTitle = "States with " + selectedOccurrenceType + " " + num + " Occurrences in" + tracesToFilter;
 
-			topStates = tracesMiner.getTopStatesOccurrences(num);
+			topStates = tracesMiner.getTopStatesOccurrences(num, tracesToFilter);
 			break;
 
 		case LOWEST:
 			num = Integer.parseInt(textFieldNumofOccurrences.getText());
-			chartTitle = "States with " + selectedOccurrenceType + " " + num + " Occurrences";
+			chartTitle = "States with " + selectedOccurrenceType + " " + num + " Occurrences in"+ tracesToFilter;
 
-			topStates = tracesMiner.getLowestStateOccurrences(num);
+			topStates = tracesMiner.getLowestStateOccurrences(num, tracesToFilter);
 
 			break;
 
@@ -876,9 +896,9 @@ public class TraceViewerController implements TracesMinerListener {
 			num = Integer.parseInt(textFieldOccurrenceFilterPercentage.getText());
 			double perc = num * 1.0 / 100;
 			String op = choiceBoxOccurrenceFilterPercentage.getSelectionModel().getSelectedItem();
-			chartTitle = "States with Occurrence % " + op + " " + num + "%";
+			chartTitle = "States with Occurrence-% " + op + " " + num + "% in" + tracesToFilter;
 
-			topStates = tracesMiner.getStatesWithOccurrencePercentage(perc, op);
+			topStates = tracesMiner.getStatesWithOccurrencePercentage(perc, op, tracesToFilter);
 
 			break;
 
@@ -911,7 +931,7 @@ public class TraceViewerController implements TracesMinerListener {
 			int occur = occurrences.get(i);
 
 			// convert occurrence into percentage
-			int occurPerc = (int) Math.floor((occur * 1.0 / numberOfTraces) * 100);
+			int occurPerc = (int) Math.floor((occur * 1.0 / numberOfTracesInSelection) * 100);
 
 			series1.getData().add(new XYChart.Data<String, Integer>("", occurPerc));
 
@@ -928,7 +948,7 @@ public class TraceViewerController implements TracesMinerListener {
 				categoryAxis.setLabel("State");
 
 				// Defining the y axis
-				numberAxis.setLabel("Occurrence");
+				numberAxis.setLabel("Occurrence %");
 
 				barChartActions.setTitle(chartTitle);
 
