@@ -4,6 +4,7 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -151,6 +152,9 @@ public class TraceViewerController implements TracesMinerListener {
 	@FXML
 	private Spinner<Integer> spinnerFilterLength;
 
+    @FXML
+    private ChoiceBox<String> choiceBoxChartFilterTraces;
+    
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -164,7 +168,7 @@ public class TraceViewerController implements TracesMinerListener {
 	private int numberOfTraces = -1;
 
 	// used for progress bar
-	private double singleTraceProgressValue = 0.1;
+//	private double singleTraceProgressValue = 0.1;
 	private int currentTraceNumber = 0;
 
 	private ExecutorService executor = Executors.newFixedThreadPool(3);
@@ -180,6 +184,8 @@ public class TraceViewerController implements TracesMinerListener {
 	public static final String LESS_THAN = "<";
 	public static final String ACTIONS = "Actions";
 	public static final String STATES = "States";
+	public static final String ALL_TRACES = "All Traces";
+	public static final String SHORTEST_TRACES = "Shortest Traces";
 
 	private AutoCompleteTextField autoCompleteActionsFiled;
 
@@ -190,6 +196,8 @@ public class TraceViewerController implements TracesMinerListener {
 	private final String[] occurrencesOptions = { HIGHEST, LOWEST };
 
 	private final String[] FilterSelectors = { ACTIONS, STATES };
+	
+	private List<String> chartFilterTraces = new ArrayList<String>();
 
 	String chartTitle = "";
 
@@ -450,45 +458,12 @@ public class TraceViewerController implements TracesMinerListener {
 			// show progress indicatior
 			progressIndicatorLoader.setVisible(true);
 
+			
 			executor.submit(new Runnable() {
 
 				@Override
 				public void run() {
-					// TODO Auto-generated method stub
-					if (loadTraces(filePath)) {
-
-						// update number of traces
-						updateImage(IMAGE_CORRECT, imgSystemFileCheck);
-						updateText("Number of Traces = " + tracesMiner.getNumberOfTraces(), lblSystemFileCheck);
-
-						// updated number of actions used
-						updateImage(IMAGE_CORRECT, imgNumOfActions);
-						updateText("Total Number of Actions: " + tracesMiner.getNumberOfActions(), lblNumOfActions);
-
-						// updated number of states used
-						updateImage(IMAGE_CORRECT, imgNumOfStates);
-						updateText("Total Number of States: " + tracesMiner.getNumberOfStates(), lblNumOfStates);
-
-						// display highest occurrence
-						setupTopActionsChart("Highest-Ranked");
-
-						imgOpentracesFile.setVisible(true);
-						imgOpentracesFileEmpty.setVisible(false);
-						btnAnalyse.setDisable(false);
-						btnRefresh.setDisable(false);
-						// show top actions
-						// setupTopActionsChart();
-
-					} else {
-						updateImage(IMAGE_WRONG, imgSystemFileCheck);
-						updateText("Traces file is not valid", lblSystemFileCheck);
-						imgOpentracesFile.setVisible(false);
-						imgOpentracesFileEmpty.setVisible(true);
-
-					}
-
-					progressIndicatorLoader.setVisible(false);
-
+					loadTraces(filePath);
 				}
 			});
 
@@ -513,14 +488,70 @@ public class TraceViewerController implements TracesMinerListener {
 
 		int numberOfTraces = tracesMiner.readTracesFromFile();
 
+		boolean isLoaded = false;
 		if (numberOfTraces == TracesMiner.TRACES_NOT_LOADED) {
 
-			return false;
+			isLoaded = false;
+		} else{
+			isLoaded  = true;
 		}
 
-		return true;
+		setupGUIpostLoading(isLoaded);
+		
+		return isLoaded;
 	}
 
+	protected void setupGUIpostLoading(boolean isLoaded) {
+		
+		if (isLoaded) {
+
+			// update number of traces
+			updateImage(IMAGE_CORRECT, imgSystemFileCheck);
+			updateText("Number of Traces = " + tracesMiner.getNumberOfTraces(), lblSystemFileCheck);
+
+			// updated number of actions used
+			updateImage(IMAGE_CORRECT, imgNumOfActions);
+			updateText("Total Number of Actions: " + tracesMiner.getNumberOfActions(), lblNumOfActions);
+
+			// updated number of states used
+			updateImage(IMAGE_CORRECT, imgNumOfStates);
+			updateText("Total Number of States: " + tracesMiner.getNumberOfStates(), lblNumOfStates);
+
+			imgOpentracesFile.setVisible(true);
+			imgOpentracesFileEmpty.setVisible(false);
+			btnAnalyse.setDisable(false);
+			btnRefresh.setDisable(false);
+			// show top actions
+			// setupTopActionsChart();
+			
+			//set traces filter to be All
+			chartFilterTraces.add(ALL_TRACES);
+			choiceBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
+			
+			Platform.runLater(new Runnable() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					choiceBoxChartFilterTraces.getSelectionModel().select(0);
+				}
+			});
+		
+			
+			// display highest occurrence
+			setupTopActionsChart("Highest-Ranked");
+			
+		} else {
+			updateImage(IMAGE_WRONG, imgSystemFileCheck);
+			updateText("Traces file is not valid", lblSystemFileCheck);
+			imgOpentracesFile.setVisible(false);
+			imgOpentracesFileEmpty.setVisible(true);
+
+		}
+
+		progressIndicatorLoader.setVisible(false);
+	}
+	
 	protected void resetLoadingGUI() {
 
 		updateImage(null, imgSystemFileCheck);
@@ -553,6 +584,19 @@ public class TraceViewerController implements TracesMinerListener {
 
 		updateImage(IMAGE_CORRECT, imgFilter);
 		updateText("# of shortest traces = " + numOfShortestTraces, lblFilter);
+		
+		
+		Platform.runLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				//add a shortest traces entry to chart filter choice box
+				chartFilterTraces.add(SHORTEST_TRACES);
+				choiceBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
+				choiceBoxChartFilterTraces.getSelectionModel().select(0);
+			}
+		});
 
 	}
 
@@ -697,12 +741,30 @@ public class TraceViewerController implements TracesMinerListener {
 		Map<String, Integer> topActions;
 		int num = 0;
 
+		String tracesToFilter = choiceBoxChartFilterTraces.getSelectionModel().getSelectedItem();
+		
+		int numberOfTracesInSelection = 0;
+		
+		switch (tracesToFilter) {
+		case ALL_TRACES:
+			numberOfTracesInSelection = numberOfTraces;
+			break;
+
+		case SHORTEST_TRACES:
+			numberOfTracesInSelection = tracesMiner.getShortestTracesNumber();
+			break;
+			
+		default:
+			numberOfTracesInSelection = numberOfTraces;
+			break;
+		}
 		switch (selectedOccurrenceType) {
+		
 		case HIGHEST:
 			num = Integer.parseInt(textFieldNumofOccurrences.getText());
-			chartTitle = "Actions with " + selectedOccurrenceType + " " + num + " Occurrences";
+			chartTitle = "Actions with " + selectedOccurrenceType + " " + num + " Occurrences in " + tracesToFilter;
 
-			topActions = tracesMiner.getTopActionOccurrences(num);
+			topActions = tracesMiner.getTopActionOccurrences(num, tracesToFilter);
 			break;
 
 		case LOWEST:
@@ -752,7 +814,7 @@ public class TraceViewerController implements TracesMinerListener {
 			int occur = occurrences.get(i);
 			
 			//convert occurrence into percentage 
-			int occurPerc = (int)Math.floor((occur*1.0/numberOfTraces)*100);
+			int occurPerc = (int)Math.floor((occur*1.0/numberOfTracesInSelection)*100);
 			series1.getData().add(new XYChart.Data<String, Integer>("", occurPerc));
 
 			series1.setName(actions.get(i));

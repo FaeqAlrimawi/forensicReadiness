@@ -385,11 +385,11 @@ public class TracesMiner {
 		// List<Integer> minMaxLengths = new LinkedList<Integer>();
 		// List<String> tracesActs = new LinkedList<String>();
 
-		//reset
+		// reset
 		tracesActionsOccurence.clear();
 		minimumTraceLength = 100000;
 		maximumTraceLength = -1;
-		
+
 		instances = readInstantiatorInstancesFile(instanceFileName);
 
 		// // set min
@@ -460,9 +460,10 @@ public class TracesMiner {
 		return result;
 	}
 
-	public Map<String, Integer> getTopActionOccurrences(int numberofActions) {
+	public Map<String, Integer> getTopActionOccurrences(int numberofActions, String tracesToFilter) {
 
 		Map<String, Integer> result = new HashMap<String, Integer>();
+		Map<String, Integer> occurrences = null;
 
 		int index = 0;
 
@@ -472,7 +473,7 @@ public class TracesMiner {
 		Collections.sort(list);// ascending order
 
 		List<Integer> topN = new LinkedList<Integer>();
-		
+
 		for (int i = list.size() - 1; i > 0; i--) {
 
 			if (!topN.contains(list.get(i))) {
@@ -486,19 +487,36 @@ public class TracesMiner {
 
 		}
 
-		// for now get the first n
-		for (Entry<String, Integer> entry : tracesActionsOccurence.entrySet()) {
+		// for now get the first n from traces
+		switch (tracesToFilter) {
 
-			String action = entry.getKey();
-			int occur = entry.getValue();
+		case TraceViewerController.ALL_TRACES:
+			occurrences = tracesActionsOccurence;
+			break;
 
-			if (topN.contains(occur)) {
-				result.put(action, occur);
-				index++;
-			}
+		case TraceViewerController.SHORTEST_TRACES:
+			occurrences = getOccurrence(shortestTraces);
 
+			break;
+
+		default:
+			break;
 		}
-		
+
+		if (occurrences != null) {
+			for (Entry<String, Integer> entry : occurrences.entrySet()) {
+
+				String action = entry.getKey();
+				int occur = entry.getValue();
+
+				if (topN.contains(occur)) {
+					result.put(action, occur);
+					index++;
+				}
+
+			}
+		}
+
 		return result;
 	}
 
@@ -514,7 +532,7 @@ public class TracesMiner {
 		Collections.sort(list);// ascending order
 
 		List<Integer> topN = new LinkedList<Integer>();
-		
+
 		for (int i = list.size() - 1; i > 0; i--) {
 
 			if (!topN.contains(list.get(i))) {
@@ -540,11 +558,10 @@ public class TracesMiner {
 			}
 
 		}
-		
+
 		return result;
 	}
 
-	
 	public Map<String, Integer> getActionsWithOccurrencePercentage(double percentage, String operation) {
 
 		Map<String, Integer> result = new HashMap<String, Integer>();
@@ -564,21 +581,21 @@ public class TracesMiner {
 			case TraceViewerController.EQUAL:
 				if (localPerc == percentage) {
 					result.put(action, occur);
-//					index++;
+					// index++;
 				}
 				break;
 
 			case TraceViewerController.MORE_THAN:
 				if (localPerc > percentage) {
 					result.put(action, occur);
-//					index++;
+					// index++;
 				}
 				break;
 
 			case TraceViewerController.LESS_THAN:
 				if (localPerc < percentage) {
 					result.put(action, occur);
-//					index++;
+					// index++;
 				}
 				break;
 
@@ -640,7 +657,7 @@ public class TracesMiner {
 		// tracesActionsOccurence.s
 		return result;
 	}
-	
+
 	public Map<String, Integer> getLowestActionOccurrences(int numberofActions) {
 
 		Map<String, Integer> result = new HashMap<String, Integer>();
@@ -734,7 +751,37 @@ public class TracesMiner {
 		// tracesActionsOccurence.s
 		return result;
 	}
-	
+
+	public Map<String, Integer> getOccurrence(Map<Integer, GraphPath> traces) {
+
+		Map<String, Integer> result = new HashMap<String, Integer>();
+
+		for (GraphPath trace : traces.values()) {
+
+			// get actions
+			List<String> actions = trace.getTransitionActions();
+
+			for (String action : actions) {
+
+				// if action already exist then add one to current occurrence
+				// value
+				if (result.containsKey(action)) {
+					int oldValue = result.get(action);
+					oldValue++;
+					result.put(action, oldValue);
+
+					// else create new entry for the action
+				} else {
+					result.put(action, 1);
+				}
+			}
+		}
+
+		System.out.println(result);
+
+		return result;
+	}
+
 	public int findShortestTraces() {
 
 		// shortest trace is set to be 3 actions (or 4 states (i.e. actions+1)
@@ -2013,7 +2060,7 @@ public class TracesMiner {
 
 		// int minTraceLength = 1000000;
 		// int maxTraceLength = -1;
-//		int currentLoadedTracesNum = 0;
+		// int currentLoadedTracesNum = 0;
 
 		FileReader reader;
 		boolean isCompactFormat = true;
@@ -2026,11 +2073,11 @@ public class TracesMiner {
 			// GraphPath object
 			JSONParser parser = new JSONParser();
 
-			//notify listener of loading json file
-			if(listener != null) {
+			// notify listener of loading json file
+			if (listener != null) {
 				listener.onLoadingJSONFile();
 			}
-			
+
 			JSONObject obj = (JSONObject) parser.parse(reader);
 
 			// check if there are instance generated
@@ -2048,7 +2095,7 @@ public class TracesMiner {
 
 				}
 
-//				System.out.println("nuuum " + numberOfTraces);
+				// System.out.println("nuuum " + numberOfTraces);
 				// check the instances again. if there are instances then read
 				// them
 				if (objInstances.containsKey(JSONTerms.INSTANCE_POTENTIAL_INSTANCES)) {
@@ -2087,12 +2134,12 @@ public class TracesMiner {
 						List<Integer> states = new LinkedList<Integer>();
 						List<String> actions = new LinkedList<String>();
 
-						for (int i=0;i< transitions.size();i++) {
-							
+						for (int i = 0; i < transitions.size(); i++) {
+
 							Object objState = transitions.get(i);
-							
+
 							try {
-								
+
 								if (isCompactFormat) {
 									Integer state = Integer.parseInt(objState.toString());
 									// compact format
@@ -2108,7 +2155,7 @@ public class TracesMiner {
 									String actionState = objTransition
 											.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_ACTION).toString();
 
-									//add state
+									// add state
 									if (!states.contains(srcState)) {
 										states.add(srcState);
 									}
@@ -2120,7 +2167,6 @@ public class TracesMiner {
 									// add action
 									actions.add(actionState);
 
-									
 									// check state occurence
 									if (statesOccurrences.containsKey(srcState)) {
 										int oldOccurrence = statesOccurrences.get(srcState);
@@ -2151,9 +2197,10 @@ public class TracesMiner {
 
 							} catch (NumberFormatException e) {
 								isCompactFormat = false;
-								
-								//to account for the lost iteration from exception
-								i = -1; 
+
+								// to account for the lost iteration from
+								// exception
+								i = -1;
 							}
 						}
 
@@ -2195,27 +2242,25 @@ public class TracesMiner {
 
 						// add to the list
 						instances.put(instanceID, tmpPath);
-						
-						
+
 						// notify listener
 						if (listener != null) {
 
-							if(instances.size() % tracesLoadedNotifierNumber == 0) {
-								listener.onTracesLoaded(tracesLoadedNotifierNumber);	
-							} else if(instances.size() == numberOfTraces){
+							if (instances.size() % tracesLoadedNotifierNumber == 0) {
+								listener.onTracesLoaded(tracesLoadedNotifierNumber);
+							} else if (instances.size() == numberOfTraces) {
 								listener.onTracesLoaded(instances.size() % tracesLoadedNotifierNumber);
 							}
-							
+
 						}
 
-						if(actions.size() == 2) {
-							System.out.println(instanceID + " " + actions);	
+						if (actions.size() == 2) {
+							System.out.println(instanceID + " " + actions);
 						}
-						
-						
+
 						int size = actions.size();
 
-						//set min and max trace lengths
+						// set min and max trace lengths
 						if (minimumTraceLength > size) {
 							minimumTraceLength = size;
 						}
@@ -2233,7 +2278,7 @@ public class TracesMiner {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return instances;
 
 	}
@@ -2258,5 +2303,14 @@ public class TracesMiner {
 
 	public void setListener(TracesMinerListener listener) {
 		this.listener = listener;
+	}
+	
+	public int getShortestTracesNumber() {
+		
+		if(shortestTraces != null) {
+			return shortestTraces.size();
+		}
+		
+		return -1;
 	}
 }

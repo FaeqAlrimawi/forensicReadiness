@@ -133,7 +133,7 @@
             <Separator prefWidth="200.0" />
             <VBox prefHeight="237.0" prefWidth="617.0">
                <children>
-                  <Label prefHeight="34.0" prefWidth="451.0" text="Filter" textFill="#aa14c4">
+                  <Label prefHeight="34.0" prefWidth="451.0" text="Filters" textFill="#aa14c4">
                      <font>
                         <Font size="18.0" />
                      </font>
@@ -291,5 +291,6 @@
             </Label>
          </children>
       </HBox>
+      <ChoiceBox fx:id="choiceBoxChartFilterTraces" layoutX="1037.0" layoutY="463.0" prefHeight="25.0" prefWidth="211.0" />
    </children>
 </AnchorPane>
