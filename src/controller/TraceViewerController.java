@@ -102,6 +102,9 @@ public class TraceViewerController implements TracesMinerListener {
 	private TextField textFieldActions;
 
 	@FXML
+	private TextField textFieldActionOccurrence;
+	
+	@FXML
 	private CheckBox checkBoxInOrder;
 
 	@FXML
@@ -173,7 +176,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 	private ExecutorService executor = Executors.newFixedThreadPool(3);
 
-	private static final String SHORTEST = "Shortest Only";
+	private static final String SHORTEST = "Shortest";
 	private static final String SHORTEST_CLASP = "Shortest length & Share longest partial sequence (ClaSP)";
 	private static final String CUSTOMISE = "Customise";
 	private static final String HIGHEST = "Highest";
@@ -327,8 +330,31 @@ public class TraceViewerController implements TracesMinerListener {
 				choiceBoxFilterSelector.getSelectionModel().select(0);
 			}
 		});
+		
+	//checks input to be digital	
+	checkInputAsDigital(textFieldNumofOccurrences);
+	checkInputAsDigital(textFieldOccurrenceFilterPercentage);
+	checkInputAsDigital(textFieldActionOccurrence);
+	
 	}
 
+	protected void checkInputAsDigital(TextField textField) {
+	
+		textField.textProperty().addListener(new ChangeListener<String>() {
+
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				// TODO Auto-generated method stub
+				if (!newValue.matches("\\d*")) {
+					textField.setText(newValue.replaceAll("[^\\d]", ""));
+		        }
+			}
+			
+		});
+		
+	}
+	
+	
 	@FXML
 	void openSystemFile(MouseEvent event) {
 
@@ -518,9 +544,8 @@ public class TraceViewerController implements TracesMinerListener {
 			imgOpentracesFileEmpty.setVisible(false);
 			btnAnalyse.setDisable(false);
 			btnRefresh.setDisable(false);
-			// show top actions
-			// setupTopActionsChart();
 
+			/****set chart filter **/
 			Platform.runLater(new Runnable() {
 
 				@Override
@@ -540,6 +565,9 @@ public class TraceViewerController implements TracesMinerListener {
 			// display highest occurrence
 			setupTopActionsChart("Highest-Ranked");
 
+			/****set customise filter**/
+			setupCustomisePane();
+			
 		} else {
 			updateImage(IMAGE_WRONG, imgSystemFileCheck);
 			updateText("Traces file is not valid", lblSystemFileCheck);
@@ -677,12 +705,20 @@ public class TraceViewerController implements TracesMinerListener {
 
 	protected void setupCustomisePane() {
 
-		customisePane.setDisable(false);
-
-		// set actions in auto completer
+		if(selectedTracesFile == null) {
+			return;
+		}
+		
+		String selectedFilter = choiceboxFilter.getSelectionModel().getSelectedItem();
+		
+		if(selectedFilter.equals(CUSTOMISE)) {
+			customisePane.setDisable(false);	
+		}
+		
+		// set actions in auto completer		
 		autoCompleteActionsFiled.setEntries(tracesMiner.getTracesActions());
 
-		// Value factory.
+		// Value factory
 		SpinnerValueFactory<Integer> valueFactory = //
 				new SpinnerValueFactory.IntegerSpinnerValueFactory(tracesMiner.getMinimumTraceLength(),
 						tracesMiner.getMaximumTraceLength(), tracesMiner.getMinimumTraceLength());

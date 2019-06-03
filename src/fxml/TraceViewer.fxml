@@ -5,7 +5,6 @@
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
@@ -23,27 +22,26 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="659.0" prefWidth="1262.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.TraceViewerController">
+<AnchorPane prefHeight="742.0" prefWidth="1262.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.TraceViewerController">
    <children>
-      <VBox layoutX="19.0" layoutY="17.0" prefHeight="389.0" prefWidth="628.0" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="15.0">
+      <VBox layoutX="19.0" layoutY="17.0" prefHeight="389.0" prefWidth="733.0" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="15.0">
          <children>
-            <VBox prefHeight="149.0" prefWidth="628.0">
+            <VBox prefHeight="109.0" prefWidth="662.0">
                <children>
-                  <Label prefHeight="50.0" prefWidth="451.0" text="Potential Incident Traces" textFill="#aa14c4">
-                     <font>
-                        <Font size="18.0" />
-                     </font>
-                  </Label>
-                  <Pane prefHeight="7.0" prefWidth="452.0" />
-                  <VBox prefHeight="138.0" prefWidth="619.0">
+                  <VBox prefHeight="109.0" prefWidth="704.0">
                      <children>
                         <HBox prefHeight="34.0" prefWidth="620.0">
                            <children>
-                              <AnchorPane>
+                              <Label prefHeight="39.0" prefWidth="70.0" text="Traces">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <AnchorPane prefHeight="35.0" prefWidth="416.0">
                                  <children>
-                                    <TextField fx:id="textFieldSystemFile" prefHeight="34.0" prefWidth="451.0" promptText="traces file (*.json)" />
-                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="410.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
-                                    <ImageView fx:id="imgSelectSystemFile" fitHeight="24.0" fitWidth="24.0" layoutX="416.0" layoutY="5.0" onMouseClicked="#selectTracesFile" pickOnBounds="true" preserveRatio="true">
+                                    <TextField fx:id="textFieldSystemFile" layoutX="-11.0" layoutY="1.0" prefHeight="34.0" prefWidth="423.0" promptText="traces file (*.json)" />
+                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="375.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
+                                    <ImageView fx:id="imgSelectSystemFile" fitHeight="24.0" fitWidth="24.0" layoutX="383.0" layoutY="5.0" onMouseClicked="#selectTracesFile" pickOnBounds="true" preserveRatio="true">
                                        <image>
                                           <Image url="@../../bin/resources/images/folder.png" />
                                        </image>
@@ -51,39 +49,39 @@
                                           <Cursor fx:constant="HAND" />
                                        </cursor>
                                     </ImageView>
-                                    <ProgressBar fx:id="progressBarTraces" opacity="0.5" prefHeight="34.0" prefWidth="415.0" progress="0.0" visible="false" />
+                                    <ProgressBar fx:id="progressBarTraces" layoutX="-11.0" opacity="0.5" prefHeight="34.0" prefWidth="426.0" progress="0.0" visible="false" />
                                  </children>
                               </AnchorPane>
-                              <HBox prefHeight="25.0" prefWidth="400.0">
+                              <AnchorPane prefHeight="24.0" prefWidth="24.0">
                                  <children>
-                                    <Pane prefHeight="34.0" prefWidth="9.0" />
-                                    <AnchorPane prefHeight="24.0" prefWidth="24.0">
-                                       <children>
-                                          <ImageView fx:id="imgOpentracesFileEmpty" fitHeight="24.0" fitWidth="24.0" layoutY="5.0" pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                <Image url="@../../bin/resources/images/file+empty.png" />
-                                             </image>
-                                          </ImageView>
-                                          <ImageView fx:id="imgOpentracesFile" fitHeight="24.0" fitWidth="24.0" layoutY="5.0" onMouseClicked="#openSystemFile" pickOnBounds="true" preserveRatio="true" visible="false">
-                                             <cursor>
-                                                <Cursor fx:constant="HAND" />
-                                             </cursor>
-                                             <image>
-                                                <Image url="@../../bin/resources/images/file.png" />
-                                             </image>
-                                          </ImageView>
-                                       </children>
-                                    </AnchorPane>
-                                    <Pane prefHeight="34.0" prefWidth="9.0" />
+                                    <ImageView fx:id="imgOpentracesFileEmpty" fitHeight="24.0" fitWidth="24.0" layoutY="5.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../bin/resources/images/file+empty.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fx:id="imgOpentracesFile" fitHeight="24.0" fitWidth="24.0" layoutY="5.0" onMouseClicked="#openSystemFile" pickOnBounds="true" preserveRatio="true" visible="false">
+                                       <cursor>
+                                          <Cursor fx:constant="HAND" />
+                                       </cursor>
+                                       <image>
+                                          <Image url="@../../bin/resources/images/file.png" />
+                                       </image>
+                                    </ImageView>
+                                 </children>
+                              </AnchorPane>
+                              <Pane prefHeight="34.0" prefWidth="9.0" />
+                              <HBox>
+                                 <children>
                                     <Label fx:id="lblProgressTraces" alignment="CENTER" prefHeight="39.0" prefWidth="94.0" />
                                     <ProgressIndicator fx:id="progressIndicatorLoader" visible="false" />
                                  </children>
                               </HBox>
                            </children>
                         </HBox>
+                        <Pane prefHeight="7.0" prefWidth="452.0" />
                         <HBox alignment="CENTER_LEFT" prefHeight="7.0" prefWidth="628.0">
                            <children>
-                              <ImageView fx:id="imgSystemFileCheck" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                              <ImageView fx:id="imgSystemFileCheck" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" visible="false">
                                  <image>
                                     <Image url="@../../bin/resources/images/correct.png" />
                                  </image>
@@ -98,7 +96,7 @@
                         </HBox>
                         <HBox alignment="CENTER_LEFT" prefHeight="0.0" prefWidth="628.0">
                            <children>
-                              <ImageView fx:id="imgNumOfActions" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                              <ImageView fx:id="imgNumOfActions" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" visible="false">
                                  <image>
                                     <Image url="@../../bin/resources/images/correct.png" />
                                  </image>
@@ -113,7 +111,7 @@
                         </HBox>
                         <HBox alignment="CENTER_LEFT" prefHeight="0.0" prefWidth="628.0">
                            <children>
-                              <ImageView fx:id="imgNumOfStates" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                              <ImageView fx:id="imgNumOfStates" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" visible="false">
                                  <image>
                                     <Image url="@../../bin/resources/images/correct.png" />
                                  </image>
@@ -153,7 +151,7 @@
                   <Pane prefHeight="15.0" prefWidth="680.0" />
                   <Pane fx:id="customisePane" disable="true" prefHeight="133.0" prefWidth="628.0">
                      <children>
-                        <VBox layoutX="4.0" layoutY="-1.0" prefHeight="134.0" prefWidth="367.0">
+                        <VBox layoutX="4.0" layoutY="-1.0" prefHeight="134.0" prefWidth="628.0">
                            <children>
                               <Label prefHeight="23.0" prefWidth="194.0" text="Customise Traces  Filter">
                                  <font>
@@ -161,9 +159,9 @@
                                  </font>
                               </Label>
                               <Pane prefHeight="6.0" prefWidth="317.0" />
-                              <HBox prefHeight="103.0" prefWidth="362.0">
+                              <HBox prefHeight="103.0" prefWidth="377.0">
                                  <children>
-                                    <VBox prefHeight="103.0" prefWidth="365.0">
+                                    <VBox prefHeight="103.0" prefWidth="602.0">
                                        <children>
                                           <HBox alignment="CENTER_LEFT" prefHeight="17.0" prefWidth="311.0">
                                              <children>
@@ -175,26 +173,20 @@
                                              </children>
                                           </HBox>
                                           <Pane prefHeight="6.0" prefWidth="317.0" />
-                                          <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="311.0">
+                                          <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="525.0">
                                              <children>
                                                 <Label text="-Contains action(s)" />
-                                                <Pane prefHeight="25.0" prefWidth="5.0" />
-                                                <VBox prefHeight="42.0" prefWidth="245.0">
+                                                <HBox prefHeight="25.0" prefWidth="499.0">
                                                    <children>
-                                                      <TextField fx:id="textFieldActions" prefHeight="25.0" prefWidth="237.0" promptText="action1, action2, ...">
+                                                      <TextField fx:id="textFieldActions" prefHeight="25.0" prefWidth="342.0" promptText="action1, action2, ...">
                                                          <tooltip>
-                                                            <Tooltip text="action names separated by comma" />
+                                                            <Tooltip text="action names separated by comma. Special chars: ? [an action], * [any number of actions]" />
                                                          </tooltip>
                                                       </TextField>
-                                                      <Pane prefHeight="0.0" prefWidth="197.0" />
-                                                      <HBox>
-                                                         <children>
-                                                            <CheckBox fx:id="checkBoxInOrder" mnemonicParsing="false" prefHeight="17.0" prefWidth="68.0" text="in order" />
-                                                            <CheckBox fx:id="checkboxFromStart" mnemonicParsing="false" text="from start" />
-                                                         </children>
-                                                      </HBox>
+                                                      <Pane prefHeight="25.0" prefWidth="13.0" />
+                                                      <Label prefHeight="25.0" prefWidth="164.0" text="?: 1 action, *: 0&gt; actions" />
                                                    </children>
-                                                </VBox>
+                                                </HBox>
                                              </children>
                                           </HBox>
                                           <Pane prefHeight="6.0" prefWidth="317.0" />
@@ -204,14 +196,13 @@
                                                 <Pane prefHeight="34.0" prefWidth="9.0" />
                                                 <ChoiceBox fx:id="choiceboxOccurrenceComparator" prefHeight="25.0" prefWidth="55.0" />
                                                 <Pane prefHeight="34.0" prefWidth="3.0" />
-                                                <TextField prefHeight="25.0" prefWidth="48.0" promptText="0-100" />
+                                                <TextField fx:id="textFieldActionOccurrence" prefHeight="25.0" prefWidth="48.0" promptText="0-100" />
                                                 <Pane prefHeight="34.0" prefWidth="3.0" />
                                                 <Label text="\%" />
                                              </children>
                                           </HBox>
                                        </children>
                                     </VBox>
-                                    <Separator orientation="VERTICAL" prefHeight="93.0" prefWidth="3.0" />
                                  </children>
                               </HBox>
                            </children>
@@ -222,7 +213,7 @@
             </VBox>
          </children>
       </VBox>
-      <BarChart fx:id="barChartActions" layoutX="715.0" layoutY="15.0" prefHeight="406.0" prefWidth="533.0">
+      <BarChart fx:id="barChartActions" layoutX="778.0" layoutY="15.0" prefHeight="349.0" prefWidth="470.0">
         <xAxis>
           <CategoryAxis fx:id="categoryAxis" side="BOTTOM" />
         </xAxis>
@@ -276,9 +267,9 @@
             </HBox>
          </children>
       </VBox>
-      <HBox alignment="CENTER_LEFT" layoutX="14.0" layoutY="442.0" prefHeight="41.0" prefWidth="628.0">
+      <HBox alignment="CENTER_LEFT" layoutX="15.0" layoutY="442.0" prefHeight="15.0" prefWidth="628.0">
          <children>
-            <ImageView fx:id="imgFilter" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" visible="false">
+            <ImageView fx:id="imgFilter" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" visible="false">
                <image>
                   <Image url="@../../bin/resources/images/correct.png" />
                </image>

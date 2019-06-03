@@ -133,9 +133,11 @@ public class TracesMiner {
 	String outputFolder;
 
 	// min action length
-	int minimumTraceLength = 1000000;
+	static final int MIN_LENGTH_INITIAL_VALUE = 1000000;
+	int minimumTraceLength = MIN_LENGTH_INITIAL_VALUE;
 
 	// max action length
+	static final int MAX_LENGTH_INITIAL_VALUE = -1;
 	int maximumTraceLength = -1;
 
 	// system data
@@ -2186,10 +2188,20 @@ public class TracesMiner {
 	}
 
 	public int getMinimumTraceLength() {
+		
+		if(minimumTraceLength == MIN_LENGTH_INITIAL_VALUE) {
+			return 0;
+		}
+		
 		return minimumTraceLength;
 	}
 
 	public int getMaximumTraceLength() {
+		
+		if(maximumTraceLength == MAX_LENGTH_INITIAL_VALUE) {
+			return 0;
+		}
+		
 		return maximumTraceLength;
 	}
 

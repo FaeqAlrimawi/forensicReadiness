@@ -148,30 +148,6 @@ public class MainController {
 
 		updateMenuBar();
 
-//		textFieldSystemFile.setOnMouseClicked((e) -> {
-//			imgSelectSystemFile.setVisible(false);
-//		});
-//
-//		textFieldSystemFile.setOnMouseExited((e) -> {
-//			imgSelectSystemFile.setVisible(true);
-//		});
-//
-//		textFieldSelectedStatesFolder.setOnMouseClicked((e) -> {
-//			imgOpenFolder.setVisible(false);
-//		});
-//
-//		textFieldSelectedStatesFolder.setOnMouseExited((e) -> {
-//			imgOpenFolder.setVisible(true);
-//		});
-//
-//		textFieldIncidentInstance.setOnMouseClicked((e) -> {
-//			imgSelectIncidentInstance.setVisible(false);
-//		});
-//
-//		textFieldIncidentInstance.setOnMouseExited((e) -> {
-//			imgSelectIncidentInstance.setVisible(true);
-//		});
-
 	}
 
 	protected void updateMenuBar() {
