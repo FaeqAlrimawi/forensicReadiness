@@ -40,7 +40,7 @@
                               </Label>
                               <AnchorPane prefHeight="35.0" prefWidth="416.0">
                                  <children>
-                                    <TextField fx:id="textFieldSystemFile" layoutX="-11.0" layoutY="1.0" prefHeight="34.0" prefWidth="423.0" promptText="traces file (*.json)" />
+                                    <TextField fx:id="textFieldSystemFile" layoutX="-4.0" prefHeight="34.0" prefWidth="416.0" promptText="traces file (*.json)" />
                                     <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="375.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
                                     <ImageView fx:id="imgSelectSystemFile" fitHeight="24.0" fitWidth="24.0" layoutX="383.0" layoutY="5.0" onMouseClicked="#selectTracesFile" pickOnBounds="true" preserveRatio="true">
                                        <image>
@@ -50,7 +50,6 @@
                                           <Cursor fx:constant="HAND" />
                                        </cursor>
                                     </ImageView>
-                                    <ProgressBar fx:id="progressBarTraces" layoutX="-11.0" opacity="0.5" prefHeight="34.0" prefWidth="426.0" progress="0.0" visible="false" />
                                  </children>
                               </AnchorPane>
                               <AnchorPane prefHeight="24.0" prefWidth="24.0">
@@ -71,10 +70,15 @@
                                  </children>
                               </AnchorPane>
                               <Pane prefHeight="34.0" prefWidth="9.0" />
-                              <HBox>
+                              <HBox prefHeight="34.0" prefWidth="213.0">
                                  <children>
-                                    <Label fx:id="lblProgressTraces" alignment="CENTER" prefHeight="39.0" prefWidth="94.0" />
-                                    <ProgressIndicator fx:id="progressIndicatorLoader" visible="false" />
+                                    <AnchorPane prefHeight="31.0" prefWidth="146.0">
+                                       <children>
+                                          <ProgressBar fx:id="progressBarTraces" opacity="0.5" prefHeight="34.0" prefWidth="213.0" progress="0.0" visible="false" />
+                                          <Label fx:id="lblProgressTraces" alignment="CENTER" prefHeight="34.0" prefWidth="213.0" />
+                                          <ProgressIndicator fx:id="progressIndicatorLoader" prefHeight="34.0" prefWidth="60.0" visible="false" />
+                                       </children>
+                                    </AnchorPane>
                                  </children>
                               </HBox>
                            </children>
@@ -154,7 +158,7 @@
                      <children>
                         <VBox layoutX="4.0" layoutY="-1.0" prefHeight="134.0" prefWidth="628.0">
                            <children>
-                              <Label prefHeight="23.0" prefWidth="194.0" text="Customise Traces  Filter">
+                              <Label prefHeight="23.0" prefWidth="194.0" text="Customise Filter">
                                  <font>
                                     <Font size="14.0" />
                                  </font>
@@ -174,6 +178,18 @@
                                              </children>
                                           </HBox>
                                           <Pane prefHeight="6.0" prefWidth="317.0" />
+                                          <HBox alignment="CENTER_LEFT" prefHeight="3.0" prefWidth="311.0">
+                                             <children>
+                                                <Label text="-Action occurrence" />
+                                                <Pane prefHeight="25.0" prefWidth="5.0" />
+                                                <ComboBox fx:id="comboboxOccurrenceComparator" prefHeight="25.0" prefWidth="55.0" />
+                                                <Pane prefHeight="34.0" prefWidth="3.0" />
+                                                <TextField fx:id="textFieldActionOccurrence" prefHeight="25.0" prefWidth="59.0" promptText="  0-100" />
+                                                <Pane prefHeight="34.0" prefWidth="3.0" />
+                                                <Label text="\%" />
+                                             </children>
+                                          </HBox>
+                                          <Pane prefHeight="6.0" prefWidth="317.0" />
                                           <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="525.0">
                                              <children>
                                                 <Label prefHeight="17.0" prefWidth="108.0" text="-Contains action(s)" />
@@ -188,18 +204,6 @@
                                                       <Label prefHeight="25.0" prefWidth="164.0" text="?: 1 action, *: 0&gt; actions" />
                                                    </children>
                                                 </HBox>
-                                             </children>
-                                          </HBox>
-                                          <Pane prefHeight="6.0" prefWidth="317.0" />
-                                          <HBox alignment="CENTER_LEFT" prefHeight="3.0" prefWidth="311.0">
-                                             <children>
-                                                <Label text="-Action occurrence" />
-                                                <Pane prefHeight="25.0" prefWidth="5.0" />
-                                                <ComboBox fx:id="comboboxOccurrenceComparator" prefHeight="25.0" prefWidth="55.0" />
-                                                <Pane prefHeight="34.0" prefWidth="3.0" />
-                                                <TextField fx:id="textFieldActionOccurrence" prefHeight="25.0" prefWidth="48.0" promptText="0-100" />
-                                                <Pane prefHeight="34.0" prefWidth="3.0" />
-                                                <Label text="\%" />
                                              </children>
                                           </HBox>
                                        </children>
@@ -244,7 +248,7 @@
                         <HBox prefHeight="25.0" prefWidth="144.0">
                            <children>
                               <ComboBox fx:id="comboBoxOccurrences" prefHeight="25.0" prefWidth="90.0" />
-                              <TextField fx:id="textFieldNumofOccurrences" prefHeight="25.0" prefWidth="40.0" promptText="#" />
+                              <TextField fx:id="textFieldNumofOccurrences" prefHeight="25.0" prefWidth="32.0" promptText=" #" />
                            </children>
                         </HBox>
                      </children>
@@ -259,8 +263,8 @@
                         <HBox prefHeight="25.0" prefWidth="103.0">
                            <children>
                               <Pane prefHeight="25.0" prefWidth="8.0" />
-                              <ChoiceBox fx:id="choiceBoxOccurrenceFilterPercentage" prefHeight="25.0" prefWidth="40.0" />
-                              <TextField fx:id="textFieldOccurrenceFilterPercentage" prefHeight="25.0" prefWidth="46.0" promptText="0-100" />
+                              <ChoiceBox fx:id="choiceBoxOccurrenceFilterPercentage" prefHeight="25.0" prefWidth="45.0" />
+                              <TextField fx:id="textFieldOccurrenceFilterPercentage" prefHeight="25.0" prefWidth="51.0" promptText="0-100" />
                            </children>
                         </HBox>
                      </children>

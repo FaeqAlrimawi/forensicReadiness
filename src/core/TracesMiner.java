@@ -654,15 +654,15 @@ public class TracesMiner {
 					}
 					break;
 
-				case TraceViewerController.MORE_THAN:
-					if (localPerc > percentage) {
+				case TraceViewerController.MORE_THAN_EQUAL:
+					if (localPerc >= percentage) {
 						result.put(action, occur);
 						// index++;
 					}
 					break;
 
-				case TraceViewerController.LESS_THAN:
-					if (localPerc < percentage) {
+				case TraceViewerController.LESS_THAN_EQUAL:
+					if (localPerc <= percentage) {
 						result.put(action, occur);
 						// index++;
 					}
@@ -729,15 +729,15 @@ public class TracesMiner {
 					}
 					break;
 
-				case TraceViewerController.MORE_THAN:
-					if (localPerc > percentage) {
+				case TraceViewerController.MORE_THAN_EQUAL:
+					if (localPerc >= percentage) {
 						result.put(state, occur);
 						index++;
 					}
 					break;
 
-				case TraceViewerController.LESS_THAN:
-					if (localPerc < percentage) {
+				case TraceViewerController.LESS_THAN_EQUAL:
+					if (localPerc <= percentage) {
 						result.put(state, occur);
 						index++;
 					}
@@ -2137,12 +2137,13 @@ public class TracesMiner {
 		boolean isFolderCreated = false;
 
 		int index = instanceFileName.lastIndexOf(File.separator);
+		
 		if (index >= 0) {
 			onlyPath = instanceFileName.substring(0, instanceFileName.lastIndexOf(File.separator) + 1);
 			onlyName = instanceFileName.substring(instanceFileName.lastIndexOf(File.separator) + 1,
 					instanceFileName.lastIndexOf("."));
 			// set folder
-			outputFolder = onlyPath + "minigOutput" + File.separator;
+			outputFolder = onlyPath + "miningOutput" + File.separator;
 
 			// make sure output folder is created
 			if (outputFolder != null && !outputFolder.isEmpty()) {
@@ -2150,10 +2151,14 @@ public class TracesMiner {
 
 				if (!out.isDirectory()) {
 					isFolderCreated = out.mkdir();
+				} else{
+					isFolderCreated = true;
 				}
 			}
 
 		}
+		
+		System.out.println(outputFolder);
 
 		// create output files in output folder
 		if (outputFolder != null && !outputFolder.isEmpty() && isFolderCreated) {

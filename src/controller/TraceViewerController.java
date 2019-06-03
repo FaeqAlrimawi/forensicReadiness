@@ -193,8 +193,10 @@ public class TraceViewerController implements TracesMinerListener {
 	private static final String LOWEST = "Lowest";
 	private static final String PERCENTAGE = "percent";
 	public static final String EQUAL = "=";
-	public static final String MORE_THAN = ">";
-	public static final String LESS_THAN = "<";
+	public static final String MORE_THAN_EQUAL = ">=";
+//	public static final String MORE_THAN = ">";
+//	public static final String LESS_THAN = "<";
+	public static final String LESS_THAN_EQUAL = "<=";
 	public static final String ACTIONS = "Actions";
 	public static final String STATES = "States";
 	public static final String ALL_TRACES = "All Traces";
@@ -204,7 +206,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 	private final String[] filters = { SHORTEST, SHORTEST_CLASP, CUSTOMISE };
 
-	private final String[] compartiveOperators = { MORE_THAN, LESS_THAN, EQUAL, };
+	private final String[] compartiveOperators = { MORE_THAN_EQUAL, LESS_THAN_EQUAL, EQUAL, };
 
 	private final String[] occurrencesOptions = { HIGHEST, LOWEST };
 
