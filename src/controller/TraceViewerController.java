@@ -14,6 +14,8 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.eclipse.swt.widgets.Combo;
+
 import controller.utlities.AutoCompleteTextField;
 import core.TracesMiner;
 import core.TracesMinerListener;
@@ -30,6 +32,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
@@ -68,11 +71,11 @@ public class TraceViewerController implements TracesMinerListener {
 	@FXML
 	private Button btnAnalyse;
 
-	@FXML
-	private ChoiceBox<String> choiceboxFilter;
+//	@FXML
+//	private ChoiceBox<String> choiceboxFilter;
 
 	@FXML
-	private ChoiceBox<String> choiceBoxFilterSelector;
+	private ComboBox<String> comboBoxFilterSelector;
 
 	@FXML
 	private ImageView imgFilter;
@@ -89,11 +92,11 @@ public class TraceViewerController implements TracesMinerListener {
 	@FXML
 	private Pane customisePane;
 
-	@FXML
-	private ChoiceBox<String> choiceboxSeqLengthComparator;
+//	@FXML
+//	private ChoiceBox<String> choiceboxSeqLengthComparator;
 
 	@FXML
-	private ChoiceBox<String> choiceboxOccurrenceComparator;
+	private ComboBox<String> comboboxOccurrenceComparator;
 
 	// @FXML
 	// private TextField txtFieldLength;
@@ -126,7 +129,7 @@ public class TraceViewerController implements TracesMinerListener {
 	private Button btnRefresh;
 
 	@FXML
-	private ChoiceBox<String> choiceBoxOccurrences;
+	private ComboBox<String> comboBoxOccurrences;
 
 	@FXML
 	private ImageView imgNumOfActions;
@@ -156,8 +159,15 @@ public class TraceViewerController implements TracesMinerListener {
 	private Spinner<Integer> spinnerFilterLength;
 
 	@FXML
-	private ChoiceBox<String> choiceBoxChartFilterTraces;
+	private ComboBox<String> comboBoxChartFilterTraces;
 
+	@FXML
+	private ComboBox<String> comboBoxFilter;
+	
+	@FXML
+	private ComboBox<String> comboboxSeqLengthComparator;
+	
+	
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -212,10 +222,13 @@ public class TraceViewerController implements TracesMinerListener {
 		// set miner listener
 		tracesMiner.setListener(this);
 
-		// update filters in choice box
-		choiceboxFilter.setItems(FXCollections.observableArrayList(filters));
+		// update filters in combo box
+		comboBoxFilter.setItems(FXCollections.observableArrayList(filters));
+		
+//		// update filters in choice box
+//		choiceboxFilter.setItems(FXCollections.observableArrayList(filters));
 
-		choiceboxFilter.valueProperty().addListener(new ChangeListener<String>() {
+		comboBoxFilter.valueProperty().addListener(new ChangeListener<String>() {
 
 			@Override
 			public void changed(ObservableValue<? extends String> arg0, String oldValue, String newValue) {
@@ -234,25 +247,28 @@ public class TraceViewerController implements TracesMinerListener {
 		});
 
 		// set compartive operators
-		choiceboxOccurrenceComparator.setItems(FXCollections.observableArrayList(compartiveOperators));
+		comboboxOccurrenceComparator.setItems(FXCollections.observableArrayList(compartiveOperators));
 
-		choiceboxSeqLengthComparator.setItems(FXCollections.observableArrayList(compartiveOperators));
+		comboboxSeqLengthComparator.setItems(FXCollections.observableArrayList(compartiveOperators));
 
 		choiceBoxOccurrenceFilterPercentage.setItems(FXCollections.observableArrayList(compartiveOperators));
 
-		choiceBoxOccurrences.setItems(FXCollections.observableArrayList(occurrencesOptions));
+		comboBoxOccurrences.setItems(FXCollections.observableArrayList(occurrencesOptions));
 
-		// defualt selection
+		// default selection
 		Platform.runLater(new Runnable() {
 
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				choiceboxOccurrenceComparator.getSelectionModel().select(0);
-				choiceboxFilter.getSelectionModel().select(0);
-				choiceBoxOccurrences.getSelectionModel().select(0);
+				comboboxOccurrenceComparator.getSelectionModel().select(0);
+//				choiceboxFilter.getSelectionModel().select(0);
+				comboBoxOccurrences.getSelectionModel().select(0);
 				choiceBoxOccurrenceFilterPercentage.getSelectionModel().select(0);
-				choiceboxSeqLengthComparator.getSelectionModel().select(0);
+				comboboxSeqLengthComparator.getSelectionModel().select(0);
+				
+				//
+				comboBoxFilter.getSelectionModel().select(0);
 			}
 		});
 
@@ -282,9 +298,9 @@ public class TraceViewerController implements TracesMinerListener {
 			// if enter is pressed then refersh
 			if (e.getCode() == KeyCode.ENTER) {
 
-				String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
+				String selectedOccurrenceType = comboBoxOccurrences.getSelectionModel().getSelectedItem();
 
-				String selection = choiceBoxFilterSelector.getSelectionModel().getSelectedItem();
+				String selection = comboBoxFilterSelector.getSelectionModel().getSelectedItem();
 
 				switch (selection) {
 				case ACTIONS:
@@ -304,7 +320,7 @@ public class TraceViewerController implements TracesMinerListener {
 		textFieldOccurrenceFilterPercentage.setOnKeyPressed(e -> {
 			// if enter is pressed then refersh
 			if (e.getCode() == KeyCode.ENTER) {
-				String selection = choiceBoxFilterSelector.getSelectionModel().getSelectedItem();
+				String selection = comboBoxFilterSelector.getSelectionModel().getSelectedItem();
 
 				switch (selection) {
 				case ACTIONS:
@@ -326,8 +342,8 @@ public class TraceViewerController implements TracesMinerListener {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				choiceBoxFilterSelector.setItems(FXCollections.observableArrayList(FilterSelectors));
-				choiceBoxFilterSelector.getSelectionModel().select(0);
+				comboBoxFilterSelector.setItems(FXCollections.observableArrayList(FilterSelectors));
+				comboBoxFilterSelector.getSelectionModel().select(0);
 			}
 		});
 		
@@ -405,7 +421,7 @@ public class TraceViewerController implements TracesMinerListener {
 	@FXML
 	public void mineTraces(ActionEvent event) {
 
-		String selectedFilter = choiceboxFilter.getSelectionModel().getSelectedItem();
+		String selectedFilter = comboBoxFilter.getSelectionModel().getSelectedItem();
 
 		switch (selectedFilter) {
 
@@ -450,13 +466,13 @@ public class TraceViewerController implements TracesMinerListener {
 
 		String perc = textFieldOccurrenceFilterPercentage.getText();
 
-		String selection = choiceBoxFilterSelector.getSelectionModel().getSelectedItem();
+		String selection = comboBoxFilterSelector.getSelectionModel().getSelectedItem();
 
 		// higher precedence for percentage
 		if (perc != null && !perc.isEmpty()) {
 			operation = PERCENTAGE;
 		} else {
-			String selectedOccurrenceType = choiceBoxOccurrences.getSelectionModel().getSelectedItem();
+			String selectedOccurrenceType = comboBoxOccurrences.getSelectionModel().getSelectedItem();
 			operation = selectedOccurrenceType;
 		}
 
@@ -554,8 +570,8 @@ public class TraceViewerController implements TracesMinerListener {
 					// set traces filter to be All
 					if(!chartFilterTraces.contains(ALL_TRACES)) {
 						chartFilterTraces.add(ALL_TRACES);	
-						choiceBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
-						choiceBoxChartFilterTraces.getSelectionModel().select(0);
+						comboBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
+						comboBoxChartFilterTraces.getSelectionModel().select(0);
 					}
 					
 					
@@ -620,8 +636,8 @@ public class TraceViewerController implements TracesMinerListener {
 				// add a shortest traces entry to chart filter choice box
 				if(!chartFilterTraces.contains(SHORTEST_TRACES)) {
 					chartFilterTraces.add(SHORTEST_TRACES);	
-					choiceBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
-					choiceBoxChartFilterTraces.getSelectionModel().select(0);
+					comboBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
+					comboBoxChartFilterTraces.getSelectionModel().select(0);
 				}
 				
 			}
@@ -709,7 +725,7 @@ public class TraceViewerController implements TracesMinerListener {
 			return;
 		}
 		
-		String selectedFilter = choiceboxFilter.getSelectionModel().getSelectedItem();
+		String selectedFilter = comboBoxFilter.getSelectionModel().getSelectedItem();
 		
 		if(selectedFilter.equals(CUSTOMISE)) {
 			customisePane.setDisable(false);	
@@ -778,7 +794,7 @@ public class TraceViewerController implements TracesMinerListener {
 		Map<String, Integer> topActions;
 		int num = 0;
 
-		String tracesToFilter = choiceBoxChartFilterTraces.getSelectionModel().getSelectedItem() + "";
+		String tracesToFilter = comboBoxChartFilterTraces.getSelectionModel().getSelectedItem() + "";
 
 		int numberOfTracesInSelection = -1;
 
@@ -892,7 +908,7 @@ public class TraceViewerController implements TracesMinerListener {
 		Map<Integer, Integer> topStates = null;
 		int num = 0;
 
-		String tracesToFilter = choiceBoxChartFilterTraces.getSelectionModel().getSelectedItem() + "";
+		String tracesToFilter = comboBoxChartFilterTraces.getSelectionModel().getSelectedItem() + "";
 
 		int numberOfTracesInSelection = -1;
 

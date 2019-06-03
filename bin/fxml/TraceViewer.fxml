@@ -6,6 +6,7 @@
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ProgressIndicator?>
@@ -138,8 +139,8 @@
                   </Label>
                   <HBox prefHeight="32.0" prefWidth="680.0">
                      <children>
-                        <ChoiceBox fx:id="choiceboxFilter" prefHeight="37.0" prefWidth="454.0" />
-                        <Pane prefHeight="37.0" prefWidth="20.0" />
+                        <ComboBox fx:id="comboBoxFilter" prefHeight="37.0" prefWidth="451.0" />
+                        <Pane prefHeight="37.0" prefWidth="13.0" />
                         <Button fx:id="btnAnalyse" disable="true" mnemonicParsing="false" onAction="#mineTraces" prefHeight="37.0" prefWidth="127.0" text="analyse">
                            <font>
                               <Font size="16.0" />
@@ -167,7 +168,7 @@
                                              <children>
                                                 <Label text="-Sequence length" />
                                                 <Pane prefHeight="34.0" prefWidth="12.0" />
-                                                <ChoiceBox fx:id="choiceboxSeqLengthComparator" prefHeight="25.0" prefWidth="55.0" />
+                                                <ComboBox fx:id="comboboxSeqLengthComparator" prefHeight="25.0" prefWidth="55.0" />
                                                 <Pane prefHeight="34.0" prefWidth="4.0" />
                                                 <Spinner fx:id="spinnerFilterLength" prefHeight="25.0" prefWidth="58.0" />
                                              </children>
@@ -175,7 +176,7 @@
                                           <Pane prefHeight="6.0" prefWidth="317.0" />
                                           <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="525.0">
                                              <children>
-                                                <Label text="-Contains action(s)" />
+                                                <Label prefHeight="17.0" prefWidth="108.0" text="-Contains action(s)" />
                                                 <HBox prefHeight="25.0" prefWidth="499.0">
                                                    <children>
                                                       <TextField fx:id="textFieldActions" prefHeight="25.0" prefWidth="342.0" promptText="action1, action2, ...">
@@ -193,8 +194,8 @@
                                           <HBox alignment="CENTER_LEFT" prefHeight="3.0" prefWidth="311.0">
                                              <children>
                                                 <Label text="-Action occurrence" />
-                                                <Pane prefHeight="34.0" prefWidth="9.0" />
-                                                <ChoiceBox fx:id="choiceboxOccurrenceComparator" prefHeight="25.0" prefWidth="55.0" />
+                                                <Pane prefHeight="25.0" prefWidth="5.0" />
+                                                <ComboBox fx:id="comboboxOccurrenceComparator" prefHeight="25.0" prefWidth="55.0" />
                                                 <Pane prefHeight="34.0" prefWidth="3.0" />
                                                 <TextField fx:id="textFieldActionOccurrence" prefHeight="25.0" prefWidth="48.0" promptText="0-100" />
                                                 <Pane prefHeight="34.0" prefWidth="3.0" />
@@ -221,17 +222,17 @@
           <NumberAxis fx:id="numberAxis" side="LEFT" />
         </yAxis>
       </BarChart>
-      <VBox layoutX="1037.0" layoutY="534.0">
+      <VBox layoutX="1023.0" layoutY="535.0" prefHeight="73.0" prefWidth="215.0">
          <children>
             <HBox>
                <children>
-                  <ChoiceBox fx:id="choiceBoxChartFilterTraces" prefHeight="25.0" prefWidth="123.0" />
+                  <ComboBox fx:id="comboBoxChartFilterTraces" prefHeight="25.0" prefWidth="126.0" />
                   <Pane prefHeight="6.0" prefWidth="5.0" />
-                  <ChoiceBox fx:id="choiceBoxFilterSelector" prefHeight="25.0" prefWidth="81.0" />
+                  <ComboBox fx:id="comboBoxFilterSelector" prefHeight="25.0" prefWidth="84.0" />
                </children>
             </HBox>
             <Pane prefHeight="6.0" prefWidth="211.0" />
-            <HBox>
+            <HBox prefHeight="42.0" prefWidth="233.0">
                <children>
                   <VBox prefHeight="25.0" prefWidth="125.0">
                      <children>
@@ -240,23 +241,24 @@
                               <Tooltip text="Find all actions that have top occurrences" />
                            </tooltip>
                         </Label>
-                        <HBox prefHeight="25.0" prefWidth="139.0">
+                        <HBox prefHeight="25.0" prefWidth="144.0">
                            <children>
-                              <ChoiceBox fx:id="choiceBoxOccurrences" prefHeight="25.0" prefWidth="70.0" />
-                              <TextField fx:id="textFieldNumofOccurrences" prefHeight="25.0" prefWidth="42.0" promptText="#" />
+                              <ComboBox fx:id="comboBoxOccurrences" prefHeight="25.0" prefWidth="90.0" />
+                              <TextField fx:id="textFieldNumofOccurrences" prefHeight="25.0" prefWidth="40.0" promptText="#" />
                            </children>
                         </HBox>
                      </children>
                   </VBox>
-                  <VBox alignment="CENTER" prefHeight="37.0" prefWidth="86.0">
+                  <VBox alignment="CENTER" prefHeight="42.0" prefWidth="90.0">
                      <children>
                         <Label contentDisplay="CENTER" prefHeight="11.0" prefWidth="80.0" text="Occurrence %">
                            <tooltip>
                               <Tooltip text="Find all actions that have specific occurrence percentage" />
                            </tooltip>
                         </Label>
-                        <HBox>
+                        <HBox prefHeight="25.0" prefWidth="103.0">
                            <children>
+                              <Pane prefHeight="25.0" prefWidth="8.0" />
                               <ChoiceBox fx:id="choiceBoxOccurrenceFilterPercentage" prefHeight="25.0" prefWidth="40.0" />
                               <TextField fx:id="textFieldOccurrenceFilterPercentage" prefHeight="25.0" prefWidth="46.0" promptText="0-100" />
                            </children>
@@ -282,6 +284,6 @@
             </Label>
          </children>
       </HBox>
-      <Button fx:id="btnRefresh" disable="true" layoutX="1168.0" layoutY="620.0" mnemonicParsing="false" onAction="#refreshGraph" prefHeight="25.0" prefWidth="80.0" text="refresh" />
+      <Button fx:id="btnRefresh" disable="true" layoutX="1158.0" layoutY="614.0" mnemonicParsing="false" onAction="#refreshGraph" prefHeight="25.0" prefWidth="80.0" text="refresh" />
    </children>
 </AnchorPane>
