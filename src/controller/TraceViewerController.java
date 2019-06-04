@@ -505,35 +505,60 @@ public class TraceViewerController implements TracesMinerListener {
 		int length = spinnerFilterLength.getValue();
 		String op = comboboxSeqLengthComparator.getSelectionModel().getSelectedItem();
 
-		// List<Integer> tracesIDs = tracesMiner.getTracesWithLength(op,
-		// length);
-		//
-		// if(tracesIDs != null) {
-		// updateImage(IMAGE_CORRECT, imgFilter);
-		// updateText("number of traces [" + op+ " "+length+"] is: " +
-		// tracesIDs.size(), lblFilter);
-		// } else {
-		// updateImage(IMAGE_WRONG, imgFilter);
-		// updateText("Problem occurred", lblFilter);
-		// }
-
 		// check actions occurrence percentage
 		String percStr = textFieldActionOccurrence.getText();
-
+		int perc = -1;
+		String opOccur ="";
+				
 		if (percStr != null && !percStr.isEmpty()) {
-			int perc = Integer.parseInt(percStr);
-			String opOccur = comboboxOccurrenceComparator.getSelectionModel().getSelectedItem();
+			perc = Integer.parseInt(percStr);
+			opOccur = comboboxOccurrenceComparator.getSelectionModel().getSelectedItem();
+		}
 
-			List<Integer> occurTracesIDs = tracesMiner.getTracesWithOccurrencePercentage(opOccur, perc);
+		//check both length and occurrence
+		if (perc != -1) {
 
-			if (occurTracesIDs != null) {
+			List<Integer> tracesIDs = tracesMiner.getTracesWithLengthAndPerc(op, length, opOccur, perc);
+
+			if (tracesIDs != null) {
 				updateImage(IMAGE_CORRECT, imgFilter);
-				updateText("number of traces [" + opOccur + " " + perc + "%] is: " + occurTracesIDs.size(), lblFilter);
+				updateText("number of traces [length " + op + " " + length + " & occur% "+opOccur+" "+perc+"] is: " + tracesIDs.size(), lblFilter);
+			} else {
+				updateImage(IMAGE_WRONG, imgFilter);
+				updateText("Problem occurred", lblFilter);
+			}
+			//check only length
+		} else {
+			List<Integer> tracesIDs = tracesMiner.getTracesWithLength(op, length);
+
+			if (tracesIDs != null) {
+				updateImage(IMAGE_CORRECT, imgFilter);
+				updateText("number of traces [" + op + " " + length + "] is: " + tracesIDs.size(), lblFilter);
 			} else {
 				updateImage(IMAGE_WRONG, imgFilter);
 				updateText("Problem occurred", lblFilter);
 			}
 		}
+
+		// check actions occurrence percentage
+
+		// if (percStr != null && !percStr.isEmpty()) {
+		// int perc = Integer.parseInt(percStr);
+		// String opOccur =
+		// comboboxOccurrenceComparator.getSelectionModel().getSelectedItem();
+		//
+		// List<Integer> occurTracesIDs =
+		// tracesMiner.getTracesWithOccurrencePercentage(opOccur, perc);
+		//
+		// if (occurTracesIDs != null) {
+		// updateImage(IMAGE_CORRECT, imgFilter);
+		// updateText("number of traces [" + opOccur + " " + perc + "%] is: " +
+		// occurTracesIDs.size(), lblFilter);
+		// } else {
+		// updateImage(IMAGE_WRONG, imgFilter);
+		// updateText("Problem occurred", lblFilter);
+		// }
+		// }
 
 	}
 

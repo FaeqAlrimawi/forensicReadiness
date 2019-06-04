@@ -2612,11 +2612,11 @@ public class TracesMiner {
 			return null;
 		}
 		
-		if(traces == null) {
+		if(traces == null || instances == null) {
 			return null;
 		}
 		
-		if(traces.isEmpty() || percentage == 0) {
+		if(traces.isEmpty() || percentage == 0 || instances.isEmpty()) {
 			return result;
 		}
 		
@@ -2628,7 +2628,7 @@ public class TracesMiner {
 
 				for (String action : entry.getValue().getTransitionActions()) {
 					int occurrence = tracesActionsOccurence.get(action);
-					int perc = (int) Math.floor((occurrence * 1.0 / traces.size()) * 100);
+					int perc = (int) Math.floor((occurrence * 1.0 / instances.size()) * 100);
 
 					//if an action does not satisfy the criterion, then skip to next trace
 					if (!(perc >= percentage)) {
@@ -2645,7 +2645,7 @@ public class TracesMiner {
 
 				for (String action : entry.getValue().getTransitionActions()) {
 					int occurrence = tracesActionsOccurence.get(action);
-					int perc = (int) Math.floor((occurrence * 1.0 / traces.size()) * 100);
+					int perc = (int) Math.floor((occurrence * 1.0 / instances.size()) * 100);
 
 					if (!(perc <= percentage)) {
 						continue next_trace;
@@ -2662,7 +2662,7 @@ public class TracesMiner {
 
 				for (String action : entry.getValue().getTransitionActions()) {
 					int occurrence = tracesActionsOccurence.get(action);
-					int perc = (int) Math.floor((occurrence * 1.0 / traces.size()) * 100);
+					int perc = (int) Math.floor((occurrence * 1.0 / instances.size()) * 100);
 
 					if (!(perc == percentage)) {
 						continue next_trace;
@@ -2681,4 +2681,45 @@ public class TracesMiner {
 
 		return result;
 	}
+	
+	public List<Integer> getTracesWithLengthAndPerc(String lengthOp, int length, String occurOp, int perc) {
+		
+		//get traces that satisfy the length first
+		List<Integer> lengthTracesIDs = getTracesWithLength(lengthOp, length);
+		
+		Map<Integer, GraphPath> lengthTraces = getTraces(lengthTracesIDs);
+		
+		//get the traces that saitsfy the perc using the traces that satisfy the length
+		List<Integer> result = getTracesWithOccurrencePercentage(occurOp, perc, lengthTraces);
+		
+		customeFilteringTraceIDs = result;
+		
+		return result;
+		
+	}
+	
+	public Map<Integer, GraphPath> getTraces(List<Integer> tracesIDs) {
+		
+		Map<Integer, GraphPath> result = new HashMap<Integer, GraphPath>();
+		
+		if(tracesIDs == null || instances == null) {
+			return null;
+		}
+		
+		if(tracesIDs.isEmpty() || instances.isEmpty()) {
+			return result;
+		}
+		
+		for(Integer id : tracesIDs){
+			
+			if(instances.containsKey(id)){
+				result.put(id, instances.get(id));
+			}
+		}
+		
+		
+		return result;
+	}
+	
+	
 }
