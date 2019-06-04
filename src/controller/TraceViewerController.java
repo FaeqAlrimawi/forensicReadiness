@@ -200,6 +200,7 @@ public class TraceViewerController implements TracesMinerListener {
 	public static final String STATES = "States";
 	public static final String ALL_TRACES = "All Traces";
 	public static final String SHORTEST_TRACES = "Shortest Traces";
+	public static final String CUSTOMISED_TRACES = "Customised Traces";
 
 	private AutoCompleteTextField autoCompleteActionsFiled;
 
@@ -501,35 +502,40 @@ public class TraceViewerController implements TracesMinerListener {
 
 	protected void mineBasedOnCustomisedFilter() {
 
+		progressIndicatorFilter.setVisible(true);
+		
 		// check sequence length
 		int length = spinnerFilterLength.getValue();
 		String op = comboboxSeqLengthComparator.getSelectionModel().getSelectedItem();
+		List<Integer> tracesIDs = null;
 
 		// check actions occurrence percentage
 		String percStr = textFieldActionOccurrence.getText();
 		int perc = -1;
-		String opOccur ="";
-				
+		String opOccur = "";
+
 		if (percStr != null && !percStr.isEmpty()) {
 			perc = Integer.parseInt(percStr);
 			opOccur = comboboxOccurrenceComparator.getSelectionModel().getSelectedItem();
 		}
 
-		//check both length and occurrence
+		// check both length and occurrence
 		if (perc != -1) {
 
-			List<Integer> tracesIDs = tracesMiner.getTracesWithLengthAndPerc(op, length, opOccur, perc);
+			tracesIDs = tracesMiner.getTracesWithLengthAndPerc(op, length, opOccur, perc);
 
 			if (tracesIDs != null) {
 				updateImage(IMAGE_CORRECT, imgFilter);
-				updateText("number of traces [length " + op + " " + length + " & occur% "+opOccur+" "+perc+"] is: " + tracesIDs.size(), lblFilter);
+				updateText("number of traces [length " + op + " " + length + " & occur% " + opOccur + " " + perc
+						+ "] is: " + tracesIDs.size(), lblFilter);
 			} else {
 				updateImage(IMAGE_WRONG, imgFilter);
 				updateText("Problem occurred", lblFilter);
 			}
-			//check only length
+
+			// check only length
 		} else {
-			List<Integer> tracesIDs = tracesMiner.getTracesWithLength(op, length);
+			tracesIDs = tracesMiner.getTracesWithLength(op, length);
 
 			if (tracesIDs != null) {
 				updateImage(IMAGE_CORRECT, imgFilter);
@@ -540,25 +546,43 @@ public class TraceViewerController implements TracesMinerListener {
 			}
 		}
 
-		// check actions occurrence percentage
+		if(tracesIDs != null) {
+			Platform.runLater(new Runnable() {
 
-		// if (percStr != null && !percStr.isEmpty()) {
-		// int perc = Integer.parseInt(percStr);
-		// String opOccur =
-		// comboboxOccurrenceComparator.getSelectionModel().getSelectedItem();
-		//
-		// List<Integer> occurTracesIDs =
-		// tracesMiner.getTracesWithOccurrencePercentage(opOccur, perc);
-		//
-		// if (occurTracesIDs != null) {
-		// updateImage(IMAGE_CORRECT, imgFilter);
-		// updateText("number of traces [" + opOccur + " " + perc + "%] is: " +
-		// occurTracesIDs.size(), lblFilter);
-		// } else {
-		// updateImage(IMAGE_WRONG, imgFilter);
-		// updateText("Problem occurred", lblFilter);
-		// }
-		// }
+				@Override
+				public void run() {
+
+//					int customiseIndex = -1;
+//					// add a shortest traces entry to chart filter choice box
+//					for(int i=0;i<chartFilterTraces.size();i++) {
+//						String traces = chartFilterTraces.get(i);
+//						if(traces.contains(CUSTOMISED_TRACES)) {
+//							customiseIndex = i;
+//							break;
+//						}
+//					}
+//					
+//					CUSTOMISED_TRACES = CUSTOMISED_TRACES + " [" + tracesMiner.getCustomisedTracesNumber()+"]";
+//					
+//					//customise filter already exists. remove then add new one	
+//					if(customiseIndex != -1) {
+//						chartFilterTraces.remove(customiseIndex);
+//						
+//					} else {
+//						chartFilterTraces.add(CUSTOMISED_TRACES + " [" + tracesMiner.getCustomisedTracesNumber()+"]");
+//					}
+//					
+					if(!chartFilterTraces.contains(CUSTOMISED_TRACES)) {
+						chartFilterTraces.add(CUSTOMISED_TRACES);	
+					}
+					comboBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
+					comboBoxChartFilterTraces.getSelectionModel().select(0);	
+					
+				}
+			});
+		}
+		
+		progressIndicatorFilter.setVisible(false);
 
 	}
 
@@ -878,6 +902,10 @@ public class TraceViewerController implements TracesMinerListener {
 			numberOfTracesInSelection = tracesMiner.getShortestTracesNumber();
 			break;
 
+		case CUSTOMISED_TRACES:
+			numberOfTracesInSelection = tracesMiner.getCustomisedTracesNumber();
+			break;
+
 		default:
 			numberOfTracesInSelection = numberOfTraces;
 			break;
@@ -905,11 +933,11 @@ public class TraceViewerController implements TracesMinerListener {
 			num = Integer.parseInt(textFieldOccurrenceFilterPercentage.getText());
 			double perc = num * 1.0 / 100;
 			String op = choiceBoxOccurrenceFilterPercentage.getSelectionModel().getSelectedItem();
-			chartTitle = "Actions with Occurrence-% " + op + " " + num + "% in " + tracesToFilter;
+			chartTitle = "Actions with Occurrence% " + op + " " + num + "% in " + tracesToFilter;
 
 			topActions = tracesMiner.getActionsWithOccurrencePercentage(perc, op, tracesToFilter);
 
-			System.out.println(topActions);
+			System.out.println("actions: "+topActions);
 			break;
 
 		default:
@@ -992,6 +1020,10 @@ public class TraceViewerController implements TracesMinerListener {
 			numberOfTracesInSelection = tracesMiner.getShortestTracesNumber();
 			break;
 
+		case CUSTOMISED_TRACES:
+			numberOfTracesInSelection = tracesMiner.getCustomisedTracesNumber();
+			break;
+
 		default:
 			numberOfTracesInSelection = numberOfTraces;
 			break;
@@ -1017,7 +1049,7 @@ public class TraceViewerController implements TracesMinerListener {
 			num = Integer.parseInt(textFieldOccurrenceFilterPercentage.getText());
 			double perc = num * 1.0 / 100;
 			String op = choiceBoxOccurrenceFilterPercentage.getSelectionModel().getSelectedItem();
-			chartTitle = "States with Occurrence-% " + op + " " + num + "% in " + tracesToFilter;
+			chartTitle = "States with Occurrence% " + op + " " + num + "% in " + tracesToFilter;
 
 			topStates = tracesMiner.getStatesWithOccurrencePercentage(perc, op, tracesToFilter);
 

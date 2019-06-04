@@ -502,6 +502,13 @@ public class TracesMiner {
 
 			break;
 
+		case TraceViewerController.CUSTOMISED_TRACES:
+			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
+				Map<Integer, GraphPath> traces = getTraces(customeFilteringTraceIDs);
+				occurrences = getOccurrence(traces);
+			}
+			break;
+
 		default:
 			break;
 		}
@@ -565,6 +572,13 @@ public class TracesMiner {
 				shortestStatesOccurence = occurrences;
 			}
 
+			break;
+
+		case TraceViewerController.CUSTOMISED_TRACES:
+			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
+				Map<Integer, GraphPath> traces = getTraces(customeFilteringTraceIDs);
+				occurrences = getStateOccurrence(traces);
+			}
 			break;
 
 		default:
@@ -636,12 +650,25 @@ public class TracesMiner {
 			numOfTraces = shortestTraces.size();
 			break;
 
+		case TraceViewerController.CUSTOMISED_TRACES:
+			Map<Integer, GraphPath> traces = null;
+			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
+				traces = getTraces(customeFilteringTraceIDs);
+				occurrences = getOccurrence(traces);
+			}
+
+			if (traces != null) {
+				numOfTraces = traces.size();
+			}
+
+			break;
 		default:
 			break;
 		}
 
-		if (occurrences != null) {
+		if (occurrences != null && !occurrences.isEmpty()) {
 
+			// numOfTraces = occurrences.size();
 			System.out.println("miner " + occurrences);
 			// for now get the first n
 			for (Entry<String, Integer> entry : occurrences.entrySet()) {
@@ -709,13 +736,28 @@ public class TracesMiner {
 			}
 
 			numOfTraces = shortestTraces.size();
+
+			break;
+
+		case TraceViewerController.CUSTOMISED_TRACES:
+			Map<Integer, GraphPath> traces = null;
+			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
+				traces = getTraces(customeFilteringTraceIDs);
+				occurrences = getStateOccurrence(traces);
+			}
+			if (traces != null) {
+				numOfTraces = traces.size();
+			}
+
 			break;
 
 		default:
 			break;
 		}
 
-		if (occurrences != null) {
+		if (occurrences != null && !occurrences.isEmpty() && numOfTraces > 0) {
+
+			// numOfTraces = occurrences.size();
 			double localPerc = 0;
 
 			// for now get the first n
@@ -781,6 +823,12 @@ public class TracesMiner {
 
 			break;
 
+		case TraceViewerController.CUSTOMISED_TRACES:
+			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
+				Map<Integer, GraphPath> traces = getTraces(customeFilteringTraceIDs);
+				occurrences = getOccurrence(traces);
+			}
+			break;
 		default:
 			break;
 		}
@@ -844,6 +892,13 @@ public class TracesMiner {
 				shortestStatesOccurence = occurrences;
 			}
 
+			break;
+
+		case TraceViewerController.CUSTOMISED_TRACES:
+			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
+				Map<Integer, GraphPath> traces = getTraces(customeFilteringTraceIDs);
+				occurrences = getStateOccurrence(traces);
+			}
 			break;
 
 		default:
@@ -2526,11 +2581,20 @@ public class TracesMiner {
 		return -1;
 	}
 
+	public int getCustomisedTracesNumber() {
+
+		if (customeFilteringTraceIDs != null) {
+			return customeFilteringTraceIDs.size();
+		}
+
+		return -1;
+	}
+
 	public List<Integer> getTracesWithLength(String op, int length) {
-		
+
 		return getTracesWithLength(op, length, instances);
 	}
-	
+
 	public List<Integer> getTracesWithLength(String op, int length, Map<Integer, GraphPath> traces) {
 
 		List<Integer> result = new LinkedList<Integer>();
@@ -2539,14 +2603,14 @@ public class TracesMiner {
 			return null;
 		}
 
-		if(traces == null) {
+		if (traces == null) {
 			return null;
 		}
-		
-		if(traces.isEmpty()) {
+
+		if (traces.isEmpty()) {
 			return result;
 		}
-		
+
 		// if less than minimum
 		if (minimumTraceLength != MIN_LENGTH_INITIAL_VALUE && length < minimumTraceLength) {
 			return result;
@@ -2598,12 +2662,11 @@ public class TracesMiner {
 	}
 
 	public List<Integer> getTracesWithOccurrencePercentage(String op, int percentage) {
-		
-	return getTracesWithOccurrencePercentage(op, percentage, instances);
-	
+
+		return getTracesWithOccurrencePercentage(op, percentage, instances);
+
 	}
-	
-	
+
 	public List<Integer> getTracesWithOccurrencePercentage(String op, int percentage, Map<Integer, GraphPath> traces) {
 
 		List<Integer> result = new LinkedList<Integer>();
@@ -2611,15 +2674,15 @@ public class TracesMiner {
 		if (percentage < 0 || percentage > 100) {
 			return null;
 		}
-		
-		if(traces == null || instances == null) {
+
+		if (traces == null || instances == null) {
 			return null;
 		}
-		
-		if(traces.isEmpty() || percentage == 0 || instances.isEmpty()) {
+
+		if (traces.isEmpty() || percentage == 0 || instances.isEmpty()) {
 			return result;
 		}
-		
+
 		// all actions of a trace should have a percentage that is [op, e.g.,
 		// more than] the given
 		switch (op) {
@@ -2630,7 +2693,8 @@ public class TracesMiner {
 					int occurrence = tracesActionsOccurence.get(action);
 					int perc = (int) Math.floor((occurrence * 1.0 / instances.size()) * 100);
 
-					//if an action does not satisfy the criterion, then skip to next trace
+					// if an action does not satisfy the criterion, then skip to
+					// next trace
 					if (!(perc >= percentage)) {
 						continue next_trace;
 					}
@@ -2652,7 +2716,6 @@ public class TracesMiner {
 					}
 				}
 				result.add(entry.getKey());
-
 
 			}
 			break;
@@ -2681,45 +2744,44 @@ public class TracesMiner {
 
 		return result;
 	}
-	
+
 	public List<Integer> getTracesWithLengthAndPerc(String lengthOp, int length, String occurOp, int perc) {
-		
-		//get traces that satisfy the length first
+
+		// get traces that satisfy the length first
 		List<Integer> lengthTracesIDs = getTracesWithLength(lengthOp, length);
-		
+
 		Map<Integer, GraphPath> lengthTraces = getTraces(lengthTracesIDs);
-		
-		//get the traces that saitsfy the perc using the traces that satisfy the length
+
+		// get the traces that saitsfy the perc using the traces that satisfy
+		// the length
 		List<Integer> result = getTracesWithOccurrencePercentage(occurOp, perc, lengthTraces);
-		
+
 		customeFilteringTraceIDs = result;
-		
+
 		return result;
-		
+
 	}
-	
+
 	public Map<Integer, GraphPath> getTraces(List<Integer> tracesIDs) {
-		
+
 		Map<Integer, GraphPath> result = new HashMap<Integer, GraphPath>();
-		
-		if(tracesIDs == null || instances == null) {
+
+		if (tracesIDs == null || instances == null) {
 			return null;
 		}
-		
-		if(tracesIDs.isEmpty() || instances.isEmpty()) {
+
+		if (tracesIDs.isEmpty() || instances.isEmpty()) {
 			return result;
 		}
-		
-		for(Integer id : tracesIDs){
-			
-			if(instances.containsKey(id)){
+
+		for (Integer id : tracesIDs) {
+
+			if (instances.containsKey(id)) {
 				result.put(id, instances.get(id));
 			}
 		}
-		
-		
+
 		return result;
 	}
-	
-	
+
 }
