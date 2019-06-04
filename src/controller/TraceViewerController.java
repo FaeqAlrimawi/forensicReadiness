@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -514,37 +515,52 @@ public class TraceViewerController implements TracesMinerListener {
 		int perc = -1;
 		String opOccur = "";
 
-		if (percStr != null && !percStr.isEmpty()) {
-			perc = Integer.parseInt(percStr);
-			opOccur = comboboxOccurrenceComparator.getSelectionModel().getSelectedItem();
+		//check action names
+		String actions = textFieldActions.getText();
+		
+		List<String> actionsToFind = parseQuery(actions);
+		
+		tracesIDs = tracesMiner.getTracesWithActions(actionsToFind);
+		
+		if (tracesIDs != null) {
+			updateImage(IMAGE_CORRECT, imgFilter);
+			updateText("number of traces [containing specific actions] is: " + tracesIDs.size(), lblFilter);
+		} else {
+			updateImage(IMAGE_WRONG, imgFilter);
+			updateText("Problem occurred", lblFilter);
 		}
+			
+//		if (percStr != null && !percStr.isEmpty()) {
+//			perc = Integer.parseInt(percStr);
+//			opOccur = comboboxOccurrenceComparator.getSelectionModel().getSelectedItem();
+//		}
 
 		// check both length and occurrence
-		if (perc != -1) {
-
-			tracesIDs = tracesMiner.getTracesWithLengthAndPerc(op, length, opOccur, perc);
-
-			if (tracesIDs != null) {
-				updateImage(IMAGE_CORRECT, imgFilter);
-				updateText("number of traces [length " + op + " " + length + " & occur% " + opOccur + " " + perc
-						+ "] is: " + tracesIDs.size(), lblFilter);
-			} else {
-				updateImage(IMAGE_WRONG, imgFilter);
-				updateText("Problem occurred", lblFilter);
-			}
-
-			// check only length
-		} else {
-			tracesIDs = tracesMiner.getTracesWithLength(op, length);
-
-			if (tracesIDs != null) {
-				updateImage(IMAGE_CORRECT, imgFilter);
-				updateText("number of traces [" + op + " " + length + "] is: " + tracesIDs.size(), lblFilter);
-			} else {
-				updateImage(IMAGE_WRONG, imgFilter);
-				updateText("Problem occurred", lblFilter);
-			}
-		}
+//		if (perc != -1) {
+//
+//			tracesIDs = tracesMiner.getTracesWithLengthAndPerc(op, length, opOccur, perc);
+//
+//			if (tracesIDs != null) {
+//				updateImage(IMAGE_CORRECT, imgFilter);
+//				updateText("number of traces [length " + op + " " + length + " & occur% " + opOccur + " " + perc
+//						+ "] is: " + tracesIDs.size(), lblFilter);
+//			} else {
+//				updateImage(IMAGE_WRONG, imgFilter);
+//				updateText("Problem occurred", lblFilter);
+//			}
+//
+//			// check only length
+//		} else {
+//			tracesIDs = tracesMiner.getTracesWithLength(op, length);
+//
+//			if (tracesIDs != null) {
+//				updateImage(IMAGE_CORRECT, imgFilter);
+//				updateText("number of traces [" + op + " " + length + "] is: " + tracesIDs.size(), lblFilter);
+//			} else {
+//				updateImage(IMAGE_WRONG, imgFilter);
+//				updateText("Problem occurred", lblFilter);
+//			}
+//		}
 
 		if(tracesIDs != null) {
 			Platform.runLater(new Runnable() {
@@ -552,26 +568,6 @@ public class TraceViewerController implements TracesMinerListener {
 				@Override
 				public void run() {
 
-//					int customiseIndex = -1;
-//					// add a shortest traces entry to chart filter choice box
-//					for(int i=0;i<chartFilterTraces.size();i++) {
-//						String traces = chartFilterTraces.get(i);
-//						if(traces.contains(CUSTOMISED_TRACES)) {
-//							customiseIndex = i;
-//							break;
-//						}
-//					}
-//					
-//					CUSTOMISED_TRACES = CUSTOMISED_TRACES + " [" + tracesMiner.getCustomisedTracesNumber()+"]";
-//					
-//					//customise filter already exists. remove then add new one	
-//					if(customiseIndex != -1) {
-//						chartFilterTraces.remove(customiseIndex);
-//						
-//					} else {
-//						chartFilterTraces.add(CUSTOMISED_TRACES + " [" + tracesMiner.getCustomisedTracesNumber()+"]");
-//					}
-//					
 					if(!chartFilterTraces.contains(CUSTOMISED_TRACES)) {
 						chartFilterTraces.add(CUSTOMISED_TRACES);	
 					}
@@ -586,6 +582,39 @@ public class TraceViewerController implements TracesMinerListener {
 
 	}
 
+	protected List<String> parseQuery(String query) {
+		
+		//actions separated by comma
+		query = query.trim();
+		
+		//remove all space
+		query = query.replaceAll(" ", "");
+		
+		List<String> result = Arrays.asList(query.split(","));
+		
+		Iterator<String> it = result.iterator();
+		
+//		List<Integer> indexToRemove = new LinkedList<Integer>();
+		
+//		for(int i=0;i<result.size();i++) {
+//			String act = result.get(i);
+//			if(act.isEmpty() || act.equals(" ")) {
+//				indexToRemove.add(i);
+//			} 
+//		}
+
+		while(it.hasNext()) {
+			String act = it.next();
+			if(act.isEmpty() || act.equals(" ")) {
+				it.remove();
+			} 
+		}
+		
+		System.out.println(result);
+		
+		return result;
+	}
+	
 	protected void loadTracesFile(String filePath) {
 
 		if (filePath != null) {

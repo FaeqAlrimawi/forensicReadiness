@@ -218,7 +218,7 @@
             </VBox>
          </children>
       </VBox>
-      <BarChart fx:id="barChartActions" layoutX="778.0" layoutY="15.0" prefHeight="349.0" prefWidth="470.0">
+      <BarChart fx:id="barChartActions" layoutX="778.0" layoutY="15.0" prefHeight="344.0" prefWidth="470.0">
         <xAxis>
           <CategoryAxis fx:id="categoryAxis" side="BOTTOM" />
         </xAxis>
@@ -281,7 +281,7 @@
                </image>
             </ImageView>
             <Pane prefHeight="20.0" prefWidth="6.0" />
-            <Label fx:id="lblFilter" prefHeight="40.0" prefWidth="430.0">
+            <Label fx:id="lblFilter" prefHeight="20.0" prefWidth="587.0">
                <font>
                   <Font size="14.0" />
                </font>

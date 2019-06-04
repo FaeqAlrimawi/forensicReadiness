@@ -666,7 +666,7 @@ public class TracesMiner {
 			break;
 		}
 
-		if (occurrences != null && !occurrences.isEmpty()) {
+		if (occurrences != null && !occurrences.isEmpty() && numOfTraces>0) {
 
 			// numOfTraces = occurrences.size();
 			System.out.println("miner " + occurrences);
@@ -2781,6 +2781,40 @@ public class TracesMiner {
 			}
 		}
 
+		return result;
+	}
+	
+	public List<Integer> getTracesWithActions(List<String> actions) {
+		
+		return getTracesWithActions(actions, instances);
+	}
+	
+	public List<Integer> getTracesWithActions(List<String> actions, Map<Integer, GraphPath> traces) {
+		
+		List<Integer> result = new LinkedList<Integer>();
+		
+		if(actions == null || traces == null) {
+			return null;
+		}
+		
+		if(actions.isEmpty() || traces.isEmpty()) {
+			return result;
+		}
+		
+		//==== need to update for ?  *
+		for(Entry<Integer, GraphPath> entry : traces.entrySet()) {
+			
+			List<String> traceActions = entry.getValue().getTransitionActions();
+			
+			//check that all actions in the list exist in the trace
+			if(traceActions.containsAll(actions)){
+				result.add(entry.getKey());
+			}
+			
+		}
+		
+		customeFilteringTraceIDs = result;
+		
 		return result;
 	}
 
