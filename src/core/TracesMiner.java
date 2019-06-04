@@ -666,7 +666,7 @@ public class TracesMiner {
 			break;
 		}
 
-		if (occurrences != null && !occurrences.isEmpty() && numOfTraces>0) {
+		if (occurrences != null && !occurrences.isEmpty() && numOfTraces > 0) {
 
 			// numOfTraces = occurrences.size();
 			System.out.println("miner " + occurrences);
@@ -2783,38 +2783,65 @@ public class TracesMiner {
 
 		return result;
 	}
-	
+
 	public List<Integer> getTracesWithActions(List<String> actions) {
-		
+
 		return getTracesWithActions(actions, instances);
 	}
-	
+
 	public List<Integer> getTracesWithActions(List<String> actions, Map<Integer, GraphPath> traces) {
-		
+
 		List<Integer> result = new LinkedList<Integer>();
-		
-		if(actions == null || traces == null) {
+
+		if (actions == null || traces == null) {
 			return null;
 		}
-		
-		if(actions.isEmpty() || traces.isEmpty()) {
+
+		if (actions.isEmpty() || traces.isEmpty()) {
 			return result;
 		}
+
+		int actionsLength = actions.size();
+		String singleAction = "";
+		StringBuilder strBldr = new StringBuilder();
 		
-		//==== need to update for ?  *
-		for(Entry<Integer, GraphPath> entry : traces.entrySet()) {
-			
+		for(String act: actions) {
+			strBldr.append(act);
+		}
+
+		singleAction = strBldr.toString();
+		
+		// ==== need to update for ? *
+		for (Entry<Integer, GraphPath> entry : traces.entrySet()) {
+
 			List<String> traceActions = entry.getValue().getTransitionActions();
 			
-			//check that all actions in the list exist in the trace
-			if(traceActions.containsAll(actions)){
+			// if the trace sequence is shorter than given actions
+			if (actions.size() > traceActions.size()) {
+				continue;
+			}
+
+			strBldr.setLength(0);
+			
+			//create one string of the actions in sequence from the beginning
+			for (int i = 0; i < actionsLength; i++) {
+				strBldr.append(traceActions.get(i));
+			}
+			
+			// check if both string are equal
+			if(singleAction.equalsIgnoreCase(strBldr.toString())) {
 				result.add(entry.getKey());
 			}
 			
+			// check that all actions in the list exist in the trace
+//			if (traceActions.containsAll(actions)) {
+//				result.add(entry.getKey());
+//			}
+
 		}
-		
+
 		customeFilteringTraceIDs = result;
-		
+
 		return result;
 	}
 
