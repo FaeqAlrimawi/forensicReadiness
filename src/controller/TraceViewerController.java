@@ -453,7 +453,15 @@ public class TraceViewerController implements TracesMinerListener {
 			break;
 
 		case CUSTOMISE:
+			executor.submit(new Runnable() {
 
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					mineBasedOnCustomisedFilter();
+				}
+			});
+			
 			break;
 
 		default:
@@ -493,6 +501,24 @@ public class TraceViewerController implements TracesMinerListener {
 
 	}
 
+	protected void mineBasedOnCustomisedFilter(){
+	
+		//check sequence
+		int length = spinnerFilterLength.getValue();
+		String op = comboboxSeqLengthComparator.getSelectionModel().getSelectedItem();
+		
+		List<Integer> tracesIDs = tracesMiner.getTracesWithLength(op, length);
+		
+		if(tracesIDs != null) {
+			updateImage(IMAGE_CORRECT, imgFilter);
+			updateText("number of traces [" + op+ " "+length+"] is: " + tracesIDs.size(), lblFilter);	
+		} else {
+			updateImage(IMAGE_WRONG, imgFilter);
+			updateText("Problem occurred", lblFilter);
+		}
+		
+	}
+	
 	protected void loadTracesFile(String filePath) {
 
 		if (filePath != null) {
