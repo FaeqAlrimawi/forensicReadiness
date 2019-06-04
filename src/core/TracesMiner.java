@@ -18,6 +18,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
+import java.util.regex.Pattern;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -2805,11 +2806,18 @@ public class TracesMiner {
 		String singleAction = "";
 		StringBuilder strBldr = new StringBuilder();
 		
+		 //+ "(.*?)" + Pattern.quote(pattern2);
+		
 		for(String act: actions) {
 			strBldr.append(act);
 		}
 
 		singleAction = strBldr.toString();
+		
+		String regexString = Pattern.quote(singleAction);
+		
+		
+		Pattern pattern = Pattern.compile(regexString);
 		
 		// ==== need to update for ? *
 		for (Entry<Integer, GraphPath> entry : traces.entrySet()) {
@@ -2828,10 +2836,13 @@ public class TracesMiner {
 				strBldr.append(traceActions.get(i));
 			}
 			
-			// check if both string are equal
-			if(singleAction.equalsIgnoreCase(strBldr.toString())) {
+			if(pattern.matcher(strBldr.toString()).matches()) {
 				result.add(entry.getKey());
 			}
+			// check if both string are equal
+//			if(singleAction.equalsIgnoreCase(strBldr.toString())) {
+//				result.add(entry.getKey());
+//			}
 			
 			// check that all actions in the list exist in the trace
 //			if (traceActions.containsAll(actions)) {
