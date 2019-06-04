@@ -977,6 +977,8 @@ public class TracesMiner {
 
 		if (shortestTraces != null) {
 			shortestTraces.clear();
+		} else{
+			shortestTraces = new HashMap<Integer, GraphPath>();
 		}
 
 		System.out.println(">>Identifying shortest traces in [" + instanceFileName + "]");
