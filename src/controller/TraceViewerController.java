@@ -71,8 +71,8 @@ public class TraceViewerController implements TracesMinerListener {
 	@FXML
 	private Button btnAnalyse;
 
-//	@FXML
-//	private ChoiceBox<String> choiceboxFilter;
+	// @FXML
+	// private ChoiceBox<String> choiceboxFilter;
 
 	@FXML
 	private ComboBox<String> comboBoxFilterSelector;
@@ -92,8 +92,8 @@ public class TraceViewerController implements TracesMinerListener {
 	@FXML
 	private Pane customisePane;
 
-//	@FXML
-//	private ChoiceBox<String> choiceboxSeqLengthComparator;
+	// @FXML
+	// private ChoiceBox<String> choiceboxSeqLengthComparator;
 
 	@FXML
 	private ComboBox<String> comboboxOccurrenceComparator;
@@ -106,7 +106,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 	@FXML
 	private TextField textFieldActionOccurrence;
-	
+
 	@FXML
 	private CheckBox checkBoxInOrder;
 
@@ -163,11 +163,10 @@ public class TraceViewerController implements TracesMinerListener {
 
 	@FXML
 	private ComboBox<String> comboBoxFilter;
-	
+
 	@FXML
 	private ComboBox<String> comboboxSeqLengthComparator;
-	
-	
+
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -194,8 +193,8 @@ public class TraceViewerController implements TracesMinerListener {
 	private static final String PERCENTAGE = "percent";
 	public static final String EQUAL = "=";
 	public static final String MORE_THAN_EQUAL = ">=";
-//	public static final String MORE_THAN = ">";
-//	public static final String LESS_THAN = "<";
+	// public static final String MORE_THAN = ">";
+	// public static final String LESS_THAN = "<";
 	public static final String LESS_THAN_EQUAL = "<=";
 	public static final String ACTIONS = "Actions";
 	public static final String STATES = "States";
@@ -226,9 +225,9 @@ public class TraceViewerController implements TracesMinerListener {
 
 		// update filters in combo box
 		comboBoxFilter.setItems(FXCollections.observableArrayList(filters));
-		
-//		// update filters in choice box
-//		choiceboxFilter.setItems(FXCollections.observableArrayList(filters));
+
+		// // update filters in choice box
+		// choiceboxFilter.setItems(FXCollections.observableArrayList(filters));
 
 		comboBoxFilter.valueProperty().addListener(new ChangeListener<String>() {
 
@@ -264,11 +263,11 @@ public class TraceViewerController implements TracesMinerListener {
 			public void run() {
 				// TODO Auto-generated method stub
 				comboboxOccurrenceComparator.getSelectionModel().select(0);
-//				choiceboxFilter.getSelectionModel().select(0);
+				// choiceboxFilter.getSelectionModel().select(0);
 				comboBoxOccurrences.getSelectionModel().select(0);
 				choiceBoxOccurrenceFilterPercentage.getSelectionModel().select(0);
 				comboboxSeqLengthComparator.getSelectionModel().select(0);
-				
+
 				//
 				comboBoxFilter.getSelectionModel().select(0);
 			}
@@ -348,16 +347,16 @@ public class TraceViewerController implements TracesMinerListener {
 				comboBoxFilterSelector.getSelectionModel().select(0);
 			}
 		});
-		
-	//checks input to be digital	
-	checkInputAsDigital(textFieldNumofOccurrences);
-	checkInputAsDigital(textFieldOccurrenceFilterPercentage);
-	checkInputAsDigital(textFieldActionOccurrence);
-	
+
+		// checks input to be digital
+		checkInputAsDigital(textFieldNumofOccurrences);
+		checkInputAsDigital(textFieldOccurrenceFilterPercentage);
+		checkInputAsDigital(textFieldActionOccurrence);
+
 	}
 
 	protected void checkInputAsDigital(TextField textField) {
-	
+
 		textField.textProperty().addListener(new ChangeListener<String>() {
 
 			@Override
@@ -365,14 +364,13 @@ public class TraceViewerController implements TracesMinerListener {
 				// TODO Auto-generated method stub
 				if (!newValue.matches("\\d*")) {
 					textField.setText(newValue.replaceAll("[^\\d]", ""));
-		        }
+				}
 			}
-			
+
 		});
-		
+
 	}
-	
-	
+
 	@FXML
 	void openSystemFile(MouseEvent event) {
 
@@ -461,7 +459,7 @@ public class TraceViewerController implements TracesMinerListener {
 					mineBasedOnCustomisedFilter();
 				}
 			});
-			
+
 			break;
 
 		default:
@@ -501,24 +499,44 @@ public class TraceViewerController implements TracesMinerListener {
 
 	}
 
-	protected void mineBasedOnCustomisedFilter(){
-	
-		//check sequence
+	protected void mineBasedOnCustomisedFilter() {
+
+		// check sequence length
 		int length = spinnerFilterLength.getValue();
 		String op = comboboxSeqLengthComparator.getSelectionModel().getSelectedItem();
-		
-		List<Integer> tracesIDs = tracesMiner.getTracesWithLength(op, length);
-		
-		if(tracesIDs != null) {
-			updateImage(IMAGE_CORRECT, imgFilter);
-			updateText("number of traces [" + op+ " "+length+"] is: " + tracesIDs.size(), lblFilter);	
-		} else {
-			updateImage(IMAGE_WRONG, imgFilter);
-			updateText("Problem occurred", lblFilter);
+
+		// List<Integer> tracesIDs = tracesMiner.getTracesWithLength(op,
+		// length);
+		//
+		// if(tracesIDs != null) {
+		// updateImage(IMAGE_CORRECT, imgFilter);
+		// updateText("number of traces [" + op+ " "+length+"] is: " +
+		// tracesIDs.size(), lblFilter);
+		// } else {
+		// updateImage(IMAGE_WRONG, imgFilter);
+		// updateText("Problem occurred", lblFilter);
+		// }
+
+		// check actions occurrence percentage
+		String percStr = textFieldActionOccurrence.getText();
+
+		if (percStr != null && !percStr.isEmpty()) {
+			int perc = Integer.parseInt(percStr);
+			String opOccur = comboboxOccurrenceComparator.getSelectionModel().getSelectedItem();
+
+			List<Integer> occurTracesIDs = tracesMiner.getTracesWithOccurrencePercentage(opOccur, perc);
+
+			if (occurTracesIDs != null) {
+				updateImage(IMAGE_CORRECT, imgFilter);
+				updateText("number of traces [" + opOccur + " " + perc + "%] is: " + occurTracesIDs.size(), lblFilter);
+			} else {
+				updateImage(IMAGE_WRONG, imgFilter);
+				updateText("Problem occurred", lblFilter);
+			}
 		}
-		
+
 	}
-	
+
 	protected void loadTracesFile(String filePath) {
 
 		if (filePath != null) {
@@ -589,29 +607,28 @@ public class TraceViewerController implements TracesMinerListener {
 			btnAnalyse.setDisable(false);
 			btnRefresh.setDisable(false);
 
-			/****set chart filter **/
+			/**** set chart filter **/
 			Platform.runLater(new Runnable() {
 
 				@Override
 				public void run() {
 					// TODO Auto-generated method stub
 					// set traces filter to be All
-					if(!chartFilterTraces.contains(ALL_TRACES)) {
-						chartFilterTraces.add(ALL_TRACES);	
+					if (!chartFilterTraces.contains(ALL_TRACES)) {
+						chartFilterTraces.add(ALL_TRACES);
 						comboBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
 						comboBoxChartFilterTraces.getSelectionModel().select(0);
 					}
-					
-					
+
 				}
 			});
 
 			// display highest occurrence
 			setupTopActionsChart("Highest-Ranked");
 
-			/****set customise filter**/
+			/**** set customise filter **/
 			setupCustomisePane();
-			
+
 		} else {
 			updateImage(IMAGE_WRONG, imgSystemFileCheck);
 			updateText("Traces file is not valid", lblSystemFileCheck);
@@ -662,12 +679,12 @@ public class TraceViewerController implements TracesMinerListener {
 			public void run() {
 
 				// add a shortest traces entry to chart filter choice box
-				if(!chartFilterTraces.contains(SHORTEST_TRACES)) {
-					chartFilterTraces.add(SHORTEST_TRACES);	
+				if (!chartFilterTraces.contains(SHORTEST_TRACES)) {
+					chartFilterTraces.add(SHORTEST_TRACES);
 					comboBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
 					comboBoxChartFilterTraces.getSelectionModel().select(0);
 				}
-				
+
 			}
 		});
 
@@ -749,17 +766,17 @@ public class TraceViewerController implements TracesMinerListener {
 
 	protected void setupCustomisePane() {
 
-		if(selectedTracesFile == null) {
+		if (selectedTracesFile == null) {
 			return;
 		}
-		
+
 		String selectedFilter = comboBoxFilter.getSelectionModel().getSelectedItem();
-		
-		if(selectedFilter.equals(CUSTOMISE)) {
-			customisePane.setDisable(false);	
+
+		if (selectedFilter.equals(CUSTOMISE)) {
+			customisePane.setDisable(false);
 		}
-		
-		// set actions in auto completer		
+
+		// set actions in auto completer
 		autoCompleteActionsFiled.setEntries(tracesMiner.getTracesActions());
 
 		// Value factory
@@ -841,7 +858,7 @@ public class TraceViewerController implements TracesMinerListener {
 			break;
 		}
 
-		//invoke operation from the miner based on selection
+		// invoke operation from the miner based on selection
 		switch (selectedOccurrenceType) {
 
 		case HIGHEST:
@@ -866,7 +883,7 @@ public class TraceViewerController implements TracesMinerListener {
 			chartTitle = "Actions with Occurrence-% " + op + " " + num + "% in " + tracesToFilter;
 
 			topActions = tracesMiner.getActionsWithOccurrencePercentage(perc, op, tracesToFilter);
-			
+
 			System.out.println(topActions);
 			break;
 
@@ -955,7 +972,6 @@ public class TraceViewerController implements TracesMinerListener {
 			break;
 		}
 
-		
 		switch (selectedOccurrenceType) {
 		case HIGHEST:
 			num = Integer.parseInt(textFieldNumofOccurrences.getText());
@@ -966,7 +982,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 		case LOWEST:
 			num = Integer.parseInt(textFieldNumofOccurrences.getText());
-			chartTitle = "States with " + selectedOccurrenceType + " " + num + " Occurrences in "+ tracesToFilter;
+			chartTitle = "States with " + selectedOccurrenceType + " " + num + " Occurrences in " + tracesToFilter;
 
 			topStates = tracesMiner.getLowestStateOccurrences(num, tracesToFilter);
 

@@ -2624,46 +2624,51 @@ public class TracesMiner {
 		// more than] the given
 		switch (op) {
 		case TraceViewerController.MORE_THAN_EQUAL:
-			for (Entry<Integer, GraphPath> entry : traces.entrySet()) {
+			next_trace: for (Entry<Integer, GraphPath> entry : traces.entrySet()) {
 
 				for (String action : entry.getValue().getTransitionActions()) {
 					int occurrence = tracesActionsOccurence.get(action);
 					int perc = (int) Math.floor((occurrence * 1.0 / traces.size()) * 100);
 
-					if (perc >= percentage) {
-						result.add(entry.getKey());
+					//if an action does not satisfy the criterion, then skip to next trace
+					if (!(perc >= percentage)) {
+						continue next_trace;
 					}
 				}
+				result.add(entry.getKey());
 
 			}
 			break;
 
 		case TraceViewerController.LESS_THAN_EQUAL:
-			for (Entry<Integer, GraphPath> entry : traces.entrySet()) {
+			next_trace: for (Entry<Integer, GraphPath> entry : traces.entrySet()) {
 
 				for (String action : entry.getValue().getTransitionActions()) {
 					int occurrence = tracesActionsOccurence.get(action);
 					int perc = (int) Math.floor((occurrence * 1.0 / traces.size()) * 100);
 
-					if (perc <= percentage) {
-						result.add(entry.getKey());
+					if (!(perc <= percentage)) {
+						continue next_trace;
 					}
 				}
+				result.add(entry.getKey());
+
 
 			}
 			break;
 
 		case TraceViewerController.EQUAL:
-			for (Entry<Integer, GraphPath> entry : traces.entrySet()) {
+			next_trace: for (Entry<Integer, GraphPath> entry : traces.entrySet()) {
 
 				for (String action : entry.getValue().getTransitionActions()) {
 					int occurrence = tracesActionsOccurence.get(action);
 					int perc = (int) Math.floor((occurrence * 1.0 / traces.size()) * 100);
 
-					if (perc == percentage) {
-						result.add(entry.getKey());
+					if (!(perc == percentage)) {
+						continue next_trace;
 					}
 				}
+				result.add(entry.getKey());
 
 			}
 			break;
