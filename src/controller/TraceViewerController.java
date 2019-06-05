@@ -534,6 +534,10 @@ public class TraceViewerController implements TracesMinerListener {
 		//check action names
 		String actions = textFieldActions.getText();
 		
+		if(actions != null && actions.isEmpty()) {
+			actions = null;
+		}
+		
 		tracesIDs = tracesMiner.getTracesWithFilters(lengthOp, length, occurOp, perc, actions);
 		
 //		List<String> actionsToFind = parseQuery(actions);

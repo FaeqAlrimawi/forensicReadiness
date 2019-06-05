@@ -2685,6 +2685,10 @@ public class TracesMiner {
 			return result;
 		}
 
+		double percGiven = (percentage*1.0/100);
+		int index = 0;
+		
+		System.out.println("given perc: " + percGiven);
 		// all actions of a trace should have a percentage that is [op, e.g.,
 		// more than] the given
 		switch (op) {
@@ -2693,11 +2697,15 @@ public class TracesMiner {
 
 				for (String action : entry.getValue().getTransitionActions()) {
 					int occurrence = tracesActionsOccurence.get(action);
-					int perc = (int) Math.floor((occurrence * 1.0 / instances.size()) * 100);
-
+					double perc = (occurrence * 1.0 / instances.size());
+					if(index != 100) {
+						System.out.println("perc: " + perc);
+						index++;
+					}
+					
 					// if an action does not satisfy the criterion, then skip to
 					// next trace
-					if (!(perc >= percentage)) {
+					if (!(perc >= percGiven)) {
 						continue next_trace;
 					}
 				}
@@ -2776,7 +2784,7 @@ public class TracesMiner {
 		lengthTracesIDs = getTracesWithLength(lengthOp, length);
 
 		// check occurrence
-		if (lengthTracesIDs != null && !lengthTracesIDs.isEmpty()) {
+		if (lengthTracesIDs != null) {
 			// use result from length
 			traces = getTraces(lengthTracesIDs);
 			occurTracesIDs = getTracesWithOccurrencePercentage(occurOp, perc, traces);
@@ -2786,11 +2794,11 @@ public class TracesMiner {
 		}
 
 		// check actions 
-		if (occurTracesIDs != null && !occurTracesIDs.isEmpty()) {
+		if (occurTracesIDs != null) {
 			//if occurrence was set
 			traces = getTraces(occurTracesIDs);
 			queryTracesIDs = getTracesWithActions(query, traces);
-		} else if (lengthTracesIDs != null && !lengthTracesIDs.isEmpty()) {
+		} else if (lengthTracesIDs != null) {
 			//if length was set
 			queryTracesIDs = getTracesWithActions(query, traces);
 		} else {
@@ -2798,9 +2806,9 @@ public class TracesMiner {
 			queryTracesIDs = getTracesWithActions(query);
 		}
 
-		if(queryTracesIDs != null && !queryTracesIDs.isEmpty()) {
+		if(queryTracesIDs != null) {
 			return queryTracesIDs;
-		} else if(occurTracesIDs != null && !occurTracesIDs.isEmpty()){
+		} else if(occurTracesIDs != null){
 			return occurTracesIDs;
 		} else {
 			return lengthTracesIDs;

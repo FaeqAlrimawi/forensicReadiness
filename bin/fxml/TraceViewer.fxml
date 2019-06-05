@@ -23,7 +23,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="742.0" prefWidth="1262.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.TraceViewerController">
+<AnchorPane prefHeight="742.0" prefWidth="1345.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.TraceViewerController">
    <children>
       <VBox layoutX="19.0" layoutY="17.0" prefHeight="389.0" prefWidth="733.0" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="15.0">
          <children>
@@ -218,7 +218,7 @@
             </VBox>
          </children>
       </VBox>
-      <BarChart fx:id="barChartActions" layoutX="778.0" layoutY="15.0" prefHeight="344.0" prefWidth="470.0">
+      <BarChart fx:id="barChartActions" layoutX="758.0" layoutY="51.0" prefHeight="344.0" prefWidth="575.0">
         <xAxis>
           <CategoryAxis fx:id="categoryAxis" side="BOTTOM" />
         </xAxis>
@@ -226,7 +226,7 @@
           <NumberAxis fx:id="numberAxis" side="LEFT" />
         </yAxis>
       </BarChart>
-      <VBox layoutX="1023.0" layoutY="535.0" prefHeight="73.0" prefWidth="215.0">
+      <VBox layoutX="1116.0" layoutY="593.0" prefHeight="73.0" prefWidth="215.0">
          <children>
             <HBox>
                <children>
@@ -288,6 +288,6 @@
             </Label>
          </children>
       </HBox>
-      <Button fx:id="btnRefresh" disable="true" layoutX="1158.0" layoutY="614.0" mnemonicParsing="false" onAction="#refreshGraph" prefHeight="25.0" prefWidth="80.0" text="refresh" />
+      <Button fx:id="btnRefresh" disable="true" layoutX="1251.0" layoutY="672.0" mnemonicParsing="false" onAction="#refreshGraph" prefHeight="25.0" prefWidth="80.0" text="refresh" />
    </children>
 </AnchorPane>
