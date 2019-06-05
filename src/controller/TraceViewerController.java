@@ -200,7 +200,7 @@ public class TraceViewerController implements TracesMinerListener {
 	private static final int FILTER_LENGTH = 1;
 	private static final int FILTER_OCCURRENCE = 3;
 	private static final int FILTER_ACTIONS = 6;
-	
+
 	public static final String ACTIONS = "Actions";
 	public static final String STATES = "States";
 	public static final String ALL_TRACES = "All Traces";
@@ -508,124 +508,59 @@ public class TraceViewerController implements TracesMinerListener {
 	protected void mineBasedOnCustomisedFilter() {
 
 		progressIndicatorFilter.setVisible(true);
-		
+
 		List<Integer> tracesIDs = null;
-//		int operationToPerform = -1;
-		
+		// int operationToPerform = -1;
+
 		// check sequence length
 		int length = spinnerFilterLength.getValue();
 		String lengthOp = comboboxSeqLengthComparator.getSelectionModel().getSelectedItem();
-//		operationToPerform = FILTER_LENGTH;
+		// operationToPerform = FILTER_LENGTH;
 
 		// check actions occurrence percentage
 		String percStr = textFieldActionOccurrence.getText();
 		int perc = -1;
 		String occurOp = null;
-		
+
 		if (percStr != null && !percStr.isEmpty()) {
 			perc = Integer.parseInt(percStr);
 			occurOp = comboboxOccurrenceComparator.getSelectionModel().getSelectedItem();
-//			if (perc != -1) {
-//				operationToPerform+=FILTER_OCCURRENCE;	
-//			}
-			
+			// if (perc != -1) {
+			// operationToPerform+=FILTER_OCCURRENCE;
+			// }
+
 		}
-		
-		//check action names
+
+		// check action names
 		String actions = textFieldActions.getText();
-		
-		if(actions != null && actions.isEmpty()) {
+
+		if (actions != null && actions.isEmpty()) {
 			actions = null;
 		}
-		
+
 		tracesIDs = tracesMiner.getTracesWithFilters(lengthOp, length, occurOp, perc, actions);
-		
-//		List<String> actionsToFind = parseQuery(actions);
-		
-//		tracesIDs = tracesMiner.getTracesWithActions(actions);
-//		
-//		if (tracesIDs != null) {
-//			updateImage(IMAGE_CORRECT, imgFilter);
-//			updateText("number of traces [containing specific actions] is: " + tracesIDs.size(), lblFilter);
-//		} else {
-//			updateImage(IMAGE_WRONG, imgFilter);
-//			updateText("Problem occurred", lblFilter);
-//		}
-			
-		
-		
 
-//		if (actions != null && !actions.isEmpty()) {
-//			operationToPerform+=FILTER_ACTIONS;
-//		}
-		
-//		if (perc != -1) {
-//
-//			//check the three option
-//			if (actions != null && !actions.isEmpty()) {
-//				
-//				tracesIDs = tracesMiner.getTracesWithLengthAndPercAndActions(op, length, opOccur, perc, actions);
-//				// check both length and occurrence
-//			} else {
-//				tracesIDs = tracesMiner.getTracesWithLengthAndPerc(op, length, opOccur, perc);
-//			}
-//			
-			if (tracesIDs != null) {
-				updateImage(IMAGE_CORRECT, imgFilter);
-				updateText("number of retrieved traces is: " + tracesIDs.size(), lblFilter);
-			} else {
-				updateImage(IMAGE_WRONG, imgFilter);
-				updateText("Problem occurred", lblFilter);
-			}
+		if (tracesIDs != null) {
+			updateImage(IMAGE_CORRECT, imgFilter);
+			updateText("number of retrieved traces is: " + tracesIDs.size(), lblFilter);
 
-			// check only length
-//		} else {
-//			tracesIDs = tracesMiner.getTracesWithLength(op, length);
-//
-//			if (tracesIDs != null) {
-//				updateImage(IMAGE_CORRECT, imgFilter);
-//				updateText("number of traces [" + op + " " + length + "] is: " + tracesIDs.size(), lblFilter);
-//			} else {
-//				updateImage(IMAGE_WRONG, imgFilter);
-//				updateText("Problem occurred", lblFilter);
-//			}
-//		}
-
-//		switch (operationToPerform) {
-//		case FILTER_LENGTH:
-//			tracesIDs = tracesMiner.getTracesWithLength(op, length);
-//			break;
-//
-//		case FILTER_LENGTH+FILTER_OCCURRENCE:
-//			tracesIDs = tracesMiner.getTracesWithLengthAndPerc(op, length, opOccur, perc);
-//			break;
-//		
-//		case FILTER_LENGTH+FILTER_ACTIONS:
-//			tracesIDs
-//			break;
-//		
-//		case FILTER_LENGTH+FILTER_OCCURRENCE+FILTER_ACTIONS:
-//			break;
-//			
-//		default:
-//			break;
-//		}
-		if(tracesIDs != null) {
 			Platform.runLater(new Runnable() {
 
 				@Override
 				public void run() {
 
-					if(!chartFilterTraces.contains(CUSTOMISED_TRACES)) {
-						chartFilterTraces.add(CUSTOMISED_TRACES);	
+					if (!chartFilterTraces.contains(CUSTOMISED_TRACES)) {
+						chartFilterTraces.add(CUSTOMISED_TRACES);
 					}
 					comboBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
-					comboBoxChartFilterTraces.getSelectionModel().select(0);	
-					
+					comboBoxChartFilterTraces.getSelectionModel().select(0);
+
 				}
 			});
+
 		} else {
-			
+			updateImage(IMAGE_WRONG, imgFilter);
+			updateText("Problem occurred", lblFilter);
 		}
 		
 		progressIndicatorFilter.setVisible(false);
@@ -633,38 +568,38 @@ public class TraceViewerController implements TracesMinerListener {
 	}
 
 	protected List<String> parseQuery(String query) {
-		
-		//actions separated by comma
-		query = query.trim();
-		
-		//remove all space
-		query = query.replaceAll(" ", "");
-		
-		List<String> result = Arrays.asList(query.split(","));
-		
-		Iterator<String> it = result.iterator();
-		
-//		List<Integer> indexToRemove = new LinkedList<Integer>();
-		
-//		for(int i=0;i<result.size();i++) {
-//			String act = result.get(i);
-//			if(act.isEmpty() || act.equals(" ")) {
-//				indexToRemove.add(i);
-//			} 
-//		}
 
-		while(it.hasNext()) {
+		// actions separated by comma
+		query = query.trim();
+
+		// remove all space
+		query = query.replaceAll(" ", "");
+
+		List<String> result = Arrays.asList(query.split(","));
+
+		Iterator<String> it = result.iterator();
+
+		// List<Integer> indexToRemove = new LinkedList<Integer>();
+
+		// for(int i=0;i<result.size();i++) {
+		// String act = result.get(i);
+		// if(act.isEmpty() || act.equals(" ")) {
+		// indexToRemove.add(i);
+		// }
+		// }
+
+		while (it.hasNext()) {
 			String act = it.next();
-			if(act.isEmpty() || act.equals(" ")) {
+			if (act.isEmpty() || act.equals(" ")) {
 				it.remove();
-			} 
+			}
 		}
-		
+
 		System.out.println(result);
-		
+
 		return result;
 	}
-	
+
 	protected void loadTracesFile(String filePath) {
 
 		if (filePath != null) {
@@ -1016,7 +951,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 			topActions = tracesMiner.getActionsWithOccurrencePercentage(perc, op, tracesToFilter);
 
-			System.out.println("actions: "+topActions);
+			System.out.println("actions: " + topActions);
 			break;
 
 		default:

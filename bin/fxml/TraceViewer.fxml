@@ -201,7 +201,7 @@
                                                          </tooltip>
                                                       </TextField>
                                                       <Pane prefHeight="25.0" prefWidth="13.0" />
-                                                      <Label prefHeight="25.0" prefWidth="164.0" text="?: 1 action, *: 0&gt; actions" />
+                                                      <Label prefHeight="25.0" prefWidth="164.0" text="?: 1 action, *: 0&gt; actions" visible="false" />
                                                    </children>
                                                 </HBox>
                                              </children>
