@@ -18,7 +18,7 @@ public class Query {
 	//pattern generated from regex
 	protected Pattern pattern;
 
-	public final static String ACTIONS_SEPARATOR = "";
+	public final static String ACTIONS_SEPARATOR = "\\s";
 
 	// query special chars
 	public final static String SINGLE_ACTION = "?";
@@ -28,8 +28,13 @@ public class Query {
 	// a word or more
 	public final static String ANY_ACTIONS_REGEX = "[a-zA-Z_0-9]+";
 	// a word
-	public final static String SINGLE_ACTION_REGEX = "[a-zA-Z_0-9]";
-
+	public final static String SINGLE_ACTION_REGEX = "\\w";//"[a-zA-Z_0-9]";
+	
+	//word boundary
+	public final static String WORD_BOUNDARY = "\\b";
+	
+	public final static String FROM_START = "^";
+	
 	public Query() {
 
 	}
@@ -54,22 +59,32 @@ public class Query {
 			return null;
 		}
 
+		int index = 0;
+		
+//		strBldr.append(FROM_START);
+		
 		for (String act : actions) {
 
 			switch (act) {
 			case ANY_ACTIONS:
-				strBldr.append(ANY_ACTIONS_REGEX).append(ACTIONS_SEPARATOR);
+				strBldr.append(ANY_ACTIONS_REGEX);
 				break;
 
 			case SINGLE_ACTION:
-				strBldr.append(SINGLE_ACTION_REGEX).append(ACTIONS_SEPARATOR);
+				strBldr.append(WORD_BOUNDARY).append(SINGLE_ACTION_REGEX).append(WORD_BOUNDARY);
 				break;
 
 			default:
-				strBldr.append(act);//.append(ACTIONS_SEPARATOR);
+				strBldr.append(act.toLowerCase());
 				queryActions.add(act);
 				break;
 			}
+			
+		if(index != actions.size()-1) {
+			strBldr.append(ACTIONS_SEPARATOR);
+		}
+		
+		index++;
 
 		}
 
@@ -79,7 +94,8 @@ public class Query {
 //		}
 
 		// generate pattern
-		regex = Pattern.quote(strBldr.toString());
+		String regexStr = strBldr.toString();
+		regex = Pattern.quote(regexStr);
 		pattern = Pattern.compile(regex);
 
 		System.out.println("regex "+regex);
@@ -102,8 +118,16 @@ public class Query {
 		// convert to format for matching
 		StringBuilder strBldr = new StringBuilder();
 
+		int index = 0;
+		
 		for (String action : traceActions) {
-			strBldr.append(action);//.append(ACTIONS_SEPARATOR);
+			strBldr.append(action.toLowerCase());//.append(ACTIONS_SEPARATOR);
+			
+			if(index != traceActions.size()-1) {
+				strBldr.append(ACTIONS_SEPARATOR);
+			}
+			
+			index++;
 		}
 
 		// remove last separator
@@ -111,14 +135,11 @@ public class Query {
 //			strBldr.delete(strBldr.length() - ACTIONS_SEPARATOR.length() - 1, strBldr.length());
 //		}
 
-		
-		
+
 		// match
-		boolean isMatched = pattern.matcher(strBldr.toString()).matches();
+		boolean isMatched = pattern.matcher(strBldr.toString()).lookingAt();
 		
-		if(isMatched) {
-			System.out.println("Matched to: " + strBldr.toString());
-		}
+		
 		return isMatched;
 
 	}
