@@ -2764,6 +2764,69 @@ public class TracesMiner {
 
 	}
 
+	public List<Integer> getTracesWithFilters(String lengthOp, int length, String occurOp, int perc, String query) {
+
+		Map<Integer, GraphPath> traces = null;
+
+		List<Integer> lengthTracesIDs;
+		List<Integer> occurTracesIDs;
+		List<Integer> queryTracesIDs;
+
+		// check length
+		lengthTracesIDs = getTracesWithLength(lengthOp, length);
+
+		// check occurrence
+		if (lengthTracesIDs != null && !lengthTracesIDs.isEmpty()) {
+			// use result from length
+			traces = getTraces(lengthTracesIDs);
+			occurTracesIDs = getTracesWithOccurrencePercentage(occurOp, perc, traces);
+		} else {
+			// use all traces
+			occurTracesIDs = getTracesWithOccurrencePercentage(occurOp, perc);
+		}
+
+		// check actions 
+		if (occurTracesIDs != null && !occurTracesIDs.isEmpty()) {
+			//if occurrence was set
+			traces = getTraces(occurTracesIDs);
+			queryTracesIDs = getTracesWithActions(query, traces);
+		} else if (lengthTracesIDs != null && !lengthTracesIDs.isEmpty()) {
+			//if length was set
+			queryTracesIDs = getTracesWithActions(query, traces);
+		} else {
+			//if no length or occurrence is set
+			queryTracesIDs = getTracesWithActions(query);
+		}
+
+		if(queryTracesIDs != null && !queryTracesIDs.isEmpty()) {
+			return queryTracesIDs;
+		} else if(occurTracesIDs != null && !occurTracesIDs.isEmpty()){
+			return occurTracesIDs;
+		} else {
+			return lengthTracesIDs;
+		}
+		
+//		return tracesIDs;
+	}
+
+	public List<Integer> getTracesWithLengthAndPercAndActions(String lengthOp, int length, String occurOp, int perc,
+			String query) {
+
+		List<Integer> tracesIDs = getTracesWithLengthAndPerc(lengthOp, length, occurOp, perc);
+
+		if (tracesIDs == null) {
+			return null;
+		}
+
+		// get the traces
+		Map<Integer, GraphPath> traces = getTraces(tracesIDs);
+
+		// find traces that match the query
+		List<Integer> result = getTracesWithActions(query, traces);
+
+		return result;
+	}
+
 	public Map<Integer, GraphPath> getTraces(List<Integer> tracesIDs) {
 
 		Map<Integer, GraphPath> result = new HashMap<Integer, GraphPath>();
@@ -2803,62 +2866,59 @@ public class TracesMiner {
 			return result;
 		}
 
-		//create a query object
+		// create a query object
 		Query queryEvaluator = new Query(query);
-		
-		//generate pattern in query
-		queryEvaluator.generatePattern();
-		
-//		int actionsLength = actions.size();
-//		String singleAction = "";
-//		StringBuilder strBldr = new StringBuilder();
-		
-		 
-		
-//		for(String act: actions) {
-//			strBldr.append(act);
-//		}
 
-//		singleAction = strBldr.toString();
-		
-//		String regexString = Pattern.quote(singleAction);
-		
-		
-//		Pattern pattern = Pattern.compile(regexString); //+ "(.*?)" + Pattern.quote(pattern2); ^:new line
-		
-		
+		// generate pattern in query
+		queryEvaluator.generatePattern();
+
+		// int actionsLength = actions.size();
+		// String singleAction = "";
+		// StringBuilder strBldr = new StringBuilder();
+
+		// for(String act: actions) {
+		// strBldr.append(act);
+		// }
+
+		// singleAction = strBldr.toString();
+
+		// String regexString = Pattern.quote(singleAction);
+
+		// Pattern pattern = Pattern.compile(regexString); //+ "(.*?)" +
+		// Pattern.quote(pattern2); ^:new line
+
 		// ==== need to update for ? *
 		for (Entry<Integer, GraphPath> entry : traces.entrySet()) {
 
 			List<String> traceActions = entry.getValue().getTransitionActions();
-			
-			if(queryEvaluator.matches(traceActions)) {
+
+			if (queryEvaluator.matches(traceActions)) {
 				result.add(entry.getKey());
 			}
 			// if the trace sequence is shorter than given actions
-//			if (actions.size() > traceActions.size()) {
-//				continue;
-//			}
+			// if (actions.size() > traceActions.size()) {
+			// continue;
+			// }
 
-//			strBldr.setLength(0);
-			
-			//create one string of the actions in sequence from the beginning
-//			for (int i = 0; i < actionsLength; i++) {
-//				strBldr.append(traceActions.get(i));
-//			}
-			
-//			if(pattern.matcher(strBldr.toString()).matches()) {
-//				result.add(entry.getKey());
-//			}
+			// strBldr.setLength(0);
+
+			// create one string of the actions in sequence from the beginning
+			// for (int i = 0; i < actionsLength; i++) {
+			// strBldr.append(traceActions.get(i));
+			// }
+
+			// if(pattern.matcher(strBldr.toString()).matches()) {
+			// result.add(entry.getKey());
+			// }
 			// check if both string are equal
-//			if(singleAction.equalsIgnoreCase(strBldr.toString())) {
-//				result.add(entry.getKey());
-//			}
-			
+			// if(singleAction.equalsIgnoreCase(strBldr.toString())) {
+			// result.add(entry.getKey());
+			// }
+
 			// check that all actions in the list exist in the trace
-//			if (traceActions.containsAll(actions)) {
-//				result.add(entry.getKey());
-//			}
+			// if (traceActions.containsAll(actions)) {
+			// result.add(entry.getKey());
+			// }
 
 		}
 
