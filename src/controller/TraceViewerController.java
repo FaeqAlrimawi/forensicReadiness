@@ -518,9 +518,9 @@ public class TraceViewerController implements TracesMinerListener {
 		//check action names
 		String actions = textFieldActions.getText();
 		
-		List<String> actionsToFind = parseQuery(actions);
+//		List<String> actionsToFind = parseQuery(actions);
 		
-		tracesIDs = tracesMiner.getTracesWithActions(actionsToFind);
+		tracesIDs = tracesMiner.getTracesWithActions(actions);
 		
 		if (tracesIDs != null) {
 			updateImage(IMAGE_CORRECT, imgFilter);

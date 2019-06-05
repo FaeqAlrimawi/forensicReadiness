@@ -48,6 +48,7 @@ import ca.pfv.spmf.algorithms.sequentialpatterns.spam.PatternTKS;
 import ca.pfv.spmf.patterns.cluster.Cluster;
 import ca.pfv.spmf.patterns.cluster.ClusterWithMean;
 import controller.TraceViewerController;
+import core.utilities.Query;
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.pattern_instantiation.GraphPath;
@@ -2785,60 +2786,70 @@ public class TracesMiner {
 		return result;
 	}
 
-	public List<Integer> getTracesWithActions(List<String> actions) {
+	public List<Integer> getTracesWithActions(String query) {
 
-		return getTracesWithActions(actions, instances);
+		return getTracesWithActions(query, instances);
 	}
 
-	public List<Integer> getTracesWithActions(List<String> actions, Map<Integer, GraphPath> traces) {
+	public List<Integer> getTracesWithActions(String query, Map<Integer, GraphPath> traces) {
 
 		List<Integer> result = new LinkedList<Integer>();
 
-		if (actions == null || traces == null) {
+		if (query == null || traces == null) {
 			return null;
 		}
 
-		if (actions.isEmpty() || traces.isEmpty()) {
+		if (query.isEmpty() || traces.isEmpty()) {
 			return result;
 		}
 
-		int actionsLength = actions.size();
-		String singleAction = "";
-		StringBuilder strBldr = new StringBuilder();
+		//create a query object
+		Query queryEvaluator = new Query(query);
 		
-		 //+ "(.*?)" + Pattern.quote(pattern2);
+		//generate pattern in query
+		queryEvaluator.generatePattern();
 		
-		for(String act: actions) {
-			strBldr.append(act);
-		}
+//		int actionsLength = actions.size();
+//		String singleAction = "";
+//		StringBuilder strBldr = new StringBuilder();
+		
+		 
+		
+//		for(String act: actions) {
+//			strBldr.append(act);
+//		}
 
-		singleAction = strBldr.toString();
+//		singleAction = strBldr.toString();
 		
-		String regexString = Pattern.quote(singleAction);
+//		String regexString = Pattern.quote(singleAction);
 		
 		
-		Pattern pattern = Pattern.compile(regexString);
+//		Pattern pattern = Pattern.compile(regexString); //+ "(.*?)" + Pattern.quote(pattern2); ^:new line
+		
 		
 		// ==== need to update for ? *
 		for (Entry<Integer, GraphPath> entry : traces.entrySet()) {
 
 			List<String> traceActions = entry.getValue().getTransitionActions();
 			
-			// if the trace sequence is shorter than given actions
-			if (actions.size() > traceActions.size()) {
-				continue;
-			}
-
-			strBldr.setLength(0);
-			
-			//create one string of the actions in sequence from the beginning
-			for (int i = 0; i < actionsLength; i++) {
-				strBldr.append(traceActions.get(i));
-			}
-			
-			if(pattern.matcher(strBldr.toString()).matches()) {
+			if(queryEvaluator.matches(traceActions)) {
 				result.add(entry.getKey());
 			}
+			// if the trace sequence is shorter than given actions
+//			if (actions.size() > traceActions.size()) {
+//				continue;
+//			}
+
+//			strBldr.setLength(0);
+			
+			//create one string of the actions in sequence from the beginning
+//			for (int i = 0; i < actionsLength; i++) {
+//				strBldr.append(traceActions.get(i));
+//			}
+			
+//			if(pattern.matcher(strBldr.toString()).matches()) {
+//				result.add(entry.getKey());
+//			}
 			// check if both string are equal
 //			if(singleAction.equalsIgnoreCase(strBldr.toString())) {
 //				result.add(entry.getKey());
