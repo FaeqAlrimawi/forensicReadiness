@@ -1,15 +1,18 @@
 package controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import ie.lero.spare.pattern_instantiation.GraphPath;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
-import javafx.scene.shape.Circle;
+import javafx.scene.layout.Pane;
 
 public class TaskCell extends ListCell<GraphPath> {
 
@@ -52,8 +55,18 @@ public class TaskCell extends ListCell<GraphPath> {
         super.updateItem(trace, empty);
 
         if(empty || trace == null) {
-            setText(null);
-            setContentDisplay(ContentDisplay.TEXT_ONLY);
+   
+            Platform.runLater(new Runnable() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+			         setText(null);
+					setContentDisplay(ContentDisplay.TEXT_ONLY);
+					
+				}
+			});
+            
         }
         else {
 
@@ -92,33 +105,82 @@ public class TaskCell extends ListCell<GraphPath> {
         		}
         	}
            
+            Platform.runLater(new Runnable() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					setText(null);
+		            setGraphic(hboxRoot);
+		            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+				}
+			});
             
-            setText(null);
-            setGraphic(hboxRoot);
-            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             
         }
     }
     
     protected void populateCell(GraphPath trace) {
     	
-    	lblTraceID.setText(trace.getInstanceID()+"");
+    	Platform.runLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				lblTraceID.setText(trace.getInstanceID()+"");
+				hbox.getChildren().clear();
+				Pane pane = new Pane();
+				pane.setPrefWidth(10);
+				hbox.getChildren().add(pane);
+				
+			}
+		});
+    	
 
-    	hbox.getChildren().clear();
+    	
         int index = 0;
         int size = trace.getStateTransitions().size()-1;
+        List<Integer> states = trace.getStateTransitions();
+        List<String> actions = trace.getTransitionActions();
+        StringBuilder strBldr = new StringBuilder();
+        
         //set states
-        for(Integer state : trace.getStateTransitions()) {
+        for(Integer state : states) {
 //        	Circle circle = new Circle(hbox.getHeight()-2);
-        	Label stateLbl;
+        	Label lblState;
+        	Label lblAction;
         	if(index != size) {
-        		stateLbl = new Label(state+" -> ");
+        		lblState = new Label(state+"");
+        		strBldr.append(state);
+        		
+        		lblAction = new Label(" =[" + actions.get(index)+"]=> ");
+        		lblAction.setStyle("-fx-text-fill: grey");
+        		strBldr.append(" =[" + actions.get(index)+"]=> ");
         	} else {
-        		stateLbl = new Label(state+"");
+        		lblState = new Label(state+"");
+        		strBldr.append(state);
+        		lblAction = null;
         	}
         	
         	index++;
-        	hbox.getChildren().add(stateLbl);
+        	
+        	Platform.runLater(new Runnable() {
+    			
+    			@Override
+    			public void run() {
+    				// TODO Auto-generated method stub
+    				hbox.getChildren().add(lblState);
+    				if(lblAction!=null) {
+    					hbox.getChildren().add(lblAction);	
+    				}
+    				
+    				//add tooltip
+    				Tooltip tip = new Tooltip(strBldr.toString());
+    				lblTraceID.setTooltip(tip);
+    				
+    			}
+    		});
+        	
         	                 	
         }
     }

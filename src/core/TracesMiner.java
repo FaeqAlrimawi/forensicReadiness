@@ -1061,7 +1061,7 @@ public class TracesMiner {
 		}
 
 		shortestTraceIDs = Arrays.asList(shortestTraces.keySet().toArray(new Integer[shortestTraces.size()]));
-		
+
 		return shortestTraces.size();
 
 	}
@@ -2941,11 +2941,14 @@ public class TracesMiner {
 
 		return shortestTraceIDs;
 	}
-	
+
 	public List<Integer> getShortestClaSPTracesIDs() {
 
 		return claSPTraceIDs;
 	}
-	
+
+	public List<Integer> getCustomisedTracesIDs() {
+		return customeFilteringTraceIDs;
+	}
 
 }

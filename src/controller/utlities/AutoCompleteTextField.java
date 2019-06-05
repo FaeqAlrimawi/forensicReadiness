@@ -208,9 +208,9 @@ public class AutoCompleteTextField {
 
 		// if new longer than older
 		if (text.length() > oldText.length()) {
-			pos++;
+			pos = pos + (text.length()-oldText.length());
 		} else {
-			pos--;
+			pos = pos - (oldText.length()-text.length()) ;
 		}
 
 		// System.out.println("txt: " + text + " old: " + oldText + " pos: " +

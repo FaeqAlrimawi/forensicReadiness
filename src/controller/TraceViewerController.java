@@ -568,6 +568,9 @@ public class TraceViewerController implements TracesMinerListener {
 		}
 		
 		progressIndicatorFilter.setVisible(false);
+		
+		//view traces
+		viewTraces(tracesMiner.getCustomisedTracesIDs());
 
 	}
 
@@ -1251,6 +1254,9 @@ public class TraceViewerController implements TracesMinerListener {
 
 		if(tracesIDs.isEmpty()) {
 			System.out.println("traces ids list is Empty");
+			
+			//clear list
+			listViewTraces.setItems(null);
 			return;
 		}
 		
