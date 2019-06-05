@@ -144,6 +144,7 @@ public class TaskCell extends ListCell<GraphPath> {
         List<String> actions = trace.getTransitionActions();
         StringBuilder strBldr = new StringBuilder();
         
+        
         //set states
         for(Integer state : states) {
 //        	Circle circle = new Circle(hbox.getHeight()-2);
@@ -151,10 +152,12 @@ public class TaskCell extends ListCell<GraphPath> {
         	Label lblAction;
         	if(index != size) {
         		lblState = new Label(state+"");
+        		lblState.setStyle("-fx-text-fill:black; -fx-font-size:12px");
         		strBldr.append(state);
         		
         		lblAction = new Label(" =[" + actions.get(index)+"]=> ");
-        		lblAction.setStyle("-fx-text-fill: grey");
+        		lblAction.setStyle("-fx-text-fill: grey; -fx-font-size:10px");
+        	
         		strBldr.append(" =[" + actions.get(index)+"]=> ");
         	} else {
         		lblState = new Label(state+"");

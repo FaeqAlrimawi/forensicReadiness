@@ -504,6 +504,13 @@ public class TracesMiner {
 
 			break;
 
+		case TraceViewerController.SHORTEST_CLASP_TRACES:
+			if (claSPTraceIDs != null && !claSPTraceIDs.isEmpty()) {
+				Map<Integer, GraphPath> traces = getTraces(claSPTraceIDs);
+				occurrences = getOccurrence(traces);
+			}
+			break;
+			
 		case TraceViewerController.CUSTOMISED_TRACES:
 			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
 				Map<Integer, GraphPath> traces = getTraces(customeFilteringTraceIDs);
@@ -576,6 +583,13 @@ public class TracesMiner {
 
 			break;
 
+		case TraceViewerController.SHORTEST_CLASP_TRACES:
+			if (claSPTraceIDs != null && !claSPTraceIDs.isEmpty()) {
+				Map<Integer, GraphPath> traces = getTraces(claSPTraceIDs);
+				occurrences = getStateOccurrence(traces);
+			}
+			break;
+			
 		case TraceViewerController.CUSTOMISED_TRACES:
 			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
 				Map<Integer, GraphPath> traces = getTraces(customeFilteringTraceIDs);
@@ -652,6 +666,19 @@ public class TracesMiner {
 			numOfTraces = shortestTraces.size();
 			break;
 
+		case TraceViewerController.SHORTEST_CLASP_TRACES:
+			Map<Integer, GraphPath> traces1 = null;
+			if (claSPTraceIDs != null && !claSPTraceIDs.isEmpty()) {
+				traces1 = getTraces(claSPTraceIDs);
+				occurrences = getOccurrence(traces1);
+			}
+
+			if (traces1 != null) {
+				numOfTraces = traces1.size();
+			}
+			
+			break;
+			
 		case TraceViewerController.CUSTOMISED_TRACES:
 			Map<Integer, GraphPath> traces = null;
 			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
@@ -741,6 +768,18 @@ public class TracesMiner {
 
 			break;
 
+		case TraceViewerController.SHORTEST_CLASP_TRACES:
+			Map<Integer, GraphPath> traces1 = null;
+			if (claSPTraceIDs != null && !claSPTraceIDs.isEmpty()) {
+				traces1 = getTraces(claSPTraceIDs);
+				occurrences = getStateOccurrence(traces1);
+			}
+			if (traces1 != null) {
+				numOfTraces = traces1.size();
+			}
+
+			break;
+			
 		case TraceViewerController.CUSTOMISED_TRACES:
 			Map<Integer, GraphPath> traces = null;
 			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
@@ -825,6 +864,13 @@ public class TracesMiner {
 
 			break;
 
+		case TraceViewerController.SHORTEST_CLASP_TRACES:
+			if (claSPTraceIDs != null && !claSPTraceIDs.isEmpty()) {
+				Map<Integer, GraphPath> traces = getTraces(claSPTraceIDs);
+				occurrences = getOccurrence(traces);
+			}
+			break;
+			
 		case TraceViewerController.CUSTOMISED_TRACES:
 			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
 				Map<Integer, GraphPath> traces = getTraces(customeFilteringTraceIDs);
@@ -895,7 +941,14 @@ public class TracesMiner {
 			}
 
 			break;
-
+			
+		case TraceViewerController.SHORTEST_CLASP_TRACES:
+			if (claSPTraceIDs != null && !claSPTraceIDs.isEmpty()) {
+				Map<Integer, GraphPath> traces = getTraces(claSPTraceIDs);
+				occurrences = getStateOccurrence(traces);
+			}
+			break;
+			
 		case TraceViewerController.CUSTOMISED_TRACES:
 			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
 				Map<Integer, GraphPath> traces = getTraces(customeFilteringTraceIDs);

@@ -86,6 +86,9 @@ public class TraceViewerController implements TracesMinerListener {
 	private Label lblFilter;
 
 	@FXML
+	private Label lblListViewTracesEmpty;
+	
+	@FXML
 	private ProgressIndicator progressIndicatorFilter;
 
 	@FXML
@@ -209,6 +212,7 @@ public class TraceViewerController implements TracesMinerListener {
 	public static final String STATES = "States";
 	public static final String ALL_TRACES = "All Traces";
 	public static final String SHORTEST_TRACES = "Shortest Traces";
+	public static final String SHORTEST_CLASP_TRACES = "Shortest ClaSP Traces";
 	public static final String CUSTOMISED_TRACES = "Customised Traces";
 
 	private AutoCompleteTextField autoCompleteActionsFiled;
@@ -777,6 +781,24 @@ public class TraceViewerController implements TracesMinerListener {
 
 		updateImage(IMAGE_CORRECT, imgFilter);
 		updateText("# of retrieved traces = " + numofTraces, lblFilter);
+		
+		Platform.runLater(new Runnable() {
+
+			@Override
+			public void run() {
+
+				// add a shortest traces entry to chart filter choice box
+				if (!chartFilterTraces.contains(SHORTEST_CLASP_TRACES)) {
+					chartFilterTraces.add(SHORTEST_CLASP_TRACES);
+					comboBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
+					comboBoxChartFilterTraces.getSelectionModel().select(0);
+				}
+
+			}
+		});
+		
+		//show traces
+		viewTraces(tracesMiner.getShortestClaSPTracesIDs());
 
 	}
 
@@ -926,6 +948,10 @@ public class TraceViewerController implements TracesMinerListener {
 			numberOfTracesInSelection = tracesMiner.getShortestTracesNumber();
 			break;
 
+		case SHORTEST_CLASP_TRACES:
+			numberOfTracesInSelection = tracesMiner.getShortestClaSPTracesIDs().size();
+			break;
+			
 		case CUSTOMISED_TRACES:
 			numberOfTracesInSelection = tracesMiner.getCustomisedTracesNumber();
 			break;
@@ -1253,8 +1279,7 @@ public class TraceViewerController implements TracesMinerListener {
 		
 
 		if(tracesIDs.isEmpty()) {
-			System.out.println("traces ids list is Empty");
-			
+			lblListViewTracesEmpty.setVisible(true);			
 			//clear list
 			listViewTraces.setItems(null);
 			return;
@@ -1270,6 +1295,8 @@ public class TraceViewerController implements TracesMinerListener {
 		
 		 listViewTraces.setCellFactory(tracesListView -> new TaskCell());
 		listViewTraces.setItems(tracesObservableList);
+		
+		lblListViewTracesEmpty.setVisible(false);
        
 		
 	}

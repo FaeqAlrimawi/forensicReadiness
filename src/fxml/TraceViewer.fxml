@@ -275,7 +275,7 @@
             </HBox>
          </children>
       </VBox>
-      <VBox layoutX="14.0" layoutY="353.0" prefHeight="380.0" prefWidth="656.0">
+      <VBox layoutX="14.0" layoutY="353.0" prefHeight="380.0" prefWidth="733.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="353.0">
          <children>
             <HBox alignment="CENTER_LEFT" prefHeight="15.0" prefWidth="628.0">
                <children>
@@ -285,19 +285,36 @@
                      </image>
                   </ImageView>
                   <Pane prefHeight="20.0" prefWidth="6.0" />
-                  <Label fx:id="lblFilter" prefHeight="20.0" prefWidth="587.0">
+                  <Label fx:id="lblFilter" prefHeight="20.0" prefWidth="710.0">
                      <font>
                         <Font size="14.0" />
                      </font>
                   </Label>
                </children>
             </HBox>
-            <Pane prefHeight="6.0" prefWidth="317.0" />
-            <ScrollPane>
-               <content>
-                  <ListView fx:id="listViewTraces" prefHeight="349.0" prefWidth="654.0" />
-               </content>
-            </ScrollPane>
+            <Pane prefHeight="6.0" prefWidth="733.0" />
+            <HBox prefHeight="17.0" prefWidth="721.0">
+               <children>
+                  <Pane prefHeight="17.0" prefWidth="14.0" />
+                  <Label prefHeight="17.0" prefWidth="50.0" text="Trace-ID" textFill="#8a8686" />
+                  <Separator orientation="VERTICAL" prefHeight="18.0" prefWidth="11.0" />
+                  <Label prefHeight="17.0" prefWidth="424.0" text="State-number =[action name]=&gt; State-number =[action name]=&gt; ..." textFill="#8a8686" />
+               </children>
+            </HBox>
+            <AnchorPane>
+               <children>
+                  <ScrollPane>
+                     <content>
+                        <ListView fx:id="listViewTraces" prefHeight="330.0" prefWidth="731.0" />
+                     </content>
+                  </ScrollPane>
+                  <Label fx:id="lblListViewTracesEmpty" alignment="CENTER" prefHeight="17.0" prefWidth="733.0" text="Empty" textFill="#a19494" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
          </children>
       </VBox>
       <Button fx:id="btnRefresh" disable="true" layoutX="1251.0" layoutY="672.0" mnemonicParsing="false" onAction="#refreshGraph" prefHeight="25.0" prefWidth="80.0" text="refresh" />

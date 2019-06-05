@@ -10,12 +10,12 @@
 <?import javafx.scene.text.Font?>
 
 
-<VBox alignment="CENTER" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox alignment="CENTER" prefHeight="50.0" prefWidth="720.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <Pane prefHeight="5.0" prefWidth="617.0" />
       <HBox fx:id="hboxRoot" prefHeight="45.0" prefWidth="617.0">
          <children>
-            <SplitPane dividerPositions="0.08487654320987655" prefHeight="27.0" prefWidth="650.0">
+            <SplitPane dividerPositions="0.08487654320987655" prefHeight="45.0" prefWidth="720.0">
                <items>
                   <BorderPane maxWidth="150.0" prefHeight="35.0" prefWidth="52.0">
                      <center>
@@ -26,9 +26,9 @@
                         </Label>
                      </center>
                   </BorderPane>
-                  <ScrollPane vbarPolicy="NEVER">
+                  <ScrollPane opacity="0.55" prefHeight="43.0" prefWidth="625.0" vbarPolicy="NEVER">
                      <content>
-                        <HBox fx:id="hbox" alignment="CENTER_LEFT" />
+                        <HBox fx:id="hbox" alignment="CENTER_LEFT" prefHeight="43.0" />
                      </content>
                   </ScrollPane>
                </items>
