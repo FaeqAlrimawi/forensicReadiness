@@ -15,15 +15,15 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.eclipse.swt.widgets.Combo;
-
 import controller.utlities.AutoCompleteTextField;
 import core.TracesMiner;
 import core.TracesMinerListener;
+import ie.lero.spare.pattern_instantiation.GraphPath;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.chart.BarChart;
@@ -35,6 +35,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Spinner;
@@ -168,6 +169,9 @@ public class TraceViewerController implements TracesMinerListener {
 	@FXML
 	private ComboBox<String> comboboxSeqLengthComparator;
 
+	@FXML
+	private ListView<GraphPath> listViewTraces;
+	
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -197,9 +201,9 @@ public class TraceViewerController implements TracesMinerListener {
 	// public static final String MORE_THAN = ">";
 	// public static final String LESS_THAN = "<";
 	public static final String LESS_THAN_EQUAL = "<=";
-	private static final int FILTER_LENGTH = 1;
-	private static final int FILTER_OCCURRENCE = 3;
-	private static final int FILTER_ACTIONS = 6;
+//	private static final int FILTER_LENGTH = 1;
+//	private static final int FILTER_OCCURRENCE = 3;
+//	private static final int FILTER_ACTIONS = 6;
 
 	public static final String ACTIONS = "Actions";
 	public static final String STATES = "States";
@@ -750,6 +754,9 @@ public class TraceViewerController implements TracesMinerListener {
 
 			}
 		});
+		
+		//show traces
+		viewTraces(tracesMiner.getShortestTracesIDs());
 
 	}
 
@@ -1232,4 +1239,34 @@ public class TraceViewerController implements TracesMinerListener {
 		});
 
 	}
+	
+	protected void viewTraces(List<Integer> tracesIDs) {
+		
+		
+		if(tracesIDs == null) {
+			System.err.println("traces ids list is null");
+			return;
+		}
+		
+
+		if(tracesIDs.isEmpty()) {
+			System.out.println("traces ids list is Empty");
+			return;
+		}
+		
+		Map<Integer, GraphPath> traces = tracesMiner.getTraces(tracesIDs);
+		
+		ObservableList<GraphPath> tracesObservableList;
+		
+		tracesObservableList = FXCollections.observableArrayList();
+		
+		tracesObservableList.addAll(traces.values());
+		
+		 listViewTraces.setCellFactory(tracesListView -> new TaskCell());
+		listViewTraces.setItems(tracesObservableList);
+       
+		
+	}
+	
+	
 }

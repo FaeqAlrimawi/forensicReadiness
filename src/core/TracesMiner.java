@@ -1060,6 +1060,8 @@ public class TracesMiner {
 			System.out.println(">>Shortest traces IDs are stored in [" + shortestTracesFileName + "]");
 		}
 
+		shortestTraceIDs = Arrays.asList(shortestTraces.keySet().toArray(new Integer[shortestTraces.size()]));
+		
 		return shortestTraces.size();
 
 	}
@@ -2685,9 +2687,9 @@ public class TracesMiner {
 			return result;
 		}
 
-		double percGiven = (percentage*1.0/100);
+		double percGiven = (percentage * 1.0 / 100);
 		int index = 0;
-		
+
 		System.out.println("given perc: " + percGiven);
 		// all actions of a trace should have a percentage that is [op, e.g.,
 		// more than] the given
@@ -2698,11 +2700,11 @@ public class TracesMiner {
 				for (String action : entry.getValue().getTransitionActions()) {
 					int occurrence = tracesActionsOccurence.get(action);
 					double perc = (occurrence * 1.0 / instances.size());
-					if(index != 100) {
+					if (index != 100) {
 						System.out.println("perc: " + perc);
 						index++;
 					}
-					
+
 					// if an action does not satisfy the criterion, then skip to
 					// next trace
 					if (!(perc >= percGiven)) {
@@ -2793,28 +2795,28 @@ public class TracesMiner {
 			occurTracesIDs = getTracesWithOccurrencePercentage(occurOp, perc);
 		}
 
-		// check actions 
+		// check actions
 		if (occurTracesIDs != null) {
-			//if occurrence was set
+			// if occurrence was set
 			traces = getTraces(occurTracesIDs);
 			queryTracesIDs = getTracesWithActions(query, traces);
 		} else if (lengthTracesIDs != null) {
-			//if length was set
+			// if length was set
 			queryTracesIDs = getTracesWithActions(query, traces);
 		} else {
-			//if no length or occurrence is set
+			// if no length or occurrence is set
 			queryTracesIDs = getTracesWithActions(query);
 		}
 
-		if(queryTracesIDs != null) {
+		if (queryTracesIDs != null) {
 			return queryTracesIDs;
-		} else if(occurTracesIDs != null){
+		} else if (occurTracesIDs != null) {
 			return occurTracesIDs;
 		} else {
 			return lengthTracesIDs;
 		}
-		
-//		return tracesIDs;
+
+		// return tracesIDs;
 	}
 
 	public List<Integer> getTracesWithLengthAndPercAndActions(String lengthOp, int length, String occurOp, int perc,
@@ -2934,5 +2936,16 @@ public class TracesMiner {
 
 		return result;
 	}
+
+	public List<Integer> getShortestTracesIDs() {
+
+		return shortestTraceIDs;
+	}
+	
+	public List<Integer> getShortestClaSPTracesIDs() {
+
+		return claSPTraceIDs;
+	}
+	
 
 }

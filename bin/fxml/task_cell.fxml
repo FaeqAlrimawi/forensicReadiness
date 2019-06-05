@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+
+
+<HBox fx:id="hboxRoot" prefHeight="29.0" prefWidth="617.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <SplitPane dividerPositions="0.08487654320987655" prefHeight="27.0" prefWidth="650.0">
+         <items>
+            <BorderPane maxWidth="150.0" prefHeight="35.0" prefWidth="52.0">
+               <center>
+                  <Label fx:id="lblTraceID" prefHeight="27.0" prefWidth="155.0" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </Label>
+               </center>
+            </BorderPane>
+            <HBox fx:id="hbox" alignment="CENTER_LEFT" prefHeight="27.0" prefWidth="582.0" />
+         </items>
+      </SplitPane>
+   </children>
+</HBox>
