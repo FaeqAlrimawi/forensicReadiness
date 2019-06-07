@@ -291,7 +291,7 @@
                         </HBox>
                      </children>
                   </VBox>
-                  <VBox layoutX="15.0" layoutY="10.0">
+                  <VBox layoutX="15.0" layoutY="10.0" AnchorPane.bottomAnchor="377.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="10.0">
                      <children>
                         <VBox prefHeight="472.0" prefWidth="886.0">
                            <children>

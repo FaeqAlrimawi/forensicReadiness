@@ -426,7 +426,13 @@ public class TraceViewerController implements TracesMinerListener {
 
 		if (selectedTracesFile != null) {
 			fileChooser.setInitialFileName(selectedTracesFile.getName());
-//			fileChooser.setInitialDirectory(selectedTracesFile.getAbsoluteFile());
+			
+			String folder = selectedTracesFile.getAbsolutePath().substring(0, selectedTracesFile.getAbsolutePath().lastIndexOf(File.separator));
+			File folderF = new File(folder);
+			
+			if(folderF.isDirectory()) {
+				fileChooser.setInitialDirectory(folderF);	
+			}
 		}
 
 		// set extension to be of system model (.cps)
@@ -541,7 +547,13 @@ public class TraceViewerController implements TracesMinerListener {
 
 		if (selectedFilteredTracesFile!= null) {
 			fileChooser.setInitialFileName(selectedFilteredTracesFile.getName());
-//			fileChooser.setInitialDirectory(selectedFilteredTracesFile.getAbsoluteFile());
+			String folder = selectedFilteredTracesFile.getAbsolutePath().substring(0, selectedFilteredTracesFile.getAbsolutePath().lastIndexOf(File.separator));
+			File folderF = new File(folder);
+			
+			if(folderF.isDirectory()) {
+				fileChooser.setInitialDirectory(folderF);	
+			}
+			
 		}
 
 		// set extension to be of system model (.cps)
@@ -690,7 +702,7 @@ public class TraceViewerController implements TracesMinerListener {
 		if (filePath != null) {
 
 			// show progress indicatior
-			progressIndicatorLoader.setVisible(true);
+//			progressIndicatorLoader.setVisible(true);
 
 			executor.submit(new Runnable() {
 
@@ -816,7 +828,9 @@ public class TraceViewerController implements TracesMinerListener {
 				// TODO Auto-generated method stub
 				
 				//clear combobox for filtering chart
-				comboBoxChartFilterTraces.getItems().clear();
+				chartFilterTraces.clear();
+				chartFilterTraces.add(ALL_TRACES);
+				comboBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
 				
 				//clear chart
 				
@@ -1352,6 +1366,7 @@ public class TraceViewerController implements TracesMinerListener {
 				// TODO Auto-generated method stub
 				lblProgressTraces.setVisible(true);
 				lblProgressTraces.setText("Loading File...");
+				progressIndicatorLoader.setVisible(true);
 			}
 		});
 	}
