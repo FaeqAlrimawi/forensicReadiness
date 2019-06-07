@@ -14,6 +14,7 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
@@ -31,7 +32,7 @@
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="740.0" prefWidth="412.0">
                <children>
-                  <VBox prefHeight="389.0" prefWidth="406.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+                  <VBox prefHeight="453.0" prefWidth="406.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
                      <children>
                         <VBox prefHeight="109.0" prefWidth="662.0">
                            <children>
@@ -39,7 +40,7 @@
                                  <children>
                                     <HBox prefHeight="34.0" prefWidth="620.0">
                                        <children>
-                                          <Label prefHeight="39.0" prefWidth="70.0" text="Traces">
+                                          <Label prefHeight="34.0" prefWidth="59.0" text="Traces">
                                              <font>
                                                 <Font size="18.0" />
                                              </font>
@@ -79,7 +80,7 @@
                                        </children>
                                     </HBox>
                                     <Pane prefHeight="7.0" prefWidth="452.0" />
-                                    <HBox prefHeight="34.0" prefWidth="213.0">
+                                    <HBox prefHeight="16.0" prefWidth="406.0">
                                        <children>
                                           <AnchorPane prefHeight="31.0" prefWidth="146.0">
                                              <children>
@@ -140,9 +141,9 @@
                            </children>
                         </VBox>
                         <Separator prefWidth="200.0" />
-                        <VBox prefHeight="237.0" prefWidth="617.0">
+                        <VBox prefHeight="317.0" prefWidth="406.0">
                            <children>
-                              <Label prefHeight="34.0" prefWidth="370.0" text="Filters" textFill="#aa14c4">
+                              <Label prefHeight="34.0" prefWidth="370.0" text="Filters">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -154,85 +155,85 @@
                                  </children>
                               </HBox>
                               <Pane prefHeight="15.0" prefWidth="680.0" />
-                              <Pane fx:id="customisePane" disable="true" prefHeight="133.0" prefWidth="628.0">
+                              <VBox prefHeight="189.0" prefWidth="406.0">
                                  <children>
-                                    <VBox layoutX="4.0" layoutY="-1.0" prefHeight="134.0" prefWidth="406.0">
+                                    <Label prefHeight="23.0" prefWidth="194.0" text="Customise Filter">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <Pane prefHeight="6.0" prefWidth="317.0" />
+                                    <HBox prefHeight="148.0" prefWidth="406.0">
                                        <children>
-                                          <Label prefHeight="23.0" prefWidth="194.0" text="Customise Filter">
-                                             <font>
-                                                <Font size="14.0" />
-                                             </font>
-                                          </Label>
-                                          <Pane prefHeight="6.0" prefWidth="317.0" />
-                                          <HBox prefHeight="103.0" prefWidth="539.0">
+                                          <VBox fx:id="customisePane" prefHeight="118.0" prefWidth="406.0">
                                              <children>
-                                                <VBox prefHeight="103.0" prefWidth="602.0">
+                                                <HBox alignment="CENTER_LEFT" prefHeight="17.0" prefWidth="311.0">
                                                    <children>
-                                                      <HBox alignment="CENTER_LEFT" prefHeight="17.0" prefWidth="311.0">
+                                                      <Label text="-Sequence length" />
+                                                      <Pane prefHeight="34.0" prefWidth="12.0" />
+                                                      <ComboBox fx:id="comboboxSeqLengthComparator" prefHeight="25.0" prefWidth="60.0" />
+                                                      <Pane prefHeight="34.0" prefWidth="4.0" />
+                                                      <Spinner fx:id="spinnerFilterLength" prefHeight="25.0" prefWidth="58.0" />
+                                                   </children>
+                                                </HBox>
+                                                <Pane prefHeight="6.0" prefWidth="317.0" />
+                                                <HBox alignment="CENTER_LEFT" prefHeight="3.0" prefWidth="311.0">
+                                                   <children>
+                                                      <Label text="-Action occurrence" />
+                                                      <Pane prefHeight="25.0" prefWidth="5.0" />
+                                                      <ComboBox fx:id="comboboxOccurrenceComparator" prefHeight="25.0" prefWidth="60.0" />
+                                                      <Pane prefHeight="34.0" prefWidth="3.0" />
+                                                      <TextField fx:id="textFieldActionOccurrence" prefHeight="25.0" prefWidth="59.0" promptText="  1-100" />
+                                                      <Pane prefHeight="34.0" prefWidth="3.0" />
+                                                      <Label text="\%" />
+                                                   </children>
+                                                </HBox>
+                                                <Pane prefHeight="6.0" prefWidth="317.0" />
+                                                <HBox alignment="CENTER_LEFT" prefHeight="74.0" prefWidth="406.0">
+                                                   <children>
+                                                      <Label prefHeight="17.0" prefWidth="108.0" text="-Contains action(s)" />
+                                                      <HBox prefHeight="51.0" prefWidth="302.0">
                                                          <children>
-                                                            <Label text="-Sequence length" />
-                                                            <Pane prefHeight="34.0" prefWidth="12.0" />
-                                                            <ComboBox fx:id="comboboxSeqLengthComparator" prefHeight="25.0" prefWidth="60.0" />
-                                                            <Pane prefHeight="34.0" prefWidth="4.0" />
-                                                            <Spinner fx:id="spinnerFilterLength" prefHeight="25.0" prefWidth="58.0" />
-                                                         </children>
-                                                      </HBox>
-                                                      <Pane prefHeight="6.0" prefWidth="317.0" />
-                                                      <HBox alignment="CENTER_LEFT" prefHeight="3.0" prefWidth="311.0">
-                                                         <children>
-                                                            <Label text="-Action occurrence" />
-                                                            <Pane prefHeight="25.0" prefWidth="5.0" />
-                                                            <ComboBox fx:id="comboboxOccurrenceComparator" prefHeight="25.0" prefWidth="60.0" />
-                                                            <Pane prefHeight="34.0" prefWidth="3.0" />
-                                                            <TextField fx:id="textFieldActionOccurrence" prefHeight="25.0" prefWidth="59.0" promptText="  1-100" />
-                                                            <Pane prefHeight="34.0" prefWidth="3.0" />
-                                                            <Label text="\%" />
-                                                         </children>
-                                                      </HBox>
-                                                      <Pane prefHeight="6.0" prefWidth="317.0" />
-                                                      <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="525.0">
-                                                         <children>
-                                                            <Label prefHeight="17.0" prefWidth="108.0" text="-Contains action(s)" />
-                                                            <HBox prefHeight="25.0" prefWidth="305.0">
-                                                               <children>
-                                                                  <TextField fx:id="textFieldActions" prefHeight="25.0" prefWidth="269.0" promptText="action1, action2, ...">
-                                                                     <tooltip>
-                                                                        <Tooltip text="action names separated by comma. Special chars: ? [an action], * [any number of actions]" />
-                                                                     </tooltip>
-                                                                  </TextField>
-                                                                  <Pane prefHeight="25.0" prefWidth="13.0" />
-                                                                  <Label prefHeight="25.0" prefWidth="164.0" text="?: 1 action, *: 0&gt; actions" visible="false" />
-                                                               </children>
-                                                            </HBox>
+                                                            <TextArea fx:id="textAreaActions" prefHeight="54.0" prefWidth="443.0" promptText="action1, action2, ..." />
+                                                            <Pane prefHeight="25.0" prefWidth="13.0" />
+                                                            <Label prefHeight="25.0" prefWidth="164.0" text="?: 1 action, *: 0&gt; actions" visible="false" />
                                                          </children>
                                                       </HBox>
                                                    </children>
-                                                </VBox>
+                                                </HBox>
                                              </children>
-                                          </HBox>
+                                          </VBox>
                                        </children>
-                                    </VBox>
+                                    </HBox>
                                  </children>
-                              </Pane>
+                              </VBox>
+                              <HBox prefHeight="23.0" prefWidth="661.0">
+                                 <children>
+                                    <Button fx:id="btnAnalyse" disable="true" mnemonicParsing="false" onAction="#mineTraces" prefHeight="37.0" prefWidth="127.0" text="analyse">
+                                       <font>
+                                          <Font size="16.0" />
+                                       </font>
+                                    </Button>
+                                    <ProgressIndicator fx:id="progressIndicatorFilter" visible="false" />
+                                 </children>
+                              </HBox>
                            </children>
                         </VBox>
-                        <HBox prefHeight="23.0" prefWidth="661.0">
-                           <children>
-                              <Button fx:id="btnAnalyse" disable="true" mnemonicParsing="false" onAction="#mineTraces" prefHeight="37.0" prefWidth="127.0" text="analyse">
-                                 <font>
-                                    <Font size="16.0" />
-                                 </font>
-                              </Button>
-                              <ProgressIndicator fx:id="progressIndicatorFilter" visible="false" />
-                           </children>
-                        </HBox>
                      </children>
                   </VBox>
                </children>
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                <children>
-                  <VBox layoutX="623.0" layoutY="697.0">
+                  <BarChart fx:id="barChartActions" layoutX="15.0" layoutY="476.0" prefHeight="344.0" prefWidth="664.0" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="237.0" AnchorPane.topAnchor="476.0">
+                    <xAxis>
+                      <CategoryAxis fx:id="categoryAxis" side="BOTTOM" />
+                    </xAxis>
+                    <yAxis>
+                      <NumberAxis fx:id="numberAxis" side="LEFT" />
+                    </yAxis>
+                  </BarChart>
+                  <VBox alignment="BOTTOM_CENTER" layoutX="679.0" layoutY="716.0" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="22.0">
                      <children>
                         <VBox prefHeight="73.0" prefWidth="215.0">
                            <children>
@@ -310,8 +311,8 @@
                         <Pane prefHeight="6.0" prefWidth="733.0" />
                         <HBox prefHeight="17.0" prefWidth="721.0">
                            <children>
-                              <Pane prefHeight="17.0" prefWidth="20.0" />
-                              <Label prefHeight="17.0" prefWidth="62.0" text="Trace-ID  " textFill="#8a8686">
+                              <Pane prefHeight="17.0" prefWidth="26.0" />
+                              <Label prefHeight="17.0" prefWidth="57.0" text="Trace-ID  " textFill="#8a8686">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>
@@ -332,14 +333,6 @@
                         </AnchorPane>
                      </children>
                   </VBox>
-                  <BarChart fx:id="barChartActions" layoutX="15.0" layoutY="476.0" prefHeight="344.0" prefWidth="575.0">
-                    <xAxis>
-                      <CategoryAxis fx:id="categoryAxis" side="BOTTOM" />
-                    </xAxis>
-                    <yAxis>
-                      <NumberAxis fx:id="numberAxis" side="LEFT" />
-                    </yAxis>
-                  </BarChart>
                   <Separator layoutX="15.0" layoutY="458.0" prefWidth="200.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" />
                </children>
             </AnchorPane>

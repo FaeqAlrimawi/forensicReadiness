@@ -15,6 +15,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import controller.utlities.AutoCompleteTextArea;
 import controller.utlities.AutoCompleteTextField;
 import core.TracesMiner;
 import core.TracesMinerListener;
@@ -40,6 +41,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
@@ -106,8 +108,11 @@ public class TraceViewerController implements TracesMinerListener {
 	// @FXML
 	// private TextField txtFieldLength;
 
+//	@FXML
+//	private TextField textFieldActions;
+	
 	@FXML
-	private TextField textFieldActions;
+	private TextArea textAreaActions;
 
 	@FXML
 	private TextField textFieldActionOccurrence;
@@ -215,7 +220,8 @@ public class TraceViewerController implements TracesMinerListener {
 	public static final String SHORTEST_CLASP_TRACES = "Shortest ClaSP Traces";
 	public static final String CUSTOMISED_TRACES = "Customised Traces";
 
-	private AutoCompleteTextField autoCompleteActionsFiled;
+//	private AutoCompleteTextField autoCompleteActionsFiled;
+	private AutoCompleteTextArea autoCompleteActionsArea;
 
 	private final String[] filters = { SHORTEST, SHORTEST_CLASP, CUSTOMISE };
 
@@ -288,8 +294,9 @@ public class TraceViewerController implements TracesMinerListener {
 		});
 
 		// auto complete
-		autoCompleteActionsFiled = new AutoCompleteTextField();
-
+//		autoCompleteActionsFiled = new AutoCompleteTextField();
+		autoCompleteActionsArea = new AutoCompleteTextArea();
+		
 		textFieldSystemFile.setOnKeyPressed(e -> {
 
 			// if enter is pressed then refersh
@@ -540,8 +547,9 @@ public class TraceViewerController implements TracesMinerListener {
 		}
 
 		// check action names
-		String actions = textFieldActions.getText();
-
+//		String actions = textFieldActions.getText();
+		String actions = textAreaActions.getText();
+		
 		if (actions != null && actions.isEmpty()) {
 			actions = null;
 		}
@@ -872,7 +880,9 @@ public class TraceViewerController implements TracesMinerListener {
 		}
 
 		// set actions in auto completer
-		autoCompleteActionsFiled.setEntries(tracesMiner.getTracesActions());
+//		autoCompleteActionsFiled.setEntries(tracesMiner.getTracesActions());
+		
+		autoCompleteActionsArea.setEntries(tracesMiner.getTracesActions());
 
 		// Value factory
 		SpinnerValueFactory<Integer> valueFactory = //
@@ -893,31 +903,60 @@ public class TraceViewerController implements TracesMinerListener {
 				// + tracesMiner.getMaximumTraceLength() + "]");
 
 				// set actions filed autoComplete
-				textFieldActions.textProperty().addListener(new ChangeListener<String>() {
+//				textFieldActions.textProperty().addListener(new ChangeListener<String>() {
+//
+//					@Override
+//					public void changed(ObservableValue<? extends String> observable, String oldValue,
+//							String newValue) {
+//						// TODO Auto-generated method stub
+//						autoCompleteActionsFiled.autoComplete(textFieldActions, newValue, oldValue);
+//					}
+//				});
+//
+//				textFieldActions.focusedProperty().addListener(new ChangeListener<Boolean>() {
+//
+//					@Override
+//					public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
+//							Boolean newValue) {
+//						// TODO Auto-generated method stub
+//						autoCompleteActionsFiled.hidePopup();
+//					}
+//				});
+//
+//				textFieldActions.setOnKeyPressed(e -> {
+//					// if control+space pressed, then show the list of possible
+//					// actions
+//					if (e.getCode() == KeyCode.SPACE && e.isControlDown()) {
+//						autoCompleteActionsFiled.showAllEntries(textFieldActions);
+//					}
+//				});
+				
+				
+				textAreaActions.textProperty().addListener(new ChangeListener<String>() {
 
 					@Override
 					public void changed(ObservableValue<? extends String> observable, String oldValue,
 							String newValue) {
 						// TODO Auto-generated method stub
-						autoCompleteActionsFiled.autoComplete(textFieldActions, newValue, oldValue);
+						autoCompleteActionsArea.autoComplete(textAreaActions, newValue, oldValue);
 					}
 				});
 
-				textFieldActions.focusedProperty().addListener(new ChangeListener<Boolean>() {
+				textAreaActions.focusedProperty().addListener(new ChangeListener<Boolean>() {
 
 					@Override
 					public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
 							Boolean newValue) {
 						// TODO Auto-generated method stub
-						autoCompleteActionsFiled.hidePopup();
+						autoCompleteActionsArea.hidePopup();
 					}
 				});
 
-				textFieldActions.setOnKeyPressed(e -> {
+				textAreaActions.setOnKeyPressed(e -> {
 					// if control+space pressed, then show the list of possible
 					// actions
 					if (e.getCode() == KeyCode.SPACE && e.isControlDown()) {
-						autoCompleteActionsFiled.showAllEntries(textFieldActions);
+						autoCompleteActionsArea.showAllEntries(textAreaActions);
 					}
 				});
 			}

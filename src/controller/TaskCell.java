@@ -167,7 +167,7 @@ public class TaskCell extends ListCell<GraphPath> {
         		strBldr.append(state);
         		
         		lblAction = new Label(" =[" + actions.get(index)+"]=> ");
-        		lblAction.setStyle("-fx-text-fill: grey; -fx-font-size:10px");
+        		lblAction.setStyle("-fx-text-fill: black; -fx-font-size:10px");
         	
         		strBldr.append(" =[" + actions.get(index)+"]=> ");
         	} else {
