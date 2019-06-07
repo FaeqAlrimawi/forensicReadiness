@@ -82,11 +82,11 @@
                                     <Pane prefHeight="7.0" prefWidth="452.0" />
                                     <HBox prefHeight="16.0" prefWidth="406.0">
                                        <children>
-                                          <AnchorPane prefHeight="31.0" prefWidth="146.0">
+                                          <AnchorPane prefHeight="34.0" prefWidth="342.0">
                                              <children>
-                                                <ProgressBar fx:id="progressBarTraces" opacity="0.5" prefHeight="34.0" prefWidth="213.0" progress="0.0" visible="false" />
-                                                <Label fx:id="lblProgressTraces" alignment="CENTER" prefHeight="34.0" prefWidth="213.0" />
-                                                <ProgressIndicator fx:id="progressIndicatorLoader" prefHeight="34.0" prefWidth="60.0" visible="false" />
+                                                <ProgressBar fx:id="progressBarTraces" layoutX="55.0" opacity="0.5" prefHeight="25.0" prefWidth="286.0" progress="0.0" visible="false" />
+                                                <Label fx:id="lblProgressTraces" alignment="CENTER" layoutX="55.0" prefHeight="25.0" prefWidth="286.0" />
+                                                <ProgressIndicator fx:id="progressIndicatorLoader" layoutX="132.0" layoutY="2.0" prefHeight="25.0" prefWidth="25.0" visible="false" />
                                              </children>
                                           </AnchorPane>
                                        </children>
@@ -345,7 +345,7 @@
                            <children>
                               <ImageView fx:id="imgSavedTraces" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" />
                               <Pane prefHeight="20.0" prefWidth="6.0" />
-                              <Label fx:id="lblSaved" prefHeight="23.0" prefWidth="65.0" />
+                              <Label fx:id="lblSaved" alignment="CENTER" prefHeight="23.0" prefWidth="70.0" />
                               <Pane prefHeight="20.0" prefWidth="6.0" />
                               <Button fx:id="btnSaveFilteredTraces" mnemonicParsing="false" onAction="#saveFilteredTraces" prefHeight="29.0" prefWidth="94.0" text="save">
                                  <tooltip>

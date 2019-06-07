@@ -16,7 +16,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import controller.utlities.AutoCompleteTextArea;
-import controller.utlities.AutoCompleteTextField;
 import core.TracesMiner;
 import core.TracesMinerListener;
 import ie.lero.spare.pattern_instantiation.GraphPath;
@@ -207,7 +206,7 @@ public class TraceViewerController implements TracesMinerListener {
 	// private double singleTraceProgressValue = 0.1;
 	private int currentTraceNumber = 0;
 
-	private ExecutorService executor = Executors.newFixedThreadPool(3);
+	private ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
 	private static final String SHORTEST = "Shortest";
 	private static final String SHORTEST_CLASP = "Shortest length & Share longest partial sequence (ClaSP)";
@@ -556,14 +555,14 @@ public class TraceViewerController implements TracesMinerListener {
 		selectedFilteredTracesFile = fileChooser.showSaveDialog(null);
 
 		if (selectedFilteredTracesFile != null) {
-			Platform.runLater(new Runnable() {
-
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-//					textFieldSystemFile.setText(selectedTracesFile.getAbsolutePath());
-				}
-			});
+//			Platform.runLater(new Runnable() {
+//
+//				@Override
+//				public void run() {
+//					// TODO Auto-generated method stub
+////					textFieldSystemFile.setText(selectedTracesFile.getAbsolutePath());
+//				}
+//			});
 
 			saveTraces(selectedFilteredTracesFile.getAbsolutePath(), shownFitleredTraces);
 		}

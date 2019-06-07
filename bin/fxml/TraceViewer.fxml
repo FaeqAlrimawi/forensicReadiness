@@ -82,11 +82,11 @@
                                     <Pane prefHeight="7.0" prefWidth="452.0" />
                                     <HBox prefHeight="16.0" prefWidth="406.0">
                                        <children>
-                                          <AnchorPane prefHeight="31.0" prefWidth="146.0">
+                                          <AnchorPane prefHeight="34.0" prefWidth="342.0">
                                              <children>
-                                                <ProgressBar fx:id="progressBarTraces" opacity="0.5" prefHeight="34.0" prefWidth="213.0" progress="0.0" visible="false" />
-                                                <Label fx:id="lblProgressTraces" alignment="CENTER" prefHeight="34.0" prefWidth="213.0" />
-                                                <ProgressIndicator fx:id="progressIndicatorLoader" prefHeight="34.0" prefWidth="60.0" visible="false" />
+                                                <ProgressBar fx:id="progressBarTraces" layoutX="55.0" opacity="0.5" prefHeight="25.0" prefWidth="286.0" progress="0.0" visible="false" />
+                                                <Label fx:id="lblProgressTraces" alignment="CENTER" layoutX="55.0" layoutY="2.0" prefHeight="25.0" prefWidth="286.0" />
+                                                <ProgressIndicator fx:id="progressIndicatorLoader" layoutX="132.0" layoutY="2.0" prefHeight="25.0" prefWidth="25.0" visible="false" />
                                              </children>
                                           </AnchorPane>
                                        </children>
