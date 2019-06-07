@@ -198,6 +198,11 @@ public class TaskCell extends ListCell<GraphPath> {
 				lblAction = null;
 			}
 
+			lblState.setStyle("-fx-text-fill:black; -fx-font-size:12px");
+			
+			//setup a way to find available files for the state (svg or json)
+			
+			//set color to blue if found
 			lblState.setStyle("-fx-text-fill:blue; -fx-font-size:12px");
 			
 			//open state svg
