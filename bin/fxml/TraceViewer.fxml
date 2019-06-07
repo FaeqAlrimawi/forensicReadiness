@@ -30,7 +30,7 @@
    <children>
       <SplitPane dividerPositions="0.31571109456440805" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="740.0" prefWidth="412.0">
+          <AnchorPane minHeight="500.0" minWidth="100.0" prefHeight="740.0">
                <children>
                   <VBox prefHeight="453.0" prefWidth="406.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
                      <children>
@@ -223,9 +223,9 @@
                   </VBox>
                </children>
             </AnchorPane>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+          <AnchorPane minHeight="500.0" minWidth="500.0" prefHeight="160.0" prefWidth="100.0">
                <children>
-                  <BarChart fx:id="barChartActions" layoutX="15.0" layoutY="476.0" prefHeight="344.0" prefWidth="664.0" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="237.0" AnchorPane.topAnchor="476.0">
+                  <BarChart fx:id="barChartActions" layoutX="15.0" layoutY="533.0" prefHeight="340.0" prefWidth="664.0" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="237.0" AnchorPane.topAnchor="533.0">
                     <xAxis>
                       <CategoryAxis fx:id="categoryAxis" side="BOTTOM" />
                     </xAxis>
@@ -291,9 +291,14 @@
                         </HBox>
                      </children>
                   </VBox>
-                  <VBox layoutX="14.0" layoutY="14.0" prefHeight="415.0" prefWidth="886.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
+                  <VBox layoutX="14.0" layoutY="10.0" prefHeight="472.0" prefWidth="886.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="10.0">
                      <children>
-                        <HBox alignment="CENTER_LEFT" prefHeight="15.0" prefWidth="628.0">
+                        <Label alignment="TOP_LEFT" prefHeight="57.0" prefWidth="320.0" text="Filtered Traces">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                        <HBox alignment="CENTER_LEFT" prefHeight="41.0" prefWidth="886.0">
                            <children>
                               <ImageView fx:id="imgFilter" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" visible="false">
                                  <image>
@@ -301,14 +306,14 @@
                                  </image>
                               </ImageView>
                               <Pane prefHeight="20.0" prefWidth="6.0" />
-                              <Label fx:id="lblFilter" prefHeight="20.0" prefWidth="710.0">
+                              <Label fx:id="lblFilter" prefHeight="20.0" prefWidth="736.0">
                                  <font>
                                     <Font size="14.0" />
                                  </font>
                               </Label>
                            </children>
                         </HBox>
-                        <Pane prefHeight="6.0" prefWidth="733.0" />
+                        <Pane prefHeight="23.0" prefWidth="886.0" />
                         <HBox prefHeight="17.0" prefWidth="721.0">
                            <children>
                               <Pane prefHeight="17.0" prefWidth="26.0" />
@@ -321,10 +326,10 @@
                               <Label prefHeight="17.0" prefWidth="424.0" text="State-number =[action name]=&gt; State-number =[action name]=&gt; ..." textFill="#8a8686" />
                            </children>
                         </HBox>
-                        <AnchorPane prefHeight="380.0" prefWidth="886.0">
+                        <AnchorPane prefHeight="400.0" prefWidth="886.0">
                            <children>
                               <ListView fx:id="listViewTraces" prefHeight="330.0" prefWidth="907.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                              <Label fx:id="lblListViewTracesEmpty" alignment="CENTER" prefHeight="376.0" prefWidth="886.0" text="Traces List Empty " textFill="#a19494" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <Label fx:id="lblListViewTracesEmpty" alignment="CENTER" layoutY="-38.0" prefHeight="395.0" prefWidth="886.0" text="List Empty " textFill="#a19494" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <font>
                                     <Font size="24.0" />
                                  </font>
@@ -333,7 +338,20 @@
                         </AnchorPane>
                      </children>
                   </VBox>
-                  <Separator layoutX="15.0" layoutY="458.0" prefWidth="200.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" />
+                  <Separator layoutX="15.0" layoutY="527.0" prefWidth="200.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" />
+                  <HBox alignment="CENTER_RIGHT" layoutX="700.0" layoutY="491.0" prefHeight="29.0" prefWidth="194.0">
+                     <children>
+                        <ImageView fx:id="imgSavedTraces" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" />
+                        <Pane prefHeight="20.0" prefWidth="6.0" />
+                        <Label fx:id="lblSaved" prefHeight="23.0" prefWidth="65.0" />
+                        <Pane prefHeight="20.0" prefWidth="6.0" />
+                        <Button fx:id="btnSaveFilteredTraces" mnemonicParsing="false" onAction="#saveFilteredTraces" prefHeight="29.0" prefWidth="94.0" text="save">
+                           <tooltip>
+                              <Tooltip text="Save filtered traces" />
+                           </tooltip>
+                        </Button>
+                     </children>
+                  </HBox>
                </children>
             </AnchorPane>
         </items>

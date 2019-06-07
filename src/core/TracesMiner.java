@@ -52,6 +52,8 @@ import core.utilities.Query;
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.pattern_instantiation.GraphPath;
+import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator;
+import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator.InstancesSaver;
 
 public class TracesMiner {
 
@@ -3002,6 +3004,49 @@ public class TracesMiner {
 
 	public List<Integer> getCustomisedTracesIDs() {
 		return customeFilteringTraceIDs;
+	}
+	
+	public boolean saveTraces(String fileName, List<Integer> tracesIDs) {
+		
+		if(fileName == null || tracesIDs == null) {
+			return false;
+		}
+		
+		boolean isSaved = false;
+		
+		Map<Integer, GraphPath> traces = getTraces(tracesIDs);
+		
+		String [] dummy = new String[1];
+		dummy[0] = "dummy";
+		List<GraphPath> paths = Arrays.asList(traces.values().toArray(new GraphPath[traces.size()]));
+		
+		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
+		
+		InstancesSaver tracesSaver = ins.new InstancesSaver(-1, fileName, dummy, dummy, paths);
+		try {
+			int res = tracesSaver.call();
+			
+			if(res == InstancesSaver.SUCCESSFUL) {
+				isSaved = true;
+			} else if(res == InstancesSaver.UNSUCCESSFUL) {
+				isSaved = false;
+				
+			}
+			
+			System.out.println(isSaved);
+			
+			if(listener != null) {
+				listener.onSavingFilteredTracesComplete(isSaved);
+			}
+			
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		
+		
+		return isSaved;
 	}
 
 }

@@ -55,6 +55,15 @@ import javafx.stage.FileChooser;
 public class TraceViewerController implements TracesMinerListener {
 
 	@FXML
+	private Label lblSaved;
+	
+	@FXML
+	private ImageView imgSavedTraces;
+	
+	@FXML
+	private Button btnSaveFilteredTraces;
+	
+	@FXML
 	private TextField textFieldSystemFile;
 
 	@FXML
@@ -187,6 +196,8 @@ public class TraceViewerController implements TracesMinerListener {
 	// private static final int FILE_MENU = 0;
 
 	private File selectedTracesFile;
+	private File selectedFilteredTracesFile;
+	
 	// private JSONObject jsonTraces;
 	private TracesMiner tracesMiner;
 
@@ -220,6 +231,8 @@ public class TraceViewerController implements TracesMinerListener {
 	public static final String SHORTEST_CLASP_TRACES = "Shortest ClaSP Traces";
 	public static final String CUSTOMISED_TRACES = "Customised Traces";
 
+	private List<Integer> shownFitleredTraces;
+	
 //	private AutoCompleteTextField autoCompleteActionsFiled;
 	private AutoCompleteTextArea autoCompleteActionsArea;
 
@@ -240,6 +253,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 		tracesMiner = new TracesMiner();
 
+		shownFitleredTraces = new LinkedList<Integer>();
 		// set miner listener
 		tracesMiner.setListener(this);
 
@@ -413,6 +427,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 		if (selectedTracesFile != null) {
 			fileChooser.setInitialFileName(selectedTracesFile.getName());
+			fileChooser.setInitialDirectory(selectedTracesFile.getAbsoluteFile());
 		}
 
 		// set extension to be of system model (.cps)
@@ -520,6 +535,59 @@ public class TraceViewerController implements TracesMinerListener {
 
 	}
 
+	@FXML
+	public void saveFilteredTraces(ActionEvent event) {
+	
+		//save filtered traces
+		FileChooser fileChooser = new FileChooser();
+
+		if (selectedFilteredTracesFile!= null) {
+			fileChooser.setInitialFileName(selectedFilteredTracesFile.getName());
+			fileChooser.setInitialDirectory(selectedFilteredTracesFile.getAbsoluteFile());
+		}
+
+		// set extension to be of system model (.cps)
+		// fileChooser.setSelectedExtensionFilter(new ExtensionFilter("System
+		// model files (*.cps)",".cps"));
+		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
+
+		fileChooser.getExtensionFilters().add(extFilter);
+
+		
+		selectedFilteredTracesFile = fileChooser.showSaveDialog(null);
+
+		if (selectedFilteredTracesFile != null) {
+			Platform.runLater(new Runnable() {
+
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+//					textFieldSystemFile.setText(selectedTracesFile.getAbsolutePath());
+				}
+			});
+
+			saveTraces(selectedFilteredTracesFile.getAbsolutePath(), shownFitleredTraces);
+		}
+		
+	}
+	
+	protected void saveTraces(String fileName, List<Integer> tracesIDs) {
+		
+		if(fileName == null || tracesIDs == null) {
+			return;
+		}
+		
+		executor.submit(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				tracesMiner.saveTraces(fileName, tracesIDs);
+			}
+		});
+		
+	}
+	
 	protected void mineBasedOnCustomisedFilter() {
 
 		progressIndicatorFilter.setVisible(true);
@@ -1318,11 +1386,15 @@ public class TraceViewerController implements TracesMinerListener {
 		
 
 		if(tracesIDs.isEmpty()) {
-			lblListViewTracesEmpty.setVisible(true);			
+			lblListViewTracesEmpty.setVisible(true);	
+			shownFitleredTraces = tracesIDs;
 			//clear list
 			listViewTraces.setItems(null);
 			return;
 		}
+		
+		//used for saving
+		shownFitleredTraces = tracesIDs;
 		
 		Map<Integer, GraphPath> traces = tracesMiner.getTraces(tracesIDs);
 		
@@ -1339,6 +1411,20 @@ public class TraceViewerController implements TracesMinerListener {
        
 		
 	}
+
+	@Override
+	public void onSavingFilteredTracesComplete(boolean isSuccessful) {
+		// TODO Auto-generated method stub
+		
+		if(isSuccessful) {
+			updateImage(IMAGE_CORRECT, imgSavedTraces);
+			updateText("Saved!", lblSaved);
+		} else {
+			updateImage(IMAGE_WRONG, imgSavedTraces);
+			updateText("didn't save!", lblSaved);
+		}
+	}
+	
 	
 	
 }

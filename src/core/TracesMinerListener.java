@@ -10,4 +10,6 @@ public interface TracesMinerListener {
 	
 	public void onLoadingJSONFile();
 
+	
+	public void onSavingFilteredTracesComplete(boolean isSuccessful);
 }
