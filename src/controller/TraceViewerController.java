@@ -604,37 +604,37 @@ public class TraceViewerController implements TracesMinerListener {
 
 	}
 
-	@FXML
-	public void viewSVG(ActionEvent event) {
-
-		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/state_viewer.fxml"));
-		Parent root;
-		try {
-			root = (Parent) fxmlLoader.load();
-			Stage stage = new Stage();
-			stage.setScene(new Scene(root));
-			
-			//get controller
-			stateViewerController = fxmlLoader.<StateViewerController>getController();
-			
-			String path = "C:\\Users\\Faeq\\Desktop\\svg\\0.svg";
-			int tries = 10000;
-			
-			while(path.contains("\\") && tries > 0) {
-				path = path.replace("\\", "/");
-				tries--;
-			}
-			
-			String svgPath = "file:///"+path;
-			stateViewerController.updateSVGPath(svgPath);
-			stage.show();
-//			   main.stg.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
+//	@FXML
+//	public void viewSVG(ActionEvent event) {
+//
+//		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/state_viewer.fxml"));
+//		Parent root;
+//		try {
+//			root = (Parent) fxmlLoader.load();
+//			Stage stage = new Stage();
+//			stage.setScene(new Scene(root));
+//			
+//			//get controller
+//			stateViewerController = fxmlLoader.<StateViewerController>getController();
+//			
+//			String path = "C:\\Users\\Faeq\\Desktop\\svg\\0.svg";
+//			int tries = 10000;
+//			
+//			while(path.contains("\\") && tries > 0) {
+//				path = path.replace("\\", "/");
+//				tries--;
+//			}
+//			
+//			String svgPath = "file:///"+path;
+//			stateViewerController.updateSVGPath(svgPath);
+//			stage.show();
+////			   main.stg.close();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//	}
 
 	protected void mineBasedOnCustomisedFilter() {
 
