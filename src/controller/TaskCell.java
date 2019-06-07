@@ -10,6 +10,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -23,7 +25,13 @@ public class TaskCell extends ListCell<GraphPath> {
     private HBox hbox;
     
     @FXML
-    private HBox hboxRoot;
+    private Pane rootPane;
+    
+    @FXML
+    private ScrollPane scrollPaneTrace;
+    
+    @FXML
+    private SplitPane splitPaneTrace;
     
 //    @FXML 
 //    private Circle state;
@@ -105,13 +113,16 @@ public class TaskCell extends ListCell<GraphPath> {
         		}
         	}
            
+        	
             Platform.runLater(new Runnable() {
 				
 				@Override
 				public void run() {
+//					splitPaneTrace.setPrefWidth(hboxRoot.getPrefWidth());
+//					hboxRoot.prefWidthProperty().bind(hboxRoot.prefWidthProperty());
 					// TODO Auto-generated method stub
 					setText(null);
-		            setGraphic(hboxRoot);
+		            setGraphic(rootPane);
 		            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 				}
 			});

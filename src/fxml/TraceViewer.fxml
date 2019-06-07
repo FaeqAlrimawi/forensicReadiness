@@ -11,9 +11,9 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ProgressIndicator?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
@@ -25,187 +25,254 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="742.0" prefWidth="1345.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.TraceViewerController">
+<AnchorPane prefHeight="890.0" prefWidth="1345.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.TraceViewerController">
    <children>
-      <VBox layoutX="19.0" layoutY="17.0" prefHeight="389.0" prefWidth="733.0" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="15.0">
-         <children>
-            <VBox prefHeight="109.0" prefWidth="662.0">
+      <SplitPane dividerPositions="0.31571109456440805" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="740.0" prefWidth="412.0">
                <children>
-                  <VBox prefHeight="109.0" prefWidth="704.0">
+                  <VBox prefHeight="389.0" prefWidth="406.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
                      <children>
-                        <HBox prefHeight="34.0" prefWidth="620.0">
+                        <VBox prefHeight="109.0" prefWidth="662.0">
                            <children>
-                              <Label prefHeight="39.0" prefWidth="70.0" text="Traces">
+                              <VBox prefHeight="128.0" prefWidth="542.0">
+                                 <children>
+                                    <HBox prefHeight="34.0" prefWidth="620.0">
+                                       <children>
+                                          <Label prefHeight="39.0" prefWidth="70.0" text="Traces">
+                                             <font>
+                                                <Font size="18.0" />
+                                             </font>
+                                          </Label>
+                                          <AnchorPane prefHeight="34.0" prefWidth="286.0">
+                                             <children>
+                                                <TextField fx:id="textFieldSystemFile" layoutX="-4.0" prefHeight="34.0" prefWidth="285.0" promptText="traces file (*.json)" />
+                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="244.0" layoutY="2.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
+                                                <ImageView fx:id="imgSelectSystemFile" fitHeight="24.0" fitWidth="24.0" layoutX="252.0" layoutY="4.0" onMouseClicked="#selectTracesFile" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@../../bin/resources/images/folder.png" />
+                                                   </image>
+                                                   <cursor>
+                                                      <Cursor fx:constant="HAND" />
+                                                   </cursor>
+                                                </ImageView>
+                                             </children>
+                                          </AnchorPane>
+                                          <AnchorPane prefHeight="24.0" prefWidth="24.0">
+                                             <children>
+                                                <ImageView fx:id="imgOpentracesFileEmpty" fitHeight="24.0" fitWidth="24.0" layoutY="5.0" pickOnBounds="true" preserveRatio="true">
+                                                   <image>
+                                                      <Image url="@../../bin/resources/images/file+empty.png" />
+                                                   </image>
+                                                </ImageView>
+                                                <ImageView fx:id="imgOpentracesFile" fitHeight="24.0" fitWidth="24.0" layoutY="5.0" onMouseClicked="#openSystemFile" pickOnBounds="true" preserveRatio="true" visible="false">
+                                                   <cursor>
+                                                      <Cursor fx:constant="HAND" />
+                                                   </cursor>
+                                                   <image>
+                                                      <Image url="@../../bin/resources/images/file.png" />
+                                                   </image>
+                                                </ImageView>
+                                             </children>
+                                          </AnchorPane>
+                                          <Pane prefHeight="34.0" prefWidth="9.0" />
+                                       </children>
+                                    </HBox>
+                                    <Pane prefHeight="7.0" prefWidth="452.0" />
+                                    <HBox prefHeight="34.0" prefWidth="213.0">
+                                       <children>
+                                          <AnchorPane prefHeight="31.0" prefWidth="146.0">
+                                             <children>
+                                                <ProgressBar fx:id="progressBarTraces" opacity="0.5" prefHeight="34.0" prefWidth="213.0" progress="0.0" visible="false" />
+                                                <Label fx:id="lblProgressTraces" alignment="CENTER" prefHeight="34.0" prefWidth="213.0" />
+                                                <ProgressIndicator fx:id="progressIndicatorLoader" prefHeight="34.0" prefWidth="60.0" visible="false" />
+                                             </children>
+                                          </AnchorPane>
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefHeight="7.0" prefWidth="628.0">
+                                       <children>
+                                          <ImageView fx:id="imgSystemFileCheck" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                                             <image>
+                                                <Image url="@../../bin/resources/images/correct.png" />
+                                             </image>
+                                          </ImageView>
+                                          <Pane prefHeight="20.0" prefWidth="6.0" />
+                                          <Label fx:id="lblSystemFileCheck" prefHeight="16.0" prefWidth="267.0">
+                                             <font>
+                                                <Font size="14.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefHeight="0.0" prefWidth="628.0">
+                                       <children>
+                                          <ImageView fx:id="imgNumOfActions" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                                             <image>
+                                                <Image url="@../../bin/resources/images/correct.png" />
+                                             </image>
+                                          </ImageView>
+                                          <Pane prefHeight="20.0" prefWidth="6.0" />
+                                          <Label fx:id="lblNumOfActions" prefHeight="2.0" prefWidth="267.0">
+                                             <font>
+                                                <Font size="14.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefHeight="0.0" prefWidth="628.0">
+                                       <children>
+                                          <ImageView fx:id="imgNumOfStates" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                                             <image>
+                                                <Image url="@../../bin/resources/images/correct.png" />
+                                             </image>
+                                          </ImageView>
+                                          <Pane prefHeight="20.0" prefWidth="6.0" />
+                                          <Label fx:id="lblNumOfStates" prefHeight="0.0" prefWidth="267.0">
+                                             <font>
+                                                <Font size="14.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </VBox>
+                        <Separator prefWidth="200.0" />
+                        <VBox prefHeight="237.0" prefWidth="617.0">
+                           <children>
+                              <Label prefHeight="34.0" prefWidth="370.0" text="Filters" textFill="#aa14c4">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
                               </Label>
-                              <AnchorPane prefHeight="35.0" prefWidth="416.0">
+                              <HBox prefHeight="37.0" prefWidth="600.0">
                                  <children>
-                                    <TextField fx:id="textFieldSystemFile" layoutX="-4.0" prefHeight="34.0" prefWidth="416.0" promptText="traces file (*.json)" />
-                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="375.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
-                                    <ImageView fx:id="imgSelectSystemFile" fitHeight="24.0" fitWidth="24.0" layoutX="383.0" layoutY="5.0" onMouseClicked="#selectTracesFile" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../../bin/resources/images/folder.png" />
-                                       </image>
-                                       <cursor>
-                                          <Cursor fx:constant="HAND" />
-                                       </cursor>
-                                    </ImageView>
-                                 </children>
-                              </AnchorPane>
-                              <AnchorPane prefHeight="24.0" prefWidth="24.0">
-                                 <children>
-                                    <ImageView fx:id="imgOpentracesFileEmpty" fitHeight="24.0" fitWidth="24.0" layoutY="5.0" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../../bin/resources/images/file+empty.png" />
-                                       </image>
-                                    </ImageView>
-                                    <ImageView fx:id="imgOpentracesFile" fitHeight="24.0" fitWidth="24.0" layoutY="5.0" onMouseClicked="#openSystemFile" pickOnBounds="true" preserveRatio="true" visible="false">
-                                       <cursor>
-                                          <Cursor fx:constant="HAND" />
-                                       </cursor>
-                                       <image>
-                                          <Image url="@../../bin/resources/images/file.png" />
-                                       </image>
-                                    </ImageView>
-                                 </children>
-                              </AnchorPane>
-                              <Pane prefHeight="34.0" prefWidth="9.0" />
-                              <HBox prefHeight="34.0" prefWidth="213.0">
-                                 <children>
-                                    <AnchorPane prefHeight="31.0" prefWidth="146.0">
-                                       <children>
-                                          <ProgressBar fx:id="progressBarTraces" opacity="0.5" prefHeight="34.0" prefWidth="213.0" progress="0.0" visible="false" />
-                                          <Label fx:id="lblProgressTraces" alignment="CENTER" prefHeight="34.0" prefWidth="213.0" />
-                                          <ProgressIndicator fx:id="progressIndicatorLoader" prefHeight="34.0" prefWidth="60.0" visible="false" />
-                                       </children>
-                                    </AnchorPane>
+                                    <ComboBox fx:id="comboBoxFilter" prefHeight="37.0" prefWidth="401.0" />
+                                    <Pane prefHeight="37.0" prefWidth="13.0" />
                                  </children>
                               </HBox>
+                              <Pane prefHeight="15.0" prefWidth="680.0" />
+                              <Pane fx:id="customisePane" disable="true" prefHeight="133.0" prefWidth="628.0">
+                                 <children>
+                                    <VBox layoutX="4.0" layoutY="-1.0" prefHeight="134.0" prefWidth="406.0">
+                                       <children>
+                                          <Label prefHeight="23.0" prefWidth="194.0" text="Customise Filter">
+                                             <font>
+                                                <Font size="14.0" />
+                                             </font>
+                                          </Label>
+                                          <Pane prefHeight="6.0" prefWidth="317.0" />
+                                          <HBox prefHeight="103.0" prefWidth="539.0">
+                                             <children>
+                                                <VBox prefHeight="103.0" prefWidth="602.0">
+                                                   <children>
+                                                      <HBox alignment="CENTER_LEFT" prefHeight="17.0" prefWidth="311.0">
+                                                         <children>
+                                                            <Label text="-Sequence length" />
+                                                            <Pane prefHeight="34.0" prefWidth="12.0" />
+                                                            <ComboBox fx:id="comboboxSeqLengthComparator" prefHeight="25.0" prefWidth="60.0" />
+                                                            <Pane prefHeight="34.0" prefWidth="4.0" />
+                                                            <Spinner fx:id="spinnerFilterLength" prefHeight="25.0" prefWidth="58.0" />
+                                                         </children>
+                                                      </HBox>
+                                                      <Pane prefHeight="6.0" prefWidth="317.0" />
+                                                      <HBox alignment="CENTER_LEFT" prefHeight="3.0" prefWidth="311.0">
+                                                         <children>
+                                                            <Label text="-Action occurrence" />
+                                                            <Pane prefHeight="25.0" prefWidth="5.0" />
+                                                            <ComboBox fx:id="comboboxOccurrenceComparator" prefHeight="25.0" prefWidth="60.0" />
+                                                            <Pane prefHeight="34.0" prefWidth="3.0" />
+                                                            <TextField fx:id="textFieldActionOccurrence" prefHeight="25.0" prefWidth="59.0" promptText="  1-100" />
+                                                            <Pane prefHeight="34.0" prefWidth="3.0" />
+                                                            <Label text="\%" />
+                                                         </children>
+                                                      </HBox>
+                                                      <Pane prefHeight="6.0" prefWidth="317.0" />
+                                                      <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="525.0">
+                                                         <children>
+                                                            <Label prefHeight="17.0" prefWidth="108.0" text="-Contains action(s)" />
+                                                            <HBox prefHeight="25.0" prefWidth="305.0">
+                                                               <children>
+                                                                  <TextField fx:id="textFieldActions" prefHeight="25.0" prefWidth="269.0" promptText="action1, action2, ...">
+                                                                     <tooltip>
+                                                                        <Tooltip text="action names separated by comma. Special chars: ? [an action], * [any number of actions]" />
+                                                                     </tooltip>
+                                                                  </TextField>
+                                                                  <Pane prefHeight="25.0" prefWidth="13.0" />
+                                                                  <Label prefHeight="25.0" prefWidth="164.0" text="?: 1 action, *: 0&gt; actions" visible="false" />
+                                                               </children>
+                                                            </HBox>
+                                                         </children>
+                                                      </HBox>
+                                                   </children>
+                                                </VBox>
+                                             </children>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </Pane>
                            </children>
-                        </HBox>
-                        <Pane prefHeight="7.0" prefWidth="452.0" />
-                        <HBox alignment="CENTER_LEFT" prefHeight="7.0" prefWidth="628.0">
+                        </VBox>
+                        <HBox prefHeight="23.0" prefWidth="661.0">
                            <children>
-                              <ImageView fx:id="imgSystemFileCheck" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" visible="false">
-                                 <image>
-                                    <Image url="@../../bin/resources/images/correct.png" />
-                                 </image>
-                              </ImageView>
-                              <Pane prefHeight="20.0" prefWidth="6.0" />
-                              <Label fx:id="lblSystemFileCheck" prefHeight="16.0" prefWidth="267.0">
+                              <Button fx:id="btnAnalyse" disable="true" mnemonicParsing="false" onAction="#mineTraces" prefHeight="37.0" prefWidth="127.0" text="analyse">
                                  <font>
-                                    <Font size="14.0" />
+                                    <Font size="16.0" />
                                  </font>
-                              </Label>
-                           </children>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT" prefHeight="0.0" prefWidth="628.0">
-                           <children>
-                              <ImageView fx:id="imgNumOfActions" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" visible="false">
-                                 <image>
-                                    <Image url="@../../bin/resources/images/correct.png" />
-                                 </image>
-                              </ImageView>
-                              <Pane prefHeight="20.0" prefWidth="6.0" />
-                              <Label fx:id="lblNumOfActions" prefHeight="2.0" prefWidth="267.0">
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font>
-                              </Label>
-                           </children>
-                        </HBox>
-                        <HBox alignment="CENTER_LEFT" prefHeight="0.0" prefWidth="628.0">
-                           <children>
-                              <ImageView fx:id="imgNumOfStates" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" visible="false">
-                                 <image>
-                                    <Image url="@../../bin/resources/images/correct.png" />
-                                 </image>
-                              </ImageView>
-                              <Pane prefHeight="20.0" prefWidth="6.0" />
-                              <Label fx:id="lblNumOfStates" prefHeight="0.0" prefWidth="267.0">
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font>
-                              </Label>
+                              </Button>
+                              <ProgressIndicator fx:id="progressIndicatorFilter" visible="false" />
                            </children>
                         </HBox>
                      </children>
                   </VBox>
                </children>
-            </VBox>
-            <Separator prefWidth="200.0" />
-            <VBox prefHeight="237.0" prefWidth="617.0">
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                <children>
-                  <Label prefHeight="34.0" prefWidth="451.0" text="Filters" textFill="#aa14c4">
-                     <font>
-                        <Font size="18.0" />
-                     </font>
-                  </Label>
-                  <HBox prefHeight="32.0" prefWidth="680.0">
+                  <VBox layoutX="623.0" layoutY="697.0">
                      <children>
-                        <ComboBox fx:id="comboBoxFilter" prefHeight="37.0" prefWidth="451.0" />
-                        <Pane prefHeight="37.0" prefWidth="13.0" />
-                        <Button fx:id="btnAnalyse" disable="true" mnemonicParsing="false" onAction="#mineTraces" prefHeight="37.0" prefWidth="127.0" text="analyse">
-                           <font>
-                              <Font size="16.0" />
-                           </font>
-                        </Button>
-                        <ProgressIndicator fx:id="progressIndicatorFilter" visible="false" />
-                     </children>
-                  </HBox>
-                  <Pane prefHeight="15.0" prefWidth="680.0" />
-                  <Pane fx:id="customisePane" disable="true" prefHeight="133.0" prefWidth="628.0">
-                     <children>
-                        <VBox layoutX="4.0" layoutY="-1.0" prefHeight="134.0" prefWidth="628.0">
+                        <VBox prefHeight="73.0" prefWidth="215.0">
                            <children>
-                              <Label prefHeight="23.0" prefWidth="194.0" text="Customise Filter">
-                                 <font>
-                                    <Font size="14.0" />
-                                 </font>
-                              </Label>
-                              <Pane prefHeight="6.0" prefWidth="317.0" />
-                              <HBox prefHeight="103.0" prefWidth="377.0">
+                              <HBox>
                                  <children>
-                                    <VBox prefHeight="103.0" prefWidth="602.0">
+                                    <ComboBox fx:id="comboBoxChartFilterTraces" prefHeight="25.0" prefWidth="126.0" />
+                                    <Pane prefHeight="6.0" prefWidth="5.0" />
+                                    <ComboBox fx:id="comboBoxFilterSelector" prefHeight="25.0" prefWidth="84.0" />
+                                 </children>
+                              </HBox>
+                              <Pane prefHeight="6.0" prefWidth="211.0" />
+                              <HBox prefHeight="42.0" prefWidth="233.0">
+                                 <children>
+                                    <VBox prefHeight="25.0" prefWidth="125.0">
                                        <children>
-                                          <HBox alignment="CENTER_LEFT" prefHeight="17.0" prefWidth="311.0">
+                                          <Label alignment="TOP_LEFT" contentDisplay="CENTER" prefHeight="17.0" prefWidth="116.0" text="Ranked Occurrences">
+                                             <tooltip>
+                                                <Tooltip text="Find all actions that have top occurrences" />
+                                             </tooltip>
+                                          </Label>
+                                          <HBox prefHeight="25.0" prefWidth="144.0">
                                              <children>
-                                                <Label text="-Sequence length" />
-                                                <Pane prefHeight="34.0" prefWidth="12.0" />
-                                                <ComboBox fx:id="comboboxSeqLengthComparator" prefHeight="25.0" prefWidth="60.0" />
-                                                <Pane prefHeight="34.0" prefWidth="4.0" />
-                                                <Spinner fx:id="spinnerFilterLength" prefHeight="25.0" prefWidth="58.0" />
+                                                <ComboBox fx:id="comboBoxOccurrences" prefHeight="25.0" prefWidth="90.0" />
+                                                <TextField fx:id="textFieldNumofOccurrences" prefHeight="25.0" prefWidth="32.0" promptText=" #" />
                                              </children>
                                           </HBox>
-                                          <Pane prefHeight="6.0" prefWidth="317.0" />
-                                          <HBox alignment="CENTER_LEFT" prefHeight="3.0" prefWidth="311.0">
+                                       </children>
+                                    </VBox>
+                                    <VBox alignment="CENTER" prefHeight="42.0" prefWidth="90.0">
+                                       <children>
+                                          <Label contentDisplay="CENTER" prefHeight="11.0" prefWidth="80.0" text="Occurrence %">
+                                             <tooltip>
+                                                <Tooltip text="Find all actions that have specific occurrence percentage" />
+                                             </tooltip>
+                                          </Label>
+                                          <HBox prefHeight="25.0" prefWidth="103.0">
                                              <children>
-                                                <Label text="-Action occurrence" />
-                                                <Pane prefHeight="25.0" prefWidth="5.0" />
-                                                <ComboBox fx:id="comboboxOccurrenceComparator" prefHeight="25.0" prefWidth="60.0" />
-                                                <Pane prefHeight="34.0" prefWidth="3.0" />
-                                                <TextField fx:id="textFieldActionOccurrence" prefHeight="25.0" prefWidth="59.0" promptText="  1-100" />
-                                                <Pane prefHeight="34.0" prefWidth="3.0" />
-                                                <Label text="\%" />
-                                             </children>
-                                          </HBox>
-                                          <Pane prefHeight="6.0" prefWidth="317.0" />
-                                          <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="525.0">
-                                             <children>
-                                                <Label prefHeight="17.0" prefWidth="108.0" text="-Contains action(s)" />
-                                                <HBox prefHeight="25.0" prefWidth="499.0">
-                                                   <children>
-                                                      <TextField fx:id="textFieldActions" prefHeight="25.0" prefWidth="342.0" promptText="action1, action2, ...">
-                                                         <tooltip>
-                                                            <Tooltip text="action names separated by comma. Special chars: ? [an action], * [any number of actions]" />
-                                                         </tooltip>
-                                                      </TextField>
-                                                      <Pane prefHeight="25.0" prefWidth="13.0" />
-                                                      <Label prefHeight="25.0" prefWidth="164.0" text="?: 1 action, *: 0&gt; actions" visible="false" />
-                                                   </children>
-                                                </HBox>
+                                                <Pane prefHeight="25.0" prefWidth="8.0" />
+                                                <ChoiceBox fx:id="choiceBoxOccurrenceFilterPercentage" prefHeight="25.0" prefWidth="45.0" />
+                                                <TextField fx:id="textFieldOccurrenceFilterPercentage" prefHeight="25.0" prefWidth="51.0" promptText="0-100" />
                                              </children>
                                           </HBox>
                                        </children>
@@ -214,109 +281,69 @@
                               </HBox>
                            </children>
                         </VBox>
-                     </children>
-                  </Pane>
-               </children>
-            </VBox>
-         </children>
-      </VBox>
-      <BarChart fx:id="barChartActions" layoutX="758.0" layoutY="51.0" prefHeight="344.0" prefWidth="575.0">
-        <xAxis>
-          <CategoryAxis fx:id="categoryAxis" side="BOTTOM" />
-        </xAxis>
-        <yAxis>
-          <NumberAxis fx:id="numberAxis" side="LEFT" />
-        </yAxis>
-      </BarChart>
-      <VBox layoutX="1116.0" layoutY="593.0" prefHeight="73.0" prefWidth="215.0">
-         <children>
-            <HBox>
-               <children>
-                  <ComboBox fx:id="comboBoxChartFilterTraces" prefHeight="25.0" prefWidth="126.0" />
-                  <Pane prefHeight="6.0" prefWidth="5.0" />
-                  <ComboBox fx:id="comboBoxFilterSelector" prefHeight="25.0" prefWidth="84.0" />
-               </children>
-            </HBox>
-            <Pane prefHeight="6.0" prefWidth="211.0" />
-            <HBox prefHeight="42.0" prefWidth="233.0">
-               <children>
-                  <VBox prefHeight="25.0" prefWidth="125.0">
-                     <children>
-                        <Label alignment="TOP_LEFT" contentDisplay="CENTER" prefHeight="17.0" prefWidth="116.0" text="Ranked Occurrences">
-                           <tooltip>
-                              <Tooltip text="Find all actions that have top occurrences" />
-                           </tooltip>
-                        </Label>
-                        <HBox prefHeight="25.0" prefWidth="144.0">
+                        <Pane prefHeight="6.0" prefWidth="211.0" />
+                        <HBox prefHeight="25.0" prefWidth="88.0">
                            <children>
-                              <ComboBox fx:id="comboBoxOccurrences" prefHeight="25.0" prefWidth="90.0" />
-                              <TextField fx:id="textFieldNumofOccurrences" prefHeight="25.0" prefWidth="32.0" promptText=" #" />
+                              <Pane prefHeight="25.0" prefWidth="153.0" />
+                              <Button fx:id="btnRefresh" disable="true" mnemonicParsing="false" onAction="#refreshGraph" prefHeight="25.0" prefWidth="80.0" text="refresh" />
                            </children>
                         </HBox>
                      </children>
                   </VBox>
-                  <VBox alignment="CENTER" prefHeight="42.0" prefWidth="90.0">
+                  <VBox layoutX="14.0" layoutY="14.0" prefHeight="415.0" prefWidth="886.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0">
                      <children>
-                        <Label contentDisplay="CENTER" prefHeight="11.0" prefWidth="80.0" text="Occurrence %">
-                           <tooltip>
-                              <Tooltip text="Find all actions that have specific occurrence percentage" />
-                           </tooltip>
-                        </Label>
-                        <HBox prefHeight="25.0" prefWidth="103.0">
+                        <HBox alignment="CENTER_LEFT" prefHeight="15.0" prefWidth="628.0">
                            <children>
-                              <Pane prefHeight="25.0" prefWidth="8.0" />
-                              <ChoiceBox fx:id="choiceBoxOccurrenceFilterPercentage" prefHeight="25.0" prefWidth="45.0" />
-                              <TextField fx:id="textFieldOccurrenceFilterPercentage" prefHeight="25.0" prefWidth="51.0" promptText="0-100" />
+                              <ImageView fx:id="imgFilter" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                                 <image>
+                                    <Image url="@../../bin/resources/images/correct.png" />
+                                 </image>
+                              </ImageView>
+                              <Pane prefHeight="20.0" prefWidth="6.0" />
+                              <Label fx:id="lblFilter" prefHeight="20.0" prefWidth="710.0">
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Label>
                            </children>
                         </HBox>
+                        <Pane prefHeight="6.0" prefWidth="733.0" />
+                        <HBox prefHeight="17.0" prefWidth="721.0">
+                           <children>
+                              <Pane prefHeight="17.0" prefWidth="20.0" />
+                              <Label prefHeight="17.0" prefWidth="62.0" text="Trace-ID  " textFill="#8a8686">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Label>
+                              <Separator orientation="VERTICAL" prefHeight="18.0" prefWidth="11.0" />
+                              <Label prefHeight="17.0" prefWidth="424.0" text="State-number =[action name]=&gt; State-number =[action name]=&gt; ..." textFill="#8a8686" />
+                           </children>
+                        </HBox>
+                        <AnchorPane prefHeight="380.0" prefWidth="886.0">
+                           <children>
+                              <ListView fx:id="listViewTraces" prefHeight="330.0" prefWidth="907.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                              <Label fx:id="lblListViewTracesEmpty" alignment="CENTER" prefHeight="376.0" prefWidth="886.0" text="Traces List Empty " textFill="#a19494" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <font>
+                                    <Font size="24.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </AnchorPane>
                      </children>
                   </VBox>
-               </children>
-            </HBox>
-         </children>
-      </VBox>
-      <VBox layoutX="14.0" layoutY="353.0" prefHeight="380.0" prefWidth="733.0" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="353.0">
-         <children>
-            <HBox alignment="CENTER_LEFT" prefHeight="15.0" prefWidth="628.0">
-               <children>
-                  <ImageView fx:id="imgFilter" fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true" visible="false">
-                     <image>
-                        <Image url="@../../bin/resources/images/correct.png" />
-                     </image>
-                  </ImageView>
-                  <Pane prefHeight="20.0" prefWidth="6.0" />
-                  <Label fx:id="lblFilter" prefHeight="20.0" prefWidth="710.0">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Label>
-               </children>
-            </HBox>
-            <Pane prefHeight="6.0" prefWidth="733.0" />
-            <HBox prefHeight="17.0" prefWidth="721.0">
-               <children>
-                  <Pane prefHeight="17.0" prefWidth="14.0" />
-                  <Label prefHeight="17.0" prefWidth="50.0" text="Trace-ID" textFill="#8a8686" />
-                  <Separator orientation="VERTICAL" prefHeight="18.0" prefWidth="11.0" />
-                  <Label prefHeight="17.0" prefWidth="424.0" text="State-number =[action name]=&gt; State-number =[action name]=&gt; ..." textFill="#8a8686" />
-               </children>
-            </HBox>
-            <AnchorPane>
-               <children>
-                  <ScrollPane>
-                     <content>
-                        <ListView fx:id="listViewTraces" prefHeight="330.0" prefWidth="731.0" />
-                     </content>
-                  </ScrollPane>
-                  <Label fx:id="lblListViewTracesEmpty" alignment="CENTER" prefHeight="17.0" prefWidth="733.0" text="Empty" textFill="#a19494" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <font>
-                        <Font size="24.0" />
-                     </font>
-                  </Label>
+                  <BarChart fx:id="barChartActions" layoutX="15.0" layoutY="476.0" prefHeight="344.0" prefWidth="575.0">
+                    <xAxis>
+                      <CategoryAxis fx:id="categoryAxis" side="BOTTOM" />
+                    </xAxis>
+                    <yAxis>
+                      <NumberAxis fx:id="numberAxis" side="LEFT" />
+                    </yAxis>
+                  </BarChart>
+                  <Separator layoutX="15.0" layoutY="458.0" prefWidth="200.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" />
                </children>
             </AnchorPane>
-         </children>
-      </VBox>
-      <Button fx:id="btnRefresh" disable="true" layoutX="1251.0" layoutY="672.0" mnemonicParsing="false" onAction="#refreshGraph" prefHeight="25.0" prefWidth="80.0" text="refresh" />
+        </items>
+      </SplitPane>
    </children>
 </AnchorPane>

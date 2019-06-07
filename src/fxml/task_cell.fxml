@@ -3,37 +3,31 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
 
-<VBox alignment="CENTER" prefHeight="50.0" prefWidth="720.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="rootPane" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <Pane prefHeight="5.0" prefWidth="617.0" />
-      <HBox fx:id="hboxRoot" prefHeight="45.0" prefWidth="617.0">
-         <children>
-            <SplitPane dividerPositions="0.08487654320987655" prefHeight="45.0" prefWidth="720.0">
-               <items>
-                  <BorderPane maxWidth="150.0" prefHeight="35.0" prefWidth="52.0">
-                     <center>
-                        <Label fx:id="lblTraceID" alignment="CENTER" prefHeight="27.0" prefWidth="57.0" BorderPane.alignment="CENTER">
-                           <font>
-                              <Font name="System Bold" size="12.0" />
-                           </font>
-                        </Label>
-                     </center>
-                  </BorderPane>
-                  <ScrollPane opacity="0.55" prefHeight="43.0" prefWidth="625.0" vbarPolicy="NEVER">
-                     <content>
-                        <HBox fx:id="hbox" alignment="CENTER_LEFT" prefHeight="43.0" />
-                     </content>
-                  </ScrollPane>
-               </items>
-            </SplitPane>
-         </children>
-      </HBox>
+      <SplitPane fx:id="splitPaneTrace" dividerPositions="0.08487654320987655" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="45.0" prefWidth="720.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0">
+         <items>
+            <BorderPane maxWidth="150.0" prefHeight="35.0" prefWidth="52.0">
+               <center>
+                  <Label fx:id="lblTraceID" alignment="CENTER" prefHeight="27.0" prefWidth="57.0" BorderPane.alignment="CENTER">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </Label>
+               </center>
+            </BorderPane>
+            <ScrollPane fx:id="scrollPaneTrace" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" opacity="0.55" vbarPolicy="NEVER">
+               <content>
+                  <HBox fx:id="hbox" alignment="CENTER_LEFT" prefHeight="43.0" />
+               </content>
+            </ScrollPane>
+         </items>
+      </SplitPane>
    </children>
-</VBox>
+</AnchorPane>
