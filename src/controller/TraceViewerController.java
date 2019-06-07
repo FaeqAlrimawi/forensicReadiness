@@ -26,6 +26,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -50,18 +53,19 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 public class TraceViewerController implements TracesMinerListener {
 
 	@FXML
 	private Label lblSaved;
-	
+
 	@FXML
 	private ImageView imgSavedTraces;
-	
+
 	@FXML
 	private Button btnSaveFilteredTraces;
-	
+
 	@FXML
 	private TextField textFieldSystemFile;
 
@@ -97,7 +101,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 	@FXML
 	private Label lblListViewTracesEmpty;
-	
+
 	@FXML
 	private ProgressIndicator progressIndicatorFilter;
 
@@ -116,9 +120,9 @@ public class TraceViewerController implements TracesMinerListener {
 	// @FXML
 	// private TextField txtFieldLength;
 
-//	@FXML
-//	private TextField textFieldActions;
-	
+	// @FXML
+	// private TextField textFieldActions;
+
 	@FXML
 	private TextArea textAreaActions;
 
@@ -187,7 +191,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 	@FXML
 	private ListView<GraphPath> listViewTraces;
-	
+
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -196,7 +200,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 	private File selectedTracesFile;
 	private File selectedFilteredTracesFile;
-	
+
 	// private JSONObject jsonTraces;
 	private TracesMiner tracesMiner;
 
@@ -219,9 +223,9 @@ public class TraceViewerController implements TracesMinerListener {
 	// public static final String MORE_THAN = ">";
 	// public static final String LESS_THAN = "<";
 	public static final String LESS_THAN_EQUAL = "<=";
-//	private static final int FILTER_LENGTH = 1;
-//	private static final int FILTER_OCCURRENCE = 3;
-//	private static final int FILTER_ACTIONS = 6;
+	// private static final int FILTER_LENGTH = 1;
+	// private static final int FILTER_OCCURRENCE = 3;
+	// private static final int FILTER_ACTIONS = 6;
 
 	public static final String ACTIONS = "Actions";
 	public static final String STATES = "States";
@@ -231,8 +235,8 @@ public class TraceViewerController implements TracesMinerListener {
 	public static final String CUSTOMISED_TRACES = "Customised Traces";
 
 	private List<Integer> shownFitleredTraces;
-	
-//	private AutoCompleteTextField autoCompleteActionsFiled;
+
+	// private AutoCompleteTextField autoCompleteActionsFiled;
 	private AutoCompleteTextArea autoCompleteActionsArea;
 
 	private final String[] filters = { SHORTEST, SHORTEST_CLASP, CUSTOMISE };
@@ -247,6 +251,8 @@ public class TraceViewerController implements TracesMinerListener {
 
 	String chartTitle = "";
 
+	StateViewerController stateViewerController;
+	
 	@FXML
 	public void initialize() {
 
@@ -307,9 +313,9 @@ public class TraceViewerController implements TracesMinerListener {
 		});
 
 		// auto complete
-//		autoCompleteActionsFiled = new AutoCompleteTextField();
+		// autoCompleteActionsFiled = new AutoCompleteTextField();
 		autoCompleteActionsArea = new AutoCompleteTextArea();
-		
+
 		textFieldSystemFile.setOnKeyPressed(e -> {
 
 			// if enter is pressed then refersh
@@ -426,12 +432,13 @@ public class TraceViewerController implements TracesMinerListener {
 
 		if (selectedTracesFile != null) {
 			fileChooser.setInitialFileName(selectedTracesFile.getName());
-			
-			String folder = selectedTracesFile.getAbsolutePath().substring(0, selectedTracesFile.getAbsolutePath().lastIndexOf(File.separator));
+
+			String folder = selectedTracesFile.getAbsolutePath().substring(0,
+					selectedTracesFile.getAbsolutePath().lastIndexOf(File.separator));
 			File folderF = new File(folder);
-			
-			if(folderF.isDirectory()) {
-				fileChooser.setInitialDirectory(folderF);	
+
+			if (folderF.isDirectory()) {
+				fileChooser.setInitialDirectory(folderF);
 			}
 		}
 
@@ -452,7 +459,6 @@ public class TraceViewerController implements TracesMinerListener {
 				}
 			});
 
-			
 			loadTracesFile(selectedTracesFile.getAbsolutePath());
 		}
 
@@ -541,19 +547,20 @@ public class TraceViewerController implements TracesMinerListener {
 
 	@FXML
 	public void saveFilteredTraces(ActionEvent event) {
-	
-		//save filtered traces
+
+		// save filtered traces
 		FileChooser fileChooser = new FileChooser();
 
-		if (selectedFilteredTracesFile!= null) {
+		if (selectedFilteredTracesFile != null) {
 			fileChooser.setInitialFileName(selectedFilteredTracesFile.getName());
-			String folder = selectedFilteredTracesFile.getAbsolutePath().substring(0, selectedFilteredTracesFile.getAbsolutePath().lastIndexOf(File.separator));
+			String folder = selectedFilteredTracesFile.getAbsolutePath().substring(0,
+					selectedFilteredTracesFile.getAbsolutePath().lastIndexOf(File.separator));
 			File folderF = new File(folder);
-			
-			if(folderF.isDirectory()) {
-				fileChooser.setInitialDirectory(folderF);	
+
+			if (folderF.isDirectory()) {
+				fileChooser.setInitialDirectory(folderF);
 			}
-			
+
 		}
 
 		// set extension to be of system model (.cps)
@@ -563,41 +570,72 @@ public class TraceViewerController implements TracesMinerListener {
 
 		fileChooser.getExtensionFilters().add(extFilter);
 
-		
 		selectedFilteredTracesFile = fileChooser.showSaveDialog(null);
 
 		if (selectedFilteredTracesFile != null) {
-//			Platform.runLater(new Runnable() {
-//
-//				@Override
-//				public void run() {
-//					// TODO Auto-generated method stub
-////					textFieldSystemFile.setText(selectedTracesFile.getAbsolutePath());
-//				}
-//			});
+			// Platform.runLater(new Runnable() {
+			//
+			// @Override
+			// public void run() {
+			// // TODO Auto-generated method stub
+			//// textFieldSystemFile.setText(selectedTracesFile.getAbsolutePath());
+			// }
+			// });
 
 			saveTraces(selectedFilteredTracesFile.getAbsolutePath(), shownFitleredTraces);
 		}
-		
+
 	}
-	
+
 	protected void saveTraces(String fileName, List<Integer> tracesIDs) {
-		
-		if(fileName == null || tracesIDs == null) {
+
+		if (fileName == null || tracesIDs == null) {
 			return;
 		}
-		
+
 		executor.submit(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
 				tracesMiner.saveTraces(fileName, tracesIDs);
 			}
 		});
-		
+
 	}
-	
+
+	@FXML
+	public void viewSVG(ActionEvent event) {
+
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/state_viewer.fxml"));
+		Parent root;
+		try {
+			root = (Parent) fxmlLoader.load();
+			Stage stage = new Stage();
+			stage.setScene(new Scene(root));
+			
+			//get controller
+			stateViewerController = fxmlLoader.<StateViewerController>getController();
+			
+			String path = "C:\\Users\\Faeq\\Desktop\\svg\\0.svg";
+			int tries = 10000;
+			
+			while(path.contains("\\") && tries > 0) {
+				path = path.replace("\\", "/");
+				tries--;
+			}
+			
+			String svgPath = "file:///"+path;
+			stateViewerController.updateSVGPath(svgPath);
+			stage.show();
+//			   main.stg.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
 	protected void mineBasedOnCustomisedFilter() {
 
 		progressIndicatorFilter.setVisible(true);
@@ -625,9 +663,9 @@ public class TraceViewerController implements TracesMinerListener {
 		}
 
 		// check action names
-//		String actions = textFieldActions.getText();
+		// String actions = textFieldActions.getText();
 		String actions = textAreaActions.getText();
-		
+
 		if (actions != null && actions.isEmpty()) {
 			actions = null;
 		}
@@ -656,10 +694,10 @@ public class TraceViewerController implements TracesMinerListener {
 			updateImage(IMAGE_WRONG, imgFilter);
 			updateText("Problem occurred", lblFilter);
 		}
-		
+
 		progressIndicatorFilter.setVisible(false);
-		
-		//view traces
+
+		// view traces
 		viewTraces(tracesMiner.getCustomisedTracesIDs());
 
 	}
@@ -702,7 +740,7 @@ public class TraceViewerController implements TracesMinerListener {
 		if (filePath != null) {
 
 			// show progress indicatior
-//			progressIndicatorLoader.setVisible(true);
+			// progressIndicatorLoader.setVisible(true);
 
 			executor.submit(new Runnable() {
 
@@ -728,10 +766,10 @@ public class TraceViewerController implements TracesMinerListener {
 		resetLoadingGUI();
 
 		resetFilterGUI();
-		
-		//reset data
+
+		// reset data
 		shownFitleredTraces = null;
-		
+
 		// set file in miner
 		tracesMiner.setTracesFile(filePath);
 
@@ -820,20 +858,20 @@ public class TraceViewerController implements TracesMinerListener {
 		updateImage(null, imgFilter);
 
 		updateText(null, lblFilter);
-		
+
 		Platform.runLater(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				
-				//clear combobox for filtering chart
+
+				// clear combobox for filtering chart
 				chartFilterTraces.clear();
 				chartFilterTraces.add(ALL_TRACES);
 				comboBoxChartFilterTraces.setItems(FXCollections.observableArrayList(chartFilterTraces));
-				
-				//clear chart
-				
+
+				// clear chart
+
 			}
 		});
 	}
@@ -867,8 +905,8 @@ public class TraceViewerController implements TracesMinerListener {
 
 			}
 		});
-		
-		//show traces
+
+		// show traces
 		viewTraces(tracesMiner.getShortestTracesIDs());
 
 	}
@@ -887,7 +925,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 		updateImage(IMAGE_CORRECT, imgFilter);
 		updateText("# of retrieved traces = " + numofTraces, lblFilter);
-		
+
 		Platform.runLater(new Runnable() {
 
 			@Override
@@ -902,8 +940,8 @@ public class TraceViewerController implements TracesMinerListener {
 
 			}
 		});
-		
-		//show traces
+
+		// show traces
 		viewTraces(tracesMiner.getShortestClaSPTracesIDs());
 
 	}
@@ -978,8 +1016,8 @@ public class TraceViewerController implements TracesMinerListener {
 		}
 
 		// set actions in auto completer
-//		autoCompleteActionsFiled.setEntries(tracesMiner.getTracesActions());
-		
+		// autoCompleteActionsFiled.setEntries(tracesMiner.getTracesActions());
+
 		autoCompleteActionsArea.setEntries(tracesMiner.getTracesActions());
 
 		// Value factory
@@ -1001,35 +1039,39 @@ public class TraceViewerController implements TracesMinerListener {
 				// + tracesMiner.getMaximumTraceLength() + "]");
 
 				// set actions filed autoComplete
-//				textFieldActions.textProperty().addListener(new ChangeListener<String>() {
-//
-//					@Override
-//					public void changed(ObservableValue<? extends String> observable, String oldValue,
-//							String newValue) {
-//						// TODO Auto-generated method stub
-//						autoCompleteActionsFiled.autoComplete(textFieldActions, newValue, oldValue);
-//					}
-//				});
-//
-//				textFieldActions.focusedProperty().addListener(new ChangeListener<Boolean>() {
-//
-//					@Override
-//					public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue,
-//							Boolean newValue) {
-//						// TODO Auto-generated method stub
-//						autoCompleteActionsFiled.hidePopup();
-//					}
-//				});
-//
-//				textFieldActions.setOnKeyPressed(e -> {
-//					// if control+space pressed, then show the list of possible
-//					// actions
-//					if (e.getCode() == KeyCode.SPACE && e.isControlDown()) {
-//						autoCompleteActionsFiled.showAllEntries(textFieldActions);
-//					}
-//				});
-				
-				
+				// textFieldActions.textProperty().addListener(new
+				// ChangeListener<String>() {
+				//
+				// @Override
+				// public void changed(ObservableValue<? extends String>
+				// observable, String oldValue,
+				// String newValue) {
+				// // TODO Auto-generated method stub
+				// autoCompleteActionsFiled.autoComplete(textFieldActions,
+				// newValue, oldValue);
+				// }
+				// });
+				//
+				// textFieldActions.focusedProperty().addListener(new
+				// ChangeListener<Boolean>() {
+				//
+				// @Override
+				// public void changed(ObservableValue<? extends Boolean>
+				// observable, Boolean oldValue,
+				// Boolean newValue) {
+				// // TODO Auto-generated method stub
+				// autoCompleteActionsFiled.hidePopup();
+				// }
+				// });
+				//
+				// textFieldActions.setOnKeyPressed(e -> {
+				// // if control+space pressed, then show the list of possible
+				// // actions
+				// if (e.getCode() == KeyCode.SPACE && e.isControlDown()) {
+				// autoCompleteActionsFiled.showAllEntries(textFieldActions);
+				// }
+				// });
+
 				textAreaActions.textProperty().addListener(new ChangeListener<String>() {
 
 					@Override
@@ -1088,7 +1130,7 @@ public class TraceViewerController implements TracesMinerListener {
 		case SHORTEST_CLASP_TRACES:
 			numberOfTracesInSelection = tracesMiner.getShortestClaSPTracesIDs().size();
 			break;
-			
+
 		case CUSTOMISED_TRACES:
 			numberOfTracesInSelection = tracesMiner.getCustomisedTracesNumber();
 			break;
@@ -1406,48 +1448,45 @@ public class TraceViewerController implements TracesMinerListener {
 		});
 
 	}
-	
+
 	protected void viewTraces(List<Integer> tracesIDs) {
-		
-		
-		if(tracesIDs == null) {
+
+		if (tracesIDs == null) {
 			System.err.println("traces ids list is null");
 			return;
 		}
-		
 
-		if(tracesIDs.isEmpty()) {
-			lblListViewTracesEmpty.setVisible(true);	
+		if (tracesIDs.isEmpty()) {
+			lblListViewTracesEmpty.setVisible(true);
 			shownFitleredTraces = tracesIDs;
-			//clear list
+			// clear list
 			listViewTraces.setItems(null);
 			return;
 		}
-		
-		//used for saving
+
+		// used for saving
 		shownFitleredTraces = tracesIDs;
-		
+
 		Map<Integer, GraphPath> traces = tracesMiner.getTraces(tracesIDs);
-		
+
 		ObservableList<GraphPath> tracesObservableList;
-		
+
 		tracesObservableList = FXCollections.observableArrayList();
-		
+
 		tracesObservableList.addAll(traces.values());
-		
-		 listViewTraces.setCellFactory(tracesListView -> new TaskCell());
+
+		listViewTraces.setCellFactory(tracesListView -> new TaskCell());
 		listViewTraces.setItems(tracesObservableList);
-		
+
 		lblListViewTracesEmpty.setVisible(false);
-       
-		
+
 	}
 
 	@Override
 	public void onSavingFilteredTracesComplete(boolean isSuccessful) {
 		// TODO Auto-generated method stub
-		
-		if(isSuccessful) {
+
+		if (isSuccessful) {
 			updateImage(IMAGE_CORRECT, imgSavedTraces);
 			updateText("Saved!", lblSaved);
 		} else {
@@ -1455,7 +1494,5 @@ public class TraceViewerController implements TracesMinerListener {
 			updateText("didn't save!", lblSaved);
 		}
 	}
-	
-	
-	
+
 }
