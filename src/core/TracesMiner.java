@@ -18,7 +18,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
-import java.util.regex.Pattern;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -2289,8 +2290,6 @@ public class TracesMiner {
 
 		}
 
-		System.out.println(outputFolder);
-
 		// create output files in output folder
 		if (outputFolder != null && !outputFolder.isEmpty() && isFolderCreated) {
 			clustersOutputFileName = outputFolder + onlyName + "_relevantTraces.txt";// instanceFileName.replace(".json",
@@ -2321,7 +2320,6 @@ public class TracesMiner {
 		shortestTraces.clear();
 		shortestActionsOccurence.clear();
 		shortestStatesOccurence.clear();
-
 	}
 
 	public int getMinimumTraceLength() {
@@ -3016,14 +3014,16 @@ public class TracesMiner {
 		
 		Map<Integer, GraphPath> traces = getTraces(tracesIDs);
 		
-		String [] dummy = new String[1];
-		dummy[0] = "dummy";
+		String [] dummy = new String[0];
+//		dummy[0] = "dummy";
 		List<GraphPath> paths = Arrays.asList(traces.values().toArray(new GraphPath[traces.size()]));
 		
 		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 		
 		InstancesSaver tracesSaver = ins.new InstancesSaver(-1, fileName, dummy, dummy, paths);
 		try {
+//			ForkJoinPool mainPool = new ForkJoinPool();
+//			int res = mainPool.submit(tracesSaver).get();
 			int res = tracesSaver.call();
 			
 			if(res == InstancesSaver.SUCCESSFUL) {
@@ -3033,12 +3033,17 @@ public class TracesMiner {
 				
 			}
 			
-			System.out.println(isSaved);
+//			mainPool.shutdown();
+
+			// if it returns false then maximum waiting time is reached
+//			if (!mainPool.awaitTermination(24, TimeUnit.DAYS)) {
+//				System.err.println("Time out! saving instances took more than specified maximum time ["
+//						+ 24 + " " + TimeUnit.DAYS + "]");
+//			}
 			
 			if(listener != null) {
 				listener.onSavingFilteredTracesComplete(isSaved);
 			}
-			
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

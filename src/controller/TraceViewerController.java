@@ -427,12 +427,10 @@ public class TraceViewerController implements TracesMinerListener {
 
 		if (selectedTracesFile != null) {
 			fileChooser.setInitialFileName(selectedTracesFile.getName());
-			fileChooser.setInitialDirectory(selectedTracesFile.getAbsoluteFile());
+//			fileChooser.setInitialDirectory(selectedTracesFile.getAbsoluteFile());
 		}
 
 		// set extension to be of system model (.cps)
-		// fileChooser.setSelectedExtensionFilter(new ExtensionFilter("System
-		// model files (*.cps)",".cps"));
 		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
 
 		fileChooser.getExtensionFilters().add(extFilter);
@@ -449,6 +447,7 @@ public class TraceViewerController implements TracesMinerListener {
 				}
 			});
 
+			
 			loadTracesFile(selectedTracesFile.getAbsolutePath());
 		}
 
@@ -543,7 +542,7 @@ public class TraceViewerController implements TracesMinerListener {
 
 		if (selectedFilteredTracesFile!= null) {
 			fileChooser.setInitialFileName(selectedFilteredTracesFile.getName());
-			fileChooser.setInitialDirectory(selectedFilteredTracesFile.getAbsoluteFile());
+//			fileChooser.setInitialDirectory(selectedFilteredTracesFile.getAbsoluteFile());
 		}
 
 		// set extension to be of system model (.cps)
@@ -718,6 +717,10 @@ public class TraceViewerController implements TracesMinerListener {
 		resetLoadingGUI();
 
 		resetFilterGUI();
+		
+		//reset data
+		shownFitleredTraces = null;
+		
 		// set file in miner
 		tracesMiner.setTracesFile(filePath);
 
@@ -806,6 +809,20 @@ public class TraceViewerController implements TracesMinerListener {
 		updateImage(null, imgFilter);
 
 		updateText(null, lblFilter);
+		
+		Platform.runLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				
+				//clear combobox for filtering chart
+				comboBoxChartFilterTraces.getItems().clear();
+				
+				//clear chart
+				
+			}
+		});
 	}
 
 	protected void findShortestTraces() {
