@@ -2,6 +2,7 @@
 
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Menu?>
@@ -51,7 +52,7 @@
             <items>
               <AnchorPane minWidth="230.0" prefHeight="532.0" prefWidth="383.0" SplitPane.resizableWithParent="false">
                 <children>
-                        <VBox alignment="TOP_CENTER" layoutX="22.0" layoutY="71.0" minHeight="400.0" prefHeight="461.0" prefWidth="238.0" spacing="10.0">
+                        <VBox alignment="TOP_CENTER" layoutX="22.0" layoutY="71.0" minHeight="400.0" prefHeight="461.0" prefWidth="238.0" spacing="2.0">
                            <children>
                               <AnchorPane prefHeight="34.0" prefWidth="238.0">
                                  <children>
@@ -86,14 +87,20 @@
                                     </AnchorPane>
                                  </children>
                               </HBox>
+                              <HBox>
+                                 <children>
+                                    <CheckBox fx:id="checkboxLTSSame" mnemonicParsing="false" selected="true" text="LTS in same Folder" />
+                                 </children>
+                              </HBox>
+                              <Pane prefHeight="13.0" prefWidth="238.0" />
                               <VBox prefHeight="172.0" prefWidth="295.0">
                                  <children>
                                     <AnchorPane prefHeight="34.0" prefWidth="265.0">
                                        <children>
-                                          <TextField fx:id="textFieldSelectedStatesFolder" prefHeight="34.0" prefWidth="238.0" promptText="LTS Folder" />
+                                          <TextField fx:id="textFieldSelectedStatesFolder" disable="true" prefHeight="34.0" prefWidth="238.0" promptText="LTS Folder" />
                                           <ProgressBar fx:id="progressBarAnalyse" opacity="0.4" prefHeight="34.0" prefWidth="238.0" visible="false" />
                                           <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="202.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
-                                          <ImageView fx:id="imgOpenFolder" fitHeight="24.0" fitWidth="24.0" layoutX="210.0" layoutY="6.0" onMouseClicked="#selectStatesFolder" pickOnBounds="true" preserveRatio="true">
+                                          <ImageView fx:id="imgOpenStatesFolder" disable="true" fitHeight="24.0" fitWidth="24.0" layoutX="210.0" layoutY="6.0" onMouseClicked="#selectStatesFolder" pickOnBounds="true" preserveRatio="true">
                                              <image>
                                                 <Image url="@../../bin/resources/images/folder.png" />
                                              </image>

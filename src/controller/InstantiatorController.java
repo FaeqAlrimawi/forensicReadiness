@@ -46,6 +46,12 @@ public class InstantiatorController
 		implements ie.lero.spare.pattern_instantiation.IncidentPatternInstantiationListener {
 
 	@FXML
+	private ImageView imgOpenStatesFolder;
+	
+	@FXML
+	private CheckBox  checkboxLTSSame;
+	
+	@FXML
 	private ProgressBar progressBarAnalyse;
 	
 	@FXML
@@ -158,6 +164,16 @@ public class InstantiatorController
 		// initialize gui if necessary
 		// ObservableList<String> items = FXCollections.observableArrayList();
 		// listResults.setItems(items);
+		
+		checkboxLTSSame.setOnAction(e->{
+			if(checkboxLTSSame.isSelected()){
+				textFieldSelectedStatesFolder.setDisable(true);
+				imgOpenStatesFolder.setDisable(true);
+			} else {
+				textFieldSelectedStatesFolder.setDisable(false);
+				imgOpenStatesFolder.setDisable(false);
+			}
+		});
 	}
 
 	@FXML
@@ -382,7 +398,26 @@ public class InstantiatorController
 			@Override
 			public void run() {
 				incidentInstantiator = new IncidentPatternInstantiator();
-				incidentInstantiator.execute(incidentPatternFilePath, systemModelFilePath, listener);
+				if(checkboxLTSSame.isSelected()) {
+					incidentInstantiator.execute(incidentPatternFilePath, systemModelFilePath, listener);	
+				} else{
+					String ltsFolder = selectedStatesDirectory.getAbsolutePath();
+//					int index = systemModelFilePath.lastIndexOf(File.separator);
+					
+					String systemName = systemFile.getName();
+					String bigrapherFile = null;
+					
+					if(systemName.contains(".cps")) {
+						bigrapherFile = systemFile.getName().replace(".cps", ".big");	
+					}
+					
+//					if(index>0) {
+//						bigrapherFile = systemModelFilePath.replace(".cps", ".big")	
+//					}
+//					 
+					incidentInstantiator.execute(incidentPatternFilePath, systemModelFilePath, bigrapherFile, ltsFolder, listener);
+				}
+				
 
 			}
 
