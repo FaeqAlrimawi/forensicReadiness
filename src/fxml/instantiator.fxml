@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.Glow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+
+<SplitPane dividerPositions="0.5" maxHeight="3200.0" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.InstantiatorController">
+   <items>
+      <VBox prefWidth="1198.0">
+        <children>
+            <MenuBar>
+              <menus>
+                <Menu mnemonicParsing="false" text="File">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Close" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Edit">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="Delete" />
+                  </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Help">
+                  <items>
+                    <MenuItem mnemonicParsing="false" text="About" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+          <SplitPane dividerPositions="0.25" focusTraversable="true" prefHeight="564.0" prefWidth="1198.0" VBox.vgrow="ALWAYS">
+            <items>
+              <AnchorPane minWidth="230.0" prefHeight="532.0" prefWidth="383.0" SplitPane.resizableWithParent="false">
+                <children>
+                        <VBox alignment="TOP_CENTER" layoutX="22.0" layoutY="71.0" minHeight="400.0" prefHeight="461.0" prefWidth="238.0" spacing="10.0">
+                           <children>
+                              <AnchorPane prefHeight="34.0" prefWidth="238.0">
+                                 <children>
+                                    <TextField fx:id="txtFieldIncidentPattern" prefHeight="34.0" prefWidth="238.0" promptText="Incident Pattern Model (*.cpi)" />
+                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="201.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
+                                    <ImageView fx:id="imgSelectIncidentPattern" fitHeight="24.0" fitWidth="24.0" layoutX="210.0" layoutY="6.0" onMouseClicked="#selectIncidentPattern" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../../bin/resources/images/folder.png" />
+                                       </image>
+                                       <cursor>
+                                          <Cursor fx:constant="HAND" />
+                                       </cursor>
+                                    </ImageView>
+                                 </children>
+                              </AnchorPane>
+                              <Pane prefHeight="38.0" prefWidth="238.0" />
+                              <HBox prefHeight="34.0" prefWidth="238.0">
+                                 <children>
+                                    <AnchorPane prefHeight="34.0" prefWidth="225.0">
+                                       <children>
+                                          <TextField fx:id="txtFieldSystemModel" prefHeight="34.0" prefWidth="238.0" promptText="Cyber-Physical System (*.cps)" />
+                                          <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="202.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
+                                          <ImageView fx:id="imgSelectSystemFile" fitHeight="24.0" fitWidth="24.0" layoutX="210.0" layoutY="6.0" onMouseClicked="#selectSystemFile" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../bin/resources/images/folder.png" />
+                                             </image>
+                                             <cursor>
+                                                <Cursor fx:constant="HAND" />
+                                             </cursor>
+                                          </ImageView>
+                                       </children>
+                                    </AnchorPane>
+                                 </children>
+                              </HBox>
+                              <VBox prefHeight="172.0" prefWidth="295.0">
+                                 <children>
+                                    <AnchorPane prefHeight="34.0" prefWidth="265.0">
+                                       <children>
+                                          <TextField fx:id="textFieldSelectedStatesFolder" prefHeight="34.0" prefWidth="238.0" promptText="LTS Folder" />
+                                          <ProgressBar fx:id="progressBarAnalyse" opacity="0.4" prefHeight="34.0" prefWidth="238.0" visible="false" />
+                                          <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="202.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
+                                          <ImageView fx:id="imgOpenFolder" fitHeight="24.0" fitWidth="24.0" layoutX="210.0" layoutY="6.0" onMouseClicked="#selectStatesFolder" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../../bin/resources/images/folder.png" />
+                                             </image>
+                                             <cursor>
+                                                <Cursor fx:constant="HAND" />
+                                             </cursor>
+                                          </ImageView>
+                                       </children>
+                                    </AnchorPane>
+                                    <HBox alignment="CENTER_LEFT" prefHeight="34.0" prefWidth="295.0">
+                                       <children>
+                                          <ImageView fx:id="imgTransitionCheck" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                                             <image>
+                                                <Image url="@../../bin/resources/images/correct.png" />
+                                             </image>
+                                          </ImageView>
+                                          <Pane prefHeight="20.0" prefWidth="6.0" />
+                                          <Label fx:id="lblTransitionCheck" prefHeight="29.0" prefWidth="262.0">
+                                             <font>
+                                                <Font size="14.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" prefHeight="34.0" prefWidth="295.0">
+                                       <children>
+                                          <ImageView fx:id="imgStatesCheck" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                                             <image>
+                                                <Image url="@../../bin/resources/images/correct.png" />
+                                             </image>
+                                          </ImageView>
+                                          <Pane prefHeight="20.0" prefWidth="6.0" />
+                                          <Label fx:id="lblStatesCheck" prefHeight="29.0" prefWidth="262.0">
+                                             <font>
+                                                <Font size="14.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
+                              <Button fx:id="btnGenerateInstances" mnemonicParsing="false" onAction="#instantiateIncidentPattern" prefHeight="52.0" prefWidth="238.0" text="Instantiate Incident Pattern" textOverrun="LEADING_ELLIPSIS">
+                                 <effect>
+                                    <Glow />
+                                 </effect>
+                                 <font>
+                                    <Font size="14.0" />
+                                 </font>
+                              </Button>
+                           </children>
+                        </VBox>
+                        <Label layoutX="22.0" layoutY="23.0" text="Inputs">
+                           <font>
+                              <Font size="18.0" />
+                           </font>
+                        </Label>
+                </children>
+              </AnchorPane>
+            <AnchorPane id="Content" prefHeight="505.0" prefWidth="911.0">
+                     <children>
+                        <Label fx:id="lblProgressBar" layoutX="60.0" layoutY="14.0" prefHeight="18.0" prefWidth="509.0" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="14.0" />
+                        <ProgressBar fx:id="progressBar" layoutX="60.0" layoutY="67.0" prefHeight="8.0" prefWidth="380.0" progress="0.0" AnchorPane.leftAnchor="60.0" AnchorPane.rightAnchor="60.0" AnchorPane.topAnchor="40.0" />
+                        <TableView fx:id="tableViewMap" prefHeight="206.0" prefWidth="304.0" style="-fx-border-color: grey;" AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="70.0">      
+                            </TableView>
+                        <ListView fx:id="listViewSets" layoutX="377.0" layoutY="70.0" prefHeight="206.0" prefWidth="474.0" AnchorPane.leftAnchor="377.0" AnchorPane.rightAnchor="60.0" />
+                        <HBox alignment="CENTER" layoutX="159.0" layoutY="277.0" prefHeight="39.0" prefWidth="694.0" spacing="5.0" AnchorPane.rightAnchor="58.200000000000045">
+                           <children>
+                              <HBox alignment="CENTER" prefHeight="39.0" prefWidth="539.0">
+                                 <children>
+                                    <HBox alignment="CENTER" prefHeight="39.0" prefWidth="205.0">
+                                       <children>
+                                          <Label alignment="CENTER" prefHeight="19.0" prefWidth="107.0" text="Parallel Instances">
+                                             <font>
+                                                <Font size="13.0" />
+                                             </font>
+                                          </Label>
+                                          <Spinner fx:id="instancesSpinner" disable="true" prefHeight="25.0" prefWidth="50.0" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                                       <children>
+                                          <Label alignment="CENTER" prefHeight="19.0" prefWidth="107.0" text="Parallel Activities">
+                                             <font>
+                                                <Font size="13.0" />
+                                             </font>
+                                          </Label>
+                                          <Spinner fx:id="activitiesSpinner" disable="true" prefHeight="25.0" prefWidth="50.0" />
+                                       </children>
+                                    </HBox>
+                                    <HBox alignment="CENTER" prefHeight="39.0" prefWidth="249.0">
+                                       <children>
+                                          <Label alignment="CENTER" prefHeight="19.0" prefWidth="162.0" text="Matching Threshold (*100)">
+                                             <font>
+                                                <Font size="13.0" />
+                                             </font>
+                                          </Label>
+                                          <Spinner fx:id="matchingSpinner" disable="true" prefHeight="25.0" prefWidth="50.0" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </HBox>
+                              <Button fx:id="btnAnalyse" disable="true" mnemonicParsing="false" onAction="#analyseInstances" prefHeight="32.0" prefWidth="145.0" text="Analyse" />
+                           </children>
+                        </HBox>
+                        <HBox fx:id="panelAssetSets" alignment="CENTER" layoutX="377.0" layoutY="70.0" prefHeight="206.0" prefWidth="482.0" style="-fx-background-color: white; -fx-border-color: grey;" AnchorPane.leftAnchor="377.0" AnchorPane.rightAnchor="60.0" AnchorPane.topAnchor="70.0">
+                           <children>
+                              <Label fx:id="lblEntityAssetMap1" text="Asset Sets" textFill="#928a8a">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <HBox fx:id="panelEntityAssetMap" alignment="CENTER" layoutX="60.0" layoutY="70.0" prefHeight="206.0" prefWidth="304.0" style="-fx-background-color: white; -fx-border-color: grey;">
+                           <children>
+                              <Label fx:id="lblEntityAssetMap11" text="Entity-Asset Map" textFill="#928a8a">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                     </children>
+                  </AnchorPane>
+            </items>
+          </SplitPane>
+        </children>
+      </VBox>
+      <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" maxHeight="500.0" minHeight="150.0" prefHeight="100.0">
+         <content>
+            <TextArea fx:id="txtAreaLog" editable="false" prefHeight="300.0" />
+         </content>
+      </ScrollPane>
+   </items>
+</SplitPane>

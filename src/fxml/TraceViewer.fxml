@@ -45,7 +45,7 @@
                                                 <Font size="18.0" />
                                              </font>
                                           </Label>
-                                          <AnchorPane prefHeight="34.0" prefWidth="286.0">
+                                          <AnchorPane prefHeight="34.0" prefWidth="302.0">
                                              <children>
                                                 <TextField fx:id="textFieldSystemFile" layoutX="-4.0" prefHeight="34.0" prefWidth="285.0" promptText="traces file (*.json)" />
                                                 <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="244.0" layoutY="2.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
@@ -76,10 +76,8 @@
                                                 </ImageView>
                                              </children>
                                           </AnchorPane>
-                                          <Pane prefHeight="34.0" prefWidth="9.0" />
                                        </children>
                                     </HBox>
-                                    <Pane prefHeight="7.0" prefWidth="452.0" />
                                     <HBox prefHeight="16.0" prefWidth="406.0">
                                        <children>
                                           <AnchorPane prefHeight="34.0" prefWidth="342.0">
@@ -209,7 +207,7 @@
                               </VBox>
                               <HBox prefHeight="23.0" prefWidth="661.0">
                                  <children>
-                                    <Button fx:id="btnAnalyse" disable="true" mnemonicParsing="false" onAction="#mineTraces" prefHeight="37.0" prefWidth="127.0" text="analyse">
+                                    <Button fx:id="btnAnalyse" disable="true" mnemonicParsing="false" onAction="#mineTraces" prefHeight="37.0" prefWidth="127.0" text="filter">
                                        <font>
                                           <Font size="16.0" />
                                        </font>

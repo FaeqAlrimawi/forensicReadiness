@@ -478,7 +478,9 @@ public class TraceViewerController implements TracesMinerListener {
 				@Override
 				public void run() {
 					// TODO Auto-generated method stub
+					toggleButtonDisability(btnAnalyse, true);
 					findShortestTraces();
+					toggleButtonDisability(btnAnalyse, false);
 				}
 			});
 			break;
@@ -490,7 +492,9 @@ public class TraceViewerController implements TracesMinerListener {
 				@Override
 				public void run() {
 					// TODO Auto-generated method stub
+					toggleButtonDisability(btnAnalyse, true);
 					mineShortestTracesUsingClaSP();
+					toggleButtonDisability(btnAnalyse, false);
 				}
 			});
 
@@ -502,7 +506,9 @@ public class TraceViewerController implements TracesMinerListener {
 				@Override
 				public void run() {
 					// TODO Auto-generated method stub
+					toggleButtonDisability(btnAnalyse, true);
 					mineBasedOnCustomisedFilter();
+					toggleButtonDisability(btnAnalyse, false);
 				}
 			});
 
@@ -773,6 +779,7 @@ public class TraceViewerController implements TracesMinerListener {
 		// set file in miner
 		tracesMiner.setTracesFile(filePath);
 
+		System.out.println("set file path " + filePath);
 		numberOfTraces = tracesMiner.readTracesFromFile();
 
 		boolean isLoaded = false;
@@ -1449,6 +1456,23 @@ public class TraceViewerController implements TracesMinerListener {
 
 	}
 
+	protected void toggleButtonDisability(Button button, boolean isDisabled) {
+	
+		Platform.runLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				if(isDisabled){
+					button.setDisable(true);	
+				} else{
+					button.setDisable(false);
+				}
+				
+			}
+		});
+	}
+	
 	protected void viewTraces(List<Integer> tracesIDs) {
 
 		if (tracesIDs == null) {
@@ -1494,5 +1518,7 @@ public class TraceViewerController implements TracesMinerListener {
 			updateText("didn't save!", lblSaved);
 		}
 	}
+	
+	
 
 }

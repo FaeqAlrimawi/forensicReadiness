@@ -5,6 +5,7 @@ import java.net.URL;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.SplitPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
@@ -12,13 +13,15 @@ public class Main extends Application {
 
 	private Pane layout;
 
+	private SplitPane splitPaneInstantiator;
+	
 	@Override
 	public void start(Stage primaryStage) {
 		try {
 
 			FXMLLoader loader = new FXMLLoader();
 
-			URL url = Main.class.getResource("../fxml/TraceViewer.fxml");
+			URL url = Main.class.getResource("../fxml/instantiator.fxml");
 			
 			if(url!=null) {
 				System.out.println(url.getPath());	
@@ -31,13 +34,13 @@ public class Main extends Application {
 
 			// Platform.setImplicitExit(false);
 
-			layout = loader.load();
+			splitPaneInstantiator = loader.load();
 
-			Scene scene = new Scene(layout);
+			Scene scene = new Scene(splitPaneInstantiator);
 
 			// scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			primaryStage.setScene(scene);
-			primaryStage.setTitle("Traces Filter");
+			primaryStage.setTitle("Incident Pattern Instantiator");
 			primaryStage.show();
 
 		} catch (Exception e) {
