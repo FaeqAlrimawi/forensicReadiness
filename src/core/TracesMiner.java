@@ -153,6 +153,8 @@ public class TracesMiner {
 	// listener (from GUI)
 	TracesMinerListener listener;
 
+	boolean isLoaded = false;
+	
 	public TracesMiner() {
 
 		tracesActions = new HashMap<String, Integer>();
@@ -344,7 +346,7 @@ public class TracesMiner {
 
 		// loads instances(or traces) from given file name
 		// and finds shortest transitions
-		readTracesFromFile();
+		loadTracesFromFile();
 
 		// find shortest traces
 		findShortestTraces();
@@ -383,24 +385,7 @@ public class TracesMiner {
 
 	}
 
-	public int readTracesFromFile() {
-
-		// File fileConvertedInstances = new File(convertedInstancesFileName);
-		// File fileShortestInstances = new File(shortestTracesFileName);
-
-		// if the traces already read before and converted instances are
-		// generated as a file then skip loading
-		// if (fileConvertedInstances.exists() &&
-		// fileShortestInstances.exists()) {
-		// isAlreadyChecked = true;
-		// System.out.println(">>Traces were loaded before and shortest traces
-		// are identified."
-		// + "\n>>Converted traces from [" + convertedInstancesFileName + "]
-		// will be used."
-		// + "\n>>Shortest traces from [" + shortestTracesFileName + "] will be
-		// used");
-		// return;
-		// }
+	public int loadTracesFromFile() {
 
 		System.out.println(">>Reading instances from [" + instanceFileName + "]");
 
@@ -414,12 +399,6 @@ public class TracesMiner {
 		maximumTraceLength = -1;
 
 		instances = readInstantiatorInstancesFile(instanceFileName);
-
-		// // set min
-		// minimumTraceLength = minMaxLengths.get(0);
-		//
-		// // set max
-		// maximumTraceLength = minMaxLengths.get(1);
 
 		// set traces actions
 		if (tracesActionsOccurence.size() > 0) {
@@ -441,15 +420,27 @@ public class TracesMiner {
 		// System.out.println(instances.get(0).getTransitionActions());
 		if (instances == null) {
 			System.out.println("Instances are null! Exiting");
+			isLoaded = false;
 			return TRACES_NOT_LOADED;
+			
 		}
 
+		isLoaded = true;
+		
 		return instances.size();
 
 	}
 
+	/**
+	 * Return Actions with the highest occurrence in all given traces
+	 * @return Map with the key as action name and value as occurrence
+	 */
 	public Map<String, Integer> getHighestActionOccurrence() {
 
+		if(tracesActionsOccurence == null || tracesActionsOccurence.isEmpty()) {
+			return null;
+		}
+		
 		Map<String, Integer> result = new HashMap<String, Integer>();
 
 		int index = 0;
@@ -2314,14 +2305,19 @@ public class TracesMiner {
 			instances.clear();
 		}
 
+		resetMiner();
+	}
+
+	public void resetMiner() {
 		shortestTraceIDs.clear();
 		claSPTraceIDs.clear();
 		tracesActionsOccurence.clear();
 		shortestTraces.clear();
 		shortestActionsOccurence.clear();
 		shortestStatesOccurence.clear();
+		isLoaded = false;
 	}
-
+	
 	public int getMinimumTraceLength() {
 
 		if (minimumTraceLength == MIN_LENGTH_INITIAL_VALUE) {
@@ -3052,6 +3048,11 @@ public class TracesMiner {
 		
 		
 		return isSaved;
+	}
+	
+	public boolean areTracesLoaded() {
+		
+		return isLoaded;
 	}
 
 }

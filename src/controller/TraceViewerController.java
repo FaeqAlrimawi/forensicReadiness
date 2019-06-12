@@ -780,7 +780,7 @@ public class TraceViewerController implements TracesMinerListener {
 		tracesMiner.setTracesFile(filePath);
 
 		System.out.println("set file path " + filePath);
-		numberOfTraces = tracesMiner.readTracesFromFile();
+		numberOfTraces = tracesMiner.loadTracesFromFile();
 
 		boolean isLoaded = false;
 		if (numberOfTraces == TracesMiner.TRACES_NOT_LOADED) {
