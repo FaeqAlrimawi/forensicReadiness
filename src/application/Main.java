@@ -26,7 +26,7 @@ public class Main extends Application {
 			if(url!=null) {
 				System.out.println(url.getPath());	
 			} else{ 
-				System.out.println("url is null");
+				System.err.println("url is null");
 			}
 			
 			
