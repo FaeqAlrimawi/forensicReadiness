@@ -47,7 +47,6 @@ public class ForensicReadinessAnalyser {
 
 		List<String> actions = new LinkedList<String>();
 
-
 		Map<String, Integer> actionsOccur = tracesMiner.getHighestActionOccurrence();
 
 		if (actionsOccur == null) {
