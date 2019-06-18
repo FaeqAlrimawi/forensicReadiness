@@ -34,5 +34,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/incidentpatternB"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/FR_Analyser"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/DataMiningTester"/>
+	<classpathentry kind="lib" path="lib/richtextfx-fat-0.10.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

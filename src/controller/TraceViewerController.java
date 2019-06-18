@@ -15,7 +15,11 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.fxmisc.flowless.VirtualizedScrollPane;
+import org.fxmisc.richtext.CodeArea;
+
 import controller.utlities.AutoCompleteTextArea;
+import controller.utlities.ConditionAreaHandler;
 import core.TracesMiner;
 import core.TracesMinerListener;
 import ie.lero.spare.pattern_instantiation.GraphPath;
@@ -26,9 +30,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -50,13 +51,22 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.BorderWidths;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 
 public class TraceViewerController implements TracesMinerListener {
 
+	
 	@FXML
 	private Label lblSaved;
 
@@ -192,6 +202,7 @@ public class TraceViewerController implements TracesMinerListener {
 	@FXML
 	private ListView<GraphPath> listViewTraces;
 
+	
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -393,6 +404,7 @@ public class TraceViewerController implements TracesMinerListener {
 		checkInputAsDigital(textFieldOccurrenceFilterPercentage);
 		checkInputAsDigital(textFieldActionOccurrence);
 
+		
 	}
 
 	protected void checkInputAsDigital(TextField textField) {
@@ -519,6 +531,7 @@ public class TraceViewerController implements TracesMinerListener {
 		}
 	}
 
+	
 	@FXML
 	public void refreshGraph(ActionEvent event) {
 
