@@ -8,8 +8,8 @@ import org.fxmisc.richtext.CodeArea;
 
 import com.eteks.sweethome3d.adaptive.forensics.SystemHandler;
 
+import controller.utilities.ConditionAreaHandler;
 import controller.utlities.AutoCompleteTextArea;
-import controller.utlities.ConditionAreaHandler;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -23,7 +23,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Border;
