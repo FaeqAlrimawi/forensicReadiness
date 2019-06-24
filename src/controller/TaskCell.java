@@ -189,8 +189,9 @@ public class TaskCell extends ListCell<GraphPath> {
 				strBldr.append(state);
 
 				lblAction = new Label(" =[" + actions.get(index) + "]=> ");
-				lblAction.setStyle("-fx-text-fill: black; -fx-font-size:10px");
+				lblAction.setStyle("-fx-text-fill: black; -fx-font-size:14px");
 
+				lblAction.setStyle("-fx-font-weight: bold;");
 				strBldr.append(" =[" + actions.get(index) + "]=> ");
 			} else {
 				lblState = new Label(state + "");
@@ -198,12 +199,12 @@ public class TaskCell extends ListCell<GraphPath> {
 				lblAction = null;
 			}
 
-			lblState.setStyle("-fx-text-fill:black; -fx-font-size:12px");
+			lblState.setStyle("-fx-text-fill:black; -fx-font-size:15px");
 			
 			//setup a way to find available files for the state (svg or json)
 			
 			//set color to blue if found
-			lblState.setStyle("-fx-text-fill:blue; -fx-font-size:12px");
+			lblState.setStyle("-fx-text-fill:blue; -fx-font-size:15px");
 			
 			//open state svg
 			lblState.setOnMouseClicked(e->{
