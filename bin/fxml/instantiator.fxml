@@ -28,7 +28,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<SplitPane dividerPositions="0.5" maxHeight="3200.0" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.InstantiatorController">
+<SplitPane dividerPositions="0.8294314381270903" maxHeight="3200.0" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.InstantiatorController">
    <items>
       <VBox prefWidth="1198.0">
         <children>
@@ -51,7 +51,7 @@
                 </Menu>
               </menus>
             </MenuBar>
-          <SplitPane dividerPositions="0.25" focusTraversable="true" prefHeight="564.0" prefWidth="1198.0" VBox.vgrow="ALWAYS">
+          <SplitPane dividerPositions="0.25" focusTraversable="true" prefHeight="682.0" prefWidth="1198.0" VBox.vgrow="ALWAYS">
             <items>
               <AnchorPane minWidth="230.0" prefHeight="532.0" prefWidth="383.0" SplitPane.resizableWithParent="false">
                 <children>
@@ -244,7 +244,7 @@
                                     <Button fx:id="btnAnalyse" disable="true" mnemonicParsing="false" onAction="#analyseInstances" prefHeight="32.0" prefWidth="145.0" text="Analyse" />
                                  </children>
                               </HBox>
-                              <VBox>
+                              <VBox alignment="CENTER_RIGHT" spacing="5.0">
                                  <children>
                                     <Separator prefWidth="200.0" />
                                     <HBox>
@@ -254,7 +254,7 @@
                                                 <Font size="14.0" />
                                              </font>
                                           </Label>
-                                          <Label fx:id="lblNumOfTraces" prefHeight="31.0" prefWidth="358.0">
+                                          <Label fx:id="lblNumOfTraces" prefHeight="31.0" prefWidth="648.0">
                                              <font>
                                                 <Font name="System Bold" size="14.0" />
                                              </font>
@@ -283,6 +283,12 @@
                                           </Label>
                                        </children>
                                     </StackPane>
+                                    <HBox alignment="CENTER_RIGHT">
+                                       <children>
+                                          <Label fx:id="lblSave" prefHeight="23.0" prefWidth="83.0" />
+                                          <Button fx:id="btnSaveGeneratedTraces" mnemonicParsing="false" onAction="#saveGeneratedTraces" prefHeight="25.0" prefWidth="56.0" text="save" />
+                                       </children>
+                                    </HBox>
                                  </children>
                               </VBox>
                            </children>
@@ -293,9 +299,9 @@
           </SplitPane>
         </children>
       </VBox>
-      <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" maxHeight="500.0" minHeight="150.0" prefHeight="100.0">
+      <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" maxHeight="500.0" minHeight="150.0" prefHeight="179.0" prefWidth="1198.0">
          <content>
-            <TextArea fx:id="txtAreaLog" editable="false" prefHeight="300.0" />
+            <TextArea fx:id="txtAreaLog" editable="false" prefHeight="162.0" prefWidth="1198.0" />
          </content>
       </ScrollPane>
    </items>

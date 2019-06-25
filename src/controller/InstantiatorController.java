@@ -8,6 +8,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.eteks.sweethome3d.adaptive.forensics.BigrapherStatesChecker;
 import com.eteks.sweethome3d.adaptive.forensics.SystemHandler;
@@ -51,6 +55,12 @@ import javafx.stage.FileChooser;
 public class InstantiatorController
 		implements ie.lero.spare.pattern_instantiation.IncidentPatternInstantiationListener {
 
+	@FXML
+	private Label lblSave;
+	
+	@FXML
+	private Button btnSaveGeneratedTraces;
+	
 	@FXML
 	private Label lblNumOfTraces;
 	
@@ -147,6 +157,8 @@ public class InstantiatorController
 	@FXML
 	private ListView<String> listResults;
 
+	private ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+	
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -156,7 +168,8 @@ public class InstantiatorController
 	private File incidentPatternFile;
 	private File systemFile;
 	private File selectedStatesDirectory;
-
+	private File selectedSaveGeneratedTracesFile;
+	
 	private String incidentPatternFilePath = "D:/Bigrapher data/lero/example/int.cpi";
 	private String systemModelFilePath = "D:/Bigrapher data/lero/example/lero.cps";
 	private IncidentPatternInstantiator incidentInstantiator;
@@ -171,6 +184,8 @@ public class InstantiatorController
 	private CheckBox[] checkBoxsAssetSets;
 	private HashMap<Integer, GraphPathsAnalyser> results = new HashMap<Integer, GraphPathsAnalyser>();
 
+	private int currentSetID = -1;
+	
 	private BigrapherStatesChecker checker;
 	
 	private List<GraphPath> generatedTraces;
@@ -208,6 +223,62 @@ public class InstantiatorController
 		
 	}
 
+	@FXML
+	void saveGeneratedTraces(ActionEvent event) {
+		
+		// save filtered traces
+				FileChooser fileChooser = new FileChooser();
+
+				if (selectedSaveGeneratedTracesFile != null) {
+					fileChooser.setInitialFileName(selectedSaveGeneratedTracesFile.getName());
+					String folder = selectedSaveGeneratedTracesFile.getAbsolutePath().substring(0,
+							selectedSaveGeneratedTracesFile.getAbsolutePath().lastIndexOf(File.separator));
+					File folderF = new File(folder);
+
+					if (folderF.isDirectory()) {
+						fileChooser.setInitialDirectory(folderF);
+					}
+
+				} else if(systemFile!= null) {
+					if (systemFile != null) {
+						fileChooser.setInitialFileName(systemFile.getName());
+						String folder = systemFile.getAbsolutePath().substring(0,
+								systemFile.getAbsolutePath().lastIndexOf(File.separator));
+						File folderF = new File(folder);
+
+						if (folderF.isDirectory()) {
+							fileChooser.setInitialDirectory(folderF);
+						}
+
+					}
+
+				}
+				
+				// set extension to be of system model (.cps)
+				// fileChooser.setSelectedExtensionFilter(new ExtensionFilter("System
+				// model files (*.cps)",".cps"));
+				FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
+
+				fileChooser.getExtensionFilters().add(extFilter);
+
+				selectedSaveGeneratedTracesFile = fileChooser.showSaveDialog(null);
+
+				if (selectedSaveGeneratedTracesFile != null) {
+					// Platform.runLater(new Runnable() {
+					//
+					// @Override
+					// public void run() {
+					// // TODO Auto-generated method stub
+					//// textFieldSystemFile.setText(selectedTracesFile.getAbsolutePath());
+					// }
+					// });
+
+					saveTraces(currentSetID, generatedTraces, selectedSaveGeneratedTracesFile.getAbsolutePath());
+				}
+
+				
+	}
+	
 	@FXML
 	void selectIncidentPattern(MouseEvent event) {
 
@@ -887,6 +958,7 @@ public class InstantiatorController
 		// TODO Auto-generated method stub
 		
 		results.put(setID, graphAnalyser);
+		currentSetID = setID;
 		
 		progressBar.setVisible(false);
 		
@@ -1011,4 +1083,52 @@ public class InstantiatorController
 		generatedTraces = traces;
 		
 	}
+	
+	protected void saveTraces(int setID, List<GraphPath> traces, String fileName ) {
+
+		if (fileName == null || traces == null) {
+			return;
+		}
+
+		executor.submit(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				final boolean isSuccessful = incidentInstantiator.saveGeneratedTraces(setID, traces, fileName);
+				
+				Platform.runLater(new Runnable() {	
+					@Override
+					public void run() {
+						String result = "";
+						if(isSuccessful) {
+							result = "Saved!";
+						} else{
+							result = "Not saved!";
+						}
+						
+						// TODO Auto-generated method stub
+						lblSave.setText(result);
+					}
+				});
+				Timer t = new Timer();
+				t.schedule(new TimerTask() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						Platform.runLater(new Runnable() {	
+							@Override
+							public void run() {
+								// TODO Auto-generated method stub
+								lblSave.setText("");
+							}
+						});
+					}
+				}, 3000);
+			}
+		});
+
+	}
+
 }

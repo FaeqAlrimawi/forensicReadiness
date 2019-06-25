@@ -51,7 +51,7 @@
                 </Menu>
               </menus>
             </MenuBar>
-          <SplitPane dividerPositions="0.25" focusTraversable="true" prefHeight="678.0" prefWidth="1198.0" VBox.vgrow="ALWAYS">
+          <SplitPane dividerPositions="0.25" focusTraversable="true" prefHeight="682.0" prefWidth="1198.0" VBox.vgrow="ALWAYS">
             <items>
               <AnchorPane minWidth="230.0" prefHeight="532.0" prefWidth="383.0" SplitPane.resizableWithParent="false">
                 <children>
@@ -244,7 +244,7 @@
                                     <Button fx:id="btnAnalyse" disable="true" mnemonicParsing="false" onAction="#analyseInstances" prefHeight="32.0" prefWidth="145.0" text="Analyse" />
                                  </children>
                               </HBox>
-                              <VBox>
+                              <VBox alignment="CENTER_RIGHT" spacing="5.0">
                                  <children>
                                     <Separator prefWidth="200.0" />
                                     <HBox>
@@ -254,7 +254,7 @@
                                                 <Font size="14.0" />
                                              </font>
                                           </Label>
-                                          <Label fx:id="lblNumOfTraces" prefHeight="31.0" prefWidth="358.0">
+                                          <Label fx:id="lblNumOfTraces" prefHeight="31.0" prefWidth="648.0">
                                              <font>
                                                 <Font name="System Bold" size="14.0" />
                                              </font>
@@ -283,6 +283,12 @@
                                           </Label>
                                        </children>
                                     </StackPane>
+                                    <HBox alignment="CENTER_RIGHT">
+                                       <children>
+                                          <Label fx:id="lblSave" prefHeight="23.0" prefWidth="83.0" />
+                                          <Button fx:id="btnSaveGeneratedTraces" mnemonicParsing="false" onAction="#saveGeneratedTraces" prefHeight="25.0" prefWidth="56.0" text="save" />
+                                       </children>
+                                    </HBox>
                                  </children>
                               </VBox>
                            </children>
