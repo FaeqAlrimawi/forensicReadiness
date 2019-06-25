@@ -6,11 +6,15 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import com.eteks.sweethome3d.adaptive.forensics.BigrapherStatesChecker;
 import com.eteks.sweethome3d.adaptive.forensics.SystemHandler;
 
 import controller.utlities.IncidentAssetMap;
+import environment.Lab;
+import ie.lero.spare.pattern_instantiation.GraphPath;
 import ie.lero.spare.pattern_instantiation.GraphPathsAnalyser;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiationListener;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator;
@@ -27,6 +31,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
@@ -38,6 +43,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -45,6 +51,21 @@ import javafx.stage.FileChooser;
 public class InstantiatorController
 		implements ie.lero.spare.pattern_instantiation.IncidentPatternInstantiationListener {
 
+	@FXML
+	private Label lblNumOfTraces;
+	
+	@FXML
+	private HBox hboxLblEntityAssetSets;
+	
+	@FXML
+	private HBox hboxLblEntityAssetMap;
+	
+	@FXML
+	private Label lblListViewTracesEmpty;
+	
+	@FXML
+	private ListView<GraphPath> listViewTraces;
+	
 	@FXML
 	private ImageView imgOpenStatesFolder;
 	
@@ -100,7 +121,7 @@ public class InstantiatorController
 	private TextArea txtAreaLog;
 
 	@FXML
-	private ProgressBar progressBar;
+	private ProgressIndicator progressBar;
 
 	@FXML
 	private Label lblProgressBar;
@@ -108,8 +129,8 @@ public class InstantiatorController
 	@FXML
 	private TableView<IncidentAssetMap> tableViewMap;
 
-	@FXML
-	private Label lblEntityAssetMap;
+//	@FXML
+//	private Label lblEntityAssetMap;
 
 	// @FXML
 	// private Pane panelEntityAssetMap;
@@ -136,8 +157,8 @@ public class InstantiatorController
 	private File systemFile;
 	private File selectedStatesDirectory;
 
-	private String incidentPatternFilePath = "D:/Bigrapher data/scenario2/interruption_incident-pattern_modified.cpi";
-	private String systemModelFilePath = "D:/Bigrapher data/scenario2/lero.cps";
+	private String incidentPatternFilePath = "D:/Bigrapher data/lero/example/int.cpi";
+	private String systemModelFilePath = "D:/Bigrapher data/lero/example/lero.cps";
 	private IncidentPatternInstantiator incidentInstantiator;
 	private int numOfParallelInstances = 1;
 	private Thread instanceThread;
@@ -152,6 +173,8 @@ public class InstantiatorController
 
 	private BigrapherStatesChecker checker;
 	
+	private List<GraphPath> generatedTraces;
+	
 	public InstantiatorController() {
 		incidentNames = new LinkedList<String>();
 		assetNames = new LinkedList<String[]>();
@@ -165,6 +188,8 @@ public class InstantiatorController
 		// ObservableList<String> items = FXCollections.observableArrayList();
 		// listResults.setItems(items);
 		
+		progressBar.setVisible(false);
+		
 		checkboxLTSSame.setOnAction(e->{
 			if(checkboxLTSSame.isSelected()){
 				textFieldSelectedStatesFolder.setDisable(true);
@@ -174,6 +199,13 @@ public class InstantiatorController
 				imgOpenStatesFolder.setDisable(false);
 			}
 		});
+		
+		//=== for testing
+		incidentPatternFile = new File(incidentPatternFilePath);
+		systemFile = new File(systemModelFilePath);
+		txtFieldIncidentPattern.setText(incidentPatternFilePath);
+		txtFieldSystemModel.setText(systemModelFilePath);
+		
 	}
 
 	@FXML
@@ -432,7 +464,8 @@ public class InstantiatorController
 			public void run() {
 				// TODO Auto-generated method stub
 				txtAreaLog.appendText("\n");
-				progressBar.setProgress(0);
+//				progressBar.setProgress(0);
+				progressBar.setVisible(true);
 				lblProgressBar.setText("Running...");
 				// lblInputFiles.setText("[Input incident file]: " +
 				// incidentPatternFilePath + " "
@@ -534,13 +567,13 @@ public class InstantiatorController
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				double newProgress = progressBar.getProgress() + ((double) progress / 100.0);
-				progressBar.setProgress(newProgress);
-
-				if (newProgress >= 1) {
-					lblProgressBar.setTextFill(Color.GREEN);
-					lblProgressBar.setText("Execution Completed Successfully");
-				}
+//				double newProgress = progressBar.getProgress() + ((double) progress / 100.0);
+//				progressBar.setProgress(newProgress);
+//
+//				if (newProgress >= 1) {
+//					lblProgressBar.setTextFill(Color.GREEN);
+//					lblProgressBar.setText("Execution Completed Successfully");
+//				}
 			}
 		});
 
@@ -562,7 +595,8 @@ public class InstantiatorController
 
 	@Override
 	public void updateAssetMapInfo(String msg) {
-
+		
+		hboxLblEntityAssetMap.setVisible(false);
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -617,6 +651,10 @@ public class InstantiatorController
 	public void updateAssetSetInfo(LinkedList<String[]> assetSets) {
 		// TODO Auto-generated method stub
 
+		//hide label
+//		lbl.setVisible(false);
+		hboxLblEntityAssetSets.setVisible(false);
+		
 		Platform.runLater(new Runnable() {
 
 			@Override
@@ -765,6 +803,8 @@ public class InstantiatorController
 				lblProgressBar.setTextFill(Color.BLACK);
 
 				lblProgressBar.setText("Analysing...");
+				
+				btnAnalyse.setDisable(true);
 			}
 		});
 
@@ -845,8 +885,11 @@ public class InstantiatorController
 	@Override
 	public void updateResult(int setID, GraphPathsAnalyser graphAnalyser, String outputFile, String timeConsumed) {
 		// TODO Auto-generated method stub
+		
 		results.put(setID, graphAnalyser);
-
+		
+		progressBar.setVisible(false);
+		
 		String strResult = "Set[" + setID + "] finished execution successfully. Execution time: " + timeConsumed;
 
 		Platform.runLater(new Runnable() {
@@ -855,8 +898,15 @@ public class InstantiatorController
 			public void run() {
 				// TODO Auto-generated method stub
 				// lblProgressBar.setTextFill(Color.BLACK);
-				listResults.getItems().add(strResult);
-				// lblProgressBar.setText("Analysing...");
+//				listResults.getItems().add(strResult);
+				if(graphAnalyser!=null){
+					lblNumOfTraces.setText("["+graphAnalyser.getPaths().size()+"]");
+					populateTracesList(graphAnalyser.getPaths());
+					
+				}
+				
+				 lblProgressBar.setText("Done!");
+				 
 			}
 		});
 
@@ -935,5 +985,30 @@ public class InstantiatorController
 
 		}
 
+	}
+	
+	protected void populateTracesList(List<GraphPath> traces) {
+		
+		if (traces == null || traces.isEmpty()) {
+			lblListViewTracesEmpty.setVisible(true);
+			generatedTraces = traces;
+			// clear list
+			listViewTraces.setItems(null);
+			return;
+		}
+
+		ObservableList<GraphPath> tracesObservableList;
+
+		tracesObservableList = FXCollections.observableArrayList();
+
+		tracesObservableList.addAll(traces);
+
+		listViewTraces.setCellFactory(tracesListView -> new TaskCell());
+		listViewTraces.setItems(tracesObservableList);
+
+		lblListViewTracesEmpty.setVisible(false);
+		
+		generatedTraces = traces;
+		
 	}
 }

@@ -22,9 +22,9 @@ public class Main extends Application {
 			FXMLLoader loader = new FXMLLoader();
 
 			String traceViewerGUI = "TraceViewer.fxml";
-			String instantiatorGui = "instantiator.xml";
+			String instantiatorGui = "instantiator.fxml";
 			
-			URL url = Main.class.getResource("../fxml/"+traceViewerGUI);
+			URL url = Main.class.getResource("../fxml/"+instantiatorGui);
 			
 			if(url!=null) {
 				System.out.println(url.getPath());	
@@ -37,9 +37,9 @@ public class Main extends Application {
 
 			// Platform.setImplicitExit(false);
 
-			layout = loader.load();
+			splitPaneInstantiator = loader.load();
 
-			Scene scene = new Scene(layout);
+			Scene scene = new Scene(splitPaneInstantiator);
 
 			// scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			primaryStage.setScene(scene);
