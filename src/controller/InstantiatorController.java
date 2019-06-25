@@ -157,7 +157,7 @@ public class InstantiatorController
 	@FXML
 	private ListView<String> listResults;
 
-	private ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+//	private ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 	
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
@@ -241,7 +241,7 @@ public class InstantiatorController
 
 				} else if(systemFile!= null) {
 					if (systemFile != null) {
-						fileChooser.setInitialFileName(systemFile.getName());
+						fileChooser.setInitialFileName("traces");
 						String folder = systemFile.getAbsolutePath().substring(0,
 								systemFile.getAbsolutePath().lastIndexOf(File.separator));
 						File folderF = new File(folder);
@@ -1090,44 +1090,48 @@ public class InstantiatorController
 			return;
 		}
 
-		executor.submit(new Runnable() {
-
+		final boolean isSuccessful = incidentInstantiator.saveGeneratedTraces(setID, traces, fileName);
+		
+		Platform.runLater(new Runnable() {	
+			@Override
+			public void run() {
+				String result = "";
+				if(isSuccessful) {
+					result = "Saved!";
+				} else{
+					result = "Not saved!";
+				}
+				
+				// TODO Auto-generated method stub
+				lblSave.setText(result);
+			}
+		});
+		Timer t = new Timer();
+		t.schedule(new TimerTask() {
+			
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				final boolean isSuccessful = incidentInstantiator.saveGeneratedTraces(setID, traces, fileName);
-				
 				Platform.runLater(new Runnable() {	
 					@Override
 					public void run() {
-						String result = "";
-						if(isSuccessful) {
-							result = "Saved!";
-						} else{
-							result = "Not saved!";
-						}
-						
 						// TODO Auto-generated method stub
-						lblSave.setText(result);
+						lblSave.setText("");
 					}
 				});
-				Timer t = new Timer();
-				t.schedule(new TimerTask() {
-					
-					@Override
-					public void run() {
-						// TODO Auto-generated method stub
-						Platform.runLater(new Runnable() {	
-							@Override
-							public void run() {
-								// TODO Auto-generated method stub
-								lblSave.setText("");
-							}
-						});
-					}
-				}, 3000);
 			}
-		});
+		}, 3000);
+		
+//		executor.submit(new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				// TODO Auto-generated method stub
+//				
+//				
+//				
+//			}
+//		});
 
 	}
 
