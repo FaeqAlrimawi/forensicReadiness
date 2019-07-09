@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 
 import controller.utlities.AutoCompleteTextArea;
 import core.TracesMiner;
+//import core.GraphPath;
 import core.TracesMinerListener;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 import javafx.application.Platform;
@@ -251,6 +252,8 @@ public class TraceViewerController implements TracesMinerListener {
 
 	StateViewerController stateViewerController;
 	
+	private String traceExampleFile = "resources/example/instantiations_10000.json";
+	
 	@FXML
 	public void initialize() {
 
@@ -391,7 +394,15 @@ public class TraceViewerController implements TracesMinerListener {
 		checkInputAsDigital(textFieldOccurrenceFilterPercentage);
 		checkInputAsDigital(textFieldActionOccurrence);
 
+		//get example
+		URL exampleTraces = TraceViewerController.class.getClassLoader().getResource(traceExampleFile);
 		
+		if(exampleTraces!=null) {
+			textFieldSystemFile.setText(exampleTraces.getPath());
+			selectedTracesFile = new File(exampleTraces.getPath());
+		} else {
+			System.out.println("nulllll");
+		}
 	}
 
 	protected void checkInputAsDigital(TextField textField) {

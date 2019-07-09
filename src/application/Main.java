@@ -2,6 +2,7 @@ package application;
 
 import java.net.URL;
 
+import core.brs.parser.BRSParser;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -15,6 +16,7 @@ public class Main extends Application {
 
 	private SplitPane splitPaneInstantiator;
 	
+
 	@Override
 	public void start(Stage primaryStage) {
 		try {
@@ -24,7 +26,7 @@ public class Main extends Application {
 			String traceViewerGUI = "TraceViewer.fxml";
 			String instantiatorGui = "instantiator.fxml";
 			
-			URL url = Main.class.getResource("../fxml/"+instantiatorGui);
+			URL url = Main.class.getClassLoader().getResource("fxml/"+traceViewerGUI);
 			
 			if(url!=null) {
 				System.out.println(url.getPath());	
@@ -37,13 +39,13 @@ public class Main extends Application {
 
 			// Platform.setImplicitExit(false);
 
-			splitPaneInstantiator = loader.load();
+			layout = loader.load();
 
-			Scene scene = new Scene(splitPaneInstantiator);
+			Scene scene = new Scene(layout);
 
 			// scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 			primaryStage.setScene(scene);
-			primaryStage.setTitle("Incident Pattern Instantiator");
+			primaryStage.setTitle("Incident Filter");
 			primaryStage.show();
 
 		} catch (Exception e) {
@@ -52,7 +54,15 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-		launch(args);
+//		launch(args);
+		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor) || Room";
+		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor | Actor)";
+		System.out.println("expression: "+exprs+"\n\n");
+		BRSParser parser = new BRSParser();
+		
+		parser.parseBigraph(exprs);
+//		parser.clear();
+		parser.parseBigraph(exprs2);
 	}
 	
 	  @Override

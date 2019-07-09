@@ -14,7 +14,6 @@ import com.eteks.sweethome3d.adaptive.forensics.SystemHandler;
 import application.Main;
 import cyberPhysical_Incident.IncidentDiagram;
 import environment.EnvironmentDiagram;
-import environment.Lab;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import ie.lero.spare.pattern_extraction.IncidentPatternExtractor;
 import javafx.application.Platform;

@@ -9,9 +9,10 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.eteks.sweethome3d.adaptive.forensics.SystemHandler;
+//import com.eteks.sweethome3d.adaptive.forensics.SystemHandler;
 import com.sun.javafx.scene.control.skin.TextAreaSkin;
 
+import core.SystemMetaModelHelper;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
@@ -398,7 +399,7 @@ public class AutoCompleteTextArea {
 
 		entries = new TreeSet<String>();
 
-		Collection<String> types = SystemHandler.getSystemTypes();
+		Collection<String> types = SystemMetaModelHelper.getSystemTypes();
 
 		for (String type : types) {
 			entries.add(type.toLowerCase());
