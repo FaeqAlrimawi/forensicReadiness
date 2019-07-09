@@ -320,7 +320,7 @@ public class BRSParser {
 			}
 		}
 
-		printAll();
+//		printAll();
 		// ===create bigraph expression
 		BigraphExpression newBRS = instance.createBigraphExpression();
 
@@ -444,10 +444,10 @@ public class BRSParser {
 
 	}
 
-	protected void printAll() {
+	public void printAll() {
 
 		System.out.println("//===== BRS expression");
-		System.out.println(brsExpression);
+		System.out.println("original: "+brsExpression);
 		modifyBrsExpression();
 		System.out.println("modified: "+modifiedBrsExpression);
 		

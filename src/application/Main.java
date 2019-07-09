@@ -57,12 +57,13 @@ public class Main extends Application {
 //		launch(args);
 		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor) || Room";
 		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor | Actor)";
-		System.out.println("expression: "+exprs+"\n\n");
+//		System.out.println("expression: "+exprs+"\n\n");
 		BRSParser parser = new BRSParser();
 		
 		parser.parseBigraph(exprs);
-//		parser.clear();
+
 		parser.parseBigraph(exprs2);
+		parser.printAll();
 	}
 	
 	  @Override
