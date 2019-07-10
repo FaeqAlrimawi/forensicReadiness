@@ -1,12 +1,8 @@
 package core.brs.parser;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import core.brs.parser.Tokenizer.Token;
 import cyberPhysical_Incident.BigraphExpression;
 import cyberPhysical_Incident.Connectivity;
 import cyberPhysical_Incident.CyberPhysicalIncidentFactory;
@@ -15,46 +11,12 @@ import cyberPhysical_Incident.Entity;
 public class BRSParser {
 
 	private Tokenizer brsTokenizer;
-	
-	private String brsExpression;
-	private String modifiedBrsExpression;
-	
-	//all entities (with numbering as its order in the string)
-	private List<String> entities;
-	
-	//connections as is (no modifications to the con name)
-	private List<String> connections;
-	
-	//roots whether added or not
-	private List<String> roots;
-
-	//key is the entity (name holds the control), value is the entity name
-	private Map<Entity, String> controlMap;
+	private BigraphWrapper bigWrapper;
 
 	private int controlNum = 1;
-
-	// key is entity name, value is a list of all contained entities
-	private Map<String, List<String>> containedEntitiesMap;
-
-	// key is entity name, value is parent entity (if empty then it is a root)
-	private Map<String, String> containerEntitiesMap;
-
-	// key is connection name, value is a list of TWO entities that are the ends
-	private Map<String, List<String>> connectivityMap;
-
-	// key is entity name, value is a list all connection names
-	private Map<String, List<String>> entityConnectivityMap;
 	
 	public BRSParser(){
-		entities = new LinkedList<String>();
-		connections = new LinkedList<String>();
-		controlMap = new HashMap<Entity, String>();
-		containedEntitiesMap = new HashMap<String, List<String>>();
-		containerEntitiesMap = new HashMap<String, String>();
-		connectivityMap = new HashMap<String, List<String>>();
-		entityConnectivityMap = new HashMap<String, List<String>>();
-		roots  = new LinkedList<String>();
-		
+		bigWrapper = new BigraphWrapper();
 		controlNum = 1;
 	}
 
@@ -65,7 +27,7 @@ public class BRSParser {
 	 * @param BRScondition
 	 * @return Condition
 	 */
-	public BigraphExpression parseBigraph(String BRScondition) {
+	public BigraphWrapper parseBigraph(String BRScondition) {
 
 		if (brsTokenizer == null) {
 			createBRSTokenizer();
@@ -74,7 +36,8 @@ public class BRSParser {
 		//clear data if any
 		clear();
 		
-		brsExpression = BRScondition;
+//		brsExpression = BRScondition;
+		bigWrapper.setBigraphERString(BRScondition);
 		
 		CyberPhysicalIncidentFactory instance = CyberPhysicalIncidentFactory.eINSTANCE;
 
@@ -218,7 +181,7 @@ public class BRSParser {
 					lastAdded.getConnectivity().add(tmpCon);
 
 					// ===update connectivity value
-					updateConnectivity(tok.sequence, controlMap.get(lastAdded));
+					updateConnectivity(tok.sequence, bigWrapper.getControlMap().get(lastAdded));
 
 					// close connectivity
 					if (!closedConnectivities.isEmpty()) {
@@ -248,7 +211,7 @@ public class BRSParser {
 						currentContainer.getEntity().add(tmp);
 
 						// ===update entities and containers
-						updateEntityContainer(entityName, controlMap.get(currentContainer));
+						updateEntityContainer(entityName, bigWrapper.getControlMap().get(currentContainer));
 
 						// System.out.println("entity " + tok.sequence + " is
 						// contained in " + currentContainer.getName());
@@ -286,9 +249,9 @@ public class BRSParser {
 						
 						updateEntityContainer(entityName, newRoot.getName());
 						
-						if(controlMap.containsKey(lastRoot)) {
-							removeRoot(controlMap.get(lastRoot));
-							updateEntityContainer(controlMap.get(lastRoot), newRoot.getName());
+						if(bigWrapper.getControlMap().containsKey(lastRoot)) {
+							removeRoot(bigWrapper.getControlMap().get(lastRoot));
+							updateEntityContainer(bigWrapper.getControlMap().get(lastRoot), newRoot.getName());
 						} 
 
 						// for now root is not added to all entities
@@ -326,7 +289,9 @@ public class BRSParser {
 
 		newBRS.getEntity().addAll(rootEntities);
 
-		return newBRS;
+		bigWrapper.setBigraphExpression(newBRS);
+		
+		return bigWrapper;
 	}
 
 
@@ -343,7 +308,7 @@ public class BRSParser {
 		
 		controlNum++;
 		
-		controlMap.put(entity, uniqName);
+		bigWrapper.getControlMap().put(entity, uniqName);
 		
 		
 		return uniqName;
@@ -353,8 +318,8 @@ public class BRSParser {
 		updateEntityContainer(entityRoot, null);
 
 		// add to root
-		if (!roots.contains(entityRoot)) {
-			roots.add(entityRoot);
+		if (!bigWrapper.getRoots().contains(entityRoot)) {
+			bigWrapper.getRoots().add(entityRoot);
 		}
 
 	}
@@ -362,32 +327,32 @@ public class BRSParser {
 	protected void addExtraRoot(String root) {
 
 		// add to root
-		if (!roots.contains(root)) {
-			roots.add(root);
+		if (!bigWrapper.getRoots().contains(root)) {
+			bigWrapper.getRoots().add(root);
 		}
 
 	}
 
 	protected void removeRoot(String root) {
 
-		if (roots == null) {
+		if (bigWrapper.getRoots() == null) {
 			return;
 		}
 
-		roots.remove(root);
+		bigWrapper.getRoots().remove(root);
 
 	}
 
 	protected void updateConnectivity(String conName, String entityName) {
 
 		// add connection to the list of connections
-		if (!connections.contains(conName)) {
-			connections.add(conName);
+		if (!bigWrapper.getConnections().contains(conName)) {
+			bigWrapper.getConnections().add(conName);
 		}
 
 		// add to map fo connections
-		if (connectivityMap.containsKey(conName)) {
-			List<String> cons = connectivityMap.get(conName);
+		if (bigWrapper.getConnectivityMap().containsKey(conName)) {
+			List<String> cons = bigWrapper.getConnectivityMap().get(conName);
 			if (!cons.contains(entityName)) {
 				cons.add(entityName);
 			}
@@ -395,12 +360,12 @@ public class BRSParser {
 			// new connection
 			List<String> cons = new LinkedList<String>();
 			cons.add(entityName);
-			connectivityMap.put(conName, cons);
+			bigWrapper.getConnectivityMap().put(conName, cons);
 		}
 
 		// add to entity connection map
-		if (entityConnectivityMap.containsKey(entityName)) {
-			List<String> cons = entityConnectivityMap.get(entityName);
+		if (bigWrapper.getEntityConnectivityMap().containsKey(entityName)) {
+			List<String> cons = bigWrapper.getEntityConnectivityMap().get(entityName);
 			if (!cons.contains(conName)) {
 				cons.add(conName);
 			}
@@ -408,18 +373,18 @@ public class BRSParser {
 			// new connection for the entity
 			List<String> cons = new LinkedList<String>();
 			cons.add(conName);
-			entityConnectivityMap.put(entityName, cons);
+			bigWrapper.getEntityConnectivityMap().put(entityName, cons);
 		}
 	}
 
 	protected void updateEntityContainer(String entityName, String entityContainer) {
 
 		// add to all entities
-		if (!entities.contains(entityName)) {
-			entities.add(entityName);
+		if (!bigWrapper.getEntities().contains(entityName)) {
+			bigWrapper.getEntities().add(entityName);
 		}
 
-		containerEntitiesMap.put(entityName, entityContainer);
+		bigWrapper.getContainerEntitiesMap().put(entityName, entityContainer);
 
 		// add to the control map
 //		controlMap.put(uniqName, entityName);
@@ -430,8 +395,8 @@ public class BRSParser {
 		}
 
 		// update contained entities for parent
-		if (containedEntitiesMap.containsKey(entityContainer)) {
-			List<String> children = containedEntitiesMap.get(entityContainer);
+		if (bigWrapper.getContainedEntitiesMap().containsKey(entityContainer)) {
+			List<String> children = bigWrapper.getContainedEntitiesMap().get(entityContainer);
 			if (!children.contains(entityName)) {
 				children.add(entityName);
 			}
@@ -439,50 +404,12 @@ public class BRSParser {
 			// new entity
 			List<String> children = new LinkedList<String>();
 			children.add(entityName);
-			containedEntitiesMap.put(entityContainer, children);
+			bigWrapper.getContainedEntitiesMap().put(entityContainer, children);
 		}
 
 	}
 
-	public void printAll() {
-
-		System.out.println("//===== BRS expression");
-		System.out.println("original: "+brsExpression);
-		modifyBrsExpression();
-		System.out.println("modified: "+modifiedBrsExpression);
-		
-		System.out.println("\n//===== All entities");
-		System.out.println(entities);
-		System.out.println("\nControl map");
-		System.out.println("\"entity\" => \"Control\"");
-		for(Entry<Entity, String> entry : controlMap.entrySet()) {
-			System.out.println(entry.getValue()+" => " + entry.getKey().getName());
-		}
-		System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-
-		System.out.println("//===== Roots");
-		System.out.println(roots);
-		System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		
-		System.out.println("//===== All containment relations");
-		System.out.println("\n=Container relations (entity1's container is entity2)");
-		System.out.println(containerEntitiesMap);
-		System.out.println("\n=Contained entities relations (entity1 contains entities)");
-		System.out.println(containedEntitiesMap);
-		System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		
-		System.out.println("//===== All connections");
-		System.out.println(connections);
-		System.out.println("\n=Connection and its entities");
-		System.out.println(connectivityMap);
-		System.out.println("\n=Entity and its connections");
-		System.out.println(entityConnectivityMap);
-		System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		System.out.println("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-
-
-	}
-
+	
 	protected void createBRSTokenizer() {
 
 		brsTokenizer = new Tokenizer();
@@ -505,129 +432,58 @@ public class BRSParser {
 		brsTokenizer.add(BigraphERTokens.TOKEN_WORD, BigraphERTokens.WORD);
 
 	}
-
-	public List<String> getEntities() {
-		return entities;
-	}
-
-//	public void setEntities(List<String> entities) {
-//		this.entities = entities;
-//	}
-
-	public List<String> getConnections() {
-		return connections;
-	}
-
-//	public void setConnections(List<String> connections) {
-//		this.connections = connections;
-//	}
-
-	public List<String> getRoots() {
-		return roots;
-	}
-
-//	public void setRoots(List<String> roots) {
-//		this.roots = roots;
-//	}
-
-	public Map<Entity, String> getControlMap() {
-		return controlMap;
-	}
-
-//	public void setControlMap(Map<Entity, String> controlMap) {
-//		this.controlMap = controlMap;
-//	}
-
-	public Map<String, List<String>> getContainedEntitiesMap() {
-		return containedEntitiesMap;
-	}
-
-//	public void setContainedEntitiesMap(Map<String, List<String>> containedEntitiesMap) {
-//		this.containedEntitiesMap = containedEntitiesMap;
-//	}
-
-	public Map<String, String> getContainerEntitiesMap() {
-		return containerEntitiesMap;
-	}
-
-//	public void setContainerEntitiesMap(Map<String, String> containerEntitiesMap) {
-//		this.containerEntitiesMap = containerEntitiesMap;
-//	}
-
-	public Map<String, List<String>> getConnectivityMap() {
-		return connectivityMap;
-	}
-
-//	public void setConnectivityMap(Map<String, List<String>> connectivityMap) {
-//		this.connectivityMap = connectivityMap;
-//	}
-
-	public Map<String, List<String>> getEntityConnectivityMap() {
-		return entityConnectivityMap;
-	}
-
-//	public void setEntityConnectivityMap(Map<String, List<String>> entityConnectivityMap) {
-//		this.entityConnectivityMap = entityConnectivityMap;
-//	}
-
 	
 	public void clear() {
-		entities.clear();
-		connections.clear();
-		containerEntitiesMap.clear();
-		containedEntitiesMap.clear();
-		connectivityMap.clear();
-		entityConnectivityMap.clear();
-		controlMap.clear();
-		roots.clear();
+
+		bigWrapper.clear();
 		
 		controlNum = 1;
 	}
 
-	public String getBrsExpression() {
-		return brsExpression;
-	}
+//	public String getBrsExpression() {
+//		return brsExpression;
+//	}
 	
-	public void modifyBrsExpression() {
-		
-		//replace controls with equivlent entity names used
-//		List<Token> tokens = brsTokenizer.getTokens();
-		int fromIndex = 0;
-		
-//		String entityName = entities.get(index);
-//		S
-		modifiedBrsExpression = brsExpression;
-		StringBuffer temp = new StringBuffer(brsExpression);
-		int start = 0;
-		int end = 0;
-		
-		for(String entityName : entities) {
-			String ctrl = getControl(entityName);
-			start = temp.indexOf(ctrl, fromIndex);
-			end = start+ctrl.length();
-			fromIndex = end;
-//			System.out.println("entity: " + entityName + " ctrl: "+ctrl);
-			temp.delete(start, end);
-			temp.insert(start, entityName);
-			
-//			modifiedBrsExpression = modifiedBrsExpression.replace
-		}
-		
-		modifiedBrsExpression = temp.toString();
-//		for(Token t : tokens) {
+//	public void modifyBrsExpression() {
+//		
+//		//replace controls with equivlent entity names used
+////		List<Token> tokens = brsTokenizer.getTokens();
+//		int fromIndex = 0;
+//		
+////		String entityName = entities.get(index);
+////		S
+//		modifiedBrsExpression = brsExpression;
+//		StringBuffer temp = new StringBuffer(brsExpression);
+//		int start = 0;
+//		int end = 0;
+//		
+//		for(String entityName : entities) {
+//			String ctrl = getControl(entityName);
+//			start = temp.indexOf(ctrl, fromIndex);
+//			end = start+ctrl.length();
+//			fromIndex = end;
+////			System.out.println("entity: " + entityName + " ctrl: "+ctrl);
+//			temp.delete(start, end);
+//			temp.insert(start, entityName);
 //			
-//			if(t)
+////			modifiedBrsExpression = modifiedBrsExpression.replace
 //		}
-	}
+//		
+//		modifiedBrsExpression = temp.toString();
+////		for(Token t : tokens) {
+////			
+////			if(t)
+////		}
+//	}
 	
-	protected String getControl(String entityName) {
-		
-		for(Entry<Entity, String> entry : controlMap.entrySet()) {
-			if(entry.getValue().equals(entityName)){ 
-				return entry.getKey().getName();
-			}
-		}	
-		return null;
-	}
+//	protected String getControl(String entityName) {
+//		
+//		for(Entry<Entity, String> entry : controlMap.entrySet()) {
+//			if(entry.getValue().equals(entityName)){ 
+//				return entry.getKey().getName();
+//			}
+//		}	
+//		return null;
+//	}
 
 }

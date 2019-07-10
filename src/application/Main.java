@@ -3,6 +3,8 @@ package application;
 import java.net.URL;
 
 import core.brs.parser.BRSParser;
+import core.brs.parser.BigraphWrapper;
+import it.uniud.mads.jlibbig.core.std.Bigraph;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -34,7 +36,7 @@ public class Main extends Application {
 				System.err.println("url is null");
 			}
 			
-			
+	
 			loader.setLocation(url);
 
 			// Platform.setImplicitExit(false);
@@ -55,15 +57,19 @@ public class Main extends Application {
 
 	public static void main(String[] args) {
 //		launch(args);
-		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor) || Room";
+		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor) || Room.Device";
 		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor | Actor)";
 //		System.out.println("expression: "+exprs+"\n\n");
 		BRSParser parser = new BRSParser();
 		
-		parser.parseBigraph(exprs);
+		BigraphWrapper r = parser.parseBigraph(exprs);
 
-		parser.parseBigraph(exprs2);
-		parser.printAll();
+		Bigraph b = r.getBigraphObject();
+		
+		r.printAll();
+		
+//		parser.parseBigraph(exprs2);
+//		parser.printAll();
 	}
 	
 	  @Override

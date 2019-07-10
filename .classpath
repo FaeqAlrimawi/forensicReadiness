@@ -14,5 +14,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/FR_Analyser"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/SweetHome3D-6.1.2-src"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/incidentpatternB"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jlibbig"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
