@@ -35,10 +35,12 @@ public class BigraphWrapper {
 	private BigraphExpression bigraphExpression;
 
 	private Bigraph bigraphObj;
-	
+
 	// used to set the number of automatically created outernames for the
 	// signature of a Bigraph Object
 	protected int maxOuterNameNumber = 10;
+
+	private static final String BIGRAPH_ROOT_CNTRL = "BigraphRoot";
 
 	// all entities (with numbering as its order in the string)
 	private List<String> entities;
@@ -169,8 +171,8 @@ public class BigraphWrapper {
 
 		if (bigraphObj == null) {
 			if (bigraphExpression != null) {
-//				bigraphObj = bigraphExpression.createBigraph(false);
-				createBigraph(false);
+				// bigraphObj = bigraphExpression.createBigraph(false);
+				bigraphObj = createBigraphNew(false);
 			}
 		}
 
@@ -182,7 +184,6 @@ public class BigraphWrapper {
 		bigraphObj = bigraphObject;
 	}
 
-	
 	public Bigraph createBigraph(boolean isGround) {
 
 		BigraphNode node;
@@ -193,9 +194,16 @@ public class BigraphWrapper {
 
 		for (Entity ent : controlMap.keySet()) {
 
+			String entityName = controlMap.get(ent);
+
+			// just roots are dealts with
+			if (!roots.contains(entityName)) {
+				continue;
+			}
+
 			node = new BigraphNode();
 
-			node.setId(controlMap.get(ent));
+			node.setId(entityName);
 
 			/*
 			 * // add site node.setSite(ent.getSite() != null ? true : false);
@@ -222,34 +230,102 @@ public class BigraphWrapper {
 			addChildren(node, ent.getEntity(), nodes, isGround);
 		}
 
-		 Signature signature = createBigraphSignature();
+		Signature signature = createBigraphSignature();
 
 		return BuildBigraph(nodes, signature);
 
 	}
-	
+
+	public Bigraph createBigraphNew(boolean isGround) {
+
+		BigraphNode node;
+		Map<String, BigraphNode> nodes = new HashMap<String, BigraphNode>();
+		// SignatureBuilder sigBuilder = new SignatureBuilder();
+
+		int numOfRoots = 0;
+
+		for (Entity ent : controlMap.keySet()) {
+
+			 String entityName = controlMap.get(ent);
+
+			// just roots are dealts with
+			 if(!roots.contains(entityName)) {
+			 continue;
+			 }
+
+			node = new BigraphNode();
+
+			node.setId(entityName);
+
+			/*
+			 * // add site node.setSite(ent.getSite() != null ? true : false);
+			 */
+
+			// add parent
+			node.setParentRoot(numOfRoots);
+			numOfRoots++;
+
+			// add control (currently same as the name of the entity)
+			if (controlMap.containsKey(ent)) {
+				node.setControl(ent.getName());
+			} else {
+				// if the root is an extra one, then create BigraphRoot as an
+				// extra entity to represent it
+				node.setControl(BIGRAPH_ROOT_CNTRL);
+			}
+
+			// add connectivity (outernames)
+			if (entityConnectivityMap.get(ent) != null) {
+				for (String con : entityConnectivityMap.get(ent)) {
+					node.addOuterName(con, false); // default of connection to
+													// be not-closed
+				}
+			}
+			nodes.put(node.getId(), node);
+
+			// create a bigraph signature out of each entity and max arity
+			// number
+			// sigBuilder.add(ent.getName(), true, maxOuterNameNumber);
+
+			addChildrenNew(node, containedEntitiesMap.get(ent), nodes, isGround);
+		}
+
+		Signature signature = createBigraphSignature();
+
+		return BuildBigraph(nodes, signature);
+
+	}
+
 	public Signature createBigraphSignature() {
 
 		Signature signature;
-		
+
 		setMaxNumberOfuterNames();
 
 		SignatureBuilder sigBuilder = new SignatureBuilder();
-//		EList<IncidentEntity> entities = new BasicEList<IncidentEntity>();
-//
-//		entities.addAll(getAsset());
-//		entities.addAll(getResource());
-//		entities.addAll(getActor());
+		// EList<IncidentEntity> entities = new BasicEList<IncidentEntity>();
+		//
+		// entities.addAll(getAsset());
+		// entities.addAll(getResource());
+		// entities.addAll(getActor());
 
 		for (Entity ent : controlMap.keySet()) {
 			// create a bigraph signature out of each entity and max arity
 			// number
+			System.out.println(ent);
 			sigBuilder.add(ent.getName(), true, maxOuterNameNumber);
 
 			// addChildren(node, ent.getEntity(), nodes, sigBuilder);
 		}
 
-		entities = null;
+		// add the roots if they don't exist in the map. They are added with
+		// default control as "BigraphRoot"
+		// for(String root: roots) {
+		// if(!entities.contains(root)) {
+		sigBuilder.add(BIGRAPH_ROOT_CNTRL, true, maxOuterNameNumber);
+		// }
+		// }
+		// entities = null;
 		signature = sigBuilder.makeSignature();
 
 		return signature;
@@ -257,21 +333,21 @@ public class BigraphWrapper {
 	}
 
 	protected void setMaxNumberOfuterNames() {
-	
+
 		int maxNum = 0;
-		for(Entity ent : controlMap.keySet()) {
-			if(ent.getConnectivity().size()>maxNum) {
+		for (Entity ent : controlMap.keySet()) {
+			if (ent.getConnectivity().size() > maxNum) {
 				maxNum = ent.getConnectivity().size();
 			}
 		}
-		
+
 		if (maxNum == 0) {
 			maxOuterNameNumber = 5; // default
 		} else {
 			maxOuterNameNumber = maxNum;
 		}
 	}
-	
+
 	protected Bigraph BuildBigraph(Map<String, BigraphNode> nodes, Signature signature) {
 
 		LinkedList<BigraphNode.OuterName> outerNames = new LinkedList<BigraphNode.OuterName>();
@@ -479,13 +555,52 @@ public class BigraphWrapper {
 			node.setControl(entity.getName());
 
 			// add connectivity (outernames)
-			for (Connectivity con : entity.getConnectivity()) {
-				node.addOuterName(con.getName(), con.isIsClosed());
+			if (entityConnectivityMap.get(entity) != null) {
+				for (Connectivity con : entity.getConnectivity()) {
+					node.addOuterName(con.getName(), con.isIsClosed());
+				}
 			}
-
 			nodes.put(node.getId(), node);
 
 			addChildren(node, entity.getEntity(), nodes, isGround);
+		}
+	}
+
+	protected void addChildrenNew(BigraphNode parent, List<String> entities, Map<String, BigraphNode> nodes,
+			boolean isGround) {
+
+		BigraphNode node;
+
+		if (entities == null) {
+			return;
+		}
+
+		for (String entity : entities) {
+			node = new BigraphNode();
+
+			node.setId(entity);
+
+			if (!isGround) {
+				// add site
+				// by defualt it has site
+				node.setSite(true);
+			}
+
+			// add parent
+			node.setParent(parent);
+
+			// add control (currently same as the name of the entity
+			node.setControl(controlMap.get(entity));
+
+			// add connectivity (outernames)
+			if (entityConnectivityMap.get(entity) != null) {
+				for (String con : entityConnectivityMap.get(entity)) {
+					node.addOuterName(con, false);
+				}
+			}
+			nodes.put(node.getId(), node);
+
+			addChildrenNew(node, containedEntitiesMap.get(entity), nodes, isGround);
 		}
 	}
 

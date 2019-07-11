@@ -56,7 +56,7 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-//		launch(args);
+//		launch(args)	;
 		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor) || Room.Device";
 		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor | Actor)";
 //		System.out.println("expression: "+exprs+"\n\n");
@@ -65,7 +65,8 @@ public class Main extends Application {
 		BigraphWrapper r = parser.parseBigraph(exprs);
 
 		Bigraph b = r.getBigraphObject();
-		
+
+		System.out.println(b);
 		r.printAll();
 		
 //		parser.parseBigraph(exprs2);
