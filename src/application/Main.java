@@ -4,7 +4,7 @@ import java.net.URL;
 
 import core.brs.parser.BRSParser;
 import core.brs.parser.BigraphWrapper;
-import it.uniud.mads.jlibbig.core.std.Bigraph;
+import cyberPhysical_Incident.BigraphExpression;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -57,17 +57,24 @@ public class Main extends Application {
 
 	public static void main(String[] args) {
 //		launch(args)	;
-		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor) || Room.Device";
+		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor | id) || Room.Device.id";
 		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor | Actor)";
 //		System.out.println("expression: "+exprs+"\n\n");
 		BRSParser parser = new BRSParser();
 		
 		BigraphWrapper r = parser.parseBigraph(exprs);
 
-		Bigraph b = r.getBigraphObject();
+//		BigraphExpression big = r.getBigraphExpression();
+		
+//		BigraphWrapper r2 = parser.parseBigraph(big);
+		
+//		Bigraph b = r.getBigraphObject();
 
-		System.out.println(b);
-		r.printAll();
+//		System.out.println(b);
+//		r.printAll();
+		String str = r.generateBigraphERState();
+		System.out.println(str);
+//		r2.printAll();
 		
 //		parser.parseBigraph(exprs2);
 //		parser.printAll();

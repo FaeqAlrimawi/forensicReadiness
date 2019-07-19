@@ -2,6 +2,9 @@ package core.brs.parser;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import org.eclipse.emf.common.util.EList;
 
 import cyberPhysical_Incident.BigraphExpression;
 import cyberPhysical_Incident.Connectivity;
@@ -16,29 +19,95 @@ public class BRSParser {
 	private int controlNum = 1;
 	
 	public BRSParser(){
-		bigWrapper = new BigraphWrapper();
+//		bigWrapper = new BigraphWrapper();
 		controlNum = 1;
 	}
 
+	
 	/**
 	 * Parses the given condition in BRS format to identify entities and
 	 * connectivity then creates a new condition based on that
 	 * 
-	 * @param BRScondition
-	 * @return Condition
+	 * @param BRSexp Bigraph expressed as a BigraphExpression object
+	 * @return BigraphWrapper object that contains various information about the given BRS
 	 */
-	public BigraphWrapper parseBigraph(String BRScondition) {
+	public BigraphWrapper parseBigraph(BigraphExpression BRSexp) {
+		
+		BigraphWrapper bigWrpr = new BigraphWrapper();
+		bigWrapper = bigWrpr;
+		
+		//clear data if any
+		clear();
+				
+		bigWrapper.setBigraphExpression(BRSexp);
+		
+//		int numOfRoots = 0;
+
+		for (Entity ent : BRSexp.getEntity()) {
+			
+			//===add control
+			String entityName = addControl(ent);
+			
+			//===add root
+			addEntityRoot(entityName);
+			
+			//===add connectivity 
+			for (Connectivity con : ent.getConnectivity()) {
+				updateConnectivity(con.getName(), entityName);
+			}
+
+			addChildren(entityName, ent.getEntity());
+		}	
+		
+		return bigWrapper;
+		
+	}
+	
+	protected void addChildren(String parentEntityName, EList<Entity> entities) {
+
+//		BigraphNode node;
+
+		for (Entity entity : entities) {
+
+			//===add control
+			String entityName = addControl(entity);
+			
+			//===add parent
+			updateEntityContainer(entityName, parentEntityName);
+
+			// add connectivity
+			for (Connectivity con : entity.getConnectivity()) {
+				updateConnectivity(con.getName(), entityName);
+			}
+
+			addChildren(entityName, entity.getEntity());
+		}
+	}
+	
+	/**
+	 * Parses the given condition in BRS format to identify entities and
+	 * connectivity then creates a new condition based on that
+	 * 
+	 * @param BRScondition as a string
+	 * @return BigraphWrapper object that contains various information about the given BRS
+	 */
+	public BigraphWrapper parseBigraph(String BigrapherState) {
 
 		if (brsTokenizer == null) {
 			createBRSTokenizer();
 		}
 
-		//clear data if any
-		clear();
 		
 //		brsExpression = BRScondition;
-		bigWrapper.setBigraphERString(BRScondition);
+		BigraphWrapper bigWrpr = new BigraphWrapper();
+		bigWrapper = bigWrpr;
 		
+		//clear data if any
+		clear();
+				
+		bigWrapper.setBigraphERString(BigrapherState);
+
+	
 		CyberPhysicalIncidentFactory instance = CyberPhysicalIncidentFactory.eINSTANCE;
 
 		int rootNum = 0;
@@ -58,7 +127,7 @@ public class BRSParser {
 		boolean isClosedConnectivity = false;
 
 		// ===tokenize
-		brsTokenizer.tokenize(BRScondition);
+		brsTokenizer.tokenize(BigrapherState);
 		for (Tokenizer.Token tok : brsTokenizer.getTokens()) {
 			switch (tok.token) {
 
@@ -130,10 +199,35 @@ public class BRSParser {
 
 				// maybe you should cover when site is in bigraph juxtaposition
 				if (isBigraphJuxta) {
-					// do something
+					// get last added root
+					//to be done
+					
+				} else if(isEntityJuxta) {
+					System.out.println("Site is entity juxta");
+					
+					//get current container
+					Entity ent = containers.getFirst();
+					String entityName = bigWrapper.getControlMap().get(ent);
+					
+					addSite(entityName);
+					
+				} else {
+					//add site to last added entity
+					Entity ent = allEntities.getLast();
+//					
+					String entityName = bigWrapper.getControlMap().get(ent);
+					
+					System.out.println("adding site to " + entityName);
+					
+					addSite(entityName);
+					
+					//need to remove a container
+					containers.removeFirst();
 				}
-
-				hasSite = true;
+				
+//				hasSite = true;
+				
+			
 
 				break;
 
@@ -226,6 +320,12 @@ public class BRSParser {
 							containers.removeFirst();
 							isContainment = false;
 						}
+						
+						//consume entity juxta if it is true
+						if (isEntityJuxta) {
+							isEntityJuxta = false;
+						}
+						
 					} else if (isBigraphJuxta) { // if entity after ||
 						rootEntities.add(tmp);
 
@@ -256,6 +356,7 @@ public class BRSParser {
 
 						// for now root is not added to all entities
 						rootEntities.add(newRoot);
+						
 						isEntityJuxta = false;
 
 						rootNum++;
@@ -295,6 +396,16 @@ public class BRSParser {
 	}
 
 
+	protected void addSite(String entityName) {
+		
+		if(entityName == null) {
+			return;
+		}
+		
+		Map<String, Boolean> sites = bigWrapper.getEntitySiteMap();
+		
+		sites.put(entityName, true);
+	}
 	
 	protected String addControl(Entity entity) {
 		
@@ -350,7 +461,7 @@ public class BRSParser {
 			bigWrapper.getConnections().add(conName);
 		}
 
-		// add to map fo connections
+		// add to map of connections
 		if (bigWrapper.getConnectivityMap().containsKey(conName)) {
 			List<String> cons = bigWrapper.getConnectivityMap().get(conName);
 			if (!cons.contains(entityName)) {
@@ -435,8 +546,10 @@ public class BRSParser {
 	
 	public void clear() {
 
-		bigWrapper.clear();
-		
+		if(bigWrapper!= null) {
+			bigWrapper.clear();	
+		}
+			
 		controlNum = 1;
 	}
 

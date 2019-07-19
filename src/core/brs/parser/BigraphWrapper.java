@@ -21,6 +21,16 @@ import it.uniud.mads.jlibbig.core.std.Root;
 import it.uniud.mads.jlibbig.core.std.Signature;
 import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
 
+/**
+ * This class is used to hold information about a Bigraph. A bigraph can be a
+ * condition of an activity. Information: Number of entities, modified entity
+ * names, Controls, map between entities and controls, Connections, Connections
+ * map (i.e. connections between entities and entities connections), roots,
+ * Bigraph representation,
+ * 
+ * @author Faeq
+ *
+ */
 public class BigraphWrapper {
 
 	// given bigraph expxression in BigraphER syntax
@@ -52,6 +62,7 @@ public class BigraphWrapper {
 	private List<String> roots;
 
 	// key is the entity (name holds the control), value is the entity name
+	// (modified e.g., Room => Room1)
 	private Map<Entity, String> controlMap;
 
 	// private int controlNum = 1;
@@ -68,6 +79,10 @@ public class BigraphWrapper {
 	// key is entity name, value is a list all connection names
 	private Map<String, List<String>> entityConnectivityMap;
 
+	// key is entity name, value is site existence (true it exists, false it
+	// does not)
+	private Map<String, Boolean> entitySiteMap;
+
 	public BigraphWrapper() {
 		entities = new LinkedList<String>();
 		connections = new LinkedList<String>();
@@ -77,6 +92,8 @@ public class BigraphWrapper {
 		connectivityMap = new HashMap<String, List<String>>();
 		entityConnectivityMap = new HashMap<String, List<String>>();
 		roots = new LinkedList<String>();
+		entitySiteMap = new HashMap<String, Boolean>();
+
 	}
 
 	public BigraphExpression getBigraphExpression() {
@@ -167,6 +184,14 @@ public class BigraphWrapper {
 		this.entityConnectivityMap = entityConnectivityMap;
 	}
 
+	public Map<String, Boolean> getEntitySiteMap() {
+		return entitySiteMap;
+	}
+
+	public void setEntitySiteMap(Map<String, Boolean> entitySiteMap) {
+		this.entitySiteMap = entitySiteMap;
+	}
+
 	public Bigraph getBigraphObject() {
 
 		if (bigraphObj == null) {
@@ -246,12 +271,12 @@ public class BigraphWrapper {
 
 		for (Entity ent : controlMap.keySet()) {
 
-			 String entityName = controlMap.get(ent);
+			String entityName = controlMap.get(ent);
 
 			// just roots are dealts with
-			 if(!roots.contains(entityName)) {
-			 continue;
-			 }
+			if (!roots.contains(entityName)) {
+				continue;
+			}
 
 			node = new BigraphNode();
 
@@ -606,6 +631,10 @@ public class BigraphWrapper {
 
 	public void modifyBrsExpression() {
 
+		if (bigraphERString == null || bigraphERString.isEmpty()) {
+			return;
+		}
+
 		// replace controls with equivlent entity names used
 		// List<Token> tokens = brsTokenizer.getTokens();
 		int fromIndex = 0;
@@ -655,10 +684,145 @@ public class BigraphWrapper {
 		entityConnectivityMap.clear();
 		controlMap.clear();
 		roots.clear();
+		entitySiteMap.clear();
 		bigraphERString = "";
 		modifiedBigraphERString = "";
 		bigraphExpression = null;
 
+	}
+
+	/**
+	 * Generate a string representation of the Bigraph using BigraphER syntax.
+	 * 
+	 * @return String representation of the Bigraph
+	 */
+	public String generateBigraphERState() {
+
+		StringBuilder bldr = new StringBuilder();
+
+		int index = 0;
+
+		for (String root : roots) {
+
+			// add root
+			bldr.append(root);
+
+			// add connections
+			List<String> cons = entityConnectivityMap.get(root);
+			if (cons != null && !cons.isEmpty()) {
+
+				bldr.append("{");
+
+				int ind = 0;
+				for (String con : cons) {
+					bldr.append(con);
+
+					ind++;
+
+					if (ind < cons.size()) {
+						bldr.append(", ");
+					}
+				}
+
+				bldr.append("}");
+			}
+
+			// add children
+			List<String> child = containedEntitiesMap.get(root);
+
+			if (child != null && !child.isEmpty()) {
+
+				bldr.append(".(");
+				addChildren(root, child, bldr);
+				bldr.append(")");
+			} else {
+				boolean hasSite = entitySiteMap.get(root);
+
+				if (hasSite) {
+					bldr.append(".id");
+				}
+			}
+
+			index++;
+
+			if (index < roots.size()) {
+				// add bigraph juxtaposition ||
+				bldr.append(" || ");
+			}
+
+		}
+
+		return bldr.toString();
+	}
+
+	protected void addChildren(String parentEntityName, List<String> entities, StringBuilder bldr) {
+
+		// BigraphNode node;
+
+		int index = 0;
+
+		for (String entity : entities) {
+
+			// add entity
+			bldr.append(entity);
+
+			// add connections
+			// add connections
+			List<String> cons = entityConnectivityMap.get(entity);
+			if (cons != null && !cons.isEmpty()) {
+
+				bldr.append("{");
+
+				int ind = 0;
+				for (String con : cons) {
+					bldr.append(con);
+
+					ind++;
+
+					if (ind < cons.size()) {
+						bldr.append(", ");
+					}
+				}
+
+				bldr.append("}");
+			}
+
+			// add contained entities
+			List<String> child = containedEntitiesMap.get(entity);
+
+			if (child != null && !child.isEmpty()) {
+
+				bldr.append(".(");
+				
+				//add contained entities
+				addChildren(entity, child, bldr);
+
+				//add site as entity juxtaposition i.e. | id
+				Boolean hasSite = entitySiteMap.get(entity);
+
+				if (hasSite != null && hasSite.booleanValue()) {
+					bldr.append(" | id");
+				}
+				
+				bldr.append(")");
+			}
+
+			else {
+				Boolean hasSite = entitySiteMap.get(entity);
+
+				if (hasSite != null && hasSite.booleanValue()) {
+					bldr.append(".id");
+				}
+			}
+
+			index++;
+
+			if (index < entities.size()) {
+				// add entity juxtaposition |
+				bldr.append(" | ");
+			}
+
+		}
 	}
 
 	public void printAll() {
