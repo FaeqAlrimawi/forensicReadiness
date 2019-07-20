@@ -56,24 +56,24 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-//		launch(args)	;
-		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor | id) || Room.Device.id";
-		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor | Actor)";
-//		System.out.println("expression: "+exprs+"\n\n");
-		BRSParser parser = new BRSParser();
-		
-		BigraphWrapper r = parser.parseBigraph(exprs);
-
+		launch(args)	;
+//		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor | id) || Room.Device.id || id";
+//		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor | Actor)";
+////		System.out.println("expression: "+exprs+"\n\n");
+//		BRSParser parser = new BRSParser();
+//		
+//		BigraphWrapper r = parser.parseBigraph(exprs);
+//
 //		BigraphExpression big = r.getBigraphExpression();
-		
+//		
 //		BigraphWrapper r2 = parser.parseBigraph(big);
-		
-//		Bigraph b = r.getBigraphObject();
-
-//		System.out.println(b);
-//		r.printAll();
-		String str = r.generateBigraphERState();
-		System.out.println(str);
+//		
+////		Bigraph b = r.getBigraphObject();
+//
+////		System.out.println(b);
+////		r.printAll();
+//		String str = r2.generateBigraphERState();
+//		System.out.println(str);
 //		r2.printAll();
 		
 //		parser.parseBigraph(exprs2);

@@ -14,9 +14,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.Random;
-
-//import com.beust.jcommander.internal.Lists;
 
 import ca.pfv.spmf.algorithms.clustering.dbscan.AlgoDBSCAN;
 import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceFunction;
@@ -38,17 +35,10 @@ import ca.pfv.spmf.algorithms.sequentialpatterns.spam.AlgoTKS;
 import ca.pfv.spmf.algorithms.sequentialpatterns.spam.PatternTKS;
 import ca.pfv.spmf.patterns.cluster.Cluster;
 import ca.pfv.spmf.patterns.cluster.ClusterWithMean;
-import ca.pfv.spmf.patterns.cluster.DoubleArray;
+
+
 import ie.lero.spare.franalyser.utility.FileManipulator;
-//import weka.clusterers.ClusterEvaluation;
-//import weka.clusterers.Clusterer;
-//import weka.clusterers.Cobweb;
-//import weka.clusterers.EM;
-//import weka.clusterers.SimpleKMeans;
-//import weka.core.Instances;
-//import weka.core.converters.ConverterUtils.DataSource;
-//import weka.filters.Filter;
-//import weka.filters.unsupervised.attribute.Remove;
+
 import ie.lero.spare.pattern_instantiation.GraphPath;
 
 public class IncidentInstancesClusterGenerator {

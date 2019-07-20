@@ -83,6 +83,9 @@ public class BigraphWrapper {
 	// does not)
 	private Map<String, Boolean> entitySiteMap;
 
+	//number of root ids (sites) e.g., Actor || id || id
+	int numberOfRootSites = 0;
+	
 	public BigraphWrapper() {
 		entities = new LinkedList<String>();
 		connections = new LinkedList<String>();
@@ -192,6 +195,20 @@ public class BigraphWrapper {
 		this.entitySiteMap = entitySiteMap;
 	}
 
+	
+	public int getNumberOfRootSites() {
+		return numberOfRootSites;
+	}
+
+	public void setNumberOfRootSites(int numberOfRootSites) {
+		this.numberOfRootSites = numberOfRootSites;
+	}
+
+	public void incrementRootSites() {
+		
+		numberOfRootSites++;
+	}
+	
 	public Bigraph getBigraphObject() {
 
 		if (bigraphObj == null) {
@@ -632,6 +649,7 @@ public class BigraphWrapper {
 	public void modifyBrsExpression() {
 
 		if (bigraphERString == null || bigraphERString.isEmpty()) {
+			modifiedBigraphERString = generateModifiedBigraphERState();
 			return;
 		}
 
@@ -665,6 +683,45 @@ public class BigraphWrapper {
 		// }
 	}
 
+	public String generateBigraphERState() {
+
+		if (modifiedBigraphERString == null || modifiedBigraphERString.isEmpty()) {
+			modifiedBigraphERString = generateModifiedBigraphERState();
+//			return;
+		}
+
+		// replace controls with equivlent entity names used
+		// List<Token> tokens = brsTokenizer.getTokens();
+		int fromIndex = 0;
+
+		// String entityName = entities.get(index);
+		// S
+		// modifiedBrsExpression = brsExpression;
+		StringBuffer temp = new StringBuffer(modifiedBigraphERString);
+		int start = 0;
+		int end = 0;
+
+		for (String entityName : entities) {
+			String ctrl = getControl(entityName);
+			start = temp.indexOf(entityName, fromIndex);
+			end = start + entityName.length();
+			fromIndex = end;
+			// System.out.println("entity: " + entityName + " ctrl: "+ctrl);
+			temp.delete(start, end);
+			temp.insert(start, ctrl);
+
+			// modifiedBrsExpression = modifiedBrsExpression.replace
+		}
+
+		String bigrapher = temp.toString();
+		// for(Token t : tokens) {
+		//
+		// if(t)
+		// }
+		
+		return bigrapher;
+	}
+	
 	protected String getControl(String entityName) {
 
 		for (Entry<Entity, String> entry : controlMap.entrySet()) {
@@ -696,7 +753,7 @@ public class BigraphWrapper {
 	 * 
 	 * @return String representation of the Bigraph
 	 */
-	public String generateBigraphERState() {
+	public String generateModifiedBigraphERState() {
 
 		StringBuilder bldr = new StringBuilder();
 
@@ -750,6 +807,11 @@ public class BigraphWrapper {
 				bldr.append(" || ");
 			}
 
+		}
+		
+		//add root sites
+		for(int i=0;i<numberOfRootSites;i++) {
+			bldr.append(" || id");
 		}
 
 		return bldr.toString();

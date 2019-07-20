@@ -51,6 +51,11 @@ public class BRSParser {
 			//===add root
 			addEntityRoot(entityName);
 			
+			//===add site
+			if(ent.isHasSite()) {
+				addSite(entityName);
+			}
+			
 			//===add connectivity 
 			for (Connectivity con : ent.getConnectivity()) {
 				updateConnectivity(con.getName(), entityName);
@@ -75,6 +80,11 @@ public class BRSParser {
 			//===add parent
 			updateEntityContainer(entityName, parentEntityName);
 
+			//===add site
+			if(entity.isHasSite()) {
+				addSite(entityName);
+			}
+			
 			// add connectivity
 			for (Connectivity con : entity.getConnectivity()) {
 				updateConnectivity(con.getName(), entityName);
@@ -83,6 +93,7 @@ public class BRSParser {
 			addChildren(entityName, entity.getEntity());
 		}
 	}
+	
 	
 	/**
 	 * Parses the given condition in BRS format to identify entities and
@@ -201,10 +212,9 @@ public class BRSParser {
 				if (isBigraphJuxta) {
 					// get last added root
 					//to be done
-					
+					incrementRootSites();
 				} else if(isEntityJuxta) {
-					System.out.println("Site is entity juxta");
-					
+			
 					//get current container
 					Entity ent = containers.getFirst();
 					String entityName = bigWrapper.getControlMap().get(ent);
@@ -405,6 +415,11 @@ public class BRSParser {
 		Map<String, Boolean> sites = bigWrapper.getEntitySiteMap();
 		
 		sites.put(entityName, true);
+	}
+	
+	protected void incrementRootSites(){
+	
+		bigWrapper.incrementRootSites();
 	}
 	
 	protected String addControl(Entity entity) {
