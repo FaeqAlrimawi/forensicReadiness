@@ -39,20 +39,34 @@ public class BRSParser {
 	 */
 	public ActionWrapper parseBigraphERAction(String action) {
 
+		List<String> actionComps = preProcessAction(action);
+
+		return parseBigraphERAction(actionComps);
+
+	}
+
+	/**
+	 * Parses a given action parts (name, pre, post) written using BigraphER syntax.
+	 * 
+	 * @param actionParts a List containing the name, pre, and post, respectively
+	 *        
+	 * @return ActionWrapper object which contains information about the action
+	 *         (e.g., name, pre, and post)
+	 */
+	public ActionWrapper parseBigraphERAction(List<String> actionParts) {
+		
 		ActionWrapper actionWrapper = new ActionWrapper();
 
 		BigraphWrapper preWrapper = null;
 		BigraphWrapper postWrapper = null;
 
-		List<String> actionComps = preProcessAction(action);
-
-		if (actionComps == null) {
+		if (actionParts == null) {
 			return null;
 		}
 
-		String actionName = actionComps.get(ACTION_NAME_INDEX);
-		String pre = actionComps.get(ACTION_PRE_INDEX);
-		String post = actionComps.get(ACTION_POST_INDEX);
+		String actionName = actionParts.get(ACTION_NAME_INDEX);
+		String pre = actionParts.get(ACTION_PRE_INDEX);
+		String post = actionParts.get(ACTION_POST_INDEX);
 
 		if (pre != null) {
 			preWrapper = parseBigraph(pre);
@@ -67,9 +81,8 @@ public class BRSParser {
 		actionWrapper.setPostcondition(postWrapper);
 
 		return actionWrapper;
-
+		
 	}
-
 	protected List<String> preProcessAction(String action) {
 
 		// returns in the list
