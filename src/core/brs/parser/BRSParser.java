@@ -4,6 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.plaf.basic.BasicSliderUI.ActionScroller;
+
 import org.eclipse.emf.common.util.EList;
 
 import cyberPhysical_Incident.BigraphExpression;
@@ -16,75 +18,189 @@ public class BRSParser {
 	private Tokenizer brsTokenizer;
 	private BigraphWrapper bigWrapper;
 
+	private static final int ACTION_NAME_INDEX = 0;
+	private static final int ACTION_PRE_INDEX = 1;
+	private static final int ACTION_POST_INDEX = 2;
+
 	private int controlNum = 1;
-	
-	public BRSParser(){
-//		bigWrapper = new BigraphWrapper();
+
+	public BRSParser() {
+		// bigWrapper = new BigraphWrapper();
 		controlNum = 1;
 	}
 
-	
+	/**
+	 * Parses a given action string written using BigraphER syntax.
+	 * 
+	 * @param action
+	 *            String of the action
+	 * @return ActionWrapper object which contains information about the action
+	 *         (e.g., name, pre, and post)
+	 */
+	public ActionWrapper parseBigraphERAction(String action) {
+
+		ActionWrapper actionWrapper = new ActionWrapper();
+
+		BigraphWrapper preWrapper = null;
+		BigraphWrapper postWrapper = null;
+
+		List<String> actionComps = preProcessAction(action);
+
+		if (actionComps == null) {
+			return null;
+		}
+
+		String actionName = actionComps.get(ACTION_NAME_INDEX);
+		String pre = actionComps.get(ACTION_PRE_INDEX);
+		String post = actionComps.get(ACTION_POST_INDEX);
+
+		if (pre != null) {
+			preWrapper = parseBigraph(pre);
+		}
+
+		if (post != null) {
+			postWrapper = parseBigraph(post);
+		}
+
+		actionWrapper.setActionName(actionName);
+		actionWrapper.setPrecondition(preWrapper);
+		actionWrapper.setPostcondition(postWrapper);
+
+		return actionWrapper;
+
+	}
+
+	protected List<String> preProcessAction(String action) {
+
+		// returns in the list
+		// 0: action name
+		// 1: pre
+		// 2: post
+
+		if (action == null || action.isEmpty()) {
+			return null;
+		}
+
+		List<String> components = new LinkedList<String>();
+		// parse a BigraphER action with format "react action_name = redex ->
+		// reactum;"
+		String[] parts = action.split("=");
+
+		String actionName = null;
+		String pre = null;
+		String post = null;
+
+		// parts[0] is the action name
+		if (parts.length > 1) {
+
+			// ===get action name
+			actionName = parts[0];
+
+			if (actionName.contains("react")) {
+				actionName = actionName.replace("react", "");
+			}
+
+			actionName = actionName.trim();
+
+			// ===get conditions
+			String[] conditions = null;
+
+			if (parts[1].contains("->")) {
+				conditions = parts[1].split("->");
+			} else if (parts[1].contains("-->")) {
+				conditions = parts[1].split("-->");
+			}
+
+			if (conditions != null && conditions.length > 1) {
+				pre = conditions[0];
+				post = conditions[1];
+
+				// remove any ; and [] from post
+				if (post != null) {
+					if (post.contains("[")) {
+						post = post.substring(0, post.lastIndexOf("["));
+					}
+
+					if (post.contains(";")) {
+						post = post.replace(";", "");
+					}
+
+				}
+
+			}
+		}
+
+		components.add(ACTION_NAME_INDEX, actionName);
+		components.add(ACTION_PRE_INDEX, pre);
+		components.add(ACTION_POST_INDEX, post);
+
+		return components;
+
+	}
+
 	/**
 	 * Parses the given condition in BRS format to identify entities and
 	 * connectivity then creates a new condition based on that
 	 * 
-	 * @param BRSexp Bigraph expressed as a BigraphExpression object
-	 * @return BigraphWrapper object that contains various information about the given BRS
+	 * @param BRSexp
+	 *            Bigraph expressed as a BigraphExpression object
+	 * @return BigraphWrapper object that contains various information about the
+	 *         given BRS
 	 */
 	public BigraphWrapper parseBigraph(BigraphExpression BRSexp) {
-		
+
 		BigraphWrapper bigWrpr = new BigraphWrapper();
 		bigWrapper = bigWrpr;
-		
-		//clear data if any
+
+		// clear data if any
 		clear();
-				
+
 		bigWrapper.setBigraphExpression(BRSexp);
-		
-//		int numOfRoots = 0;
+
+		// int numOfRoots = 0;
 
 		for (Entity ent : BRSexp.getEntity()) {
-			
-			//===add control
+
+			// ===add control
 			String entityName = addControl(ent);
-			
-			//===add root
+
+			// ===add root
 			addEntityRoot(entityName);
-			
-			//===add site
-			if(ent.isHasSite()) {
+
+			// ===add site
+			if (ent.isHasSite()) {
 				addSite(entityName);
 			}
-			
-			//===add connectivity 
+
+			// ===add connectivity
 			for (Connectivity con : ent.getConnectivity()) {
 				updateConnectivity(con.getName(), entityName);
 			}
 
 			addChildren(entityName, ent.getEntity());
-		}	
-		
+		}
+
 		return bigWrapper;
-		
+
 	}
-	
+
 	protected void addChildren(String parentEntityName, EList<Entity> entities) {
 
-//		BigraphNode node;
+		// BigraphNode node;
 
 		for (Entity entity : entities) {
 
-			//===add control
+			// ===add control
 			String entityName = addControl(entity);
-			
-			//===add parent
+
+			// ===add parent
 			updateEntityContainer(entityName, parentEntityName);
 
-			//===add site
-			if(entity.isHasSite()) {
+			// ===add site
+			if (entity.isHasSite()) {
 				addSite(entityName);
 			}
-			
+
 			// add connectivity
 			for (Connectivity con : entity.getConnectivity()) {
 				updateConnectivity(con.getName(), entityName);
@@ -93,14 +209,15 @@ public class BRSParser {
 			addChildren(entityName, entity.getEntity());
 		}
 	}
-	
-	
+
 	/**
 	 * Parses the given condition in BRS format to identify entities and
 	 * connectivity then creates a new condition based on that
 	 * 
-	 * @param BRScondition as a string
-	 * @return BigraphWrapper object that contains various information about the given BRS
+	 * @param BRScondition
+	 *            as a string
+	 * @return BigraphWrapper object that contains various information about the
+	 *         given BRS
 	 */
 	public BigraphWrapper parseBigraph(String BigrapherState) {
 
@@ -108,17 +225,15 @@ public class BRSParser {
 			createBRSTokenizer();
 		}
 
-		
-//		brsExpression = BRScondition;
+		// brsExpression = BRScondition;
 		BigraphWrapper bigWrpr = new BigraphWrapper();
 		bigWrapper = bigWrpr;
-		
-		//clear data if any
+
+		// clear data if any
 		clear();
-				
+
 		bigWrapper.setBigraphERString(BigrapherState);
 
-	
 		CyberPhysicalIncidentFactory instance = CyberPhysicalIncidentFactory.eINSTANCE;
 
 		int rootNum = 0;
@@ -211,33 +326,31 @@ public class BRSParser {
 				// maybe you should cover when site is in bigraph juxtaposition
 				if (isBigraphJuxta) {
 					// get last added root
-					//to be done
+					// to be done
 					incrementRootSites();
-				} else if(isEntityJuxta) {
-			
-					//get current container
+				} else if (isEntityJuxta) {
+
+					// get current container
 					Entity ent = containers.getFirst();
 					String entityName = bigWrapper.getControlMap().get(ent);
-					
+
 					addSite(entityName);
-					
+
 				} else {
-					//add site to last added entity
+					// add site to last added entity
 					Entity ent = allEntities.getLast();
-//					
+					//
 					String entityName = bigWrapper.getControlMap().get(ent);
-					
-					System.out.println("adding site to " + entityName);
-					
+
+					// System.out.println("adding site to " + entityName);
+
 					addSite(entityName);
-					
-					//need to remove a container
+
+					// need to remove a container
 					containers.removeFirst();
 				}
-				
-//				hasSite = true;
-				
-			
+
+				// hasSite = true;
 
 				break;
 
@@ -303,9 +416,9 @@ public class BRSParser {
 					tmp.setName(tok.sequence);
 					allEntities.add(tmp);
 
-					//===add to contro map
+					// ===add to contro map
 					String entityName = addControl(tmp);
-					
+
 					// check if containers are not empty, if so, then get the
 					// head (first element as the current container)
 					if (!containers.isEmpty()) {
@@ -330,12 +443,12 @@ public class BRSParser {
 							containers.removeFirst();
 							isContainment = false;
 						}
-						
-						//consume entity juxta if it is true
+
+						// consume entity juxta if it is true
 						if (isEntityJuxta) {
 							isEntityJuxta = false;
 						}
-						
+
 					} else if (isBigraphJuxta) { // if entity after ||
 						rootEntities.add(tmp);
 
@@ -356,17 +469,17 @@ public class BRSParser {
 
 						// ===update entities and containers
 						addExtraRoot(newRoot.getName());
-						
+
 						updateEntityContainer(entityName, newRoot.getName());
-						
-						if(bigWrapper.getControlMap().containsKey(lastRoot)) {
+
+						if (bigWrapper.getControlMap().containsKey(lastRoot)) {
 							removeRoot(bigWrapper.getControlMap().get(lastRoot));
 							updateEntityContainer(bigWrapper.getControlMap().get(lastRoot), newRoot.getName());
-						} 
+						}
 
 						// for now root is not added to all entities
 						rootEntities.add(newRoot);
-						
+
 						isEntityJuxta = false;
 
 						rootNum++;
@@ -394,51 +507,50 @@ public class BRSParser {
 			}
 		}
 
-//		printAll();
+		// printAll();
 		// ===create bigraph expression
 		BigraphExpression newBRS = instance.createBigraphExpression();
 
 		newBRS.getEntity().addAll(rootEntities);
 
 		bigWrapper.setBigraphExpression(newBRS);
-		
+
 		return bigWrapper;
 	}
 
-
 	protected void addSite(String entityName) {
-		
-		if(entityName == null) {
+
+		if (entityName == null) {
 			return;
 		}
-		
+
 		Map<String, Boolean> sites = bigWrapper.getEntitySiteMap();
-		
+
 		sites.put(entityName, true);
 	}
-	
-	protected void incrementRootSites(){
-	
+
+	protected void incrementRootSites() {
+
 		bigWrapper.incrementRootSites();
 	}
-	
+
 	protected String addControl(Entity entity) {
-		
-		if(entity == null) {
+
+		if (entity == null) {
 			return null;
 		}
-		
+
 		String uniqName = "";
 
 		uniqName = entity.getName() + controlNum;
-		
+
 		controlNum++;
-		
+
 		bigWrapper.getControlMap().put(entity, uniqName);
-		
-		
+
 		return uniqName;
 	}
+
 	protected void addEntityRoot(String entityRoot) {
 
 		updateEntityContainer(entityRoot, null);
@@ -513,7 +625,7 @@ public class BRSParser {
 		bigWrapper.getContainerEntitiesMap().put(entityName, entityContainer);
 
 		// add to the control map
-//		controlMap.put(uniqName, entityName);
+		// controlMap.put(uniqName, entityName);
 
 		// update parent entity
 		if (entityContainer == null) {
@@ -535,7 +647,6 @@ public class BRSParser {
 
 	}
 
-	
 	protected void createBRSTokenizer() {
 
 		brsTokenizer = new Tokenizer();
@@ -558,60 +669,60 @@ public class BRSParser {
 		brsTokenizer.add(BigraphERTokens.TOKEN_WORD, BigraphERTokens.WORD);
 
 	}
-	
+
 	public void clear() {
 
-		if(bigWrapper!= null) {
-			bigWrapper.clear();	
+		if (bigWrapper != null) {
+			bigWrapper.clear();
 		}
-			
+
 		controlNum = 1;
 	}
 
-//	public String getBrsExpression() {
-//		return brsExpression;
-//	}
-	
-//	public void modifyBrsExpression() {
-//		
-//		//replace controls with equivlent entity names used
-////		List<Token> tokens = brsTokenizer.getTokens();
-//		int fromIndex = 0;
-//		
-////		String entityName = entities.get(index);
-////		S
-//		modifiedBrsExpression = brsExpression;
-//		StringBuffer temp = new StringBuffer(brsExpression);
-//		int start = 0;
-//		int end = 0;
-//		
-//		for(String entityName : entities) {
-//			String ctrl = getControl(entityName);
-//			start = temp.indexOf(ctrl, fromIndex);
-//			end = start+ctrl.length();
-//			fromIndex = end;
-////			System.out.println("entity: " + entityName + " ctrl: "+ctrl);
-//			temp.delete(start, end);
-//			temp.insert(start, entityName);
-//			
-////			modifiedBrsExpression = modifiedBrsExpression.replace
-//		}
-//		
-//		modifiedBrsExpression = temp.toString();
-////		for(Token t : tokens) {
-////			
-////			if(t)
-////		}
-//	}
-	
-//	protected String getControl(String entityName) {
-//		
-//		for(Entry<Entity, String> entry : controlMap.entrySet()) {
-//			if(entry.getValue().equals(entityName)){ 
-//				return entry.getKey().getName();
-//			}
-//		}	
-//		return null;
-//	}
+	// public String getBrsExpression() {
+	// return brsExpression;
+	// }
+
+	// public void modifyBrsExpression() {
+	//
+	// //replace controls with equivlent entity names used
+	//// List<Token> tokens = brsTokenizer.getTokens();
+	// int fromIndex = 0;
+	//
+	//// String entityName = entities.get(index);
+	//// S
+	// modifiedBrsExpression = brsExpression;
+	// StringBuffer temp = new StringBuffer(brsExpression);
+	// int start = 0;
+	// int end = 0;
+	//
+	// for(String entityName : entities) {
+	// String ctrl = getControl(entityName);
+	// start = temp.indexOf(ctrl, fromIndex);
+	// end = start+ctrl.length();
+	// fromIndex = end;
+	//// System.out.println("entity: " + entityName + " ctrl: "+ctrl);
+	// temp.delete(start, end);
+	// temp.insert(start, entityName);
+	//
+	//// modifiedBrsExpression = modifiedBrsExpression.replace
+	// }
+	//
+	// modifiedBrsExpression = temp.toString();
+	//// for(Token t : tokens) {
+	////
+	//// if(t)
+	//// }
+	// }
+
+	// protected String getControl(String entityName) {
+	//
+	// for(Entry<Entity, String> entry : controlMap.entrySet()) {
+	// if(entry.getValue().equals(entityName)){
+	// return entry.getKey().getName();
+	// }
+	// }
+	// return null;
+	// }
 
 }

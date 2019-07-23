@@ -2,9 +2,9 @@ package application;
 
 import java.net.URL;
 
+import core.brs.parser.ActionWrapper;
 import core.brs.parser.BRSParser;
 import core.brs.parser.BigraphWrapper;
-import cyberPhysical_Incident.BigraphExpression;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -56,12 +56,23 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-		launch(args)	;
-//		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor | id) || Room.Device.id || id";
+//		launch(args)	;
+		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor | id) || Room.Device.id || id";
+		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor  id) || Room ";
+		String action = "react enter_room = " + exprs + "->" + exprs2 + "[1,2,3];";
+		
 //		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor | Actor)";
 ////		System.out.println("expression: "+exprs+"\n\n");
-//		BRSParser parser = new BRSParser();
+		BRSParser parser = new BRSParser();
 //		
+		ActionWrapper w = parser.parseBigraphERAction(action);
+		
+		System.out.println(w.getActionName());
+		BigraphWrapper pre = w.getPrecondition();
+		BigraphWrapper post = w.getPostcondition();
+		
+		pre.printAll();
+		post.printAll();
 //		BigraphWrapper r = parser.parseBigraph(exprs);
 //
 //		BigraphExpression big = r.getBigraphExpression();
