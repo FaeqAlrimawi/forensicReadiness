@@ -8,6 +8,7 @@ import org.fxmisc.richtext.CodeArea;
 
 import com.eteks.sweethome3d.adaptive.forensics.SystemHandler;
 
+import controller.instantiation.analysis.TraceViewerController;
 import controller.utilities.ConditionAreaHandler;
 import controller.utlities.AutoCompleteTextArea;
 import javafx.application.Platform;

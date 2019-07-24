@@ -28,7 +28,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<SplitPane dividerPositions="0.8294314381270903" maxHeight="3200.0" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.InstantiatorController">
+<SplitPane dividerPositions="0.8294314381270903" maxHeight="3200.0" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.InstantiatorController">
    <items>
       <VBox prefWidth="1198.0">
         <children>

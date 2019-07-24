@@ -1,0 +1,15 @@
+package core.instantiation.analysis;
+
+public interface InstantiationMinerListener {
+	
+	//number of traces is read from files
+	public void onNumberOfTracesRead(int numOfTraces);
+	
+	//a single trace is loaded from file
+	public void onTracesLoaded(int numOfTracesLoaded);
+	
+	public void onLoadingJSONFile();
+
+	
+	public void onSavingFilteredTracesComplete(boolean isSuccessful);
+}
