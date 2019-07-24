@@ -16,8 +16,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import controller.utlities.AutoCompleteTextArea;
-import core.instantiation.analysis.InstantiationMiner;
-import core.instantiation.analysis.InstantiationMinerListener;
+import core.instantiation.analysis.TraceMiner;
+import core.instantiation.analysis.TraceMinerListener;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -51,7 +51,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 
-public class TraceViewerController implements InstantiationMinerListener {
+public class TraceViewerController implements TraceMinerListener {
 
 	
 	@FXML
@@ -200,7 +200,7 @@ public class TraceViewerController implements InstantiationMinerListener {
 	private File selectedFilteredTracesFile;
 
 	// private JSONObject jsonTraces;
-	private InstantiationMiner tracesMiner;
+	private TraceMiner tracesMiner;
 
 	private int numberOfTraces = -1;
 
@@ -256,7 +256,7 @@ public class TraceViewerController implements InstantiationMinerListener {
 	@FXML
 	public void initialize() {
 
-		tracesMiner = new InstantiationMiner();
+		tracesMiner = new TraceMiner();
 
 		shownFitleredTraces = new LinkedList<Integer>();
 		// set miner listener
@@ -793,7 +793,7 @@ public class TraceViewerController implements InstantiationMinerListener {
 		numberOfTraces = tracesMiner.loadTracesFromFile();
 
 		boolean isLoaded = false;
-		if (numberOfTraces == InstantiationMiner.TRACES_NOT_LOADED) {
+		if (numberOfTraces == TraceMiner.TRACES_NOT_LOADED) {
 
 			isLoaded = false;
 		} else {
@@ -935,7 +935,7 @@ public class TraceViewerController implements InstantiationMinerListener {
 		// show
 		progressIndicatorFilter.setVisible(true);
 
-		numofTraces = tracesMiner.mineClosedSequencesUsingClaSPAlgo(InstantiationMiner.SHORTEST);
+		numofTraces = tracesMiner.mineClosedSequencesUsingClaSPAlgo(TraceMiner.SHORTEST);
 
 		// hide progress indicator
 		progressIndicatorFilter.setVisible(false);

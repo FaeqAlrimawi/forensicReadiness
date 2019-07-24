@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +19,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -47,15 +50,19 @@ import ca.pfv.spmf.algorithms.sequentialpatterns.spam.PatternTKS;
 import ca.pfv.spmf.patterns.cluster.Cluster;
 import ca.pfv.spmf.patterns.cluster.ClusterWithMean;
 import controller.instantiation.analysis.TraceViewerController;
+import core.brs.parser.ActionWrapper;
+import core.brs.parser.BRSParser;
+import core.brs.parser.BigraphWrapper;
 import core.brs.parser.utilities.JSONTerms;
 import core.utilities.Query;
+import cyberPhysical_Incident.Entity;
 //import ie.lero.spare.franalyser.utility.FileManipulator;
 //import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator.InstancesSaver;
 
-public class InstantiationMiner {
+public class TraceMiner {
 
 	// instances (traces). key is trace ID value is the trace as GraphPath
 	// object
@@ -150,11 +157,19 @@ public class InstantiationMiner {
 	int numberOfStates = 10000; // should be adjusted
 
 	// listener (from GUI)
-	InstantiationMinerListener listener;
+	TraceMinerListener listener;
 
 	boolean isLoaded = false;
-	
-	public InstantiationMiner() {
+
+	// used for analysing common entities
+	BRSParser brsParser;
+
+	// map of all actions in the bigraphER file
+	// key is action name, value is an ActionWrapper object containing action
+	// info (pre, post)
+	Map<String, ActionWrapper> bigraphERActions;
+
+	public TraceMiner() {
 
 		tracesActions = new HashMap<String, Integer>();
 		tracesActionsOccurence = new HashMap<String, Integer>();
@@ -421,25 +436,26 @@ public class InstantiationMiner {
 			System.out.println("Instances are null! Exiting");
 			isLoaded = false;
 			return TRACES_NOT_LOADED;
-			
+
 		}
 
 		isLoaded = true;
-		
+
 		return instances.size();
 
 	}
 
 	/**
 	 * Return Actions with the highest occurrence in all given traces
+	 * 
 	 * @return Map with the key as action name and value as occurrence
 	 */
 	public Map<String, Integer> getHighestActionOccurrence() {
 
-		if(tracesActionsOccurence == null || tracesActionsOccurence.isEmpty()) {
+		if (tracesActionsOccurence == null || tracesActionsOccurence.isEmpty()) {
 			return null;
 		}
-		
+
 		Map<String, Integer> result = new HashMap<String, Integer>();
 
 		int index = 0;
@@ -503,7 +519,7 @@ public class InstantiationMiner {
 				occurrences = getOccurrence(traces);
 			}
 			break;
-			
+
 		case TraceViewerController.CUSTOMISED_TRACES:
 			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
 				Map<Integer, GraphPath> traces = getTraces(customeFilteringTraceIDs);
@@ -582,7 +598,7 @@ public class InstantiationMiner {
 				occurrences = getStateOccurrence(traces);
 			}
 			break;
-			
+
 		case TraceViewerController.CUSTOMISED_TRACES:
 			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
 				Map<Integer, GraphPath> traces = getTraces(customeFilteringTraceIDs);
@@ -669,9 +685,9 @@ public class InstantiationMiner {
 			if (traces1 != null) {
 				numOfTraces = traces1.size();
 			}
-			
+
 			break;
-			
+
 		case TraceViewerController.CUSTOMISED_TRACES:
 			Map<Integer, GraphPath> traces = null;
 			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
@@ -772,7 +788,7 @@ public class InstantiationMiner {
 			}
 
 			break;
-			
+
 		case TraceViewerController.CUSTOMISED_TRACES:
 			Map<Integer, GraphPath> traces = null;
 			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
@@ -863,7 +879,7 @@ public class InstantiationMiner {
 				occurrences = getOccurrence(traces);
 			}
 			break;
-			
+
 		case TraceViewerController.CUSTOMISED_TRACES:
 			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
 				Map<Integer, GraphPath> traces = getTraces(customeFilteringTraceIDs);
@@ -934,14 +950,14 @@ public class InstantiationMiner {
 			}
 
 			break;
-			
+
 		case TraceViewerController.SHORTEST_CLASP_TRACES:
 			if (claSPTraceIDs != null && !claSPTraceIDs.isEmpty()) {
 				Map<Integer, GraphPath> traces = getTraces(claSPTraceIDs);
 				occurrences = getStateOccurrence(traces);
 			}
 			break;
-			
+
 		case TraceViewerController.CUSTOMISED_TRACES:
 			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
 				Map<Integer, GraphPath> traces = getTraces(customeFilteringTraceIDs);
@@ -1469,6 +1485,87 @@ public class InstantiationMiner {
 					// .append(statesStr)
 					// .append(" ")
 					.append(actionsStr).append(fileLinSeparator);
+
+		}
+		writeToFile(builder.toString(), convertedInstancesFileName);
+
+		return convertedInstancesFileName;
+	}
+
+	public String convertUsingActionEntities(List<GraphPath> instances) {
+
+		String fileLinSeparator = System.getProperty("line.separator");
+
+		StringBuilder builder = new StringBuilder();
+
+		// ========set data
+		for (GraphPath path : instances) {
+
+			// === get states as string
+			// String statesStr = path.getStateTransitions().toString();
+			// // remove brackets
+			// statesStr = statesStr.replaceAll("\\[", "");
+			// statesStr = statesStr.replaceAll("\\]", "");
+			// // remove commas
+			// statesStr = statesStr.replaceAll(",", "");
+			// statesStr = statesStr.trim();
+
+			// === get actions as string
+			List<String> actions = path.getTransitionActions();
+
+			int count = 0;
+			
+			for (String act : actions) {
+				List<String> actionEntities = new LinkedList<String>();
+
+				ActionWrapper actionDetails = bigraphERActions.get(act);
+
+				// allow repetition of entities
+			
+				if (actionDetails != null) {
+					
+					// add entities from pre
+					BigraphWrapper pre = actionDetails.getPrecondition();
+
+					if (pre != null) {
+						Set<Entity> ents = pre.getControlMap().keySet();
+						
+						for(Entity ent : ents) {
+							actionEntities.add(ent.getName());
+						}
+					}
+				
+					BigraphWrapper post = actionDetails.getPostcondition();
+
+					if (post != null) {
+						Set<Entity> ents = post.getControlMap().keySet();
+						
+						for(Entity ent : ents) {
+							actionEntities.add(ent.getName());
+						}
+					}
+				}
+				
+				if(!actionEntities.isEmpty()) {
+					// === set record(instance_id [states (1 2 3) actions (enterRoom)]
+					String actionsStr = actionEntities.toString();
+					
+					actionsStr = actionsStr.replaceAll("\\[", "");
+					actionsStr = actionsStr.replaceAll("\\]", "");
+					actionsStr = actionsStr.replaceAll(",", "");
+					actionsStr = actionsStr.trim();
+					
+					//id
+					builder.append(count).append("\t");
+					//data separated by space
+					builder.append(actionsStr).append(fileLinSeparator);
+				}
+				
+				count++;
+
+			}
+
+			
 
 		}
 		writeToFile(builder.toString(), convertedInstancesFileName);
@@ -2316,7 +2413,7 @@ public class InstantiationMiner {
 		shortestStatesOccurence.clear();
 		isLoaded = false;
 	}
-	
+
 	public int getMinimumTraceLength() {
 
 		if (minimumTraceLength == MIN_LENGTH_INITIAL_VALUE) {
@@ -2620,7 +2717,7 @@ public class InstantiationMiner {
 		return -1;
 	}
 
-	public void setListener(InstantiationMinerListener listener) {
+	public void setListener(TraceMinerListener listener) {
 		this.listener = listener;
 	}
 
@@ -2998,60 +3095,157 @@ public class InstantiationMiner {
 	public List<Integer> getCustomisedTracesIDs() {
 		return customeFilteringTraceIDs;
 	}
-	
+
 	public boolean saveTraces(String fileName, List<Integer> tracesIDs) {
-		
-		if(fileName == null || tracesIDs == null) {
+
+		if (fileName == null || tracesIDs == null) {
 			return false;
 		}
-		
+
 		boolean isSaved = false;
-		
+
 		Map<Integer, GraphPath> traces = getTraces(tracesIDs);
-		
-		String [] dummy = new String[0];
-//		dummy[0] = "dummy";
+
+		String[] dummy = new String[0];
+		// dummy[0] = "dummy";
 		List<GraphPath> paths = Arrays.asList(traces.values().toArray(new GraphPath[traces.size()]));
-		
+
 		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
-		
+
 		InstancesSaver tracesSaver = ins.new InstancesSaver(-1, fileName, dummy, dummy, paths);
 		try {
-//			ForkJoinPool mainPool = new ForkJoinPool();
-//			int res = mainPool.submit(tracesSaver).get();
+			// ForkJoinPool mainPool = new ForkJoinPool();
+			// int res = mainPool.submit(tracesSaver).get();
 			int res = tracesSaver.call();
-			
-			if(res == InstancesSaver.SUCCESSFUL) {
+
+			if (res == InstancesSaver.SUCCESSFUL) {
 				isSaved = true;
-			} else if(res == InstancesSaver.UNSUCCESSFUL) {
+			} else if (res == InstancesSaver.UNSUCCESSFUL) {
 				isSaved = false;
-				
+
 			}
-			
-//			mainPool.shutdown();
+
+			// mainPool.shutdown();
 
 			// if it returns false then maximum waiting time is reached
-//			if (!mainPool.awaitTermination(24, TimeUnit.DAYS)) {
-//				System.err.println("Time out! saving instances took more than specified maximum time ["
-//						+ 24 + " " + TimeUnit.DAYS + "]");
-//			}
-			
-			if(listener != null) {
+			// if (!mainPool.awaitTermination(24, TimeUnit.DAYS)) {
+			// System.err.println("Time out! saving instances took more than
+			// specified maximum time ["
+			// + 24 + " " + TimeUnit.DAYS + "]");
+			// }
+
+			if (listener != null) {
 				listener.onSavingFilteredTracesComplete(isSaved);
 			}
-			
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
-		
-		
+		}
+
 		return isSaved;
 	}
-	
+
 	public boolean areTracesLoaded() {
-		
+
 		return isLoaded;
+	}
+
+	public List<Map.Entry<String, Long>> findCommonEntities(GraphPath trace, int Occurrence) {
+
+		//finds the top (with Occurrence) in the given trace
+		List<GraphPath> traces = new LinkedList<GraphPath>();
+		traces.add(trace);
+		
+		List<String> actionsEntities = convertToEntities(trace);
+		
+		Map<String, Long> map = actionsEntities.stream()
+		        .collect(Collectors.groupingBy(w -> w, Collectors.counting()));
+
+		List<Map.Entry<String, Long>> result = map.entrySet().stream()
+		        .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+		        .limit(Occurrence)
+		        .collect(Collectors.toList());
+		
+//		convertedInstancesFileName = convertUsingActionEntities(traces);
+		
+//		generateClustersUsingTextMining();
+		//
+
+		return result;
+	}
+
+	public List<String> convertToEntities(GraphPath trace) {
+		
+		List<String> actions = trace.getTransitionActions();
+
+		List<String> actionEntities = new LinkedList<String>();
+		
+		for (String act : actions) {
+
+
+			ActionWrapper actionDetails = bigraphERActions.get(act);
+
+			// allow repetition of entities
+		
+			if (actionDetails != null) {
+				
+				// add entities from pre
+				BigraphWrapper pre = actionDetails.getPrecondition();
+
+				if (pre != null) {
+					Set<Entity> ents = pre.getControlMap().keySet();
+					
+					for(Entity ent : ents) {
+						actionEntities.add(ent.getName());
+					}
+				}
+			
+				BigraphWrapper post = actionDetails.getPostcondition();
+
+				if (post != null) {
+					Set<Entity> ents = post.getControlMap().keySet();
+					
+					for(Entity ent : ents) {
+						actionEntities.add(ent.getName());
+					}
+				}
+			}
+		}
+		
+		return actionEntities;
+
+	}
+	
+	public void setBigraphERFile(String bigraphERFile) {
+
+		brsParser = new BRSParser();
+
+		bigraphERActions = brsParser.parseBigraphERFile(bigraphERFile);
+	}
+	
+	public static void main(String []args) {
+		
+		TraceMiner m = new TraceMiner();
+		
+		String bigraphERFile = "D:/Bigrapher data/lero/example/lero.big";
+		
+		
+		m.setBigraphERFile(bigraphERFile);
+		
+		List<String> actions = new LinkedList<String>();
+		
+		actions.add("enter_room_during_working_hours");
+		actions.add("disable_hvac");
+		actions.add("connect_to_hvac");
+		
+		GraphPath p = new GraphPath();
+		
+		p.setTransitionActions(actions);
+		
+		List<Map.Entry<String, Long>> ents = m.findCommonEntities(p, 5);
+		
+		System.out.println(ents);
 	}
 
 }

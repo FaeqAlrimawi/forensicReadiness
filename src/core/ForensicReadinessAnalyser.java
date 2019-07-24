@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import core.instantiation.analysis.InstantiationMiner;
+import core.instantiation.analysis.TraceMiner;
 
 public class ForensicReadinessAnalyser {
 
@@ -13,7 +13,7 @@ public class ForensicReadinessAnalyser {
 	// facilitate the investigation of incidents that might be similar to the
 	// pattern
 
-	private InstantiationMiner tracesMiner;
+	private TraceMiner tracesMiner;
 
 	// ===Inputs
 	// traces files (PATH/*.json)
@@ -25,7 +25,7 @@ public class ForensicReadinessAnalyser {
 	private String systemModelFilePath;
 
 	public ForensicReadinessAnalyser() {
-		tracesMiner = new InstantiationMiner();
+		tracesMiner = new TraceMiner();
 	}
 
 	public ForensicReadinessAnalyser(String tracesFilePath, String LTSfolder, String systemModelFilePath) {
@@ -94,7 +94,7 @@ public class ForensicReadinessAnalyser {
 		
 		int result = tracesMiner.loadTracesFromFile();
 		
-		if(result == InstantiationMiner.TRACES_NOT_LOADED) {
+		if(result == TraceMiner.TRACES_NOT_LOADED) {
 			return false;
 		}
 		

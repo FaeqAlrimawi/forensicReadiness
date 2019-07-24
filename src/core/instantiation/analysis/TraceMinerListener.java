@@ -1,6 +1,6 @@
 package core.instantiation.analysis;
 
-public interface InstantiationMinerListener {
+public interface TraceMinerListener {
 	
 	//number of traces is read from files
 	public void onNumberOfTracesRead(int numOfTraces);
