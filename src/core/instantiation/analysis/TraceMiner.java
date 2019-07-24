@@ -3150,27 +3150,27 @@ public class TraceMiner {
 		return isLoaded;
 	}
 
-	public List<Map.Entry<String, Long>> findCommonEntities(GraphPath trace, int Occurrence) {
-
-		// finds the top (with Occurrence) in the given trace
-		List<GraphPath> traces = new LinkedList<GraphPath>();
-		traces.add(trace);
-
-		List<String> actionsEntities = convertToEntities(trace, null);
-
-		Map<String, Long> map = actionsEntities.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
-
-		List<Map.Entry<String, Long>> result = map.entrySet().stream()
-				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(Occurrence)
-				.collect(Collectors.toList());
-
-		// convertedInstancesFileName = convertUsingActionEntities(traces);
-
-		// generateClustersUsingTextMining();
-		//
-
-		return result;
-	}
+//	public List<Map.Entry<String, Long>> findCommonEntities(GraphPath trace, int Occurrence) {
+//
+//		// finds the top (with Occurrence) in the given trace
+//		List<GraphPath> traces = new LinkedList<GraphPath>();
+//		traces.add(trace);
+//
+//		List<String> actionsEntities = convertToEntities(trace, null);
+//
+//		Map<String, Long> map = actionsEntities.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
+//
+//		List<Map.Entry<String, Long>> result = map.entrySet().stream()
+//				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(Occurrence)
+//				.collect(Collectors.toList());
+//
+//		// convertedInstancesFileName = convertUsingActionEntities(traces);
+//
+//		// generateClustersUsingTextMining();
+//		//
+//
+//		return result;
+//	}
 
 	/**
 	 * Finds common entities (i.e. Classes/Controls) between all traces. It excludes entities given in the excluding list. It limits to topK entities
@@ -3243,6 +3243,7 @@ public class TraceMiner {
 					}
 				}
 
+				//add entities from post
 				BigraphWrapper post = actionDetails.getPostcondition();
 
 				if (post != null) {
