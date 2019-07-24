@@ -50,5 +50,8 @@ public class BigraphERTokens {
 	// defines * for bigraph composition
 	public static final String TOKEN_COMPOSITION = "\\*";
 	public static final int COMPOSITION = 13;
-
+	
+	// defines 1 for grounding a bigraph
+	public static final String TOKEN_1 = "1";
+	public static final int ONE_1 = 14;
 }

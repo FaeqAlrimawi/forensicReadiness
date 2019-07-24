@@ -1,10 +1,16 @@
 package application;
 
 import java.net.URL;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import core.brs.parser.ActionWrapper;
 import core.brs.parser.BRSParser;
 import core.brs.parser.BigraphWrapper;
+import core.brs.parser.utilities.BigraphNode;
+import it.uniud.mads.jlibbig.core.Node;
+import it.uniud.mads.jlibbig.core.std.Bigraph;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -56,23 +62,44 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-		launch(args)	;
-		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor | id) || Room.Device.id || id";
+//		launch(args)	;
+		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor | id) | id || Room.Device.id || id";
 		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor  id) || Room ";
 		String action = "react enter_room = " + exprs + "->" + exprs2 + "[1,2,3];";
+		String jsonState = "D:/Bigrapher data/lero/lero1/0.json";
+		String bigFile = "D:/Bigrapher data/lero/example/lero.big";
 		
 //		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor | Actor)";
 ////		System.out.println("expression: "+exprs+"\n\n");
 		BRSParser parser = new BRSParser();
 //		
-		ActionWrapper w = parser.parseBigraphERAction(action);
+		BigraphWrapper condition = parser.parseBigraphERCondition(exprs);
+//		ActionWrapper action = parser.parseBigraphERAction(action);
+//		BigraphWrapper big = parser.parseBigraphERState(jsonState);
+//		Map<String, ActionWrapper> actions = parser.parseBigraphERFile(bigFile);
+//		
+//		System.out.println(a.getActionName());
+		condition.printAll();
+//		for(ActionWrapper a : actions.values()) {
+//			System.out.println(a.getActionName());
+//		}
+//		Bigraph bigraph = big.getBigraphObject();
+//		
+//		Collection<Node> nodes = (Collection<Node>) bigraph.getNodes();
+//		for(Node n : nodes) {
+//			System.out.println("control: " + n + " parent: "+n.getParent());	
+//		}
 		
-		System.out.println(w.getActionName());
-		BigraphWrapper pre = w.getPrecondition();
-		BigraphWrapper post = w.getPostcondition();
+//		System.out.println(big.getBigraphObject());
+//		ActionWrapper w = parser.parseBigraphERAction(action);
 		
-		pre.printAll();
-		post.printAll();
+		
+//		System.out.println(w.getActionName());
+//		BigraphWrapper pre = w.getPrecondition();
+//		BigraphWrapper post = w.getPostcondition();
+//		
+//		pre.printAll();
+//		post.printAll();
 //		BigraphWrapper r = parser.parseBigraph(exprs);
 //
 //		BigraphExpression big = r.getBigraphExpression();

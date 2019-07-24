@@ -14,12 +14,16 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import core.brs.parser.Tokenizer.Token;
+import core.brs.parser.utilities.BigraphNode;
+import core.brs.parser.utilities.JSONTerms;
+import core.instantiation.analysis.FileManipulator;
 import cyberPhysical_Incident.BigraphExpression;
 import cyberPhysical_Incident.Connectivity;
 import cyberPhysical_Incident.CyberPhysicalIncidentFactory;
 import cyberPhysical_Incident.Entity;
-import ie.lero.spare.franalyser.utility.BigraphNode;
-import ie.lero.spare.franalyser.utility.JSONTerms;
+//import ie.lero.spare.franalyser.utility.BigraphNode;
+//import ie.lero.spare.franalyser.utility.JSONTerms;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
 import it.uniud.mads.jlibbig.core.std.Handle;
@@ -60,6 +64,199 @@ public class BRSParser {
 		List<String> actionComps = preProcessAction(action);
 
 		return parseBigraphERAction(actionComps);
+
+	}
+
+	public Map<String, ActionWrapper> parseBigraphERFile(String bigraphERFilePath) {
+
+		Map<String, ActionWrapper> actions = new HashMap<String, ActionWrapper>();
+		Map<String, String> bigStmts = new HashMap<String, String>();
+
+		// get statements separated by ;
+		boolean ignoreComments = true;
+		String[] lines = FileManipulator.readBigraphERFile(bigraphERFilePath, ignoreComments);
+
+		// String initBig = null;
+		// process big if any
+		for (String line : lines) {
+			line = line.trim();
+
+			// if big, then preserve to check that other actions don't contain
+			// any
+			if (line.startsWith(JSONTerms.BIG_BIG)) {
+
+				// big format: "big name = stmt"
+				// add to the map
+				String[] parts = line.split("=");
+
+				if (parts.length > 1) {
+
+					// get title
+					String title = parts[0];
+					title = title.replace(JSONTerms.BIG_BIG, "");
+					title = title.trim();
+
+					// if (initBig == null) {
+					// initBig = title;
+					// }
+
+					// get rest of statement
+					String bigSt = parts[1];
+
+					bigSt = bigSt.trim();
+
+					if (bigSt.contains(";")) {
+						bigSt = bigSt.replace(";", "");
+					}
+
+					bigStmts.put(title, bigSt);
+				}
+			}
+		}
+
+		// check if any big contains others
+		for (String bigTitle : bigStmts.keySet()) {
+			processBigStatment(bigTitle, bigStmts);
+		}
+
+		for (String line : lines) {
+			line = line.trim();
+			// if action
+			if (line.startsWith(JSONTerms.BIG_REACT)) {
+
+				// check if the actions refers to any bigs, if so then replace
+				// them
+				List<String> parts = processReactStatment(line, bigStmts);
+
+				ActionWrapper act = parseBigraphERAction(parts);
+
+				actions.put(act.getActionName(), act);
+			}
+
+		}
+
+		return actions;
+	}
+
+	protected String processBigStatment(String bigTitle, Map<String, String> bigStmts) {
+		// replaces the given stmt in the map
+		// processes all internal stmts in the given stmt if any found
+
+//		if (brsTokenizer == null) {
+//			createBRSTokenizer();
+//		}
+
+		String stmt = bigStmts.get(bigTitle);
+		StringBuilder newStmt = new StringBuilder();
+
+		System.out.println(bigTitle + ":" + stmt);
+
+		Tokenizer brsTok = createBRSTokenizer(); 
+		brsTok.tokenize(stmt);
+
+		boolean isConnection = false;
+
+		for (Token t : brsTok.getTokens()) {
+
+			if (t.token == BigraphERTokens.WORD && bigStmts.containsKey(t.sequence) && !isConnection) {
+				// if the token refers to another big then replace it
+				System.out.println("callinnnnng:: " + t.sequence + ":::" + bigStmts.get(t.sequence));
+				newStmt.append(processBigStatment(t.sequence, bigStmts));
+
+			} else {
+				if (t.token == BigraphERTokens.OPEN_BRACKET_CONNECTIVITY) {
+					isConnection = true;
+				} else if (t.token == BigraphERTokens.CLOSED_BRACKET_CONNECTIVITY) {
+					isConnection = false;
+				}
+
+				newStmt.append(t.sequence);
+			}
+		}
+
+		stmt = newStmt.toString();
+
+		System.out.println("Newwww:::" + bigTitle + ":" + stmt);
+		bigStmts.put(bigTitle, stmt);
+
+		return stmt;
+
+	}
+
+	protected List<String> processReactStatment(String react, Map<String, String> bigStmts) {
+		// replaces the given stmt in the map
+		// processes all internal stmts in the given stmt if any found
+
+//		if (brsTokenizer == null) {
+//			createBRSTokenizer();
+//		}
+
+		// String stmt = bigStmts.get(reactTitle);
+		List<String> reactParts = preProcessAction(react);
+
+		StringBuilder newStmt = new StringBuilder();
+
+		// check precondition
+		String pre = reactParts.get(ACTION_PRE_INDEX);
+
+		Tokenizer brsTok = createBRSTokenizer(); 
+		brsTok.tokenize(pre);
+
+		boolean isConnection = false;
+
+		for (Token t : brsTok.getTokens()) {
+
+			// if it is a not a Control ( and not a connection) and contained in
+			// the big stmts, then replace
+			if (t.token == BigraphERTokens.WORD && bigStmts.containsKey(t.sequence) && !isConnection) {
+				// if the token refers to another big then replace it
+				newStmt.append(bigStmts.get(t.sequence));
+
+			} else if (t.token == BigraphERTokens.OPEN_BRACKET_CONNECTIVITY) {
+				isConnection = true;
+			} else if (t.token == BigraphERTokens.CLOSED_BRACKET_CONNECTIVITY) {
+				isConnection = false;
+			}
+
+			else {
+				newStmt.append(t.sequence);
+			}
+		}
+
+		pre = newStmt.toString();
+
+		// check precondition
+		String post = reactParts.get(ACTION_PRE_INDEX);
+
+		newStmt.setLength(0);
+
+		brsTok.tokenize(post);
+
+		for (Token t : brsTok.getTokens()) {
+
+			if (t.token == BigraphERTokens.WORD && bigStmts.containsKey(t.sequence)) {
+				// if the token refers to another big then replace it
+				newStmt.append(bigStmts.get(t.sequence));
+
+			} else {
+				newStmt.append(t.sequence);
+			}
+		}
+
+		post = newStmt.toString();
+
+		// update the action
+		String title = reactParts.get(ACTION_NAME_INDEX);
+
+		// clear
+		reactParts.clear();
+
+		// add
+		reactParts.add(ACTION_NAME_INDEX, title);
+		reactParts.add(ACTION_PRE_INDEX, pre);
+		reactParts.add(ACTION_POST_INDEX, post);
+
+		return reactParts;
 
 	}
 
@@ -138,8 +335,8 @@ public class BRSParser {
 			// ===get action name
 			actionName = parts[0];
 
-			if (actionName.contains("react")) {
-				actionName = actionName.replace("react", "");
+			if (actionName.contains(JSONTerms.BIG_REACT)) {
+				actionName = actionName.replace(JSONTerms.BIG_REACT, "");
 			}
 
 			actionName = actionName.trim();
@@ -147,10 +344,10 @@ public class BRSParser {
 			// ===get conditions
 			String[] conditions = null;
 
-			if (parts[1].contains("->")) {
-				conditions = parts[1].split("->");
-			} else if (parts[1].contains("-->")) {
-				conditions = parts[1].split("-->");
+			if (parts[1].contains(JSONTerms.BIG_IMPLY)) {
+				conditions = parts[1].split(JSONTerms.BIG_IMPLY);
+			} else if (parts[1].contains(JSONTerms.BIG_IMPLY_2)) {
+				conditions = parts[1].split(JSONTerms.BIG_IMPLY_2);
 			}
 
 			if (conditions != null && conditions.length > 1) {
@@ -159,12 +356,12 @@ public class BRSParser {
 
 				// remove any ; and [] from post
 				if (post != null) {
-					if (post.contains("[")) {
-						post = post.substring(0, post.lastIndexOf("["));
+					if (post.contains(JSONTerms.BIG_AT)) {
+						post = post.substring(0, post.lastIndexOf(JSONTerms.BIG_AT));
 					}
 
-					if (post.contains(";")) {
-						post = post.replace(";", "");
+					if (post.contains(JSONTerms.BIG_SEMICOLON)) {
+						post = post.replace(JSONTerms.BIG_SEMICOLON, "");
 					}
 
 				}
@@ -268,7 +465,7 @@ public class BRSParser {
 	public BigraphWrapper parseBigraphERCondition(String BigrapherState) {
 
 		if (brsTokenizer == null) {
-			createBRSTokenizer();
+			brsTokenizer = createBRSTokenizer();
 		}
 
 		// brsExpression = BRScondition;
@@ -374,13 +571,43 @@ public class BRSParser {
 					// get last added root
 					// to be done
 					incrementRootSites();
+					isBigraphJuxta = false;
 				} else if (isEntityJuxta) {
 
 					// get current container
-					Entity ent = containers.getFirst();
-					String entityName = bigWrapper.getControlMap().get(ent);
+					if(containers.isEmpty()) {
+						//by default a root has a site
+						//if containers is empty then 
+//						Entity lastRoot = rootEntities.removeLast();
+//						Entity newRoot = instance.createEntity();
+//
+//						newRoot.setName("Root-" + rootNum);
+//						newRoot.getEntity().add(lastRoot);
+//						newRoot.getSite().
+//
+//						// ===update entities and containers
+//						addExtraRoot(newRoot.getName());
+//
+//						updateEntityContainer(entityName, newRoot.getName());
+//
+//						if (bigWrapper.getControlMap().containsKey(lastRoot)) {
+//							removeRoot(bigWrapper.getControlMap().get(lastRoot));
+//							updateEntityContainer(bigWrapper.getControlMap().get(lastRoot), newRoot.getName());
+//						}
+//
+//						// for now root is not added to all entities
+//						rootEntities.add(newRoot);
+//
+						isEntityJuxta = false;
+//
+//						rootNum++;
+					} else {
+						Entity ent = containers.getFirst();
+						String entityName = bigWrapper.getControlMap().get(ent);
+						addSite(entityName);	
+					}
+					
 
-					addSite(entityName);
 
 				} else {
 					// add site to last added entity
@@ -570,7 +797,9 @@ public class BRSParser {
 
 	/**
 	 * Parses the given state file into a BigraphWrapper
-	 * @param bigraphERStateFile the file path for the state. Should be json
+	 * 
+	 * @param bigraphERStateFile
+	 *            the file path for the state. Should be json
 	 * @return BigraphWrapper object that holds info about the state
 	 */
 	public BigraphWrapper parseBigraphERState(String bigraphERStateFile) {
@@ -582,11 +811,25 @@ public class BRSParser {
 		// clear data if any
 		clear();
 
-//		bigWrapper.setBigraphERString(bigraphERStateFile);
+		// bigWrapper.setBigraphERString(bigraphERStateFile);
 
 		// implement a conversion of a BigraphER state to a wrapper
 		//
 		//
+		JSONParser parser = new JSONParser();
+		try {
+
+			JSONObject state = (JSONObject) parser.parse(new FileReader(bigraphERStateFile));
+
+			Bigraph big = convertJSONtoBigraph(state);
+
+			bigWrapper.setCondition(false);
+			bigWrapper.setBigraphObject(big);
+
+		} catch (IOException | ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		return bigWrapper;
 	}
@@ -632,6 +875,8 @@ public class BRSParser {
 		LinkedList<Root> libBigRoots = new LinkedList<Root>();
 		LinkedList<Site> libBigSites = new LinkedList<Site>();
 
+		SignatureBuilder sigBuilder = new SignatureBuilder();
+
 		// number of roots, sites, and nodes respectively
 		int numOfRoots = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH))
 				.get(JSONTerms.BIGRAPHER_NUM_REGIONS).toString());
@@ -658,12 +903,16 @@ public class BRSParser {
 			// set node control
 			node.setControl(tmp);
 			nodes.put(node.getId(), node);
+
+			// create a sig for the state
+			sigBuilder.add(tmp, true, Integer.parseInt(tmpArity));
 		}
 
 		// get parents for nodes from the place_graph=>
 		// roots and sites numbers
 		ary = (JSONArray) ((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_ROOT_NODE);
 		it = ary.iterator();
+
 		while (it.hasNext()) {
 			tmpObj = (JSONObject) it.next(); // gets hold of node info
 			src = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_SOURCE).toString());
@@ -762,7 +1011,7 @@ public class BRSParser {
 
 		//// Create Bigraph Object \\\\\
 
-		Signature tmpSig = createSignatureFromStates(state);
+		Signature tmpSig = sigBuilder.makeSignature();
 
 		// if (tmpSig == null) {
 		// return null;
@@ -1020,9 +1269,9 @@ public class BRSParser {
 
 	}
 
-	protected void createBRSTokenizer() {
+	protected Tokenizer createBRSTokenizer() {
 
-		brsTokenizer = new Tokenizer();
+		Tokenizer brsTokenizer = new Tokenizer();
 
 		// order has importance
 
@@ -1031,6 +1280,7 @@ public class BRSParser {
 		brsTokenizer.add(BigraphERTokens.TOKEN_BIGRAPH_JUXTAPOSITION, BigraphERTokens.BIGRAPH_JUXTAPOSITION);
 		brsTokenizer.add(BigraphERTokens.TOKEN_ENTITY_JUXTAPOSITION, BigraphERTokens.ENTITY_JUXTAPOSITION);
 		brsTokenizer.add(BigraphERTokens.TOKEN_SITE, BigraphERTokens.SITE);
+		brsTokenizer.add(BigraphERTokens.TOKEN_1, BigraphERTokens.ONE_1);
 		brsTokenizer.add(BigraphERTokens.TOKEN_OPEN_BRACKET, BigraphERTokens.OPEN_BRACKET);
 		brsTokenizer.add(BigraphERTokens.TOKEN_CLOSED_BRACKET, BigraphERTokens.CLOSED_BRACKET);
 		brsTokenizer.add(BigraphERTokens.TOKEN_OPEN_BRACKET_CONNECTIVITY, BigraphERTokens.OPEN_BRACKET_CONNECTIVITY);
@@ -1041,6 +1291,7 @@ public class BRSParser {
 		brsTokenizer.add(BigraphERTokens.TOKEN_SMALL_SPACE, BigraphERTokens.SMALL_SPACE);
 		brsTokenizer.add(BigraphERTokens.TOKEN_WORD, BigraphERTokens.WORD);
 
+		return brsTokenizer;
 	}
 
 	public void clear() {
