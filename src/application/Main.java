@@ -73,16 +73,20 @@ public class Main extends Application {
 ////		System.out.println("expression: "+exprs+"\n\n");
 		BRSParser parser = new BRSParser();
 //		
-		BigraphWrapper condition = parser.parseBigraphERCondition(exprs);
+//		BigraphWrapper condition = parser.parseBigraphERCondition(exprs);
 //		ActionWrapper action = parser.parseBigraphERAction(action);
 //		BigraphWrapper big = parser.parseBigraphERState(jsonState);
-//		Map<String, ActionWrapper> actions = parser.parseBigraphERFile(bigFile);
+		Map<String, ActionWrapper> actions = parser.parseBigraphERFile(bigFile);
 //		
 //		System.out.println(a.getActionName());
-		condition.printAll();
-//		for(ActionWrapper a : actions.values()) {
-//			System.out.println(a.getActionName());
-//		}
+//		condition.printAll();
+		for(ActionWrapper a : actions.values()) {
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+			System.out.println(a.getActionName());
+			System.out.println(a.getPrecondition().getBigraphERString());
+			System.out.println(a.getPostcondition().getBigraphERString());
+			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+		}
 //		Bigraph bigraph = big.getBigraphObject();
 //		
 //		Collection<Node> nodes = (Collection<Node>) bigraph.getNodes();

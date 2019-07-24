@@ -142,16 +142,16 @@ public class BRSParser {
 		// replaces the given stmt in the map
 		// processes all internal stmts in the given stmt if any found
 
-//		if (brsTokenizer == null) {
-//			createBRSTokenizer();
-//		}
+		// if (brsTokenizer == null) {
+		// createBRSTokenizer();
+		// }
 
 		String stmt = bigStmts.get(bigTitle);
 		StringBuilder newStmt = new StringBuilder();
 
-		System.out.println(bigTitle + ":" + stmt);
+		// System.out.println(bigTitle + ":" + stmt);
 
-		Tokenizer brsTok = createBRSTokenizer(); 
+		Tokenizer brsTok = createBRSTokenizer();
 		brsTok.tokenize(stmt);
 
 		boolean isConnection = false;
@@ -160,7 +160,8 @@ public class BRSParser {
 
 			if (t.token == BigraphERTokens.WORD && bigStmts.containsKey(t.sequence) && !isConnection) {
 				// if the token refers to another big then replace it
-				System.out.println("callinnnnng:: " + t.sequence + ":::" + bigStmts.get(t.sequence));
+				// System.out.println("callinnnnng:: " + t.sequence + ":::" +
+				// bigStmts.get(t.sequence));
 				newStmt.append(processBigStatment(t.sequence, bigStmts));
 
 			} else {
@@ -176,7 +177,7 @@ public class BRSParser {
 
 		stmt = newStmt.toString();
 
-		System.out.println("Newwww:::" + bigTitle + ":" + stmt);
+		// System.out.println("Newwww:::" + bigTitle + ":" + stmt);
 		bigStmts.put(bigTitle, stmt);
 
 		return stmt;
@@ -187,9 +188,9 @@ public class BRSParser {
 		// replaces the given stmt in the map
 		// processes all internal stmts in the given stmt if any found
 
-//		if (brsTokenizer == null) {
-//			createBRSTokenizer();
-//		}
+		// if (brsTokenizer == null) {
+		// createBRSTokenizer();
+		// }
 
 		// String stmt = bigStmts.get(reactTitle);
 		List<String> reactParts = preProcessAction(react);
@@ -199,7 +200,7 @@ public class BRSParser {
 		// check precondition
 		String pre = reactParts.get(ACTION_PRE_INDEX);
 
-		Tokenizer brsTok = createBRSTokenizer(); 
+		Tokenizer brsTok = createBRSTokenizer();
 		brsTok.tokenize(pre);
 
 		boolean isConnection = false;
@@ -212,13 +213,13 @@ public class BRSParser {
 				// if the token refers to another big then replace it
 				newStmt.append(bigStmts.get(t.sequence));
 
-			} else if (t.token == BigraphERTokens.OPEN_BRACKET_CONNECTIVITY) {
-				isConnection = true;
-			} else if (t.token == BigraphERTokens.CLOSED_BRACKET_CONNECTIVITY) {
-				isConnection = false;
-			}
+			} else {
+				if (t.token == BigraphERTokens.OPEN_BRACKET_CONNECTIVITY) {
+					isConnection = true;
+				} else if (t.token == BigraphERTokens.CLOSED_BRACKET_CONNECTIVITY) {
+					isConnection = false;
+				}
 
-			else {
 				newStmt.append(t.sequence);
 			}
 		}
@@ -226,7 +227,7 @@ public class BRSParser {
 		pre = newStmt.toString();
 
 		// check precondition
-		String post = reactParts.get(ACTION_PRE_INDEX);
+		String post = reactParts.get(ACTION_POST_INDEX);
 
 		newStmt.setLength(0);
 
@@ -575,39 +576,39 @@ public class BRSParser {
 				} else if (isEntityJuxta) {
 
 					// get current container
-					if(containers.isEmpty()) {
-						//by default a root has a site
-						//if containers is empty then 
-//						Entity lastRoot = rootEntities.removeLast();
-//						Entity newRoot = instance.createEntity();
-//
-//						newRoot.setName("Root-" + rootNum);
-//						newRoot.getEntity().add(lastRoot);
-//						newRoot.getSite().
-//
-//						// ===update entities and containers
-//						addExtraRoot(newRoot.getName());
-//
-//						updateEntityContainer(entityName, newRoot.getName());
-//
-//						if (bigWrapper.getControlMap().containsKey(lastRoot)) {
-//							removeRoot(bigWrapper.getControlMap().get(lastRoot));
-//							updateEntityContainer(bigWrapper.getControlMap().get(lastRoot), newRoot.getName());
-//						}
-//
-//						// for now root is not added to all entities
-//						rootEntities.add(newRoot);
-//
+					if (containers.isEmpty()) {
+						// by default a root has a site
+						// if containers is empty then
+						// Entity lastRoot = rootEntities.removeLast();
+						// Entity newRoot = instance.createEntity();
+						//
+						// newRoot.setName("Root-" + rootNum);
+						// newRoot.getEntity().add(lastRoot);
+						// newRoot.getSite().
+						//
+						// // ===update entities and containers
+						// addExtraRoot(newRoot.getName());
+						//
+						// updateEntityContainer(entityName, newRoot.getName());
+						//
+						// if (bigWrapper.getControlMap().containsKey(lastRoot))
+						// {
+						// removeRoot(bigWrapper.getControlMap().get(lastRoot));
+						// updateEntityContainer(bigWrapper.getControlMap().get(lastRoot),
+						// newRoot.getName());
+						// }
+						//
+						// // for now root is not added to all entities
+						// rootEntities.add(newRoot);
+						//
 						isEntityJuxta = false;
-//
-//						rootNum++;
+						//
+						// rootNum++;
 					} else {
 						Entity ent = containers.getFirst();
 						String entityName = bigWrapper.getControlMap().get(ent);
-						addSite(entityName);	
+						addSite(entityName);
 					}
-					
-
 
 				} else {
 					// add site to last added entity
