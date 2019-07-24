@@ -1514,58 +1514,57 @@ public class TraceMiner {
 			List<String> actions = path.getTransitionActions();
 
 			int count = 0;
-			
+
 			for (String act : actions) {
 				List<String> actionEntities = new LinkedList<String>();
 
 				ActionWrapper actionDetails = bigraphERActions.get(act);
 
 				// allow repetition of entities
-			
+
 				if (actionDetails != null) {
-					
+
 					// add entities from pre
 					BigraphWrapper pre = actionDetails.getPrecondition();
 
 					if (pre != null) {
 						Set<Entity> ents = pre.getControlMap().keySet();
-						
-						for(Entity ent : ents) {
+
+						for (Entity ent : ents) {
 							actionEntities.add(ent.getName());
 						}
 					}
-				
+
 					BigraphWrapper post = actionDetails.getPostcondition();
 
 					if (post != null) {
 						Set<Entity> ents = post.getControlMap().keySet();
-						
-						for(Entity ent : ents) {
+
+						for (Entity ent : ents) {
 							actionEntities.add(ent.getName());
 						}
 					}
 				}
-				
-				if(!actionEntities.isEmpty()) {
-					// === set record(instance_id [states (1 2 3) actions (enterRoom)]
+
+				if (!actionEntities.isEmpty()) {
+					// === set record(instance_id [states (1 2 3) actions
+					// (enterRoom)]
 					String actionsStr = actionEntities.toString();
-					
+
 					actionsStr = actionsStr.replaceAll("\\[", "");
 					actionsStr = actionsStr.replaceAll("\\]", "");
 					actionsStr = actionsStr.replaceAll(",", "");
 					actionsStr = actionsStr.trim();
-					
-					//id
+
+					// id
 					builder.append(count).append("\t");
-					//data separated by space
+					// data separated by space
 					builder.append(actionsStr).append(fileLinSeparator);
 				}
-				
+
 				count++;
 
 			}
-
-			
 
 		}
 		writeToFile(builder.toString(), convertedInstancesFileName);
@@ -3153,98 +3152,159 @@ public class TraceMiner {
 
 	public List<Map.Entry<String, Long>> findCommonEntities(GraphPath trace, int Occurrence) {
 
-		//finds the top (with Occurrence) in the given trace
+		// finds the top (with Occurrence) in the given trace
 		List<GraphPath> traces = new LinkedList<GraphPath>();
 		traces.add(trace);
-		
-		List<String> actionsEntities = convertToEntities(trace);
-		
-		Map<String, Long> map = actionsEntities.stream()
-		        .collect(Collectors.groupingBy(w -> w, Collectors.counting()));
+
+		List<String> actionsEntities = convertToEntities(trace, null);
+
+		Map<String, Long> map = actionsEntities.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
 
 		List<Map.Entry<String, Long>> result = map.entrySet().stream()
-		        .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-		        .limit(Occurrence)
-		        .collect(Collectors.toList());
-		
-//		convertedInstancesFileName = convertUsingActionEntities(traces);
-		
-//		generateClustersUsingTextMining();
+				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(Occurrence)
+				.collect(Collectors.toList());
+
+		// convertedInstancesFileName = convertUsingActionEntities(traces);
+
+		// generateClustersUsingTextMining();
 		//
 
 		return result;
 	}
 
-	public List<String> convertToEntities(GraphPath trace) {
-		
+	/**
+	 * Finds common entities (i.e. Classes/Controls) between all traces. It excludes entities given in the excluding list. It limits to topK entities
+	 * @param traces The list of traces to search for common entities
+	 * @param excluding The list of entities to exclude
+	 * @param topK The top K entities to find
+	 * @return The list of top K entities in the given traces with their occurrence
+	 */
+	public List<Map.Entry<String, Long>> findCommonEntities(List<GraphPath> traces, List<String> excluding,
+			int topK) {
+
+		// finds the top (with Occurrence) in the given trace
+		// List<GraphPath> traces = new LinkedList<GraphPath>();
+		// traces.add(trace);
+		List<String> actionsEntities = new LinkedList<String>();
+
+		for (GraphPath trace : traces) {
+			actionsEntities.addAll(convertToEntities(trace, excluding));
+		}
+
+		Map<String, Long> map = actionsEntities.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
+
+		List<Map.Entry<String, Long>> result = map.entrySet().stream()
+				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(topK)
+				.collect(Collectors.toList());
+
+		// convertedInstancesFileName = convertUsingActionEntities(traces);
+
+		// generateClustersUsingTextMining();
+		//
+
+		return result;
+	}
+
+	/**
+	 * converts the given trace into a list of entities that it contains
+	 * @param trace
+	 * @param excluding The list of entities to exclude from the list
+	 * @return List of entities (Classes/Controls)
+	 */
+	public List<String> convertToEntities(GraphPath trace, List<String> excluding) {
+
 		List<String> actions = trace.getTransitionActions();
 
 		List<String> actionEntities = new LinkedList<String>();
-		
-		for (String act : actions) {
 
+		for (String act : actions) {
 
 			ActionWrapper actionDetails = bigraphERActions.get(act);
 
 			// allow repetition of entities
-		
+
 			if (actionDetails != null) {
-				
+
 				// add entities from pre
 				BigraphWrapper pre = actionDetails.getPrecondition();
 
 				if (pre != null) {
 					Set<Entity> ents = pre.getControlMap().keySet();
-					
-					for(Entity ent : ents) {
-						actionEntities.add(ent.getName());
+
+					for (Entity ent : ents) {
+
+						String name = ent.getName();
+
+						if (excluding != null && excluding.contains(name)) {
+							continue;
+						}
+
+						actionEntities.add(name);
 					}
 				}
-			
+
 				BigraphWrapper post = actionDetails.getPostcondition();
 
 				if (post != null) {
 					Set<Entity> ents = post.getControlMap().keySet();
-					
-					for(Entity ent : ents) {
-						actionEntities.add(ent.getName());
+
+					for (Entity ent : ents) {
+
+						String name = ent.getName();
+
+						if (excluding != null && excluding.contains(name)) {
+							continue;
+						}
+
+						actionEntities.add(name);
 					}
 				}
 			}
 		}
-		
+
 		return actionEntities;
 
 	}
-	
+
 	public void setBigraphERFile(String bigraphERFile) {
 
 		brsParser = new BRSParser();
 
 		bigraphERActions = brsParser.parseBigraphERFile(bigraphERFile);
 	}
-	
-	public static void main(String []args) {
-		
+
+	public static void main(String[] args) {
+
 		TraceMiner m = new TraceMiner();
-		
+
 		String bigraphERFile = "D:/Bigrapher data/lero/example/lero.big";
-		
-		
+
 		m.setBigraphERFile(bigraphERFile);
-		
+
 		List<String> actions = new LinkedList<String>();
-		
+
 		actions.add("enter_room_during_working_hours");
 		actions.add("disable_hvac");
 		actions.add("connect_to_hvac");
-		
+
 		GraphPath p = new GraphPath();
-		
+
 		p.setTransitionActions(actions);
+
+		List<GraphPath> traces = new LinkedList<GraphPath>();
+
+		traces.add(p);
+
+		//finds the top k
+		int topK = 10;
 		
-		List<Map.Entry<String, Long>> ents = m.findCommonEntities(p, 5);
+		//exclude terms from this list
+		List<String> excluding = new LinkedList<String>();
 		
+		excluding.add("RulesKeywords");
+		
+		List<Map.Entry<String, Long>> ents = m.findCommonEntities(traces, excluding, topK);
+
 		System.out.println(ents);
 	}
 
