@@ -1,15 +1,35 @@
 package core.brs.parser;
 
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.common.util.EList;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import cyberPhysical_Incident.BigraphExpression;
 import cyberPhysical_Incident.Connectivity;
 import cyberPhysical_Incident.CyberPhysicalIncidentFactory;
 import cyberPhysical_Incident.Entity;
+import ie.lero.spare.franalyser.utility.BigraphNode;
+import ie.lero.spare.franalyser.utility.JSONTerms;
+import it.uniud.mads.jlibbig.core.std.Bigraph;
+import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
+import it.uniud.mads.jlibbig.core.std.Handle;
+import it.uniud.mads.jlibbig.core.std.InnerName;
+import it.uniud.mads.jlibbig.core.std.Node;
+import it.uniud.mads.jlibbig.core.std.OuterName;
+import it.uniud.mads.jlibbig.core.std.Root;
+import it.uniud.mads.jlibbig.core.std.Signature;
+import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
+import it.uniud.mads.jlibbig.core.std.Site;
 
 public class BRSParser {
 
@@ -44,15 +64,17 @@ public class BRSParser {
 	}
 
 	/**
-	 * Parses a given action parts (name, pre, post) written using BigraphER syntax.
+	 * Parses a given action parts (name, pre, post) written using BigraphER
+	 * syntax.
 	 * 
-	 * @param actionParts a List containing the name, pre, and post, respectively
-	 *        
+	 * @param actionParts
+	 *            a List containing the name, pre, and post, respectively
+	 * 
 	 * @return ActionWrapper object which contains information about the action
 	 *         (e.g., name, pre, and post)
 	 */
 	public ActionWrapper parseBigraphERAction(List<String> actionParts) {
-		
+
 		ActionWrapper actionWrapper = new ActionWrapper();
 
 		BigraphWrapper preWrapper = null;
@@ -67,17 +89,17 @@ public class BRSParser {
 		String post = actionParts.get(ACTION_POST_INDEX);
 
 		if (pre != null) {
-			preWrapper = parseBigraph(pre);
-			
-			if(preWrapper != null) {
+			preWrapper = parseBigraphERCondition(pre);
+
+			if (preWrapper != null) {
 				preWrapper.setCondition(true);
 			}
 		}
 
 		if (post != null) {
-			postWrapper = parseBigraph(post);
-			
-			if(postWrapper != null) {
+			postWrapper = parseBigraphERCondition(post);
+
+			if (postWrapper != null) {
 				postWrapper.setCondition(true);
 			}
 		}
@@ -87,8 +109,9 @@ public class BRSParser {
 		actionWrapper.setPostcondition(postWrapper);
 
 		return actionWrapper;
-		
+
 	}
+
 	protected List<String> preProcessAction(String action) {
 
 		// returns in the list
@@ -199,10 +222,10 @@ public class BRSParser {
 			addChildren(entityName, ent.getEntity());
 		}
 
-		if(bigWrapper != null) {
+		if (bigWrapper != null) {
 			bigWrapper.setCondition(true);
 		}
-		
+
 		return bigWrapper;
 
 	}
@@ -242,7 +265,7 @@ public class BRSParser {
 	 * @return BigraphWrapper object that contains various information about the
 	 *         given BRS
 	 */
-	public BigraphWrapper parseBigraph(String BigrapherState) {
+	public BigraphWrapper parseBigraphERCondition(String BigrapherState) {
 
 		if (brsTokenizer == null) {
 			createBRSTokenizer();
@@ -538,11 +561,334 @@ public class BRSParser {
 
 		bigWrapper.setBigraphExpression(newBRS);
 
-		if(bigWrapper != null) {
+		if (bigWrapper != null) {
 			bigWrapper.setCondition(true);
 		}
-		
+
 		return bigWrapper;
+	}
+
+	/**
+	 * Parses the given state file into a BigraphWrapper
+	 * @param bigraphERStateFile the file path for the state. Should be json
+	 * @return BigraphWrapper object that holds info about the state
+	 */
+	public BigraphWrapper parseBigraphERState(String bigraphERStateFile) {
+
+		// brsExpression = BRScondition;
+		BigraphWrapper bigWrpr = new BigraphWrapper();
+		bigWrapper = bigWrpr;
+
+		// clear data if any
+		clear();
+
+//		bigWrapper.setBigraphERString(bigraphERStateFile);
+
+		// implement a conversion of a BigraphER state to a wrapper
+		//
+		//
+
+		return bigWrapper;
+	}
+
+	/**
+	 * converts a given bigraph in JSON format to a Bigraph object from the
+	 * LibBig library. A signature should be created first using the
+	 * buildSignature method.
+	 * 
+	 * @param state
+	 *            the JSON object containing the bigtaph
+	 * @return Bigraph object
+	 */
+	// updated implementation of the convertJSONtoBigraph method that correspond
+	// to Bigrapher v1.7.0
+	// need to update CONTROL_ID & CONTROL_ARITY in JSONTerms class before
+	// execution
+	public Bigraph convertJSONtoBigraph(JSONObject state) {
+
+		String tmp;
+		String tmpArity = null;
+		JSONObject tmpObj;
+		JSONObject tmpCtrl;
+		HashMap<String, BigraphNode> nodes = new HashMap<String, BigraphNode>();
+		BigraphNode node;
+		JSONArray ary;
+		JSONArray innerAry;
+		JSONArray outerAry;
+		JSONArray portAry;
+		Iterator<JSONObject> it;
+		Iterator<JSONObject> itInner;
+		Iterator<JSONObject> itOuter;
+		Iterator<JSONObject> itPort;
+		int src, target;
+		LinkedList<String> outerNames = new LinkedList<String>();
+		LinkedList<String> innerNames = new LinkedList<String>();
+		LinkedList<String> outerNamesFull = new LinkedList<String>();
+		LinkedList<String> innerNamesFull = new LinkedList<String>();
+
+		HashMap<String, OuterName> libBigOuterNames = new HashMap<String, OuterName>();
+		HashMap<String, InnerName> libBigInnerNames = new HashMap<String, InnerName>();
+		HashMap<String, Node> libBigNodes = new HashMap<String, Node>();
+		LinkedList<Root> libBigRoots = new LinkedList<Root>();
+		LinkedList<Site> libBigSites = new LinkedList<Site>();
+
+		// number of roots, sites, and nodes respectively
+		int numOfRoots = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH))
+				.get(JSONTerms.BIGRAPHER_NUM_REGIONS).toString());
+		int numOfSites = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH))
+				.get(JSONTerms.BIGRAPHER_NUM_SITES).toString());
+		int numOfNodes = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH))
+				.get(JSONTerms.BIGRAPHER_NUM_NODES).toString());
+		int edgeNumber = 0;
+
+		// get controls & their arity [defines signature]. Controls are assumed
+		// to be active (i.e. true)
+		ary = (JSONArray) state.get(JSONTerms.BIGRAPHER_NODES);
+		it = ary.iterator();
+		while (it.hasNext()) {
+			node = new BigraphNode();
+			tmpObj = (JSONObject) it.next(); // gets hold of node info
+
+			tmpCtrl = (JSONObject) tmpObj.get(JSONTerms.BIGRAPHER_CONTROL);
+			tmp = tmpCtrl.get(JSONTerms.BIGRAPHER_CNTRL_NAME).toString();
+			tmpArity = tmpCtrl.get(JSONTerms.BIGRAPHER_CNTRL_ARITY).toString();
+
+			// set node id
+			node.setId(tmpObj.get(JSONTerms.BIGRAPHER_NODE_ID).toString());
+			// set node control
+			node.setControl(tmp);
+			nodes.put(node.getId(), node);
+		}
+
+		// get parents for nodes from the place_graph=>
+		// roots and sites numbers
+		ary = (JSONArray) ((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_ROOT_NODE);
+		it = ary.iterator();
+		while (it.hasNext()) {
+			tmpObj = (JSONObject) it.next(); // gets hold of node info
+			src = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_SOURCE).toString());
+			target = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_TARGET).toString());
+			nodes.get(Integer.toString(target)).setParentRoot(src);
+		}
+
+		ary = (JSONArray) ((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_ROOT_SITE);
+		it = ary.iterator();
+		while (it.hasNext()) {
+			tmpObj = (JSONObject) it.next(); // gets hold of node info
+			src = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_SOURCE).toString());
+			target = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_TARGET).toString());
+			nodes.get(Integer.toString(target)).setParentRoot(src);
+		}
+
+		ary = (JSONArray) ((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_NODE_NODE);
+		it = ary.iterator();
+		while (it.hasNext()) {
+			tmpObj = (JSONObject) it.next(); // gets hold of node info
+			src = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_SOURCE).toString());
+			target = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_TARGET).toString());
+
+			// set parent node in the target node
+			nodes.get(Integer.toString(target)).setParent(nodes.get(Integer.toString(src)));
+			// add child node to source node
+			nodes.get(Integer.toString(src)).addChildNode(nodes.get(Integer.toString(target)));
+
+		}
+
+		// get outer names and inner names for the nodes. Currently, focus on
+		// outer names
+		// while inner names are extracted they are not updated in the nodes
+		ary = (JSONArray) (state.get(JSONTerms.BIGRAPHER_LINK_GRAPH));
+		it = ary.iterator();
+		while (it.hasNext()) {
+			tmpObj = (JSONObject) it.next(); // gets hold of node info
+			outerNames.clear();
+			innerNames.clear();
+
+			// get outer names
+			outerAry = (JSONArray) (tmpObj.get(JSONTerms.BIGRAPHER_OUTER));
+			innerAry = (JSONArray) (tmpObj.get(JSONTerms.BIGRAPHER_INNER));
+			portAry = (JSONArray) (tmpObj.get(JSONTerms.BIGRAPHER_PORTS));
+
+			// get outernames
+			for (int i = 0; i < outerAry.size(); i++) {
+				JSONObject tmpOuter = (JSONObject) outerAry.get(i);
+
+				outerNames.add(tmpOuter.get(JSONTerms.BIGRAPHER_NAME).toString());
+			}
+
+			// get inner names
+			for (int i = 0; i < innerAry.size(); i++) {
+				JSONObject tmpInner = (JSONObject) innerAry.get(i);
+
+				innerNames.add(tmpInner.get(JSONTerms.BIGRAPHER_NAME).toString());
+			}
+
+			// get nodes connected to outer names. Inner names should be
+			// considered
+			if (outerNames.size() > 0) {
+				for (int i = 0; i < portAry.size(); i++) {
+					JSONObject tmpPort = (JSONObject) portAry.get(i);
+					node = nodes.get(tmpPort.get(JSONTerms.BIGRAPHER_NODE_ID).toString());
+
+					node.addOuterNames(outerNames);
+					node.addInnerNames(innerNames);
+				}
+			} else { // if there are no outer names, then create edges by
+						// creating outernames, adding them to the nodes, then
+						// closing the outername
+
+				for (int i = 0; i < portAry.size(); i++) {
+					JSONObject tmpPort = (JSONObject) portAry.get(i);
+					node = nodes.get(tmpPort.get(JSONTerms.BIGRAPHER_NODE_ID).toString());
+
+					node.addOuterName("edge" + edgeNumber, true);
+				}
+				edgeNumber++;
+			}
+
+			// add inner names to nodes
+			if (innerNames.size() > 0) {
+				for (int i = 0; i < portAry.size(); i++) {
+					JSONObject tmpPort = (JSONObject) portAry.get(i);
+					node = nodes.get(tmpPort.get(JSONTerms.BIGRAPHER_NODE_ID).toString());
+					;
+					node.addInnerNames(innerNames);
+				}
+			}
+		}
+
+		outerNamesFull.addAll(outerNames);
+		innerNamesFull.addAll(innerNames);
+
+		//// Create Bigraph Object \\\\\
+
+		Signature tmpSig = createSignatureFromStates(state);
+
+		// if (tmpSig == null) {
+		// return null;
+		// }
+
+		BigraphBuilder biBuilder = new BigraphBuilder(tmpSig);
+
+		// create roots for the bigraph
+		for (int i = 0; i < numOfRoots; i++) {
+			libBigRoots.add(biBuilder.addRoot(i));
+		}
+
+		// create outer names
+		OuterName tmpNm;
+		HashMap<String, Boolean> isClosedMap = new HashMap<String, Boolean>();
+
+		for (BigraphNode nd : nodes.values()) {
+			for (BigraphNode.OuterName nm : nd.getOuterNamesObjects()) {
+				if (libBigOuterNames.get(nm.getName()) == null) {
+					tmpNm = biBuilder.addOuterName(nm.getName());
+					libBigOuterNames.put(nm.getName(), tmpNm);
+					isClosedMap.put(nm.getName(), nm.isClosed());
+				}
+			}
+		}
+
+		// create inner names
+		// consider closing iner names also (future work)
+		for (String inner : innerNamesFull) {
+			libBigInnerNames.put(inner, biBuilder.addInnerName(inner));
+		}
+
+		// initial creation of nodes
+		for (BigraphNode nd : nodes.values()) {
+			if (libBigNodes.containsKey(nd.getId())) {
+				continue;
+			}
+			createNode(nd, biBuilder, libBigRoots, libBigOuterNames, libBigNodes);
+		}
+
+		// close outernames
+		for (OuterName nm : libBigOuterNames.values()) {
+			if (isClosedMap.get(nm.getName())) {
+				biBuilder.closeOuterName(nm);
+			}
+		}
+
+		// add sites to bigraph (probably for states they don't have sites)
+		for (BigraphNode n : nodes.values()) {
+			if (n.hasSite()) {
+				biBuilder.addSite(libBigNodes.get(n.getId()));
+			}
+		}
+
+		return biBuilder.makeBigraph();
+	}
+
+	private static Node createNode(BigraphNode node, BigraphBuilder biBuilder, LinkedList<Root> libBigRoots,
+			HashMap<String, OuterName> outerNames, HashMap<String, Node> nodes) {
+
+		LinkedList<Handle> names = new LinkedList<Handle>();
+
+		for (String n : node.getOuterNames()) {
+			names.add(outerNames.get(n));
+		}
+
+		// if the parent is a root
+		if (node.isParentRoot()) { // if the parent is a root
+
+			Node n = biBuilder.addNode(node.getControl(), libBigRoots.get(node.getParentRoot()), names);
+			nodes.put(node.getId(), n);
+			return n;
+		}
+
+		// if the parent is already created as a node in the bigraph
+		if (nodes.containsKey(node.getParent().getId())) {
+
+			Node n = biBuilder.addNode(node.getControl(), nodes.get(node.getParent().getId()), names);
+			nodes.put(node.getId(), n);
+			return n;
+		}
+
+		Node n = biBuilder.addNode(node.getControl(),
+				createNode(node.getParent(), biBuilder, libBigRoots, outerNames, nodes), names);
+		nodes.put(node.getId(), n);
+		return n;
+
+	}
+
+	/**
+	 * Create a signature from a given state
+	 * 
+	 * @return
+	 */
+	public Signature createSignatureFromStates(JSONObject state) {
+		SignatureBuilder sigBuilder = new SignatureBuilder();
+		JSONArray ary;
+		Iterator<?> it;
+		JSONObject tmpObj, tmpCtrl;
+		String tmp, tmpArity;
+		LinkedList<String> controls = new LinkedList<String>();
+		// int numOfStates = createTransitionSystem().getNumberOfStates();
+		// JSONParser parser = new JSONParser();
+
+		// read state from file
+		// state = (JSONObject) parser.parse(new FileReader(outputFolder + "/" +
+		// i + ".json"));
+		ary = (JSONArray) state.get(JSONTerms.BIGRAPHER_NODES);
+		it = ary.iterator();
+		while (it.hasNext()) {
+			tmpObj = (JSONObject) it.next(); // gets hold of node info
+
+			tmpCtrl = (JSONObject) tmpObj.get(JSONTerms.BIGRAPHER_CONTROL);
+			tmp = tmpCtrl.get(JSONTerms.BIGRAPHER_CNTRL_NAME).toString();
+			tmpArity = tmpCtrl.get(JSONTerms.BIGRAPHER_CNTRL_ARITY).toString();
+
+			if (!controls.contains(tmp)) {
+				// to avoid duplicates
+				controls.add(tmp);
+				sigBuilder.add(tmp, true, Integer.parseInt(tmpArity));
+			}
+
+		}
+
+		return sigBuilder.makeSignature();
+
 	}
 
 	protected void addSite(String entityName) {
