@@ -67,6 +67,11 @@ public class BRSParser {
 
 	}
 
+	/**
+	 * Parses the actions (aka reaction rules) in the given BigraphER file (.big)
+	 * @param bigraphERFilePath the BigraphER file (.big)
+	 * @return A map of the actions in which the key is the action name and the value is an ActionWrapper containing action info (pre, post)
+	 */
 	public Map<String, ActionWrapper> parseBigraphERFile(String bigraphERFilePath) {
 
 		Map<String, ActionWrapper> actions = new HashMap<String, ActionWrapper>();
@@ -165,6 +170,11 @@ public class BRSParser {
 				newStmt.append(processBigStatment(t.sequence, bigStmts));
 
 			} else {
+				
+//				if (t.token == BigraphERTokens.SMALL_SPACE) {
+//					System.out.println("Spaaaaaaaaaaaaace");
+//				}
+				
 				if (t.token == BigraphERTokens.OPEN_BRACKET_CONNECTIVITY) {
 					isConnection = true;
 				} else if (t.token == BigraphERTokens.CLOSED_BRACKET_CONNECTIVITY) {
