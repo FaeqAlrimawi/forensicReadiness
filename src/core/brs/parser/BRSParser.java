@@ -4,8 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.plaf.basic.BasicSliderUI.ActionScroller;
-
 import org.eclipse.emf.common.util.EList;
 
 import cyberPhysical_Incident.BigraphExpression;
@@ -70,10 +68,18 @@ public class BRSParser {
 
 		if (pre != null) {
 			preWrapper = parseBigraph(pre);
+			
+			if(preWrapper != null) {
+				preWrapper.setCondition(true);
+			}
 		}
 
 		if (post != null) {
 			postWrapper = parseBigraph(post);
+			
+			if(postWrapper != null) {
+				postWrapper.setCondition(true);
+			}
 		}
 
 		actionWrapper.setActionName(actionName);
@@ -193,6 +199,10 @@ public class BRSParser {
 			addChildren(entityName, ent.getEntity());
 		}
 
+		if(bigWrapper != null) {
+			bigWrapper.setCondition(true);
+		}
+		
 		return bigWrapper;
 
 	}
@@ -528,6 +538,10 @@ public class BRSParser {
 
 		bigWrapper.setBigraphExpression(newBRS);
 
+		if(bigWrapper != null) {
+			bigWrapper.setCondition(true);
+		}
+		
 		return bigWrapper;
 	}
 

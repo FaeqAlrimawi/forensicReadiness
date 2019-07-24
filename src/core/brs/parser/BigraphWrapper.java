@@ -33,6 +33,9 @@ import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
  */
 public class BigraphWrapper {
 
+	//determines if this Bigraph represents a condition (true) or a state (false)
+	private boolean isCondition;
+	
 	// given bigraph expxression in BigraphER syntax
 	private String bigraphERString;
 
@@ -98,6 +101,17 @@ public class BigraphWrapper {
 		entitySiteMap = new HashMap<String, Boolean>();
 
 	}
+
+	
+	public boolean isCondition() {
+		return isCondition;
+	}
+
+
+	public void setCondition(boolean isCondition) {
+		this.isCondition = isCondition;
+	}
+
 
 	public BigraphExpression getBigraphExpression() {
 		return bigraphExpression;
