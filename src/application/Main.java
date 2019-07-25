@@ -62,7 +62,7 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-//		launch(args)	;
+		launch(args)	;
 		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor | id) | id || Room.Device.id || id";
 		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor  id) || Room ";
 		String action = "react enter_room = " + exprs + "->" + exprs2 + "[1,2,3];";
@@ -76,17 +76,17 @@ public class Main extends Application {
 //		BigraphWrapper condition = parser.parseBigraphERCondition(exprs);
 //		ActionWrapper action = parser.parseBigraphERAction(action);
 //		BigraphWrapper big = parser.parseBigraphERState(jsonState);
-		Map<String, ActionWrapper> actions = parser.parseBigraphERFile(bigFile);
+//		Map<String, ActionWrapper> actions = parser.parseBigraphERFile(bigFile);
 //		
 //		System.out.println(a.getActionName());
 //		condition.printAll();
-		for(ActionWrapper a : actions.values()) {
-			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-			System.out.println(a.getActionName());
-			System.out.println(a.getPrecondition().getBigraphERString());
-			System.out.println(a.getPostcondition().getBigraphERString());
-			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-		}
+//		for(ActionWrapper a : actions.values()) {
+//			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+//			System.out.println(a.getActionName());
+//			System.out.println(a.getPrecondition().getBigraphERString());
+//			System.out.println(a.getPostcondition().getBigraphERString());
+//			System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+//		}
 //		Bigraph bigraph = big.getBigraphObject();
 //		
 //		Collection<Node> nodes = (Collection<Node>) bigraph.getNodes();

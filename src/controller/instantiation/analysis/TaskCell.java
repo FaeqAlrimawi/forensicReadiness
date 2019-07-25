@@ -1,3 +1,4 @@
+
 package controller.instantiation.analysis;
 
 import java.io.IOException;
@@ -5,6 +6,7 @@ import java.util.List;
 
 import ie.lero.spare.pattern_instantiation.GraphPath;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
@@ -18,6 +20,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class TaskCell extends ListCell<GraphPath> {
@@ -37,6 +40,15 @@ public class TaskCell extends ListCell<GraphPath> {
 	@FXML
 	private SplitPane splitPaneTrace;
 
+	@FXML
+	private HBox hboxOptions;
+	
+//	@FXML
+//	private HBox hboxEntities;
+	
+	@FXML
+	private VBox vboxMain;
+	
 	// @FXML
 	// private Circle state;
 	//
@@ -50,6 +62,8 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	Stage stateViewerStage;
 	
+	private GraphPath trace;
+	
 	public TaskCell() {
 
 		loadStateController();
@@ -62,6 +76,16 @@ public class TaskCell extends ListCell<GraphPath> {
 			loader.setController(this);
 			// loader.setRoot(this);
 			loader.load();
+			
+			if(rootPane != null) {
+				rootPane.setOnMouseEntered(e -> {
+					hboxOptions.setVisible(true);
+				});
+				
+				rootPane.setOnMouseExited(e-> {
+					hboxOptions.setVisible(false);
+				});
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -85,6 +109,26 @@ public class TaskCell extends ListCell<GraphPath> {
 		}
 	}
 
+	@FXML
+	void showEntities(ActionEvent event) {
+	
+		//add a hbox to the vboxmain
+		HBox hbox = new HBox();
+		hbox.setPrefHeight(25);
+		hbox.setPrefWidth(vboxMain.getPrefWidth());
+		if(vboxMain.getChildren().size() == 2) {
+			//if hbox is already added
+//			System.out.println("Renew");
+			vboxMain.getChildren().remove(vboxMain.getChildren().size()-1);
+			vboxMain.getChildren().add(hbox);	
+		} else {
+//			System.out.println("Add new");
+			vboxMain.getChildren().add(hbox);
+//			updateItem(trace, false);
+		}
+		
+	}
+	
 	@Override
 	protected void updateItem(GraphPath trace, boolean empty) {
 		super.updateItem(trace, empty);
@@ -152,6 +196,7 @@ public class TaskCell extends ListCell<GraphPath> {
 				}
 			});
 
+			this.trace = trace;
 		}
 	}
 
