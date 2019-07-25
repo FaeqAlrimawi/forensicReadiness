@@ -21,6 +21,6 @@
             </ScrollPane>
          </children>
       </HBox>
-      <Button fx:id="btnHide" layoutX="654.0" layoutY="61.0" mnemonicParsing="false" onAction="#hide" text="hide" />
+      <Button fx:id="btnHide" layoutX="673.0" layoutY="70.0" mnemonicParsing="false" onAction="#hide" text="hide" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0" />
    </children>
 </AnchorPane>
