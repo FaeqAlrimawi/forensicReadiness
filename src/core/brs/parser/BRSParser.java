@@ -43,12 +43,17 @@ public class BRSParser {
 	private static final int ACTION_NAME_INDEX = 0;
 	private static final int ACTION_PRE_INDEX = 1;
 	private static final int ACTION_POST_INDEX = 2;
+	private static final int ACTION_REACT_NAME_INDEX = 3;
 
 	private int controlNum = 1;
 
+	//key is the react name, value is the action name taken from KeywordRules
+	private Map<String, String> mapReactToAction;
+	
 	public BRSParser() {
 		// bigWrapper = new BigraphWrapper();
 		controlNum = 1;
+		mapReactToAction = new HashMap<String, String>();
 	}
 
 	/**
@@ -124,6 +129,9 @@ public class BRSParser {
 			processBigStatment(bigTitle, bigStmts);
 		}
 
+		//clear data
+		mapReactToAction.clear();
+		
 		for (String line : lines) {
 			line = line.trim();
 			// if action
@@ -215,6 +223,10 @@ public class BRSParser {
 
 		boolean isConnection = false;
 
+		String actionName = null;
+		
+		boolean isKeyword = false;
+		
 		for (Token t : brsTok.getTokens()) {
 
 			// if it is a not a Control ( and not a connection) and contained in
@@ -224,6 +236,16 @@ public class BRSParser {
 				newStmt.append(bigStmts.get(t.sequence));
 
 			} else {
+				
+				if (t.token == BigraphERTokens.WORD && t.sequence.equalsIgnoreCase("RulesKeywords")) {
+					isKeyword = true;
+				} else				
+				if (t.token == BigraphERTokens.WORD && isKeyword) {
+					actionName = t.sequence;
+//					System.out.println(actionName);
+					isKeyword = false;
+				}
+				
 				if (t.token == BigraphERTokens.OPEN_BRACKET_CONNECTIVITY) {
 					isConnection = true;
 				} else if (t.token == BigraphERTokens.CLOSED_BRACKET_CONNECTIVITY) {
@@ -263,9 +285,18 @@ public class BRSParser {
 		reactParts.clear();
 
 		// add
-		reactParts.add(ACTION_NAME_INDEX, title);
+		if(actionName != null) {
+			reactParts.add(ACTION_NAME_INDEX, actionName);	
+		}
+		
+		//update map of action name
+		mapReactToAction.put(title, actionName);
+		
 		reactParts.add(ACTION_PRE_INDEX, pre);
 		reactParts.add(ACTION_POST_INDEX, post);
+		
+		//add react name to the action parts
+		reactParts.add(ACTION_REACT_NAME_INDEX, title);
 
 		return reactParts;
 
@@ -295,7 +326,12 @@ public class BRSParser {
 		String actionName = actionParts.get(ACTION_NAME_INDEX);
 		String pre = actionParts.get(ACTION_PRE_INDEX);
 		String post = actionParts.get(ACTION_POST_INDEX);
-
+		String reactName = null;
+		
+		if(actionParts.size() > 3) {
+			reactName = actionParts.get(ACTION_REACT_NAME_INDEX);
+		}
+		
 		if (pre != null) {
 			preWrapper = parseBigraphERCondition(pre);
 
@@ -315,7 +351,8 @@ public class BRSParser {
 		actionWrapper.setActionName(actionName);
 		actionWrapper.setPrecondition(preWrapper);
 		actionWrapper.setPostcondition(postWrapper);
-
+		actionWrapper.setReactName(reactName);
+		
 		return actionWrapper;
 
 	}

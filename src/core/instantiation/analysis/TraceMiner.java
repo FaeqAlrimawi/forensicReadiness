@@ -169,6 +169,10 @@ public class TraceMiner {
 	// info (pre, post)
 	Map<String, ActionWrapper> bigraphERActions;
 
+	//bigraphER file
+	private String bigraphERFile;
+	
+	
 	public TraceMiner() {
 
 		tracesActions = new HashMap<String, Integer>();
@@ -3271,6 +3275,8 @@ public class TraceMiner {
 
 		brsParser = new BRSParser();
 
+		this.bigraphERFile = bigraphERFile;
+		
 		bigraphERActions = brsParser.parseBigraphERFile(bigraphERFile);
 	}
 
@@ -3307,6 +3313,15 @@ public class TraceMiner {
 		List<Map.Entry<String, Long>> ents = m.findCommonEntities(traces, excluding, topK);
 
 		System.out.println(ents);
+	}
+	
+	public boolean isBigraphERFileSet() {
+		
+		if(bigraphERFile == null || bigraphERFile.isEmpty()) {
+			return false;
+		}
+		
+		return true;
 	}
 
 }

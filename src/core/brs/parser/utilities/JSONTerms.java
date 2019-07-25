@@ -1,5 +1,8 @@
 package core.brs.parser.utilities;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class JSONTerms {
 	
 	
@@ -74,6 +77,10 @@ public class JSONTerms {
 	public static final String BIG_IMPLY_2 = "-->";
 	public static final String BIG_AT= "@";
 	public static final String BIG_SEMICOLON = ";";
+	public static final List<String> BIG_IRRELEVANT_TERMS = new LinkedList<String>(){{
+		add("RulesKeywords");
+		add("Context");}
+	};
 	
 	
 	

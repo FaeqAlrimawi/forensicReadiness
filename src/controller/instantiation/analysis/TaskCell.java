@@ -2,13 +2,20 @@
 package controller.instantiation.analysis;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import javax.swing.GroupLayout.Alignment;
+
+import core.brs.parser.utilities.JSONTerms;
+import core.instantiation.analysis.TraceMiner;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -42,13 +49,13 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	@FXML
 	private HBox hboxOptions;
-	
-//	@FXML
-//	private HBox hboxEntities;
-	
+
+	// @FXML
+	// private HBox hboxEntities;
+
 	@FXML
 	private VBox vboxMain;
-	
+
 	// @FXML
 	// private Circle state;
 	//
@@ -61,9 +68,13 @@ public class TaskCell extends ListCell<GraphPath> {
 	StateViewerController stateController;
 
 	Stage stateViewerStage;
-	
+
+	// for testing
+	private String bigFile = "D:/Bigrapher data/lero/example/lero.big";
+
 	private GraphPath trace;
-	
+	private TraceMiner miner;
+
 	public TaskCell() {
 
 		loadStateController();
@@ -76,13 +87,13 @@ public class TaskCell extends ListCell<GraphPath> {
 			loader.setController(this);
 			// loader.setRoot(this);
 			loader.load();
-			
-			if(rootPane != null) {
+
+			if (rootPane != null) {
 				rootPane.setOnMouseEntered(e -> {
 					hboxOptions.setVisible(true);
 				});
-				
-				rootPane.setOnMouseExited(e-> {
+
+				rootPane.setOnMouseExited(e -> {
 					hboxOptions.setVisible(false);
 				});
 			}
@@ -100,7 +111,6 @@ public class TaskCell extends ListCell<GraphPath> {
 			stateViewerStage = new Stage();
 			stateViewerStage.setScene(new Scene(root));
 
-			
 			// get controller
 			stateController = fxmlLoader.<StateViewerController>getController();
 		} catch (IOException e) {
@@ -111,24 +121,58 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	@FXML
 	void showEntities(ActionEvent event) {
-	
-		//add a hbox to the vboxmain
+
+		if (miner == null) {
+			miner = new TraceMiner();
+		}
+
+		if (!miner.isBigraphERFileSet()) {
+			miner.setBigraphERFile(bigFile);
+		}
+
+		List<GraphPath> traces = new LinkedList<GraphPath>();
+		traces.add(trace);
+
+		List<Map.Entry<String, Long>> res = miner.findCommonEntities(traces, JSONTerms.BIG_IRRELEVANT_TERMS, 3);
+
+		System.out.println(res);
+
+		// create a holder (HBox)
 		HBox hbox = new HBox();
 		hbox.setPrefHeight(25);
 		hbox.setPrefWidth(vboxMain.getPrefWidth());
-		if(vboxMain.getChildren().size() == 2) {
-			//if hbox is already added
-//			System.out.println("Renew");
-			vboxMain.getChildren().remove(vboxMain.getChildren().size()-1);
-			vboxMain.getChildren().add(hbox);	
-		} else {
-//			System.out.println("Add new");
-			vboxMain.getChildren().add(hbox);
-//			updateItem(trace, false);
-		}
+		hbox.setSpacing(5);
+		hbox.setAlignment(Pos.CENTER);
 		
+		// create labels for each entity
+		List<Label> resLbls = new LinkedList<Label>();
+
+		for (Map.Entry<String, Long> entry : res) {
+			Label lbl = new Label(" "+entry.getKey() + " <" + entry.getValue() + "> ");
+			lbl.setStyle("-fx-text-fill: black; -fx-font-size:14px");
+			lbl.setStyle("-fx-font-weight: bold;");
+			lbl.setStyle("-fx-background-color: grey;");
+			lbl.setStyle("-fx-border-color: grey;");
+			resLbls.add(lbl);
+		}
+
+		// add labels to hbox
+		hbox.getChildren().addAll(resLbls);
+
+		// add hbox to the vboxmain
+		if (vboxMain.getChildren().size() == 2) {
+			// if hbox is already added
+			// System.out.println("Renew");
+			vboxMain.getChildren().remove(vboxMain.getChildren().size() - 1);
+			vboxMain.getChildren().add(hbox);
+		} else {
+			// System.out.println("Add new");
+			vboxMain.getChildren().add(hbox);
+			// updateItem(trace, false);
+		}
+
 	}
-	
+
 	@Override
 	protected void updateItem(GraphPath trace, boolean empty) {
 		super.updateItem(trace, empty);
@@ -228,9 +272,9 @@ public class TaskCell extends ListCell<GraphPath> {
 			Label lblState;
 			Label lblAction;
 			if (index != size) {
-				
+
 				lblState = new Label(state + "");
-				
+
 				strBldr.append(state);
 
 				lblAction = new Label(" =[" + actions.get(index) + "]=> ");
@@ -245,41 +289,40 @@ public class TaskCell extends ListCell<GraphPath> {
 			}
 
 			lblState.setStyle("-fx-text-fill:black; -fx-font-size:15px");
-			
-			//setup a way to find available files for the state (svg or json)
-			
-			//set color to blue if found
+
+			// setup a way to find available files for the state (svg or json)
+
+			// set color to blue if found
 			lblState.setStyle("-fx-text-fill:blue; -fx-font-size:15px");
-			
-			//open state svg
-			lblState.setOnMouseClicked(e->{
-				
-				//open viewer
+
+			// open state svg
+			lblState.setOnMouseClicked(e -> {
+
+				// open viewer
 				String path = "C:\\Users\\Faeq\\Desktop\\svg\\0.svg";
 				int tries = 10000;
-				
-				while(path.contains("\\") && tries > 0) {
+
+				while (path.contains("\\") && tries > 0) {
 					path = path.replace("\\", "/");
 					tries--;
 				}
-				
-				String svgPath = "file:///"+path;
-				
+
+				String svgPath = "file:///" + path;
+
 				stateController.updateSVGPath(svgPath);
-				
+
 				stateViewerStage.setTitle("State " + state);
-				
-				if(!stateViewerStage.isShowing()) {
+
+				if (!stateViewerStage.isShowing()) {
 					stateViewerStage.show();
 				}
-				
+
 			});
-			
-			lblState.setOnMouseEntered(e->{
+
+			lblState.setOnMouseEntered(e -> {
 				lblState.setCursor(Cursor.HAND);
 			});
-			
-			
+
 			index++;
 
 			Platform.runLater(new Runnable() {

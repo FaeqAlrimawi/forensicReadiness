@@ -4,6 +4,8 @@ public class ActionWrapper {
 	
 	private String actionName;
 	
+	private String reactName;
+	
 	private BigraphWrapper precondition;
 	
 	private BigraphWrapper postcondition;
@@ -30,6 +32,14 @@ public class ActionWrapper {
 
 	public void setPostcondition(BigraphWrapper postcondition) {
 		this.postcondition = postcondition;
+	}
+
+	public String getReactName() {
+		return reactName;
+	}
+
+	public void setReactName(String reactName) {
+		this.reactName = reactName;
 	}
 
 	
