@@ -27,6 +27,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -58,17 +59,13 @@ public class TaskCell extends ListCell<GraphPath> {
 	@FXML
 	private VBox vboxMain;
 
-	// @FXML
-	// private Circle state;
-	//
-	// @FXML
-	// private Label commentLabel;
-	//
-	// @FXML
-	// private Label descriptionLabel;
-
+	//for viewing a state
 	StateViewerController stateController;
 
+	//for viewing details of a trace
+	InstantiationDetailsController traceDetailController;
+	AnchorPane traceDetailsMainPane;
+	
 	Stage stateViewerStage;
 
 	private ComboBox<Integer> comboBoxTopK;
@@ -80,6 +77,7 @@ public class TaskCell extends ListCell<GraphPath> {
 	private TraceMiner miner;
 	private List<Map.Entry<String, Long>> topEntities;
 
+	//used for common entities
 	private int topK = 3;
 	private int topKMax = 10;
 
@@ -126,6 +124,23 @@ public class TaskCell extends ListCell<GraphPath> {
 			e.printStackTrace();
 		}
 	}
+	
+	private void loadTraceDetailsController() {
+
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../../../fxml/InstantiationDetails.fxml"));
+		Parent root;
+		try {
+			root = (Parent) fxmlLoader.load();
+//			stateViewerStage = new Stage();
+//			stateViewerStage.setScene(new Scene(root));
+
+			// get controller
+		traceDetailController = fxmlLoader.<InstantiationDetailsController>getController();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	@FXML
 	void showEntities(ActionEvent event) {
@@ -134,107 +149,119 @@ public class TaskCell extends ListCell<GraphPath> {
 		// return;
 		// }
 
-		if (miner == null) {
-			miner = new TraceMiner();
-		}
+//		if (miner == null) {
+//			miner = new TraceMiner();
+//		}
+//
+//		if (!miner.isBigraphERFileSet()) {
+//			miner.setBigraphERFile(bigFile);
+//		}
+//
+//		StringBuilder bldrStyle = new StringBuilder();
+//
+//		// add style to labels
+//		// font: 14, color: black, weight: bold
+//		bldrStyle.append("-fx-text-fill: black; -fx-font-size:14px; -fx-font-weight: bold;")
+//				// background
+//				.append("-fx-background-color: white;")
+//				// border
+//				.append("-fx-border-color: grey;");
+//
+//		String style = bldrStyle.toString();
+//
+//		// get common entities
+//
+//		List<GraphPath> traces = new LinkedList<GraphPath>();
+//		traces.add(trace);
+//
+//		topEntities = miner.findCommonEntities(traces, JSONTerms.BIG_IRRELEVANT_TERMS, topK);
+//
+//		// System.out.println(res);
+//
+//		// create a holder (HBox)
+//		HBox hbox = new HBox();
+//		hbox.setPrefHeight(25);
+//		hbox.setPrefWidth(vboxMain.getPrefWidth());
+//		hbox.setSpacing(5);
+//		hbox.setAlignment(Pos.CENTER);
+//
+//		// create labels for each entity
+//		List<Label> resLbls = new LinkedList<Label>();
+//
+//		for (Map.Entry<String, Long> entry : topEntities) {
+//			Label lbl = new Label(" " + entry.getKey() + " <" + entry.getValue() + "> ");
+//			lbl.setStyle(style);
+//			// lbl.setStyle("-fx-font-weight: bold;");
+//			// lbl.setStyle("-fx-background-color: grey;");
+//			// lbl.setStyle("-fx-border-color: grey;");
+//			resLbls.add(lbl);
+//		}
+//
+//		// ===add label as identifier:
+//		Label lblId = new Label("Common Entities: ");
+//		// lblId.setStyle(style);
+//		hbox.getChildren().add(lblId);
+//
+//		// ===add a combo box
+//		if (comboBoxTopK == null) {
+//			comboBoxTopK = new ComboBox<Integer>();
+//			List<Integer> topKValues = new LinkedList<Integer>();
+//
+//			for (int i = 1; i <= topKMax; i++) {
+//				topKValues.add(i);
+//			}
+//
+//			ObservableList<Integer> values = FXCollections.observableArrayList(topKValues);
+//			comboBoxTopK.setItems(values);
+//
+//			// add listener for when changed
+//			comboBoxTopK.setOnAction(e -> {
+//				int selection = comboBoxTopK.getSelectionModel().getSelectedItem();
+//
+//				topK = selection;
+//				showEntities(null);
+//			});
+//		}
+//
+//		// set selected value
+//		comboBoxTopK.getSelectionModel().select(topK - 1);
+//
+//		// add to hbox
+//		hbox.getChildren().add(comboBoxTopK);
+//
+//		// ===add hid button
+//		Button btnHide = new Button("Hide");
+//		btnHide.setOnAction(e -> {
+//			vboxMain.getChildren().remove(vboxMain.getChildren().size() - 1);
+//		});
+//
+//		// add labels to hbox
+//		hbox.getChildren().addAll(resLbls);
+//
+//		// add hide button to hbox
+//		hbox.getChildren().add(btnHide);
 
-		if (!miner.isBigraphERFileSet()) {
-			miner.setBigraphERFile(bigFile);
-		}
-
-		StringBuilder bldrStyle = new StringBuilder();
-
-		// add style to labels
-		// font: 14, color: black, weight: bold
-		bldrStyle.append("-fx-text-fill: black; -fx-font-size:14px; -fx-font-weight: bold;")
-				// background
-				.append("-fx-background-color: white;")
-				// border
-				.append("-fx-border-color: grey;");
-
-		String style = bldrStyle.toString();
-
-		// get common entities
-
-		List<GraphPath> traces = new LinkedList<GraphPath>();
-		traces.add(trace);
-
-		topEntities = miner.findCommonEntities(traces, JSONTerms.BIG_IRRELEVANT_TERMS, topK);
-
-		// System.out.println(res);
-
-		// create a holder (HBox)
-		HBox hbox = new HBox();
-		hbox.setPrefHeight(25);
-		hbox.setPrefWidth(vboxMain.getPrefWidth());
-		hbox.setSpacing(5);
-		hbox.setAlignment(Pos.CENTER);
-
-		// create labels for each entity
-		List<Label> resLbls = new LinkedList<Label>();
-
-		for (Map.Entry<String, Long> entry : topEntities) {
-			Label lbl = new Label(" " + entry.getKey() + " <" + entry.getValue() + "> ");
-			lbl.setStyle(style);
-			// lbl.setStyle("-fx-font-weight: bold;");
-			// lbl.setStyle("-fx-background-color: grey;");
-			// lbl.setStyle("-fx-border-color: grey;");
-			resLbls.add(lbl);
-		}
-
-		// ===add label as identifier:
-		Label lblId = new Label("Common Entities: ");
-		// lblId.setStyle(style);
-		hbox.getChildren().add(lblId);
-
-		// ===add a combo box
-		if (comboBoxTopK == null) {
-			comboBoxTopK = new ComboBox<Integer>();
-			List<Integer> topKValues = new LinkedList<Integer>();
-
-			for (int i = 1; i <= topKMax; i++) {
-				topKValues.add(i);
+		//load trace details view if not loaded
+		if(traceDetailsMainPane == null) {
+			loadTraceDetailsController();
+			if(traceDetailController != null) {
+				traceDetailsMainPane = traceDetailController.getMainLayout();
+				
+				traceDetailController.setVBox(vboxMain);
+				//show default value for entities
+				traceDetailController.showEntities(trace);
 			}
-
-			ObservableList<Integer> values = FXCollections.observableArrayList(topKValues);
-			comboBoxTopK.setItems(values);
-
-			// add listener for when changed
-			comboBoxTopK.setOnAction(e -> {
-				int selection = comboBoxTopK.getSelectionModel().getSelectedItem();
-
-				topK = selection;
-				showEntities(null);
-			});
 		}
-
-		// set selected value
-		comboBoxTopK.getSelectionModel().select(topK - 1);
-
-		// add to hbox
-		hbox.getChildren().add(comboBoxTopK);
-
-		// ===add hid button
-		Button btnHide = new Button("Hide");
-		btnHide.setOnAction(e -> {
-			vboxMain.getChildren().remove(vboxMain.getChildren().size() - 1);
-		});
-
-		// add labels to hbox
-		hbox.getChildren().addAll(resLbls);
-
-		// add hide button to hbox
-		hbox.getChildren().add(btnHide);
-
+		
 		// add hbox to the vboxmain
 		if (vboxMain.getChildren().size() == 2) {
 			// if hbox is already added
 			// System.out.println("Renew");
 			vboxMain.getChildren().remove(vboxMain.getChildren().size() - 1);
-			vboxMain.getChildren().add(hbox);
+			vboxMain.getChildren().add(traceDetailsMainPane);
 		} else {
 			// System.out.println("Add new");
-			vboxMain.getChildren().add(hbox);
+			vboxMain.getChildren().add(traceDetailsMainPane);
 			// updateItem(trace, false);
 		}
 

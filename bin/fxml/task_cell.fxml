@@ -32,7 +32,7 @@
       <HBox fx:id="hboxOptions" alignment="CENTER" layoutX="271.0" layoutY="13.0" prefHeight="30.0" prefWidth="112.0" spacing="5.0" visible="false" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="8.0">
          <children>
             <Label />
-            <Button fx:id="btnShowEntities" mnemonicParsing="false" onAction="#showEntities" text="Entities" />
+            <Button fx:id="btnShowEntities" mnemonicParsing="false" onAction="#showEntities" text="Details" />
          </children>
       </HBox>
    </children>
