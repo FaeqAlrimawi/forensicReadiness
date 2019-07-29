@@ -78,6 +78,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		loadStateController();
 		loadFXML();
+		loadTraceDetailsController();
 	}
 
 	private void loadFXML() {
@@ -139,7 +140,7 @@ public class TaskCell extends ListCell<GraphPath> {
 	void showEntities(ActionEvent event) {
 
 		//load trace details view if not loaded
-		if(traceDetailsMainPane == null) {
+		if(traceDetailController == null) {
 			loadTraceDetailsController();
 			if(traceDetailController != null) {
 				traceDetailsMainPane = traceDetailController.getMainLayout();
@@ -150,6 +151,7 @@ public class TaskCell extends ListCell<GraphPath> {
 			}
 		}
 		
+//		System.out.println(trace.getInstanceID());
 		// add hbox to the vboxmain
 		if (vboxMain.getChildren().size() == 2) {
 			// if hbox is already added
@@ -162,6 +164,9 @@ public class TaskCell extends ListCell<GraphPath> {
 			// updateItem(trace, false);
 		}
 
+//		if(!vboxMain.getChildren().contains(traceDetailController)) {
+//			vboxMain.getChildren().add(traceDetailsMainPane);
+//		}
 	}
 
 	@Override
@@ -237,6 +242,11 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	protected void populateCell(GraphPath trace) {
 
+		//reset trace details pane
+		traceDetailController = null;
+		traceDetailsMainPane = null;
+		
+		//id
 		Platform.runLater(new Runnable() {
 
 			@Override
