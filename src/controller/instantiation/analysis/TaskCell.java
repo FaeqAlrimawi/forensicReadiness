@@ -2,6 +2,7 @@
 package controller.instantiation.analysis;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 
 import ie.lero.spare.pattern_instantiation.GraphPath;
@@ -50,35 +51,37 @@ public class TaskCell extends ListCell<GraphPath> {
 	@FXML
 	private VBox vboxMain;
 
-	//for viewing a state
+	// for viewing a state
 	StateViewerController stateController;
 
-	//for viewing details of a trace
+	// for viewing details of a trace
 	InstantiationDetailsController traceDetailController;
 	AnchorPane traceDetailsMainPane;
-	
+
 	Stage stateViewerStage;
 
 	private GraphPath trace;
-	
-//	private ComboBox<Integer> comboBoxTopK;
+
+	private static final String statesFolder = "../../../resources/example/states_1000/";
+
+	// private ComboBox<Integer> comboBoxTopK;
 
 	// for testing
-//	private String bigFile = "D:/Bigrapher data/lero/example/lero.big";
-//
+	// private String bigFile = "D:/Bigrapher data/lero/example/lero.big";
+	//
 
-//	private TraceMiner miner;
-//	private List<Map.Entry<String, Long>> topEntities;
+	// private TraceMiner miner;
+	// private List<Map.Entry<String, Long>> topEntities;
 
-	//used for common entities
-//	private int topK = 3;
-//	private int topKMax = 10;
+	// used for common entities
+	// private int topK = 3;
+	// private int topKMax = 10;
 
 	public TaskCell() {
 
-		loadStateController();
+		// loadStateController();
 		loadFXML();
-		loadTraceDetailsController();
+		// loadTraceDetailsController();
 	}
 
 	private void loadFXML() {
@@ -118,18 +121,18 @@ public class TaskCell extends ListCell<GraphPath> {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void loadTraceDetailsController() {
 
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../../../fxml/InstantiationDetails.fxml"));
-//		Parent root;
+		// Parent root;
 		try {
-			fxmlLoader.load();
-//			stateViewerStage = new Stage();
-//			stateViewerStage.setScene(new Scene(root));
+			traceDetailsMainPane = fxmlLoader.load();
+			// stateViewerStage = new Stage();
+			// stateViewerStage.setScene(new Scene(root));
 
 			// get controller
-		traceDetailController = fxmlLoader.<InstantiationDetailsController>getController();
+			traceDetailController = fxmlLoader.<InstantiationDetailsController>getController();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -139,19 +142,19 @@ public class TaskCell extends ListCell<GraphPath> {
 	@FXML
 	void showEntities(ActionEvent event) {
 
-		//load trace details view if not loaded
-		if(traceDetailController == null) {
+		// load trace details view if not loaded
+		if (traceDetailController == null) {
 			loadTraceDetailsController();
-			if(traceDetailController != null) {
-				traceDetailsMainPane = traceDetailController.getMainLayout();
-				
-				traceDetailController.setVBox(vboxMain);
-				//show default value for entities
-				traceDetailController.showEntities(trace);
-			}
+			// if(traceDetailController != null) {
+			// traceDetailsMainPane = traceDetailController.getMainLayout();
+			//
+			traceDetailController.setVBox(vboxMain);
+			// //show default value for entities
+			traceDetailController.showEntities(trace);
+			// }
 		}
-		
-//		System.out.println(trace.getInstanceID());
+
+		// System.out.println(trace.getInstanceID());
 		// add hbox to the vboxmain
 		if (vboxMain.getChildren().size() == 2) {
 			// if hbox is already added
@@ -164,9 +167,9 @@ public class TaskCell extends ListCell<GraphPath> {
 			// updateItem(trace, false);
 		}
 
-//		if(!vboxMain.getChildren().contains(traceDetailController)) {
-//			vboxMain.getChildren().add(traceDetailsMainPane);
-//		}
+		// if(!vboxMain.getChildren().contains(traceDetailController)) {
+		// vboxMain.getChildren().add(traceDetailsMainPane);
+		// }
 	}
 
 	@Override
@@ -211,7 +214,7 @@ public class TaskCell extends ListCell<GraphPath> {
 				// hbox.getChildren().add(stateLbl);
 				//
 				// }
-
+				System.out.println("-Creating a new trace: " + trace.getInstanceID());
 				populateCell(trace);
 
 				// if already exist, check the id of the trace if different
@@ -219,6 +222,7 @@ public class TaskCell extends ListCell<GraphPath> {
 				int currentTraceID = Integer.parseInt(id);
 
 				if (currentTraceID != trace.getInstanceID()) {
+					System.out.println("-Updating trace [" + currentTraceID + "]: " + trace.getInstanceID());
 					populateCell(trace);
 				}
 			}
@@ -236,24 +240,41 @@ public class TaskCell extends ListCell<GraphPath> {
 				}
 			});
 
-			this.trace = trace;
 		}
 	}
 
-	protected void populateCell(GraphPath trace) {
-
-		//reset trace details pane
+	protected void clearData() {
 		traceDetailController = null;
 		traceDetailsMainPane = null;
+		trace = null;
+		stateController = null;
+		stateViewerStage = null;
 		
-		//id
+		lblTraceID.setText("");
+		hbox.getChildren().clear();
+		vboxMain.getChildren().clear();
+		rootPane.getChildren().clear();
+		
+		//re-add
+		vboxMain.getChildren().add(splitPaneTrace);
+		rootPane.getChildren().add(vboxMain);
+		rootPane.getChildren().add(hboxOptions);
+	}
+	
+	protected void populateCell(GraphPath trace) {
+
+		clearData();
+		// traceDetailsMainPane = null;
+
+		this.trace = trace;
+		// id
 		Platform.runLater(new Runnable() {
 
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
 				lblTraceID.setText(trace.getInstanceID() + "");
-				hbox.getChildren().clear();
+//				hbox.getChildren().clear();
 				Pane pane = new Pane();
 				pane.setPrefWidth(10);
 				hbox.getChildren().add(pane);
@@ -299,8 +320,25 @@ public class TaskCell extends ListCell<GraphPath> {
 			// open state svg
 			lblState.setOnMouseClicked(e -> {
 
+				// int currentTraceID = Integer.parseInt(lblState.getText());
+
+				if (stateController == null) {
+					loadStateController();
+				}
+
 				// open viewer
-				String path = "C:\\Users\\Faeq\\Desktop\\svg\\0.svg";
+				// String path = "C:\\Users\\Faeq\\Desktop\\svg\\0.svg";
+				URL stateURL = getClass().getResource(statesFolder + state + ".svg");
+
+				String path = "";
+
+				if (stateURL != null) {
+					path = stateURL.getPath();
+					System.out.println(path);
+				} else {
+					System.out.println("path not found for state " + state);
+				}
+
 				int tries = 10000;
 
 				while (path.contains("\\") && tries > 0) {
