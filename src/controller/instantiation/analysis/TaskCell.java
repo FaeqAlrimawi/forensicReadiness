@@ -214,7 +214,7 @@ public class TaskCell extends ListCell<GraphPath> {
 				// hbox.getChildren().add(stateLbl);
 				//
 				// }
-				System.out.println("-Creating a new trace: " + trace.getInstanceID());
+//				System.out.println("-Creating a new trace: " + trace.getInstanceID());
 				populateCell(trace);
 
 				// if already exist, check the id of the trace if different
@@ -222,7 +222,7 @@ public class TaskCell extends ListCell<GraphPath> {
 				int currentTraceID = Integer.parseInt(id);
 
 				if (currentTraceID != trace.getInstanceID()) {
-					System.out.println("-Updating trace [" + currentTraceID + "]: " + trace.getInstanceID());
+//					System.out.println("-Updating trace [" + currentTraceID + "]: " + trace.getInstanceID());
 					populateCell(trace);
 				}
 			}
