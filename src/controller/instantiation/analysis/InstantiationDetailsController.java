@@ -7,14 +7,14 @@ import java.util.Map;
 import core.brs.parser.utilities.JSONTerms;
 import core.instantiation.analysis.TraceMiner;
 import ie.lero.spare.pattern_instantiation.GraphPath;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -26,7 +26,10 @@ public class InstantiationDetailsController {
 	private HBox hboxEntities;
 
 	@FXML
-	private ComboBox<Integer> comboBoxTopK;
+	private Spinner<Integer> spinnerTopK;
+	
+//	@FXML
+//	private ComboBox<Integer> comboBoxTopK;
 
 	@FXML
 	private Button btnHide;
@@ -43,29 +46,32 @@ public class InstantiationDetailsController {
 
 	// used for common entities
 	private int topK = 3;
-	private int topKMax = 10;
+//	private int topKMax = 10;
 
 	private VBox vboxMain;
 
+	private int minEntityNum = 1;
+	private int maxEntityNum = 100;
+	
 	@FXML
 	public void initialize() {
 
-		// ===add a combo box
-		List<Integer> topKValues = new LinkedList<Integer>();
+		//set up spinner
+		SpinnerValueFactory<Integer> valueFactory = //
+				new SpinnerValueFactory.IntegerSpinnerValueFactory(minEntityNum,
+						maxEntityNum, topK);
 
-		for (int i = 1; i <= topKMax; i++) {
-			topKValues.add(i);
-		}
-
-		ObservableList<Integer> values = FXCollections.observableArrayList(topKValues);
-		comboBoxTopK.setItems(values);
-
+		spinnerTopK.setValueFactory(valueFactory);
+		
 		// add listener for when changed
-		comboBoxTopK.setOnAction(e -> {
-			int selection = comboBoxTopK.getSelectionModel().getSelectedItem();
+		spinnerTopK.valueProperty().addListener(new ChangeListener<Integer>() {
 
-			topK = selection;
-			showEntities(trace);
+			@Override
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+				// TODO Auto-generated method stub
+				topK = newValue;
+				showEntities(trace);
+			}
 		});
 
 	}
@@ -81,14 +87,6 @@ public class InstantiationDetailsController {
 	void showEntities(GraphPath trace) {
 
 		this.trace = trace;
-		
-		// if(vboxMain == null) {
-		// return;
-		// }
-
-		// if (topEntities != null) {
-		// return;
-		// }
 
 		if (miner == null) {
 			miner = new TraceMiner();
@@ -127,15 +125,12 @@ public class InstantiationDetailsController {
 		for (Map.Entry<String, Long> entry : topEntities) {
 			Label lbl = new Label(" " + entry.getKey() + " <" + entry.getValue() + "> ");
 			lbl.setStyle(style);
-			// lbl.setStyle("-fx-font-weight: bold;");
-			// lbl.setStyle("-fx-background-color: grey;");
-			// lbl.setStyle("-fx-border-color: grey;");
 			resLbls.add(lbl);
 		}
 
 		// set selected value
-		comboBoxTopK.getSelectionModel().select(topK - 1);
-
+//		comboBoxTopK.getSelectionModel().select(topK - 1);
+		spinnerTopK.getValueFactory().setValue(topK);
 		// add labels to hbox
 		hboxEntities.getChildren().addAll(resLbls);
 

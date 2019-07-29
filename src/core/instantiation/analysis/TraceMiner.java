@@ -3573,12 +3573,15 @@ public class TraceMiner {
 
 			// allow repetition of entities
 
+//			System.out.println("Entities of " + act);
 			if (actionDetails != null) {
 
 				// add entities from pre
 				BigraphWrapper pre = actionDetails.getPrecondition();
 
 				if (pre != null) {
+//					System.out.println("Pre entities: ");
+					
 					Set<Entity> ents = pre.getControlMap().keySet();
 
 					for (Entity ent : ents) {
@@ -3596,6 +3599,7 @@ public class TraceMiner {
 							continue;
 						}
 
+//						System.out.println("\t-"+name);
 						actionEntities.add(name);
 					}
 				}
@@ -3604,6 +3608,9 @@ public class TraceMiner {
 				BigraphWrapper post = actionDetails.getPostcondition();
 
 				if (post != null) {
+					
+//					System.out.println("Post entities: ");
+					
 					Set<Entity> ents = post.getControlMap().keySet();
 
 					for (Entity ent : ents) {
@@ -3620,6 +3627,7 @@ public class TraceMiner {
 							continue;
 						}
 
+//						System.out.println("\t-"+name);
 						actionEntities.add(name);
 					}
 				}
