@@ -12,9 +12,9 @@
    <children>
       <HBox alignment="CENTER_LEFT" layoutX="8.0" layoutY="6.0" prefHeight="55.0" prefWidth="713.0" spacing="5.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="-1.0" AnchorPane.topAnchor="6.0">
          <children>
-            <Label text="Top Entities" />
-            <ComboBox fx:id="comboBoxTopK" prefHeight="25.0" prefWidth="28.0" />
-            <ScrollPane prefHeight="44.0" prefWidth="590.0" vbarPolicy="NEVER">
+            <Label prefHeight="17.0" prefWidth="68.0" text="Top Entities" />
+            <ComboBox fx:id="comboBoxTopK" prefHeight="25.0" prefWidth="64.0" />
+            <ScrollPane prefHeight="55.0" prefWidth="570.0" vbarPolicy="NEVER">
                <content>
                   <HBox fx:id="hboxEntities" prefHeight="45.0" spacing="10.0">
                      <padding>

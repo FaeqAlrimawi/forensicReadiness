@@ -3532,7 +3532,8 @@ public class TraceMiner {
 		// List<GraphPath> traces = new LinkedList<GraphPath>();
 		// traces.add(trace);
 		List<String> actionsEntities = new LinkedList<String>();
-
+//		List<Map.Entry<String, Long>> result = new LinkedList<Map.Entry<String,Long>>();
+		
 		// reset number of all entities
 		totalNumberOfEntitiesInCurrentTraces = 0;
 
