@@ -169,10 +169,13 @@ public class TraceMiner {
 	// info (pre, post)
 	Map<String, ActionWrapper> bigraphERActions;
 
-	//bigraphER file
+	// bigraphER file
 	private String bigraphERFile;
-	
-	
+
+	// specifies how many entities are there in the current selected traces that
+	// are processed
+	int totalNumberOfEntitiesInCurrentTraces = 0;
+
 	public TraceMiner() {
 
 		tracesActions = new HashMap<String, Integer>();
@@ -571,13 +574,13 @@ public class TraceMiner {
 
 		return result;
 	}
-	
+
 	public Map<String, Long> getTopEntitiesOccurrences(int numberofEntities, String tracesToFilter) {
 
 		Map<String, Long> result = new HashMap<String, Long>();
-//		Map<String, Integer> occurrences = null;
-		List<Map.Entry<String, Long>> entitiesOccur = new LinkedList<Map.Entry<String,Long>>();
-		
+		// Map<String, Integer> occurrences = null;
+		List<Map.Entry<String, Long>> entitiesOccur = new LinkedList<Map.Entry<String, Long>>();
+
 		int index = 0;
 		List<String> omitList = JSONTerms.BIG_IRRELEVANT_TERMS;
 		// for now get the first n from traces
@@ -585,16 +588,17 @@ public class TraceMiner {
 
 		case TraceViewerController.ALL_TRACES:
 			entitiesOccur = findTopCommonEntities(traces.values(), omitList, numberofEntities);
-//			occurrences = tracesActionsOccurence;
+			// occurrences = tracesActionsOccurence;
 			break;
 
 		case TraceViewerController.SHORTEST_TRACES:
-//			if (shortestActionsOccurence != null && !shortestActionsOccurence.isEmpty()) {
-//				occurrences = shortestActionsOccurence;
-//			} else {
-//				occurrences = getOccurrence(shortestTraces);
-//				shortestActionsOccurence = occurrences;
-//			}
+			// if (shortestActionsOccurence != null &&
+			// !shortestActionsOccurence.isEmpty()) {
+			// occurrences = shortestActionsOccurence;
+			// } else {
+			// occurrences = getOccurrence(shortestTraces);
+			// shortestActionsOccurence = occurrences;
+			// }
 			entitiesOccur = findTopCommonEntities(getTraces(shortestTraceIDs).values(), omitList, numberofEntities);
 
 			break;
@@ -617,46 +621,46 @@ public class TraceMiner {
 			break;
 		}
 
-//		System.out.println("Res: " + entitiesOccur);
-		
-		for(Entry<String, Long> ent : entitiesOccur) {
+		// System.out.println("Res: " + entitiesOccur);
+
+		for (Entry<String, Long> ent : entitiesOccur) {
 			result.put(ent.getKey(), ent.getValue());
-			
+
 		}
-		
-//		if (occurrences != null) {
-//			// sort occurrences
-//			Collection<Integer> values = occurrences.values();
-//			List<Integer> list = new LinkedList<Integer>(values);
-//			Collections.sort(list);// ascending order
-//
-//			List<Integer> topN = new LinkedList<Integer>();
-//
-//			for (int i = list.size() - 1; i > 0; i--) {
-//
-//				if (!topN.contains(list.get(i))) {
-//					topN.add(list.get(i));
-//					index++;
-//
-//					if (index == numberofActions) {
-//						break;
-//					}
-//				}
-//
-//			}
-//
-//			for (Entry<String, Integer> entry : occurrences.entrySet()) {
-//
-//				String action = entry.getKey();
-//				int occur = entry.getValue();
-//
-//				if (topN.contains(occur)) {
-//					result.put(action, occur);
-//					index++;
-//				}
-//
-//			}
-//		}
+
+		// if (occurrences != null) {
+		// // sort occurrences
+		// Collection<Integer> values = occurrences.values();
+		// List<Integer> list = new LinkedList<Integer>(values);
+		// Collections.sort(list);// ascending order
+		//
+		// List<Integer> topN = new LinkedList<Integer>();
+		//
+		// for (int i = list.size() - 1; i > 0; i--) {
+		//
+		// if (!topN.contains(list.get(i))) {
+		// topN.add(list.get(i));
+		// index++;
+		//
+		// if (index == numberofActions) {
+		// break;
+		// }
+		// }
+		//
+		// }
+		//
+		// for (Entry<String, Integer> entry : occurrences.entrySet()) {
+		//
+		// String action = entry.getKey();
+		// int occur = entry.getValue();
+		//
+		// if (topN.contains(occur)) {
+		// result.put(action, occur);
+		// index++;
+		// }
+		//
+		// }
+		// }
 
 		return result;
 	}
@@ -800,7 +804,7 @@ public class TraceMiner {
 		if (occurrences != null && !occurrences.isEmpty() && numOfTraces > 0) {
 
 			// numOfTraces = occurrences.size();
-			System.out.println("miner " + occurrences);
+//			System.out.println("miner " + occurrences);
 			// for now get the first n
 			for (Entry<String, Integer> entry : occurrences.entrySet()) {
 
@@ -842,6 +846,97 @@ public class TraceMiner {
 		return result;
 	}
 
+	public Map<String, Long> getEntitiesWithOccurrencePercentage(double percentage, String operation,
+			String tracesToFilter) {
+
+		Map<String, Long> result = new HashMap<String, Long>();
+		// Map<String, Integer> occurrences = null;
+		List<Map.Entry<String, Long>> entitiesOccur = new LinkedList<Map.Entry<String, Long>>();
+
+		// int index = 0;
+		List<String> omitList = JSONTerms.BIG_IRRELEVANT_TERMS;
+		// for now get the first n from traces
+		switch (tracesToFilter) {
+
+		case TraceViewerController.ALL_TRACES:
+			entitiesOccur = findAllEntities(traces.values(), omitList);
+			// occurrences = tracesActionsOccurence;
+			break;
+
+		case TraceViewerController.SHORTEST_TRACES:
+			// if (shortestActionsOccurence != null &&
+			// !shortestActionsOccurence.isEmpty()) {
+			// occurrences = shortestActionsOccurence;
+			// } else {
+			// occurrences = getOccurrence(shortestTraces);
+			// shortestActionsOccurence = occurrences;
+			// }
+			entitiesOccur = findAllEntities(getTraces(shortestTraceIDs).values(), omitList);
+
+			break;
+
+		case TraceViewerController.SHORTEST_CLASP_TRACES:
+			if (claSPTraceIDs != null && !claSPTraceIDs.isEmpty()) {
+				Map<Integer, GraphPath> traces = getTraces(claSPTraceIDs);
+				entitiesOccur = findAllEntities(traces.values(), omitList);
+			}
+			break;
+
+		case TraceViewerController.CUSTOMISED_TRACES:
+			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
+				Map<Integer, GraphPath> traces = getTraces(customeFilteringTraceIDs);
+				entitiesOccur = findAllEntities(traces.values(), omitList);
+			}
+			break;
+
+		default:
+			break;
+		}
+
+		for (Entry<String, Long> entry : entitiesOccur) {
+			
+			String action = entry.getKey();
+			long occur = entry.getValue();
+
+			double localPerc = 1;
+			
+			if(totalNumberOfEntitiesInCurrentTraces > 0) {
+				localPerc = occur * 1.0 / totalNumberOfEntitiesInCurrentTraces;	
+			} else {
+				localPerc = occur;
+			}
+			
+			switch (operation) {
+			case TraceViewerController.EQUAL:
+				if (localPerc == percentage) {
+					result.put(action, occur);
+					// index++;
+				}
+				break;
+
+			case TraceViewerController.MORE_THAN_EQUAL:
+				if (localPerc >= percentage) {
+					result.put(action, occur);
+					// index++;
+				}
+				break;
+
+			case TraceViewerController.LESS_THAN_EQUAL:
+				if (localPerc <= percentage) {
+					result.put(action, occur);
+					// index++;
+				}
+				break;
+
+			default:
+				break;
+			}
+
+		}
+
+		return result;
+	}
+	
 	public Map<Integer, Integer> getStatesWithOccurrencePercentage(double percentage, String operation,
 			String tracesToFilter) {
 
@@ -1016,6 +1111,62 @@ public class TraceMiner {
 				}
 
 			}
+		}
+
+		return result;
+	}
+
+	public Map<String, Long> getLowestEntitiesOccurrences(int numberofEntities, String tracesToFilter) {
+
+		Map<String, Long> result = new HashMap<String, Long>();
+		// Map<String, Integer> occurrences = null;
+		List<Map.Entry<String, Long>> entitiesOccur = new LinkedList<Map.Entry<String, Long>>();
+
+		// int index = 0;
+		List<String> omitList = JSONTerms.BIG_IRRELEVANT_TERMS;
+		// for now get the first n from traces
+		switch (tracesToFilter) {
+
+		case TraceViewerController.ALL_TRACES:
+			entitiesOccur = findLowestCommonEntities(traces.values(), omitList, numberofEntities);
+			// occurrences = tracesActionsOccurence;
+			break;
+
+		case TraceViewerController.SHORTEST_TRACES:
+			// if (shortestActionsOccurence != null &&
+			// !shortestActionsOccurence.isEmpty()) {
+			// occurrences = shortestActionsOccurence;
+			// } else {
+			// occurrences = getOccurrence(shortestTraces);
+			// shortestActionsOccurence = occurrences;
+			// }
+			entitiesOccur = findLowestCommonEntities(getTraces(shortestTraceIDs).values(), omitList, numberofEntities);
+
+			break;
+
+		case TraceViewerController.SHORTEST_CLASP_TRACES:
+			if (claSPTraceIDs != null && !claSPTraceIDs.isEmpty()) {
+				Map<Integer, GraphPath> traces = getTraces(claSPTraceIDs);
+				entitiesOccur = findLowestCommonEntities(traces.values(), omitList, numberofEntities);
+			}
+			break;
+
+		case TraceViewerController.CUSTOMISED_TRACES:
+			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
+				Map<Integer, GraphPath> traces = getTraces(customeFilteringTraceIDs);
+				entitiesOccur = findLowestCommonEntities(traces.values(), omitList, numberofEntities);
+			}
+			break;
+
+		default:
+			break;
+		}
+
+//		System.out.println("Res: " + entitiesOccur);
+
+		for (Entry<String, Long> ent : entitiesOccur) {
+			result.put(ent.getKey(), ent.getValue());
+
 		}
 
 		return result;
@@ -3243,46 +3394,57 @@ public class TraceMiner {
 		return isLoaded;
 	}
 
-//	public List<Map.Entry<String, Long>> findCommonEntities(GraphPath trace, int Occurrence) {
-//
-//		// finds the top (with Occurrence) in the given trace
-//		List<GraphPath> traces = new LinkedList<GraphPath>();
-//		traces.add(trace);
-//
-//		List<String> actionsEntities = convertToEntities(trace, null);
-//
-//		Map<String, Long> map = actionsEntities.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
-//
-//		List<Map.Entry<String, Long>> result = map.entrySet().stream()
-//				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(Occurrence)
-//				.collect(Collectors.toList());
-//
-//		// convertedInstancesFileName = convertUsingActionEntities(traces);
-//
-//		// generateClustersUsingTextMining();
-//		//
-//
-//		return result;
-//	}
+	// public List<Map.Entry<String, Long>> findCommonEntities(GraphPath trace,
+	// int Occurrence) {
+	//
+	// // finds the top (with Occurrence) in the given trace
+	// List<GraphPath> traces = new LinkedList<GraphPath>();
+	// traces.add(trace);
+	//
+	// List<String> actionsEntities = convertToEntities(trace, null);
+	//
+	// Map<String, Long> map =
+	// actionsEntities.stream().collect(Collectors.groupingBy(w -> w,
+	// Collectors.counting()));
+	//
+	// List<Map.Entry<String, Long>> result = map.entrySet().stream()
+	// .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(Occurrence)
+	// .collect(Collectors.toList());
+	//
+	// // convertedInstancesFileName = convertUsingActionEntities(traces);
+	//
+	// // generateClustersUsingTextMining();
+	// //
+	//
+	// return result;
+	// }
 
 	/**
-	 * Finds common entities (i.e. Classes/Controls) between all traces. It excludes entities given in the excluding list. It limits to topK entities
-	 * @param traces The list of traces to search for common entities
-	 * @param excluding The list of entities to exclude
-	 * @param topK The top K entities to find
-	 * @return The list of top K entities in the given traces with their occurrence
+	 * Finds all entities (i.e. Classes/Controls) between all traces. It
+	 * excludes entities given in the excluding list.
+	 * 
+	 * @param traces
+	 *            The list of traces to search for common entities
+	 * @param excluding
+	 *            The list of entities to exclude
+	 * @param topK
+	 *            The top K entities to find
+	 * @return The list of top K entities in the given traces with their
+	 *         occurrence in a descending order i.e. highest to lowest
 	 */
-	public List<Map.Entry<String, Long>> findTopCommonEntities(Collection<GraphPath> traces, List<String> excluding,
-			int topK) {
+	public List<Map.Entry<String, Long>> findAllEntities(Collection<GraphPath> traces, List<String> excluding) {
 
-		if(!isBigraphERFileSet()) {
+		if (!isBigraphERFileSet()) {
 			setBigraphERFile(bigraphERFile);
 		}
-		
+
 		// finds the top (with Occurrence) in the given trace
 		// List<GraphPath> traces = new LinkedList<GraphPath>();
 		// traces.add(trace);
 		List<String> actionsEntities = new LinkedList<String>();
+
+		// reset number of all entities
+		totalNumberOfEntitiesInCurrentTraces = 0;
 
 		for (GraphPath trace : traces) {
 			actionsEntities.addAll(convertToEntities(trace, excluding));
@@ -3291,8 +3453,97 @@ public class TraceMiner {
 		Map<String, Long> map = actionsEntities.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
 
 		List<Map.Entry<String, Long>> result = map.entrySet().stream()
-				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(topK)
-				.collect(Collectors.toList());
+				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).collect(Collectors.toList());
+
+		// convertedInstancesFileName = convertUsingActionEntities(traces);
+
+		// generateClustersUsingTextMining();
+
+		return result;
+	}
+	
+	/**
+	 * Finds top common entities (i.e. Classes/Controls) between all traces. It
+	 * excludes entities given in the excluding list. It limits to topK entities
+	 * 
+	 * @param traces
+	 *            The list of traces to search for common entities
+	 * @param excluding
+	 *            The list of entities to exclude
+	 * @param topK
+	 *            The top K entities to find
+	 * @return The list of top K entities in the given traces with their
+	 *         occurrence
+	 */
+	public List<Map.Entry<String, Long>> findTopCommonEntities(Collection<GraphPath> traces, List<String> excluding,
+			int topK) {
+
+		if (!isBigraphERFileSet()) {
+			setBigraphERFile(bigraphERFile);
+		}
+
+		// finds the top (with Occurrence) in the given trace
+		// List<GraphPath> traces = new LinkedList<GraphPath>();
+		// traces.add(trace);
+		List<String> actionsEntities = new LinkedList<String>();
+
+		// reset number of all entities
+		totalNumberOfEntitiesInCurrentTraces = 0;
+
+		for (GraphPath trace : traces) {
+			actionsEntities.addAll(convertToEntities(trace, excluding));
+		}
+
+		Map<String, Long> map = actionsEntities.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
+
+		List<Map.Entry<String, Long>> result = map.entrySet().stream()
+				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(topK).collect(Collectors.toList());
+
+		// convertedInstancesFileName = convertUsingActionEntities(traces);
+
+		// generateClustersUsingTextMining();
+
+		return result;
+	}
+
+	
+	/**
+	 * Finds lowest common entities (i.e. Classes/Controls) between all traces.
+	 * It excludes entities given in the excluding list. It limits to topK
+	 * entities
+	 * 
+	 * @param traces
+	 *            The list of traces to search for common entities
+	 * @param excluding
+	 *            The list of entities to exclude
+	 * @param topK
+	 *            The top K entities to find
+	 * @return The list of top K entities in the given traces with their
+	 *         occurrence
+	 */
+	public List<Map.Entry<String, Long>> findLowestCommonEntities(Collection<GraphPath> traces, List<String> excluding,
+			int topK) {
+
+		if (!isBigraphERFileSet()) {
+			setBigraphERFile(bigraphERFile);
+		}
+
+		// finds the top (with Occurrence) in the given trace
+		// List<GraphPath> traces = new LinkedList<GraphPath>();
+		// traces.add(trace);
+		List<String> actionsEntities = new LinkedList<String>();
+
+		// reset number of all entities
+		totalNumberOfEntitiesInCurrentTraces = 0;
+
+		for (GraphPath trace : traces) {
+			actionsEntities.addAll(convertToEntities(trace, excluding));
+		}
+
+		Map<String, Long> map = actionsEntities.stream().collect(Collectors.groupingBy(w -> w, Collectors.counting()));
+
+		List<Map.Entry<String, Long>> result = map.entrySet().stream()
+				.sorted(Map.Entry.comparingByValue(Comparator.naturalOrder())).limit(topK).collect(Collectors.toList());
 
 		// convertedInstancesFileName = convertUsingActionEntities(traces);
 
@@ -3303,8 +3554,10 @@ public class TraceMiner {
 
 	/**
 	 * converts the given trace into a list of entities that it contains
+	 * 
 	 * @param trace
-	 * @param excluding The list of entities to exclude from the list
+	 * @param excluding
+	 *            The list of entities to exclude from the list
 	 * @return List of entities (Classes/Controls)
 	 */
 	public List<String> convertToEntities(GraphPath trace, List<String> excluding) {
@@ -3331,7 +3584,14 @@ public class TraceMiner {
 
 						String name = ent.getName();
 
+						// if it is a term to exclude, then continue
 						if (excluding != null && excluding.contains(name)) {
+							continue;
+						}
+
+						// if it is a reaction name that is used to identify the
+						// action (i.e. an extra)
+						if (name.equalsIgnoreCase(act)) {
 							continue;
 						}
 
@@ -3339,7 +3599,7 @@ public class TraceMiner {
 					}
 				}
 
-				//add entities from post
+				// add entities from post
 				BigraphWrapper post = actionDetails.getPostcondition();
 
 				if (post != null) {
@@ -3353,11 +3613,19 @@ public class TraceMiner {
 							continue;
 						}
 
+						// if it is a reaction name that is used to identify the
+						// action (i.e. an extra)
+						if (name.equalsIgnoreCase(act)) {
+							continue;
+						}
+
 						actionEntities.add(name);
 					}
 				}
 			}
 		}
+
+		totalNumberOfEntitiesInCurrentTraces += actionEntities.size();
 
 		return actionEntities;
 
@@ -3368,54 +3636,60 @@ public class TraceMiner {
 		brsParser = new BRSParser();
 
 		this.bigraphERFile = bigraphERFile;
-		
+
 		bigraphERActions = brsParser.parseBigraphERFile(bigraphERFile);
 	}
 
-public boolean isBigraphERFileSet() {
-		
-		if(bigraphERFile == null || bigraphERFile.isEmpty()) {
+	public boolean isBigraphERFileSet() {
+
+		if (bigraphERFile == null || bigraphERFile.isEmpty()) {
 			return false;
 		}
+
 		
 		return true;
+		
 	}
 
+	public int getTotalNumberOfEntitiesInCurrentTraces() {
+		
+		return totalNumberOfEntitiesInCurrentTraces;
+	}
+	
+	// public static void main(String[] args) {
+	//
+	// TraceMiner m = new TraceMiner();
+	//
+	// String bigraphERFile = "D:/Bigrapher data/lero/example/lero.big";
+	//
+	// m.setBigraphERFile(bigraphERFile);
+	//
+	// List<String> actions = new LinkedList<String>();
+	//
+	// actions.add("enter_room_during_working_hours");
+	// actions.add("disable_hvac");
+	// actions.add("connect_to_hvac");
+	//
+	// GraphPath p = new GraphPath();
+	//
+	// p.setTransitionActions(actions);
+	//
+	// List<GraphPath> traces = new LinkedList<GraphPath>();
+	//
+	// traces.add(p);
+	//
+	// //finds the top k
+	// int topK = 10;
+	//
+	// //exclude terms from this list
+	// List<String> excluding = new LinkedList<String>();
+	//
+	// excluding.add("RulesKeywords");
+	//
+	// List<Map.Entry<String, Long>> ents = m.findTopCommonEntities(traces,
+	// excluding, topK);
+	//
+	// System.out.println(ents);
+	// }
 
-//	public static void main(String[] args) {
-//
-//		TraceMiner m = new TraceMiner();
-//
-//		String bigraphERFile = "D:/Bigrapher data/lero/example/lero.big";
-//
-//		m.setBigraphERFile(bigraphERFile);
-//
-//		List<String> actions = new LinkedList<String>();
-//
-//		actions.add("enter_room_during_working_hours");
-//		actions.add("disable_hvac");
-//		actions.add("connect_to_hvac");
-//
-//		GraphPath p = new GraphPath();
-//
-//		p.setTransitionActions(actions);
-//
-//		List<GraphPath> traces = new LinkedList<GraphPath>();
-//
-//		traces.add(p);
-//
-//		//finds the top k
-//		int topK = 10;
-//		
-//		//exclude terms from this list
-//		List<String> excluding = new LinkedList<String>();
-//		
-//		excluding.add("RulesKeywords");
-//		
-//		List<Map.Entry<String, Long>> ents = m.findTopCommonEntities(traces, excluding, topK);
-//
-//		System.out.println(ents);
-//	}
-	
-	
 }

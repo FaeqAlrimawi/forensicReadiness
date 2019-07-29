@@ -1269,30 +1269,30 @@ public class TraceViewerController implements TraceMinerListener {
 
 		String tracesToFilter = comboBoxChartFilterTraces.getSelectionModel().getSelectedItem() + "";
 
-		int numberOfTracesInSelection = -1;
+		int numberOfEntitiesInSelection = -1;
 
 		// set number of entities based on selection
-		switch (tracesToFilter) {
-		case ALL_TRACES:
-			numberOfTracesInSelection = numberOfTraces;
-			break;
-
-		case SHORTEST_TRACES:
-			numberOfTracesInSelection = tracesMiner.getShortestTracesNumber();
-			break;
-
-		case SHORTEST_CLASP_TRACES:
-			numberOfTracesInSelection = tracesMiner.getShortestClaSPTracesIDs().size();
-			break;
-
-		case CUSTOMISED_TRACES:
-			numberOfTracesInSelection = tracesMiner.getCustomisedTracesNumber();
-			break;
-
-		default:
-			numberOfTracesInSelection = numberOfTraces;
-			break;
-		}
+//		switch (tracesToFilter) {
+//		case ALL_TRACES:
+//			numberOfTracesInSelection = numberOfTraces;
+//			break;
+//
+//		case SHORTEST_TRACES:
+//			numberOfTracesInSelection = tracesMiner.getShortestTracesNumber();
+//			break;
+//
+//		case SHORTEST_CLASP_TRACES:
+//			numberOfTracesInSelection = tracesMiner.getShortestClaSPTracesIDs().size();
+//			break;
+//
+//		case CUSTOMISED_TRACES:
+//			numberOfTracesInSelection = tracesMiner.getCustomisedTracesNumber();
+//			break;
+//
+//		default:
+//			numberOfTracesInSelection = numberOfTraces;
+//			break;
+//		}
 		
 		//load .big file if not loaded
 		tracesMiner.setBigraphERFile(bigFile);
@@ -1311,7 +1311,7 @@ public class TraceViewerController implements TraceMinerListener {
 			num = Integer.parseInt(textFieldNumofOccurrences.getText());
 			chartTitle = "Entities with " + selectedOccurrenceType + " " + num + " Occurrences in " + tracesToFilter;
 
-//			topEntities = tracesMiner.getLowestActionOccurrences(num, tracesToFilter);
+			topEntities = tracesMiner.getLowestEntitiesOccurrences(num, tracesToFilter);
 
 			break;
 
@@ -1321,7 +1321,7 @@ public class TraceViewerController implements TraceMinerListener {
 			String op = choiceBoxOccurrenceFilterPercentage.getSelectionModel().getSelectedItem();
 			chartTitle = "Entities with Occurrence% " + op + " " + num + "% in " + tracesToFilter;
 
-//			topEntities = tracesMiner.getActionsWithOccurrencePercentage(perc, op, tracesToFilter);
+			topEntities = tracesMiner.getEntitiesWithOccurrencePercentage(perc, op, tracesToFilter);
 
 //			System.out.println("Entities: " + topEntities);
 			break;
@@ -1338,28 +1338,35 @@ public class TraceViewerController implements TraceMinerListener {
 			return;
 		}
 
-		List<String> actions = Arrays.asList(topEntities.keySet().toArray(new String[topEntities.size()]));
+		List<String> entities = Arrays.asList(topEntities.keySet().toArray(new String[topEntities.size()]));
 		List<Long> occurrences = Arrays.asList(topEntities.values().toArray(new Long[topEntities.size()]));
 
-		final int numOfActions = actions.size();
+		final int numOfEntities = entities.size();
 
+		//get total number of entities
+		numberOfEntitiesInSelection = tracesMiner.getTotalNumberOfEntitiesInCurrentTraces();
+		
 		List<XYChart.Series<String, Integer>> series = new LinkedList<XYChart.Series<String, Integer>>();
 
 		// XYChart.Series<String, Integer> series1 = new XYChart.Series<String,
 		// Integer>();
 
-		for (int i = 0; i < numOfActions; i++) {
+		for (int i = 0; i < numOfEntities; i++) {
 			XYChart.Series<String, Integer> series1 = new XYChart.Series<String, Integer>();
 
 			// bug does not allow the correct order of labels
 			long occur = occurrences.get(i);
 
-			// convert occurrence into percentage
-			//need to be fixed
-			int occurPerc = (int) Math.floor((occur * 1.0 / numberOfTracesInSelection) * 100);
-			series1.getData().add(new XYChart.Data<String, Integer>("", occurPerc));
-
-			series1.setName(actions.get(i));
+			// convert occurrence into percentage if the number of entities known
+			if(numberOfEntitiesInSelection>0) {
+				int occurPerc = (int) Math.floor((occur * 1.0 / numberOfEntitiesInSelection) * 100);
+				series1.getData().add(new XYChart.Data<String, Integer>("", occurPerc));
+	
+			} else {
+				series1.getData().add(new XYChart.Data<String, Integer>("", (int) occur));
+			}
+			
+			series1.setName(entities.get(i));
 
 			series.add(series1);
 		}
