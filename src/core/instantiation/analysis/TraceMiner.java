@@ -66,7 +66,7 @@ public class TraceMiner {
 
 	// instances (traces). key is trace ID value is the trace as GraphPath
 	// object
-	Map<Integer, GraphPath> instances;
+	Map<Integer, GraphPath> traces;
 
 	String instanceFileName;
 	String convertedInstancesFileName = "convertedInstances.txt";
@@ -416,7 +416,7 @@ public class TraceMiner {
 		minimumTraceLength = 100000;
 		maximumTraceLength = -1;
 
-		instances = readInstantiatorInstancesFile(instanceFileName);
+		traces = readInstantiatorInstancesFile(instanceFileName);
 
 		// set traces actions
 		if (tracesActionsOccurence.size() > 0) {
@@ -428,16 +428,16 @@ public class TraceMiner {
 			}
 		}
 
-		System.out.println(">>Number of instances read = " + instances.size() + "\n>>Min trace length: "
+		System.out.println(">>Number of instances read = " + traces.size() + "\n>>Min trace length: "
 				+ minimumTraceLength + "\n>>Max trace length: " + maximumTraceLength + "\n>>Actions: " + tracesActions
 				+ "\n>>Occurrences: " + tracesActionsOccurence);
 
 		// used when converting traces to mining format
 		PADDING_ACTION_INT = -1 * tracesActions.size();
 
-		// System.out.println(instances.get(0).getTransitionActions());
-		if (instances == null) {
-			System.out.println("Instances are null! Exiting");
+		// System.out.println(traces.get(0).getTransitionActions());
+		if (traces == null) {
+			System.out.println("traces are null! Exiting");
 			isLoaded = false;
 			return TRACES_NOT_LOADED;
 
@@ -445,7 +445,7 @@ public class TraceMiner {
 
 		isLoaded = true;
 
-		return instances.size();
+		return traces.size();
 
 	}
 
@@ -571,6 +571,95 @@ public class TraceMiner {
 
 		return result;
 	}
+	
+	public Map<String, Long> getTopEntitiesOccurrences(int numberofEntities, String tracesToFilter) {
+
+		Map<String, Long> result = new HashMap<String, Long>();
+//		Map<String, Integer> occurrences = null;
+		List<Map.Entry<String, Long>> entitiesOccur = new LinkedList<Map.Entry<String,Long>>();
+		
+		int index = 0;
+		List<String> omitList = JSONTerms.BIG_IRRELEVANT_TERMS;
+		// for now get the first n from traces
+		switch (tracesToFilter) {
+
+		case TraceViewerController.ALL_TRACES:
+			entitiesOccur = findTopCommonEntities(traces.values(), omitList, numberofEntities);
+//			occurrences = tracesActionsOccurence;
+			break;
+
+		case TraceViewerController.SHORTEST_TRACES:
+//			if (shortestActionsOccurence != null && !shortestActionsOccurence.isEmpty()) {
+//				occurrences = shortestActionsOccurence;
+//			} else {
+//				occurrences = getOccurrence(shortestTraces);
+//				shortestActionsOccurence = occurrences;
+//			}
+			entitiesOccur = findTopCommonEntities(getTraces(shortestTraceIDs).values(), omitList, numberofEntities);
+
+			break;
+
+		case TraceViewerController.SHORTEST_CLASP_TRACES:
+			if (claSPTraceIDs != null && !claSPTraceIDs.isEmpty()) {
+				Map<Integer, GraphPath> traces = getTraces(claSPTraceIDs);
+				entitiesOccur = findTopCommonEntities(traces.values(), omitList, numberofEntities);
+			}
+			break;
+
+		case TraceViewerController.CUSTOMISED_TRACES:
+			if (customeFilteringTraceIDs != null && !customeFilteringTraceIDs.isEmpty()) {
+				Map<Integer, GraphPath> traces = getTraces(customeFilteringTraceIDs);
+				entitiesOccur = findTopCommonEntities(traces.values(), omitList, numberofEntities);
+			}
+			break;
+
+		default:
+			break;
+		}
+
+//		System.out.println("Res: " + entitiesOccur);
+		
+		for(Entry<String, Long> ent : entitiesOccur) {
+			result.put(ent.getKey(), ent.getValue());
+			
+		}
+		
+//		if (occurrences != null) {
+//			// sort occurrences
+//			Collection<Integer> values = occurrences.values();
+//			List<Integer> list = new LinkedList<Integer>(values);
+//			Collections.sort(list);// ascending order
+//
+//			List<Integer> topN = new LinkedList<Integer>();
+//
+//			for (int i = list.size() - 1; i > 0; i--) {
+//
+//				if (!topN.contains(list.get(i))) {
+//					topN.add(list.get(i));
+//					index++;
+//
+//					if (index == numberofActions) {
+//						break;
+//					}
+//				}
+//
+//			}
+//
+//			for (Entry<String, Integer> entry : occurrences.entrySet()) {
+//
+//				String action = entry.getKey();
+//				int occur = entry.getValue();
+//
+//				if (topN.contains(occur)) {
+//					result.put(action, occur);
+//					index++;
+//				}
+//
+//			}
+//		}
+
+		return result;
+	}
 
 	public Map<Integer, Integer> getTopStatesOccurrences(int numberofActions, String tracesToFilter) {
 
@@ -665,7 +754,7 @@ public class TraceMiner {
 		switch (tracesToFilter) {
 		case TraceViewerController.ALL_TRACES:
 			occurrences = tracesActionsOccurence;
-			numOfTraces = instances.size();
+			numOfTraces = traces.size();
 			break;
 
 		case TraceViewerController.SHORTEST_TRACES:
@@ -766,7 +855,7 @@ public class TraceMiner {
 
 		case TraceViewerController.ALL_TRACES:
 			occurrences = statesOccurrences;
-			numOfTraces = instances.size();
+			numOfTraces = traces.size();
 			break;
 
 		case TraceViewerController.SHORTEST_TRACES:
@@ -1108,7 +1197,7 @@ public class TraceMiner {
 		}
 
 		System.out.println(">>Identifying shortest traces in [" + instanceFileName + "]");
-		for (GraphPath trace : instances.values()) {
+		for (GraphPath trace : traces.values()) {
 
 			if (trace.getStateTransitions().size() == minimumStates) {
 				shortestTraces.put(trace.getInstanceID(), trace);
@@ -1146,7 +1235,7 @@ public class TraceMiner {
 		}
 
 		System.out.println(">>Identifying shortest traces in [" + instanceFileName + "]");
-		for (GraphPath trace : instances.values()) {
+		for (GraphPath trace : traces.values()) {
 
 			if (trace.getStateTransitions().size() == numberOfStates) {
 				shortestTraces.put(trace.getInstanceID(), trace);
@@ -1236,9 +1325,9 @@ public class TraceMiner {
 
 		AlgoDBSCAN algo = new AlgoDBSCAN();
 
-		// minimum number of points/instances in a cluster
+		// minimum number of points/traces in a cluster
 		int minPoints = 10;
-		// distance between points/instances in a cluster
+		// distance between points/traces in a cluster
 		double epsilon = 10d;
 		// double epsilonPrime = epsilon;
 
@@ -1266,9 +1355,9 @@ public class TraceMiner {
 
 		AlgoOPTICS algo = new AlgoOPTICS();
 
-		// minimum number of points/instances in a cluster
+		// minimum number of points/traces in a cluster
 		int minPoints = 10;
-		// distance between points/instances in a cluster
+		// distance between points/traces in a cluster
 		double epsilon = 2d;
 		double epsilonPrime = epsilon;
 
@@ -1314,9 +1403,9 @@ public class TraceMiner {
 		algo.printStatistics();
 	}
 
-	public String convertInstancesToMiningFormat(List<GraphPath> instances) {
+	public String convertInstancesToMiningFormat(List<GraphPath> traces) {
 
-		// convert instances to a format compatible with that of the data mining
+		// convert traces to a format compatible with that of the data mining
 		// library used (i.e. SPMF)
 		// line format could have:
 		// @NAME="instance name"
@@ -1337,12 +1426,12 @@ public class TraceMiner {
 
 		StringBuilder builder = new StringBuilder();
 
-		if (instances != null && !instances.isEmpty()) {
-			shortestTransition = instances.get(0).getStateTransitions().size();
+		if (traces != null && !traces.isEmpty()) {
+			shortestTransition = traces.get(0).getStateTransitions().size();
 		}
 
 		// find longest and shortest transitions
-		for (GraphPath path : instances) {
+		for (GraphPath path : traces) {
 			List<Integer> tmp = path.getStateTransitions();
 
 			if (tmp.size() > longestTransition) {
@@ -1375,7 +1464,7 @@ public class TraceMiner {
 		// }
 
 		// ========set data
-		for (GraphPath path : instances) {
+		for (GraphPath path : traces) {
 
 			// set instance name to be the instance id
 			builder.append(instanceName).append(path.getInstanceID()).append(fileLinSeparator);
@@ -1459,14 +1548,14 @@ public class TraceMiner {
 		return convertedInstancesFileName;
 	}
 
-	public String convertInstancesToTextMiningFormat(List<GraphPath> instances) {
+	public String convertInstancesToTextMiningFormat(List<GraphPath> traces) {
 
 		String fileLinSeparator = System.getProperty("line.separator");
 
 		StringBuilder builder = new StringBuilder();
 
 		// ========set data
-		for (GraphPath path : instances) {
+		for (GraphPath path : traces) {
 
 			// === get states as string
 			// String statesStr = path.getStateTransitions().toString();
@@ -1496,14 +1585,14 @@ public class TraceMiner {
 		return convertedInstancesFileName;
 	}
 
-	public String convertUsingActionEntities(List<GraphPath> instances) {
+	public String convertUsingActionEntities(List<GraphPath> traces) {
 
 		String fileLinSeparator = System.getProperty("line.separator");
 
 		StringBuilder builder = new StringBuilder();
 
 		// ========set data
-		for (GraphPath path : instances) {
+		for (GraphPath path : traces) {
 
 			// === get states as string
 			// String statesStr = path.getStateTransitions().toString();
@@ -1738,7 +1827,7 @@ public class TraceMiner {
 			return mineClosedSequencesUsingClaSPAlgo(shortestTraces.values());
 
 		case ALL: // all
-			return mineClosedSequencesUsingClaSPAlgo(instances.values());
+			return mineClosedSequencesUsingClaSPAlgo(traces.values());
 
 		default:
 			return -1;
@@ -1755,7 +1844,7 @@ public class TraceMiner {
 			return mineClosedSequencesUsingClaSPAlgo(shortestTraces.values(), minimumTraces);
 
 		case ALL:
-			return mineClosedSequencesUsingClaSPAlgo(instances.values(), minimumTraces);
+			return mineClosedSequencesUsingClaSPAlgo(traces.values(), minimumTraces);
 
 		default:
 			return -1;
@@ -2221,7 +2310,7 @@ public class TraceMiner {
 	// return java.net.URLDecoder.decode(url.getPath(), "UTF-8");
 	// }
 
-	protected String toSPMFsequentialPatternFormat(Collection<GraphPath> instances) {
+	protected String toSPMFsequentialPatternFormat(Collection<GraphPath> traces) {
 
 		// the format is as follows:
 		// state-0 <space> -1 <space> state-1 ... state-n -2
@@ -2236,7 +2325,7 @@ public class TraceMiner {
 
 		StringBuilder str = new StringBuilder();
 
-		for (GraphPath sequence : instances) {
+		for (GraphPath sequence : traces) {
 
 			List<Integer> states = sequence.getStateTransitions();
 
@@ -2260,7 +2349,7 @@ public class TraceMiner {
 
 	protected void mineFrequentItemsetsUsingFP_GrowthAlgo() {
 
-		convertedInstancesFileName = toSPMFFrequentItemsetsFormat(instances.values());
+		convertedInstancesFileName = toSPMFFrequentItemsetsFormat(traces.values());
 
 		// percentage of traces in which the item set appears
 		// e.g., 10% in a 100 traces means that an item set should appear in at
@@ -2290,7 +2379,7 @@ public class TraceMiner {
 
 	}
 
-	protected String toSPMFFrequentItemsetsFormat(Collection<GraphPath> instances) {
+	protected String toSPMFFrequentItemsetsFormat(Collection<GraphPath> traces) {
 
 		// the format is as follows:
 		// state-0 <space> state-1 ... state-n
@@ -2301,7 +2390,7 @@ public class TraceMiner {
 
 		StringBuilder str = new StringBuilder();
 
-		for (GraphPath sequence : instances) {
+		for (GraphPath sequence : traces) {
 
 			List<Integer> states = sequence.getStateTransitions();
 
@@ -2400,8 +2489,8 @@ public class TraceMiner {
 		}
 
 		// reset data
-		if (instances != null) {
-			instances.clear();
+		if (traces != null) {
+			traces.clear();
 		}
 
 		resetMiner();
@@ -2439,8 +2528,8 @@ public class TraceMiner {
 
 		if (numberOfTraces != -1) {
 			return numberOfTraces;
-		} else if (instances != null) {
-			numberOfTraces = instances.size();
+		} else if (traces != null) {
+			numberOfTraces = traces.size();
 			return numberOfTraces;
 		}
 
@@ -2475,7 +2564,7 @@ public class TraceMiner {
 			return null;
 		}
 
-		Map<Integer, GraphPath> instances = new HashMap<Integer, GraphPath>();
+		Map<Integer, GraphPath> traces = new HashMap<Integer, GraphPath>();
 
 		// int minTraceLength = 1000000;
 		// int maxTraceLength = -1;
@@ -2504,7 +2593,7 @@ public class TraceMiner {
 				JSONObject objInstances = (JSONObject) obj.get(JSONTerms.INSTANCE_POTENTIAL);
 
 				if (objInstances.containsKey(JSONTerms.INSTANCE_POTENTIAL_COUNT)) {
-					// get instances number
+					// get traces number
 					numberOfTraces = Integer.parseInt(objInstances.get(JSONTerms.INSTANCE_POTENTIAL_COUNT).toString());
 
 					// if there's a listener, then notify
@@ -2515,11 +2604,11 @@ public class TraceMiner {
 				}
 
 				// System.out.println("nuuum " + numberOfTraces);
-				// check the instances again. if there are instances then read
+				// check the traces again. if there are traces then read
 				// them
 				if (objInstances.containsKey(JSONTerms.INSTANCE_POTENTIAL_INSTANCES)) {
 
-					// get instances
+					// get traces
 					JSONArray aryInstances = (JSONArray) objInstances.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES);
 
 					// each instance currently has an instance_id (integer),
@@ -2660,15 +2749,15 @@ public class TraceMiner {
 						tmpPath.setTransitionActions(actions);
 
 						// add to the list
-						instances.put(instanceID, tmpPath);
+						traces.put(instanceID, tmpPath);
 
 						// notify listener
 						if (listener != null) {
 
-							if (instances.size() % tracesLoadedNotifierNumber == 0) {
+							if (traces.size() % tracesLoadedNotifierNumber == 0) {
 								listener.onTracesLoaded(tracesLoadedNotifierNumber);
-							} else if (instances.size() == numberOfTraces) {
-								listener.onTracesLoaded(instances.size() % tracesLoadedNotifierNumber);
+							} else if (traces.size() == numberOfTraces) {
+								listener.onTracesLoaded(traces.size() % tracesLoadedNotifierNumber);
 							}
 
 						}
@@ -2698,7 +2787,7 @@ public class TraceMiner {
 			e.printStackTrace();
 		}
 
-		return instances;
+		return traces;
 
 	}
 
@@ -2744,7 +2833,7 @@ public class TraceMiner {
 
 	public List<Integer> getTracesWithLength(String op, int length) {
 
-		return getTracesWithLength(op, length, instances);
+		return getTracesWithLength(op, length, traces);
 	}
 
 	public List<Integer> getTracesWithLength(String op, int length, Map<Integer, GraphPath> traces) {
@@ -2815,7 +2904,7 @@ public class TraceMiner {
 
 	public List<Integer> getTracesWithOccurrencePercentage(String op, int percentage) {
 
-		return getTracesWithOccurrencePercentage(op, percentage, instances);
+		return getTracesWithOccurrencePercentage(op, percentage, traces);
 
 	}
 
@@ -2827,11 +2916,11 @@ public class TraceMiner {
 			return null;
 		}
 
-		if (traces == null || instances == null) {
+		if (traces == null || traces == null) {
 			return null;
 		}
 
-		if (traces.isEmpty() || percentage == 0 || instances.isEmpty()) {
+		if (traces.isEmpty() || percentage == 0 || traces.isEmpty()) {
 			return result;
 		}
 
@@ -2847,7 +2936,7 @@ public class TraceMiner {
 
 				for (String action : entry.getValue().getTransitionActions()) {
 					int occurrence = tracesActionsOccurence.get(action);
-					double perc = (occurrence * 1.0 / instances.size());
+					double perc = (occurrence * 1.0 / traces.size());
 					if (index != 100) {
 						System.out.println("perc: " + perc);
 						index++;
@@ -2869,7 +2958,7 @@ public class TraceMiner {
 
 				for (String action : entry.getValue().getTransitionActions()) {
 					int occurrence = tracesActionsOccurence.get(action);
-					int perc = (int) Math.floor((occurrence * 1.0 / instances.size()) * 100);
+					int perc = (int) Math.floor((occurrence * 1.0 / traces.size()) * 100);
 
 					if (!(perc <= percentage)) {
 						continue next_trace;
@@ -2885,7 +2974,7 @@ public class TraceMiner {
 
 				for (String action : entry.getValue().getTransitionActions()) {
 					int occurrence = tracesActionsOccurence.get(action);
-					int perc = (int) Math.floor((occurrence * 1.0 / instances.size()) * 100);
+					int perc = (int) Math.floor((occurrence * 1.0 / traces.size()) * 100);
 
 					if (!(perc == percentage)) {
 						continue next_trace;
@@ -2989,18 +3078,18 @@ public class TraceMiner {
 
 		Map<Integer, GraphPath> result = new HashMap<Integer, GraphPath>();
 
-		if (tracesIDs == null || instances == null) {
+		if (tracesIDs == null || traces == null) {
 			return null;
 		}
 
-		if (tracesIDs.isEmpty() || instances.isEmpty()) {
+		if (tracesIDs.isEmpty() || traces.isEmpty()) {
 			return result;
 		}
 
 		for (Integer id : tracesIDs) {
 
-			if (instances.containsKey(id)) {
-				result.put(id, instances.get(id));
+			if (traces.containsKey(id)) {
+				result.put(id, traces.get(id));
 			}
 		}
 
@@ -3009,7 +3098,7 @@ public class TraceMiner {
 
 	public List<Integer> getTracesWithActions(String query) {
 
-		return getTracesWithActions(query, instances);
+		return getTracesWithActions(query, traces);
 	}
 
 	public List<Integer> getTracesWithActions(String query, Map<Integer, GraphPath> traces) {
@@ -3132,7 +3221,7 @@ public class TraceMiner {
 
 			// if it returns false then maximum waiting time is reached
 			// if (!mainPool.awaitTermination(24, TimeUnit.DAYS)) {
-			// System.err.println("Time out! saving instances took more than
+			// System.err.println("Time out! saving traces took more than
 			// specified maximum time ["
 			// + 24 + " " + TimeUnit.DAYS + "]");
 			// }
@@ -3183,9 +3272,13 @@ public class TraceMiner {
 	 * @param topK The top K entities to find
 	 * @return The list of top K entities in the given traces with their occurrence
 	 */
-	public List<Map.Entry<String, Long>> findCommonEntities(List<GraphPath> traces, List<String> excluding,
+	public List<Map.Entry<String, Long>> findTopCommonEntities(Collection<GraphPath> traces, List<String> excluding,
 			int topK) {
 
+		if(!isBigraphERFileSet()) {
+			setBigraphERFile(bigraphERFile);
+		}
+		
 		// finds the top (with Occurrence) in the given trace
 		// List<GraphPath> traces = new LinkedList<GraphPath>();
 		// traces.add(trace);
@@ -3204,7 +3297,6 @@ public class TraceMiner {
 		// convertedInstancesFileName = convertUsingActionEntities(traces);
 
 		// generateClustersUsingTextMining();
-		//
 
 		return result;
 	}
@@ -3280,42 +3372,7 @@ public class TraceMiner {
 		bigraphERActions = brsParser.parseBigraphERFile(bigraphERFile);
 	}
 
-	public static void main(String[] args) {
-
-		TraceMiner m = new TraceMiner();
-
-		String bigraphERFile = "D:/Bigrapher data/lero/example/lero.big";
-
-		m.setBigraphERFile(bigraphERFile);
-
-		List<String> actions = new LinkedList<String>();
-
-		actions.add("enter_room_during_working_hours");
-		actions.add("disable_hvac");
-		actions.add("connect_to_hvac");
-
-		GraphPath p = new GraphPath();
-
-		p.setTransitionActions(actions);
-
-		List<GraphPath> traces = new LinkedList<GraphPath>();
-
-		traces.add(p);
-
-		//finds the top k
-		int topK = 10;
-		
-		//exclude terms from this list
-		List<String> excluding = new LinkedList<String>();
-		
-		excluding.add("RulesKeywords");
-		
-		List<Map.Entry<String, Long>> ents = m.findCommonEntities(traces, excluding, topK);
-
-		System.out.println(ents);
-	}
-	
-	public boolean isBigraphERFileSet() {
+public boolean isBigraphERFileSet() {
 		
 		if(bigraphERFile == null || bigraphERFile.isEmpty()) {
 			return false;
@@ -3324,4 +3381,41 @@ public class TraceMiner {
 		return true;
 	}
 
+
+//	public static void main(String[] args) {
+//
+//		TraceMiner m = new TraceMiner();
+//
+//		String bigraphERFile = "D:/Bigrapher data/lero/example/lero.big";
+//
+//		m.setBigraphERFile(bigraphERFile);
+//
+//		List<String> actions = new LinkedList<String>();
+//
+//		actions.add("enter_room_during_working_hours");
+//		actions.add("disable_hvac");
+//		actions.add("connect_to_hvac");
+//
+//		GraphPath p = new GraphPath();
+//
+//		p.setTransitionActions(actions);
+//
+//		List<GraphPath> traces = new LinkedList<GraphPath>();
+//
+//		traces.add(p);
+//
+//		//finds the top k
+//		int topK = 10;
+//		
+//		//exclude terms from this list
+//		List<String> excluding = new LinkedList<String>();
+//		
+//		excluding.add("RulesKeywords");
+//		
+//		List<Map.Entry<String, Long>> ents = m.findTopCommonEntities(traces, excluding, topK);
+//
+//		System.out.println(ents);
+//	}
+	
+	
 }

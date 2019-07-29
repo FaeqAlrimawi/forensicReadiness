@@ -119,16 +119,7 @@ public class InstantiationDetailsController {
 		List<GraphPath> traces = new LinkedList<GraphPath>();
 		traces.add(trace);
 
-		topEntities = miner.findCommonEntities(traces, JSONTerms.BIG_IRRELEVANT_TERMS, topK);
-
-		// System.out.println(res);
-
-		// create a holder (HBox)
-		// HBox hbox = new HBox();
-		// hbox.setPrefHeight(25);
-		// hbox.setPrefWidth(vboxMain.getPrefWidth());
-		// hbox.setSpacing(5);
-		// hbox.setAlignment(Pos.CENTER);
+		topEntities = miner.findTopCommonEntities(traces, JSONTerms.BIG_IRRELEVANT_TERMS, topK);
 
 		// create labels for each entity
 		List<Label> resLbls = new LinkedList<Label>();
@@ -142,40 +133,12 @@ public class InstantiationDetailsController {
 			resLbls.add(lbl);
 		}
 
-		// ===add label as identifier:
-		// Label lblId = new Label("Common Entities: ");
-		// lblId.setStyle(style);
-		// hboxEntities.getChildren().add(lblId);
-
 		// set selected value
 		comboBoxTopK.getSelectionModel().select(topK - 1);
-
-		// add to hbox
-		// hboxEntities.getChildren().add(comboBoxTopK);
-
-		// ===add hid button
-		// Button btnHide = new Button("Hide");
-		// btnHide.setOnAction(e -> {
-		// vboxMain.getChildren().remove(vboxMain.getChildren().size() - 1);
-		// });
 
 		// add labels to hbox
 		hboxEntities.getChildren().addAll(resLbls);
 
-		// add hide button to hbox
-		// hbox.getChildren().add(btnHide);
-
-		// add hbox to the vboxmain
-		// if (vboxMain.getChildren().size() == 2) {
-		// // if hbox is already added
-		// // System.out.println("Renew");
-		// vboxMain.getChildren().remove(vboxMain.getChildren().size() - 1);
-		// vboxMain.getChildren().add(anchorPaneMain);
-		// } else {
-		// // System.out.println("Add new");
-		// vboxMain.getChildren().add(anchorPaneMain);
-		// // updateItem(trace, false);
-		// }
 
 	}
 

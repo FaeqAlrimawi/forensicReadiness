@@ -204,6 +204,8 @@ public class TraceViewerController implements TraceMinerListener {
 
 	private int numberOfTraces = -1;
 
+	private String bigFile = "D:/Bigrapher data/lero/example/lero.big";
+	
 	// used for progress bar
 	// private double singleTraceProgressValue = 0.1;
 	private int currentTraceNumber = 0;
@@ -227,6 +229,7 @@ public class TraceViewerController implements TraceMinerListener {
 
 	public static final String ACTIONS = "Actions";
 	public static final String STATES = "States";
+	public static final String ENTITIES = "Entities";
 	public static final String ALL_TRACES = "All Traces";
 	public static final String SHORTEST_TRACES = "Shortest Traces";
 	public static final String SHORTEST_CLASP_TRACES = "Shortest ClaSP Traces";
@@ -243,7 +246,7 @@ public class TraceViewerController implements TraceMinerListener {
 
 	private final String[] occurrencesOptions = { HIGHEST, LOWEST };
 
-	private final String[] FilterSelectors = { ACTIONS, STATES };
+	private final String[] FilterSelectors = { ACTIONS, STATES, ENTITIES };
 
 	private List<String> chartFilterTraces = new ArrayList<String>();
 
@@ -350,6 +353,10 @@ public class TraceViewerController implements TraceMinerListener {
 
 				case STATES:
 					setupTopStatesChart(selectedOccurrenceType);
+					break;
+					
+				case ENTITIES:
+					setupTopEntitiesChart(selectedOccurrenceType);
 				default:
 					break;
 				}
@@ -370,6 +377,11 @@ public class TraceViewerController implements TraceMinerListener {
 
 				case STATES:
 					setupTopStatesChart(PERCENTAGE);
+					break;
+					
+				case ENTITIES:
+					//to be done
+//					setupTopEntitiesChart(selectedOccurrenceType);
 				default:
 					break;
 				}
@@ -554,6 +566,9 @@ public class TraceViewerController implements TraceMinerListener {
 		case STATES:
 			setupTopStatesChart(operation);
 			break;
+			
+		case ENTITIES:
+			setupTopEntitiesChart(operation);
 
 		default:
 			break;
@@ -1243,6 +1258,132 @@ public class TraceViewerController implements TraceMinerListener {
 
 	}
 
+	protected void setupTopEntitiesChart(String selectedOccurrenceType) {
+
+		// int numOfOccurrences = 10;
+		// int numOfSeries = 0;
+
+		// get actions from miner
+		Map<String, Long> topEntities = null;
+		int num = 0;
+
+		String tracesToFilter = comboBoxChartFilterTraces.getSelectionModel().getSelectedItem() + "";
+
+		int numberOfTracesInSelection = -1;
+
+		// set number of entities based on selection
+		switch (tracesToFilter) {
+		case ALL_TRACES:
+			numberOfTracesInSelection = numberOfTraces;
+			break;
+
+		case SHORTEST_TRACES:
+			numberOfTracesInSelection = tracesMiner.getShortestTracesNumber();
+			break;
+
+		case SHORTEST_CLASP_TRACES:
+			numberOfTracesInSelection = tracesMiner.getShortestClaSPTracesIDs().size();
+			break;
+
+		case CUSTOMISED_TRACES:
+			numberOfTracesInSelection = tracesMiner.getCustomisedTracesNumber();
+			break;
+
+		default:
+			numberOfTracesInSelection = numberOfTraces;
+			break;
+		}
+		
+		//load .big file if not loaded
+		tracesMiner.setBigraphERFile(bigFile);
+
+		// invoke operation from the miner based on selection
+		switch (selectedOccurrenceType) {
+
+		case HIGHEST:
+			num = Integer.parseInt(textFieldNumofOccurrences.getText());
+			chartTitle = "Entities with " + selectedOccurrenceType + " " + num + " Occurrences in " + tracesToFilter;
+
+			topEntities = tracesMiner.getTopEntitiesOccurrences(num, tracesToFilter);
+			break;
+
+		case LOWEST:
+			num = Integer.parseInt(textFieldNumofOccurrences.getText());
+			chartTitle = "Entities with " + selectedOccurrenceType + " " + num + " Occurrences in " + tracesToFilter;
+
+//			topEntities = tracesMiner.getLowestActionOccurrences(num, tracesToFilter);
+
+			break;
+
+		case PERCENTAGE:
+			num = Integer.parseInt(textFieldOccurrenceFilterPercentage.getText());
+			double perc = num * 1.0 / 100;
+			String op = choiceBoxOccurrenceFilterPercentage.getSelectionModel().getSelectedItem();
+			chartTitle = "Entities with Occurrence% " + op + " " + num + "% in " + tracesToFilter;
+
+//			topEntities = tracesMiner.getActionsWithOccurrencePercentage(perc, op, tracesToFilter);
+
+//			System.out.println("Entities: " + topEntities);
+			break;
+
+		default:
+			// highest occurrence in all
+			chartTitle = "Entities with " + selectedOccurrenceType + " Occurrence in All Traces";
+//			topEntities = tracesMiner.getHighestActionOccurrence();
+
+			break;
+		}
+
+		if (topEntities == null) {
+			return;
+		}
+
+		List<String> actions = Arrays.asList(topEntities.keySet().toArray(new String[topEntities.size()]));
+		List<Long> occurrences = Arrays.asList(topEntities.values().toArray(new Long[topEntities.size()]));
+
+		final int numOfActions = actions.size();
+
+		List<XYChart.Series<String, Integer>> series = new LinkedList<XYChart.Series<String, Integer>>();
+
+		// XYChart.Series<String, Integer> series1 = new XYChart.Series<String,
+		// Integer>();
+
+		for (int i = 0; i < numOfActions; i++) {
+			XYChart.Series<String, Integer> series1 = new XYChart.Series<String, Integer>();
+
+			// bug does not allow the correct order of labels
+			long occur = occurrences.get(i);
+
+			// convert occurrence into percentage
+			//need to be fixed
+			int occurPerc = (int) Math.floor((occur * 1.0 / numberOfTracesInSelection) * 100);
+			series1.getData().add(new XYChart.Data<String, Integer>("", occurPerc));
+
+			series1.setName(actions.get(i));
+
+			series.add(series1);
+		}
+
+		Platform.runLater(new Runnable() {
+
+			@Override
+			public void run() {
+				// Defining the x axis
+				categoryAxis.setLabel("Entity");
+
+				// Defining the y axis
+				numberAxis.setLabel("Occurrence %");
+
+				barChartActions.setTitle(chartTitle);
+
+				barChartActions.getData().clear();
+				// TODO Auto-generated method stub
+				barChartActions.getData().addAll(series);
+			}
+		});
+
+	}
+	
 	protected void setupTopStatesChart(String selectedOccurrenceType) {
 
 		// int numOfOccurrences = 10;
