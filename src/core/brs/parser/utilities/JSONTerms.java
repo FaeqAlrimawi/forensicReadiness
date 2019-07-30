@@ -70,6 +70,9 @@ public class JSONTerms {
 	public static final String TRANSITIONS__LABEL = "action";
 	
 	//bigraphER .big file
+	public static final String BIG_CTRL = "ctrl";
+	public static final String BIG_ATOMIC = "atomic";
+	public static final String BIG_FUN = "fun";
 	public static final String BIG_REACT = "react";
 	public static final String BIG_BIG = "big";
 	public static final String BIG_COMMENT = "#";

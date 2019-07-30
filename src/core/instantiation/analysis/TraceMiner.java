@@ -3640,6 +3640,10 @@ public class TraceMiner {
 
 	}
 
+	/**
+	 * Set the path to the *.big file
+	 * @param bigraphERFile file path
+	 */
 	public void setBigraphERFile(String bigraphERFile) {
 
 		brsParser = new BRSParser();

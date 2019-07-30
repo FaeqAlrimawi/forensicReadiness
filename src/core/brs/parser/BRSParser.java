@@ -26,6 +26,7 @@ import cyberPhysical_Incident.Entity;
 //import ie.lero.spare.franalyser.utility.JSONTerms;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
+import it.uniud.mads.jlibbig.core.std.Control;
 import it.uniud.mads.jlibbig.core.std.Handle;
 import it.uniud.mads.jlibbig.core.std.InnerName;
 import it.uniud.mads.jlibbig.core.std.Node;
@@ -47,9 +48,9 @@ public class BRSParser {
 
 	private int controlNum = 1;
 
-	//key is the react name, value is the action name taken from KeywordRules
+	// key is the react name, value is the action name taken from KeywordRules
 	private Map<String, String> mapReactToAction;
-	
+
 	public BRSParser() {
 		// bigWrapper = new BigraphWrapper();
 		controlNum = 1;
@@ -73,14 +74,19 @@ public class BRSParser {
 	}
 
 	/**
-	 * Parses the actions (aka reaction rules) in the given BigraphER file (.big)
-	 * @param bigraphERFilePath the BigraphER file (.big)
-	 * @return A map of the actions in which the key is the action name and the value is an ActionWrapper containing action info (pre, post)
+	 * Parses the actions (aka reaction rules) in the given BigraphER file
+	 * (.big)
+	 * 
+	 * @param bigraphERFilePath
+	 *            the BigraphER file (.big)
+	 * @return A map of the actions in which the key is the action name and the
+	 *         value is an ActionWrapper containing action info (pre, post)
 	 */
 	public Map<String, ActionWrapper> parseBigraphERFile(String bigraphERFilePath) {
 
 		Map<String, ActionWrapper> actions = new HashMap<String, ActionWrapper>();
 		Map<String, String> bigStmts = new HashMap<String, String>();
+		BRSWrapper brsWrapper = new BRSWrapper();
 
 		// get statements separated by ;
 		boolean ignoreComments = true;
@@ -90,6 +96,49 @@ public class BRSParser {
 		// process big if any
 		for (String line : lines) {
 			line = line.trim();
+
+			// if control
+			if (line.startsWith(JSONTerms.BIG_CTRL) || line.startsWith(JSONTerms.BIG_ATOMIC)
+					|| line.startsWith(JSONTerms.BIG_FUN)) {
+				// analyse control
+				// e.g., "ctrl CONTROL_NAME = 1;"
+
+				// remove atomic
+				if (line.contains(JSONTerms.BIG_ATOMIC)) {
+					line = line.replace(JSONTerms.BIG_ATOMIC, "");
+				}
+
+				// remove ctrl
+				if (line.contains(JSONTerms.BIG_CTRL)) {
+					line = line.replace(JSONTerms.BIG_CTRL, "");
+				}
+
+				// remove fun (controls in states are numbered so they are
+				// defferent from the .big file definition)
+				if (line.contains(JSONTerms.BIG_FUN)) {
+					line = line.replace(JSONTerms.BIG_FUN, "");
+				}
+
+				// remove comment (#)
+				if (line.contains(JSONTerms.BIG_COMMENT)) {
+					line = line.substring(0, line.indexOf(JSONTerms.BIG_COMMENT));
+				}
+
+				line = line.trim();
+
+				// get control name
+				String[] parts = line.split("=");
+				if (parts.length > 1) {
+
+					String ctrlName = parts[0].trim();
+					String arityStr = parts[1].trim();
+
+					int arity = Integer.parseInt(arityStr);
+					System.out.println("c: " + ctrlName + " a: " + arityStr);
+					brsWrapper.addControl(ctrlName, arity);
+				}
+
+			}
 
 			// if big, then preserve to check that other actions don't contain
 			// any
@@ -129,9 +178,9 @@ public class BRSParser {
 			processBigStatment(bigTitle, bigStmts);
 		}
 
-		//clear data
+		// clear data
 		mapReactToAction.clear();
-		
+
 		for (String line : lines) {
 			line = line.trim();
 			// if action
@@ -178,11 +227,11 @@ public class BRSParser {
 				newStmt.append(processBigStatment(t.sequence, bigStmts));
 
 			} else {
-				
-//				if (t.token == BigraphERTokens.SMALL_SPACE) {
-//					System.out.println("Spaaaaaaaaaaaaace");
-//				}
-				
+
+				// if (t.token == BigraphERTokens.SMALL_SPACE) {
+				// System.out.println("Spaaaaaaaaaaaaace");
+				// }
+
 				if (t.token == BigraphERTokens.OPEN_BRACKET_CONNECTIVITY) {
 					isConnection = true;
 				} else if (t.token == BigraphERTokens.CLOSED_BRACKET_CONNECTIVITY) {
@@ -224,9 +273,9 @@ public class BRSParser {
 		boolean isConnection = false;
 
 		String actionName = null;
-		
+
 		boolean isKeyword = false;
-		
+
 		for (Token t : brsTok.getTokens()) {
 
 			// if it is a not a Control ( and not a connection) and contained in
@@ -236,16 +285,15 @@ public class BRSParser {
 				newStmt.append(bigStmts.get(t.sequence));
 
 			} else {
-				
+
 				if (t.token == BigraphERTokens.WORD && t.sequence.equalsIgnoreCase("RulesKeywords")) {
 					isKeyword = true;
-				} else				
-				if (t.token == BigraphERTokens.WORD && isKeyword) {
+				} else if (t.token == BigraphERTokens.WORD && isKeyword) {
 					actionName = t.sequence;
-//					System.out.println(actionName);
+					// System.out.println(actionName);
 					isKeyword = false;
 				}
-				
+
 				if (t.token == BigraphERTokens.OPEN_BRACKET_CONNECTIVITY) {
 					isConnection = true;
 				} else if (t.token == BigraphERTokens.CLOSED_BRACKET_CONNECTIVITY) {
@@ -285,17 +333,17 @@ public class BRSParser {
 		reactParts.clear();
 
 		// add
-		if(actionName != null) {
-			reactParts.add(ACTION_NAME_INDEX, actionName);	
+		if (actionName != null) {
+			reactParts.add(ACTION_NAME_INDEX, actionName);
 		}
-		
-		//update map of action name
+
+		// update map of action name
 		mapReactToAction.put(title, actionName);
-		
+
 		reactParts.add(ACTION_PRE_INDEX, pre);
 		reactParts.add(ACTION_POST_INDEX, post);
-		
-		//add react name to the action parts
+
+		// add react name to the action parts
 		reactParts.add(ACTION_REACT_NAME_INDEX, title);
 
 		return reactParts;
@@ -327,11 +375,11 @@ public class BRSParser {
 		String pre = actionParts.get(ACTION_PRE_INDEX);
 		String post = actionParts.get(ACTION_POST_INDEX);
 		String reactName = null;
-		
-		if(actionParts.size() > 3) {
+
+		if (actionParts.size() > 3) {
 			reactName = actionParts.get(ACTION_REACT_NAME_INDEX);
 		}
-		
+
 		if (pre != null) {
 			preWrapper = parseBigraphERCondition(pre);
 
@@ -352,7 +400,7 @@ public class BRSParser {
 		actionWrapper.setPrecondition(preWrapper);
 		actionWrapper.setPostcondition(postWrapper);
 		actionWrapper.setReactName(reactName);
-		
+
 		return actionWrapper;
 
 	}
