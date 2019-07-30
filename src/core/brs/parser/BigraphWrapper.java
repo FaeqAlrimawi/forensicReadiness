@@ -529,7 +529,7 @@ public class BigraphWrapper {
 
 		// if the parent is a root
 		if (node.isParentRoot()) { // if the parent is a root
-			System.out.println(node.getId());
+//			System.out.println(node.getId());
 			Node n = biBuilder.addNode(node.getControl(), libBigRoots.get(node.getParentRoot()), names);
 
 			nodes.put(node.getId(), n);
@@ -551,7 +551,7 @@ public class BigraphWrapper {
 		// the names variable
 		// if the number of outernames defined are less than in the signature,
 		// then the rest of outernames will be defined as links (i.e. XX:e)
-		System.out.println("*node: " + node.getId() + " ctrl: " + node.getControl());
+//		System.out.println("*node: " + node.getId() + " ctrl: " + node.getControl());
 		Node n = biBuilder.addNode(node.getControl(),
 				createNode(node.getParent(), biBuilder, libBigRoots, outerNames, nodes), names);
 

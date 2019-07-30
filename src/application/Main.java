@@ -12,6 +12,7 @@ import core.brs.parser.BigraphWrapper;
 import core.brs.parser.utilities.BigraphNode;
 import it.uniud.mads.jlibbig.core.Node;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
+import it.uniud.mads.jlibbig.core.std.Matcher;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -66,7 +67,7 @@ public class Main extends Application {
 		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor  id) || Room ";
 		String action = "react enter_room = " + exprs + "->" + exprs2 + "[1,2,3];";
 		String jsonState = "D:/Bigrapher data/lero/lero1/0.json";
-		String bigFile = "D:/Bigrapher data/lero/example/lero.big";
+		String bigFile = "D:/Bigrapher data/lero/example/lero .big";
 
 		// String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor | Actor)";
 		//// System.out.println("expression: "+exprs+"\n\n");
@@ -74,6 +75,7 @@ public class Main extends Application {
 		//
 		 BRSWrapper brsWrapper = parser.parseBigraphERFile(bigFile);
 		 ActionWrapper act = brsWrapper.getActions().get("EnterRoom");
+		 ActionWrapper act2 = brsWrapper.getActions().get("ConnectBusDevice");
 		 
 		 if(act!= null) {
 			 BigraphWrapper pre = act.getPrecondition();
@@ -82,9 +84,22 @@ public class Main extends Application {
 			 Bigraph bigPre = pre.createBigraph(true, brsWrapper.getSignature());
 			 Bigraph bigPost = post.createBigraph(true, brsWrapper.getSignature());
 			 
-			 System.out.println(bigPre);
-			 System.out.println("\n"+post.getBigraphERString());
-			 System.out.println(bigPost);
+			 BigraphWrapper pre2 = act2.getPrecondition();
+			 BigraphWrapper post2 = act2.getPostcondition();
+			 
+			 Bigraph bigPre2 = pre2.createBigraph(true, brsWrapper.getSignature());
+			 Bigraph bigPost2 = post2.createBigraph(true, brsWrapper.getSignature());
+			 
+			 
+			 Matcher matcher = new Matcher();
+			 if(matcher.match(bigPre2, bigPost).iterator().hasNext()) {
+				 System.out.println("matched!");
+			 } else {
+				 System.out.println("NOT matched!");
+			 }
+//			 System.out.println(bigPre);
+//			 System.out.println("\n"+post.getBigraphERString());
+//			 System.out.println(bigPost);
 		 }
 		// ActionWrapper action = parser.parseBigraphERAction(action);
 		// BigraphWrapper big = parser.parseBigraphERState(jsonState);

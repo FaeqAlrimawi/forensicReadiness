@@ -221,8 +221,6 @@ public class BRSParser {
 
 				ActionWrapper act = parseBigraphERAction(parts);
 
-				// System.out.println("pre: " + parts.get(ACTION_PRE_INDEX));
-				// System.out.println("post: " + parts.get(ACTION_POST_INDEX));
 				actions.put(act.getActionName(), act);
 			}
 
@@ -315,7 +313,6 @@ public class BRSParser {
 			// the big stmts, then replace
 			if (t.token == BigraphERTokens.WORD && bigStmts.containsKey(t.sequence) && !isConnection) {
 				// if the token refers to another big then replace it
-				System.out.println("replac: " + t.sequence);
 				newStmt.append(bigStmts.get(t.sequence));
 
 			} else {
@@ -351,7 +348,6 @@ public class BRSParser {
 			// the big stmts, then replace
 			if (t.token == BigraphERTokens.WORD && bigStmts.containsKey(t.sequence) && !isConnection) {
 				// if the token refers to another big then replace it
-				System.out.println("replac: " + t.sequence);
 				newStmt.append(bigStmts.get(t.sequence));
 
 			} else {
@@ -513,10 +509,10 @@ public class BRSParser {
 			}
 		}
 
-		System.out.println(actionName);
-		System.out.println(pre);
-		System.out.println(post);
-		System.out.println();
+//		System.out.println(actionName);
+//		System.out.println(pre);
+//		System.out.println(post);
+//		System.out.println();
 		components.add(ACTION_NAME_INDEX, actionName);
 		components.add(ACTION_PRE_INDEX, pre);
 		components.add(ACTION_POST_INDEX, post);
