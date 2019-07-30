@@ -26,7 +26,6 @@ import cyberPhysical_Incident.Entity;
 //import ie.lero.spare.franalyser.utility.JSONTerms;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
-import it.uniud.mads.jlibbig.core.std.Control;
 import it.uniud.mads.jlibbig.core.std.Handle;
 import it.uniud.mads.jlibbig.core.std.InnerName;
 import it.uniud.mads.jlibbig.core.std.Node;
@@ -100,7 +99,7 @@ public class BRSParser {
 		for (String line : lines) {
 
 			line = line.trim();
-
+			
 			// remove comment (#)
 			if (line.contains(JSONTerms.BIG_COMMENT)) {
 				line = line.substring(0, line.indexOf(JSONTerms.BIG_COMMENT));
@@ -201,7 +200,7 @@ public class BRSParser {
 				}
 			}
 		}
-
+		
 		// check if any big contains others
 		for (String bigTitle : bigStmts.keySet()) {
 			processBigStatment(bigTitle, bigStmts);
@@ -682,6 +681,7 @@ public class BRSParser {
 
 			case BigraphERTokens.SITE:// id
 
+				System.out.println("++Site ");
 				// by default a site is created with each entity
 
 				// if the token is site then if it is containment add site to
@@ -748,7 +748,10 @@ public class BRSParser {
 					addSite(entityName);
 
 					// need to remove a container
-					containers.removeFirst();
+					if(isContainment) {
+						containers.removeFirst();	
+					}
+					
 				}
 
 				// hasSite = true;

@@ -4,7 +4,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
 import it.uniud.mads.jlibbig.core.std.Control;
+import it.uniud.mads.jlibbig.core.std.Signature;
 
 public class BRSWrapper {
 
@@ -25,6 +27,9 @@ public class BRSWrapper {
 	// key is react name, value is an ActionWrapper object
 	private Map<String, ActionWrapper> actions;
 
+	//signature for Bigraph object representation
+	private Signature signature;
+	
 	public static final String BIGRAPH_FILE_EXTENSION = "big";
 
 	public BRSWrapper() {
@@ -64,10 +69,37 @@ public class BRSWrapper {
 		this.type = type;
 	}
 
+	public Signature getSignature() {
+		
+		if(signature == null) {
+			createSignature();
+		}
+		
+		return signature;
+	}
+
+	public void setSignature(Signature signature) {
+		this.signature = signature;
+	}
+
 	public String getFilePath() {
 		return filePath;
 	}
 
+	public Signature createSignature() {
+	
+		SignatureBuilder sigBldr = new SignatureBuilder();
+		
+		for(Control ctrl : controls.values()) {
+			sigBldr.add(ctrl);
+		}
+		
+		signature = sigBldr.makeSignature();
+		
+		return signature;
+	
+	}
+	
 	public void setFilePath(String filePath) {
 		this.filePath = filePath;
 
@@ -104,6 +136,7 @@ public class BRSWrapper {
 
 	public void addControl(Control ctrl) {
 
+		
 		controls.put(ctrl.getName(), ctrl);
 	}
 

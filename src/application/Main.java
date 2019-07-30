@@ -7,6 +7,7 @@ import java.util.Map;
 
 import core.brs.parser.ActionWrapper;
 import core.brs.parser.BRSParser;
+import core.brs.parser.BRSWrapper;
 import core.brs.parser.BigraphWrapper;
 import core.brs.parser.utilities.BigraphNode;
 import it.uniud.mads.jlibbig.core.Node;
@@ -60,7 +61,7 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-		 launch(args) ;
+//		 launch(args) ;
 		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor | id) | id || Room.Device.id || id";
 		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor  id) || Room ";
 		String action = "react enter_room = " + exprs + "->" + exprs2 + "[1,2,3];";
@@ -71,7 +72,18 @@ public class Main extends Application {
 		//// System.out.println("expression: "+exprs+"\n\n");
 		BRSParser parser = new BRSParser();
 		//
-		// BigraphWrapper condition = parser.parseBigraphERCondition(exprs);
+		 BRSWrapper brsWrapper = parser.parseBigraphERFile(bigFile);
+		 ActionWrapper act = brsWrapper.getActions().get("EnterRoom");
+		 
+		 if(act!= null) {
+			 BigraphWrapper pre = act.getPrecondition();
+			 BigraphWrapper post = act.getPostcondition();
+			 
+			 Bigraph bigPre = pre.createBigraph(true, brsWrapper.getSignature());
+			 
+			 System.out.println(pre.getContainedEntitiesMap());
+			 System.out.println(bigPre);
+		 }
 		// ActionWrapper action = parser.parseBigraphERAction(action);
 		// BigraphWrapper big = parser.parseBigraphERState(jsonState);
 //		Map<String, ActionWrapper> actions = parser.parseBigraphERFile(bigFile);

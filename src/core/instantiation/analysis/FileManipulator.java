@@ -134,6 +134,10 @@ public class FileManipulator {
 					continue;
 				}
 				
+				if(tmp.contains(JSONTerms.BIG_COMMENT)) {
+					tmp = tmp.substring(0, tmp.lastIndexOf(JSONTerms.BIG_COMMENT));
+				}
+				
 				result.append(tmp);
 			}
 
