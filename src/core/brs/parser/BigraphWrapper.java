@@ -248,7 +248,7 @@ public class BigraphWrapper {
 //		System.out.println(entities);
 //		System.out.println(roots);
 //		System.out.println(sig);
-		System.out.println(containedEntitiesMap);
+//		System.out.println(containedEntitiesMap);
 		for (Entity ent : controlMap.keySet()) {
 
 			String entityName = controlMap.get(ent);

@@ -80,9 +80,11 @@ public class Main extends Application {
 			 BigraphWrapper post = act.getPostcondition();
 			 
 			 Bigraph bigPre = pre.createBigraph(true, brsWrapper.getSignature());
+			 Bigraph bigPost = post.createBigraph(true, brsWrapper.getSignature());
 			 
-			 System.out.println(pre.getContainedEntitiesMap());
 			 System.out.println(bigPre);
+			 System.out.println("\n"+post.getBigraphERString());
+			 System.out.println(bigPost);
 		 }
 		// ActionWrapper action = parser.parseBigraphERAction(action);
 		// BigraphWrapper big = parser.parseBigraphERState(jsonState);

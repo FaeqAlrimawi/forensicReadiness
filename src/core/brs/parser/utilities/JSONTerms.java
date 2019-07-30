@@ -84,6 +84,11 @@ public class JSONTerms {
 	public static final String BIG_IMPLY_2 = "-->";
 	public static final String BIG_AT= "@";
 	public static final String BIG_SEMICOLON = ";";
+	
+	//internal terms with some meaning
+	//defines an action name
+	public static final String BIG_RULES_KEYWORDS = "RulesKeywords";
+
 	public static final List<String> BIG_IRRELEVANT_TERMS = new LinkedList<String>(){{
 		add("RulesKeywords");
 		add("Context");}

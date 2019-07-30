@@ -91,15 +91,15 @@ public class BRSParser {
 		boolean ignoreComments = true;
 		String[] lines = FileManipulator.readBigraphERFile(bigraphERFilePath, ignoreComments);
 
-		//== file path
+		// == file path
 		brsWrapper.setFilePath(bigraphERFilePath);
-		
+
 		// String initBig = null;
 		// process big if any
 		for (String line : lines) {
 
 			line = line.trim();
-			
+
 			// remove comment (#)
 			if (line.contains(JSONTerms.BIG_COMMENT)) {
 				line = line.substring(0, line.indexOf(JSONTerms.BIG_COMMENT));
@@ -181,9 +181,9 @@ public class BRSParser {
 				String[] parts = line.split(" ");
 
 				if (parts.length > 1) {
-					
+
 					String type = parts[1].trim();
-					
+
 					switch (type) {
 					case JSONTerms.BIG_BRS:
 						brsWrapper.setType(BigraphType.BRS);
@@ -200,7 +200,7 @@ public class BRSParser {
 				}
 			}
 		}
-		
+
 		// check if any big contains others
 		for (String bigTitle : bigStmts.keySet()) {
 			processBigStatment(bigTitle, bigStmts);
@@ -221,6 +221,8 @@ public class BRSParser {
 
 				ActionWrapper act = parseBigraphERAction(parts);
 
+				// System.out.println("pre: " + parts.get(ACTION_PRE_INDEX));
+				// System.out.println("post: " + parts.get(ACTION_POST_INDEX));
 				actions.put(act.getActionName(), act);
 			}
 
@@ -313,19 +315,18 @@ public class BRSParser {
 			// the big stmts, then replace
 			if (t.token == BigraphERTokens.WORD && bigStmts.containsKey(t.sequence) && !isConnection) {
 				// if the token refers to another big then replace it
+				System.out.println("replac: " + t.sequence);
 				newStmt.append(bigStmts.get(t.sequence));
 
 			} else {
 
-				if (t.token == BigraphERTokens.WORD && t.sequence.equalsIgnoreCase("RulesKeywords")) {
+				if (t.token == BigraphERTokens.WORD && t.sequence.equalsIgnoreCase(JSONTerms.BIG_RULES_KEYWORDS)) {
 					isKeyword = true;
 				} else if (t.token == BigraphERTokens.WORD && isKeyword) {
 					actionName = t.sequence;
 					// System.out.println(actionName);
 					isKeyword = false;
-				}
-
-				if (t.token == BigraphERTokens.OPEN_BRACKET_CONNECTIVITY) {
+				} else if (t.token == BigraphERTokens.OPEN_BRACKET_CONNECTIVITY) {
 					isConnection = true;
 				} else if (t.token == BigraphERTokens.CLOSED_BRACKET_CONNECTIVITY) {
 					isConnection = false;
@@ -346,11 +347,27 @@ public class BRSParser {
 
 		for (Token t : brsTok.getTokens()) {
 
-			if (t.token == BigraphERTokens.WORD && bigStmts.containsKey(t.sequence)) {
+			// if it is a not a Control ( and not a connection) and contained in
+			// the big stmts, then replace
+			if (t.token == BigraphERTokens.WORD && bigStmts.containsKey(t.sequence) && !isConnection) {
 				// if the token refers to another big then replace it
+				System.out.println("replac: " + t.sequence);
 				newStmt.append(bigStmts.get(t.sequence));
 
 			} else {
+
+				if (t.token == BigraphERTokens.WORD && t.sequence.equalsIgnoreCase(JSONTerms.BIG_RULES_KEYWORDS)) {
+					isKeyword = true;
+				} else if (t.token == BigraphERTokens.WORD && isKeyword) {
+					actionName = t.sequence;
+					// System.out.println(actionName);
+					isKeyword = false;
+				} else if (t.token == BigraphERTokens.OPEN_BRACKET_CONNECTIVITY) {
+					isConnection = true;
+				} else if (t.token == BigraphERTokens.CLOSED_BRACKET_CONNECTIVITY) {
+					isConnection = false;
+				}
+
 				newStmt.append(t.sequence);
 			}
 		}
@@ -496,6 +513,10 @@ public class BRSParser {
 			}
 		}
 
+		System.out.println(actionName);
+		System.out.println(pre);
+		System.out.println(post);
+		System.out.println();
 		components.add(ACTION_NAME_INDEX, actionName);
 		components.add(ACTION_PRE_INDEX, pre);
 		components.add(ACTION_POST_INDEX, post);
@@ -681,7 +702,6 @@ public class BRSParser {
 
 			case BigraphERTokens.SITE:// id
 
-				System.out.println("++Site ");
 				// by default a site is created with each entity
 
 				// if the token is site then if it is containment add site to
@@ -748,10 +768,10 @@ public class BRSParser {
 					addSite(entityName);
 
 					// need to remove a container
-					if(isContainment) {
-						containers.removeFirst();	
+					if (isContainment) {
+						containers.removeFirst();
 					}
-					
+
 				}
 
 				// hasSite = true;
