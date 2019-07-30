@@ -73,7 +73,11 @@ public class JSONTerms {
 	public static final String BIG_CTRL = "ctrl";
 	public static final String BIG_ATOMIC = "atomic";
 	public static final String BIG_FUN = "fun";
+	public static final String BIG_BEGIN = "begin";
 	public static final String BIG_REACT = "react";
+	public static final String BIG_BRS = "brs";
+	public static final String BIG_PROP_BRS = "pbrs";
+	public static final String BIG_STOCHASTIC_BRS = "sbrs";
 	public static final String BIG_BIG = "big";
 	public static final String BIG_COMMENT = "#";
 	public static final String BIG_IMPLY = "->";

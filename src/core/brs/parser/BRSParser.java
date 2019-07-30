@@ -82,7 +82,7 @@ public class BRSParser {
 	 * @return A map of the actions in which the key is the action name and the
 	 *         value is an ActionWrapper containing action info (pre, post)
 	 */
-	public Map<String, ActionWrapper> parseBigraphERFile(String bigraphERFilePath) {
+	public BRSWrapper parseBigraphERFile(String bigraphERFilePath) {
 
 		Map<String, ActionWrapper> actions = new HashMap<String, ActionWrapper>();
 		Map<String, String> bigStmts = new HashMap<String, String>();
@@ -92,12 +92,21 @@ public class BRSParser {
 		boolean ignoreComments = true;
 		String[] lines = FileManipulator.readBigraphERFile(bigraphERFilePath, ignoreComments);
 
+		//== file path
+		brsWrapper.setFilePath(bigraphERFilePath);
+		
 		// String initBig = null;
 		// process big if any
 		for (String line : lines) {
+
 			line = line.trim();
 
-			// if control
+			// remove comment (#)
+			if (line.contains(JSONTerms.BIG_COMMENT)) {
+				line = line.substring(0, line.indexOf(JSONTerms.BIG_COMMENT));
+			}
+
+			// ===control
 			if (line.startsWith(JSONTerms.BIG_CTRL) || line.startsWith(JSONTerms.BIG_ATOMIC)
 					|| line.startsWith(JSONTerms.BIG_FUN)) {
 				// analyse control
@@ -119,11 +128,6 @@ public class BRSParser {
 					line = line.replace(JSONTerms.BIG_FUN, "");
 				}
 
-				// remove comment (#)
-				if (line.contains(JSONTerms.BIG_COMMENT)) {
-					line = line.substring(0, line.indexOf(JSONTerms.BIG_COMMENT));
-				}
-
 				line = line.trim();
 
 				// get control name
@@ -134,13 +138,14 @@ public class BRSParser {
 					String arityStr = parts[1].trim();
 
 					int arity = Integer.parseInt(arityStr);
-					System.out.println("c: " + ctrlName + " a: " + arityStr);
+
+					// add control
 					brsWrapper.addControl(ctrlName, arity);
 				}
 
 			}
 
-			// if big, then preserve to check that other actions don't contain
+			// === big, then preserve to check that other actions don't contain
 			// any
 			if (line.startsWith(JSONTerms.BIG_BIG)) {
 
@@ -171,6 +176,30 @@ public class BRSParser {
 					bigStmts.put(title, bigSt);
 				}
 			}
+
+			// ===type (brs, pbrs, sbrs)
+			if (line.startsWith(JSONTerms.BIG_BEGIN)) {
+				String[] parts = line.split(" ");
+
+				if (parts.length > 1) {
+					
+					String type = parts[1].trim();
+					
+					switch (type) {
+					case JSONTerms.BIG_BRS:
+						brsWrapper.setType(BigraphType.BRS);
+						break;
+					case JSONTerms.BIG_PROP_BRS:
+						brsWrapper.setType(BigraphType.PBRS);
+						break;
+					case JSONTerms.BIG_STOCHASTIC_BRS:
+						brsWrapper.setType(BigraphType.SBRS);
+						break;
+					default:
+						brsWrapper.setType(BigraphType.UNKNOWN);
+					}
+				}
+			}
 		}
 
 		// check if any big contains others
@@ -181,6 +210,7 @@ public class BRSParser {
 		// clear data
 		mapReactToAction.clear();
 
+		// === reactions
 		for (String line : lines) {
 			line = line.trim();
 			// if action
@@ -197,7 +227,9 @@ public class BRSParser {
 
 		}
 
-		return actions;
+		brsWrapper.setActions(actions);
+
+		return brsWrapper;
 	}
 
 	protected String processBigStatment(String bigTitle, Map<String, String> bigStmts) {

@@ -52,6 +52,7 @@ import ca.pfv.spmf.patterns.cluster.ClusterWithMean;
 import controller.instantiation.analysis.TraceViewerController;
 import core.brs.parser.ActionWrapper;
 import core.brs.parser.BRSParser;
+import core.brs.parser.BRSWrapper;
 import core.brs.parser.BigraphWrapper;
 import core.brs.parser.utilities.JSONTerms;
 import core.utilities.Query;
@@ -164,13 +165,19 @@ public class TraceMiner {
 	// used for analysing common entities
 	BRSParser brsParser;
 
-	// map of all actions in the bigraphER file
-	// key is action name, value is an ActionWrapper object containing action
-	// info (pre, post)
-	Map<String, ActionWrapper> bigraphERActions;
 
 	// bigraphER file
 	private String bigraphERFile;
+
+	
+	//holds information about the .big file
+	BRSWrapper brsWrapper;
+	
+	// map of all actions in the bigraphER file
+	// key is action name, value is an ActionWrapper object containing action
+	// info (pre, post)
+	//taken from BRSWrapper
+	Map<String, ActionWrapper> bigraphERActions;
 
 	// specifies how many entities are there in the current selected traces that
 	// are processed
@@ -3650,7 +3657,8 @@ public class TraceMiner {
 
 		this.bigraphERFile = bigraphERFile;
 
-		bigraphERActions = brsParser.parseBigraphERFile(bigraphERFile);
+		brsWrapper = brsParser.parseBigraphERFile(bigraphERFile);
+		bigraphERActions = brsWrapper.getActions();
 	}
 
 	public boolean isBigraphERFileSet() {
