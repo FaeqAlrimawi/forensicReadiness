@@ -1,6 +1,7 @@
 
 package controller.instantiation.analysis;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -16,15 +17,14 @@ import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tooltip;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -79,18 +79,11 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	private TraceMiner traceMiner;
 
-	// private ComboBox<Integer> comboBoxTopK;
+	private static final String SVG_EXT = ".svg";
+	private static final String JSON_EXT = ".json";
+	private static final String TXT_EXT = ".txt";
 
-	// for testing
-	// private String bigFile = "D:/Bigrapher data/lero/example/lero.big";
-	//
-
-	// private TraceMiner miner;
-	// private List<Map.Entry<String, Long>> topEntities;
-
-	// used for common entities
-	// private int topK = 3;
-	// private int topKMax = 10;
+	private String[] stateExtensions = new String[] { SVG_EXT, JSON_EXT, TXT_EXT };
 
 	public TaskCell(TraceMiner miner) {
 		this();
@@ -169,8 +162,8 @@ public class TaskCell extends ListCell<GraphPath> {
 		if (traceMiner != null && !traceMiner.isBigraphERFileSet()) {
 			// choose bigrapher file
 			selectBigraphERFile();
-			
-			if(!traceMiner.isBigraphERFileSet()) {
+
+			if (!traceMiner.isBigraphERFileSet()) {
 				return;
 			}
 		}
@@ -178,16 +171,13 @@ public class TaskCell extends ListCell<GraphPath> {
 		// load trace details view if not loaded
 		if (traceDetailController == null) {
 			loadTraceDetailsController();
-			
+
 			traceDetailController.setTraceMiner(traceMiner);
 			traceDetailController.setVBox(vboxMain);
 			// //show default value for entities
 			traceDetailController.showEntities(trace);
-
-			// }
 		}
 
-		// System.out.println(trace.getInstanceID());
 		// add hbox to the vboxmain
 		if (vboxMain.getChildren().size() == 2) {
 			// if hbox is already added
@@ -200,9 +190,6 @@ public class TaskCell extends ListCell<GraphPath> {
 			// updateItem(trace, false);
 		}
 
-		// if(!vboxMain.getChildren().contains(traceDetailController)) {
-		// vboxMain.getChildren().add(traceDetailsMainPane);
-		// }
 	}
 
 	/**
@@ -254,8 +241,7 @@ public class TaskCell extends ListCell<GraphPath> {
 				"Please select a Folder which contains the states representations (e.g., .svg)",
 				AlertType.CONFIRMATION);
 
-		
-		if(result == ButtonType.CANCEL) {
+		if (result == ButtonType.CANCEL) {
 			return;
 		} else {
 			File selectedStatesFolder = dirChooser.showDialog(null);
@@ -265,8 +251,7 @@ public class TaskCell extends ListCell<GraphPath> {
 				statesFolder = selectedStatesFolder.getAbsolutePath();
 			}
 		}
-		
-	
+
 	}
 
 	@Override
@@ -310,8 +295,6 @@ public class TaskCell extends ListCell<GraphPath> {
 
 				@Override
 				public void run() {
-					// splitPaneTrace.setPrefWidth(hboxRoot.getPrefWidth());
-					// hboxRoot.prefWidthProperty().bind(hboxRoot.prefWidthProperty());
 					// TODO Auto-generated method stub
 					setText(null);
 					setGraphic(rootPane);
@@ -405,34 +388,36 @@ public class TaskCell extends ListCell<GraphPath> {
 			// open state svg
 			lblState.setOnMouseClicked(e -> {
 
+				showState(state);
+
 				// int currentTraceID = Integer.parseInt(lblState.getText());
 
-				if (stateController == null) {
-					loadStateController();
-				}
-
-				// open viewer
-				// String path = "C:\\Users\\Faeq\\Desktop\\svg\\0.svg";
-
-				if (statesFolder == null || statesFolder.isEmpty()) {
-					// try to get it from the traceMiner
-					if (traceMiner != null) {
-						String statesFolder = traceMiner.getStatesFolder();
-
-						if (statesFolder == null || statesFolder.isEmpty()) {
-							selectStatesFolder();
-						} else {
-							this.statesFolder = statesFolder;
-						}
-					}
-
-				}
-
-				// URL stateURL = getClass().getResource(statesFolder
-				// +File.separator+ state + ".svg");
-
-				System.out.println(statesFolder);
-				String path = statesFolder + File.separator + state + ".svg";
+				// if (stateController == null) {
+				// loadStateController();
+				// }
+				//
+				// // open viewer
+				// // String path = "C:\\Users\\Faeq\\Desktop\\svg\\0.svg";
+				//
+				// if (statesFolder == null || statesFolder.isEmpty()) {
+				// // try to get it from the traceMiner
+				// if (traceMiner != null) {
+				// String statesFolder = traceMiner.getStatesFolder();
+				//
+				// if (statesFolder == null || statesFolder.isEmpty()) {
+				// selectStatesFolder();
+				// } else {
+				// this.statesFolder = statesFolder;
+				// }
+				// }
+				//
+				// }
+				//
+				// // URL stateURL = getClass().getResource(statesFolder
+				// // +File.separator+ state + ".svg");
+				//
+				// System.out.println(statesFolder);
+				// String path = statesFolder + File.separator + state + ".svg";
 
 				// if (stateURL != null) {
 				// path = stateURL.getPath();
@@ -441,28 +426,30 @@ public class TaskCell extends ListCell<GraphPath> {
 				// System.err.println("path not found for state " + state);
 				// }
 
-				int tries = 10000;
-
-				while (path.contains("\\") && tries > 0) {
-					path = path.replace("\\", "/");
-					tries--;
-				}
-
-				File file = new File(path);
-
-				if (!file.exists()) {
-					showDialog("Not found", "File not found for state [" + state + "].", AlertType.ERROR);
-				} else {
-					String svgPath = "file:///" + path;
-
-					stateController.updateSVGPath(svgPath);
-
-					stateViewerStage.setTitle("State " + state);
-
-					if (!stateViewerStage.isShowing()) {
-						stateViewerStage.show();
-					}
-				}
+				// int tries = 10000;
+				//
+				// while (path.contains("\\") && tries > 0) {
+				// path = path.replace("\\", "/");
+				// tries--;
+				// }
+				//
+				//
+				// File file = new File(path);
+				//
+				// if (!file.exists()) {
+				// showDialog("Not found", "File not found for state [" + state
+				// + "].", AlertType.ERROR);
+				// } else {
+				// String svgPath = "file:///" + path;
+				//
+				// stateController.updateSVGPath(svgPath);
+				//
+				// stateViewerStage.setTitle("State " + state);
+				//
+				// if (!stateViewerStage.isShowing()) {
+				// stateViewerStage.show();
+				// }
+				// }
 
 			});
 
@@ -501,6 +488,109 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	}
 
+	protected void showState(int state) {
+
+		if (stateController == null) {
+			loadStateController();
+		}
+
+		if (statesFolder == null || statesFolder.isEmpty()) {
+			// try to get it from the traceMiner
+			if (traceMiner != null) {
+				String statesFolder = traceMiner.getStatesFolder();
+
+				if (statesFolder == null || statesFolder.isEmpty()) {
+					// prompt the user to select a folder containing the states
+					selectStatesFolder();
+				} else {
+					this.statesFolder = statesFolder;
+				}
+			}
+
+		}
+
+		// if folder not set return
+		if (statesFolder == null || statesFolder.isEmpty()) {
+			return;
+		}
+
+		// try to find a state representation as in stateExtension
+		String path = null;
+		File file = null;
+		String fileExt = null;
+
+		for (String ext : stateExtensions) {
+			path = statesFolder + File.separator + state + ext;
+			file = new File(path);
+
+			if (file.exists()) {
+				fileExt = ext;
+				break;
+			}
+
+		}
+
+		// no state found
+		if (fileExt == null) {
+			showDialog("Not found", "File not found for state [" + state + "].", AlertType.ERROR);
+			return;
+		}
+
+		// if state found
+		switch (fileExt) {
+		case SVG_EXT:
+			// show svg
+			int tries = 10000;
+			while (path.contains("\\") && tries > 0) {
+				path = path.replace("\\", "/");
+				tries--;
+			}
+			String svgPath = "file:///" + path;
+
+			stateController.updateSVGPath(svgPath);
+
+			stateViewerStage.setTitle("State " + state);
+
+			if (!stateViewerStage.isShowing()) {
+				stateViewerStage.show();
+			}
+
+		case JSON_EXT:
+		case TXT_EXT:
+			//both extensions are shown by opening the file in default editor
+			try {
+				Desktop.getDesktop().open(file);
+			} catch (IOException ex) {
+				// TODO Auto-generated catch block
+				ex.printStackTrace();
+			}
+			break;
+		default:
+			break;
+		}
+//		int tries = 10000;
+//
+//		while (path.contains("\\") && tries > 0) {
+//			path = path.replace("\\", "/");
+//			tries--;
+//		}
+//
+//		if (!file.exists()) {
+//
+//		} else {
+//			String svgPath = "file:///" + path;
+//
+//			stateController.updateSVGPath(svgPath);
+//
+//			stateViewerStage.setTitle("State " + state);
+//
+//			if (!stateViewerStage.isShowing()) {
+//				stateViewerStage.show();
+//			}
+//		}
+
+	}
+
 	protected ButtonType showDialog(String title, String msg, AlertType type) {
 
 		Alert alert = new Alert(type);
@@ -510,7 +600,7 @@ public class TaskCell extends ListCell<GraphPath> {
 		alert.setContentText(msg);
 
 		alert.initModality(Modality.APPLICATION_MODAL);
-		
+
 		alert.showAndWait();
 
 		return alert.getResult();
