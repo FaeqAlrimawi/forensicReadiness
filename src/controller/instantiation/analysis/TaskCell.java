@@ -16,6 +16,7 @@ import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
@@ -30,6 +31,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class TaskCell extends ListCell<GraphPath> {
@@ -167,14 +169,16 @@ public class TaskCell extends ListCell<GraphPath> {
 		if (traceMiner != null && !traceMiner.isBigraphERFileSet()) {
 			// choose bigrapher file
 			selectBigraphERFile();
+			
+			if(!traceMiner.isBigraphERFileSet()) {
+				return;
+			}
 		}
 
 		// load trace details view if not loaded
 		if (traceDetailController == null) {
 			loadTraceDetailsController();
-			// if(traceDetailController != null) {
-			// traceDetailsMainPane = traceDetailController.getMainLayout();
-			//
+			
 			traceDetailController.setTraceMiner(traceMiner);
 			traceDetailController.setVBox(vboxMain);
 			// //show default value for entities
@@ -201,6 +205,9 @@ public class TaskCell extends ListCell<GraphPath> {
 		// }
 	}
 
+	/**
+	 * Select BigraphER file (*.big)
+	 */
 	protected void selectBigraphERFile() {
 		FileChooser fileChooser = new FileChooser();
 
@@ -228,34 +235,38 @@ public class TaskCell extends ListCell<GraphPath> {
 		}
 	}
 
+	/**
+	 * Select states folder (which contains the .svg representation)
+	 */
 	protected void selectStatesFolder() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 
+		// show defualt folder
 		if (defaultStatesFolder != null) {
 			File selectedStatesFolder = new File(defaultStatesFolder.getPath());
-			// fileChooser.setInitialFileName(selectedBigraphERFile.getName());
-			//
-			// String folder =
-			// selectedBigraphERFile.getAbsolutePath().substring(0,
-			// selectedBigraphERFile.getAbsolutePath().lastIndexOf(File.separator));
-			// File folderF = new File(folder);
 
 			if (selectedStatesFolder.isDirectory()) {
 				dirChooser.setInitialDirectory(selectedStatesFolder);
 			}
 		}
 
-		// FileChooser.ExtensionFilter extFilter = new
-		// FileChooser.ExtensionFilter("BigraphER files (*.big)", "*.big");
+		ButtonType result = showDialog("Select States Folder",
+				"Please select a Folder which contains the states representations (e.g., .svg)",
+				AlertType.CONFIRMATION);
 
-		// fileChooser.getExtensionFilters().add(extFilter);
+		
+		if(result == ButtonType.CANCEL) {
+			return;
+		} else {
+			File selectedStatesFolder = dirChooser.showDialog(null);
 
-		File selectedStatesFolder = dirChooser.showDialog(null);
-
-		if (selectedStatesFolder != null) {
-			traceMiner.setStatesFolder(selectedStatesFolder.getAbsolutePath());
-			statesFolder = selectedStatesFolder.getAbsolutePath();
+			if (selectedStatesFolder != null) {
+				traceMiner.setStatesFolder(selectedStatesFolder.getAbsolutePath());
+				statesFolder = selectedStatesFolder.getAbsolutePath();
+			}
 		}
+		
+	
 	}
 
 	@Override
@@ -283,37 +294,14 @@ public class TaskCell extends ListCell<GraphPath> {
 
 			// if new
 			if (id == null || id.isEmpty()) {
-				// lblTraceID.setText(trace.getInstanceID()+"");
-				//
-				// int index = 0;
-				// int size = trace.getStateTransitions().size()-1;
-				// //set states
-				// for(Integer state : trace.getStateTransitions()) {
-				//// Circle circle = new Circle(hbox.getHeight()-2);
-				// Label stateLbl;
-				// if(index != size) {
-				// stateLbl = new Label(state+" -> ");
-				// } else {
-				// stateLbl = new Label(state+"");
-				// }
-				//
-				// index++;
-				// hbox.getChildren().add(stateLbl);
-				//
-				// }
-				// System.out.println("-Creating a new trace: " +
-				// trace.getInstanceID());
+
 				populateCell(trace);
 
-				System.out.println("Creating new trace: " + trace.getInstanceID());
 				// if already exist, check the id of the trace if different
 			} else {
 				int currentTraceID = Integer.parseInt(id);
 
 				if (currentTraceID != trace.getInstanceID()) {
-					// System.out.println("-Updating trace [" + currentTraceID +
-					// "]: " + trace.getInstanceID());
-					System.out.println("Updating trace: " + trace.getInstanceID());
 					populateCell(trace);
 				}
 			}
@@ -463,7 +451,7 @@ public class TaskCell extends ListCell<GraphPath> {
 				File file = new File(path);
 
 				if (!file.exists()) {
-					showErrorDialog("Error", "File not found for state [" + state + "].", AlertType.ERROR);
+					showDialog("Not found", "File not found for state [" + state + "].", AlertType.ERROR);
 				} else {
 					String svgPath = "file:///" + path;
 
@@ -513,7 +501,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	}
 
-	protected void showErrorDialog(String title, String msg, AlertType type) {
+	protected ButtonType showDialog(String title, String msg, AlertType type) {
 
 		Alert alert = new Alert(type);
 
@@ -521,6 +509,10 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		alert.setContentText(msg);
 
-		alert.show();
+		alert.initModality(Modality.APPLICATION_MODAL);
+		
+		alert.showAndWait();
+
+		return alert.getResult();
 	}
 }
