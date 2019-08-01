@@ -62,45 +62,45 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-//		 launch(args) ;
+		 launch(args) ;
 		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor | id) | id || Room.Device.id || id";
 		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor  id) || Room ";
 		String action = "react enter_room = " + exprs + "->" + exprs2 + "[1,2,3];";
 		String jsonState = "D:/Bigrapher data/lero/lero1/0.json";
-		String bigFile = "D:/Bigrapher data/lero/example/lero .big";
+		String bigFile = "D:/Bigrapher data/lero/example/lero.big";
 
 		// String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor | Actor)";
 		//// System.out.println("expression: "+exprs+"\n\n");
 		BRSParser parser = new BRSParser();
 		//
-		 BRSWrapper brsWrapper = parser.parseBigraphERFile(bigFile);
-		 ActionWrapper act = brsWrapper.getActions().get("EnterRoom");
-		 ActionWrapper act2 = brsWrapper.getActions().get("ConnectBusDevice");
-		 
-		 if(act!= null) {
-			 BigraphWrapper pre = act.getPrecondition();
-			 BigraphWrapper post = act.getPostcondition();
-			 
-			 Bigraph bigPre = pre.createBigraph(true, brsWrapper.getSignature());
-			 Bigraph bigPost = post.createBigraph(true, brsWrapper.getSignature());
-			 
-			 BigraphWrapper pre2 = act2.getPrecondition();
-			 BigraphWrapper post2 = act2.getPostcondition();
-			 
-			 Bigraph bigPre2 = pre2.createBigraph(true, brsWrapper.getSignature());
-			 Bigraph bigPost2 = post2.createBigraph(true, brsWrapper.getSignature());
-			 
-			 
-			 Matcher matcher = new Matcher();
-			 if(matcher.match(bigPre2, bigPost).iterator().hasNext()) {
-				 System.out.println("matched!");
-			 } else {
-				 System.out.println("NOT matched!");
-			 }
-//			 System.out.println(bigPre);
-//			 System.out.println("\n"+post.getBigraphERString());
-//			 System.out.println(bigPost);
-		 }
+//		 BRSWrapper brsWrapper = parser.parseBigraphERFile(bigFile);
+//		 ActionWrapper act = brsWrapper.getActions().get("EnterRoom");
+//		 ActionWrapper act2 = brsWrapper.getActions().get("ConnectBusDevice");
+//		 
+//		 if(act!= null) {
+//			 BigraphWrapper pre = act.getPrecondition();
+//			 BigraphWrapper post = act.getPostcondition();
+//			 
+//			 Bigraph bigPre = pre.createBigraph(true, brsWrapper.getSignature());
+//			 Bigraph bigPost = post.createBigraph(true, brsWrapper.getSignature());
+//			 
+//			 BigraphWrapper pre2 = act2.getPrecondition();
+//			 BigraphWrapper post2 = act2.getPostcondition();
+//			 
+//			 Bigraph bigPre2 = pre2.createBigraph(true, brsWrapper.getSignature());
+//			 Bigraph bigPost2 = post2.createBigraph(true, brsWrapper.getSignature());
+//			 
+//			 
+//			 Matcher matcher = new Matcher();
+//			 if(matcher.match(bigPre2, bigPost).iterator().hasNext()) {
+//				 System.out.println("matched!");
+//			 } else {
+//				 System.out.println("NOT matched!");
+//			 }
+////			 System.out.println(bigPre);
+////			 System.out.println("\n"+post.getBigraphERString());
+////			 System.out.println(bigPost);
+//		 }
 		// ActionWrapper action = parser.parseBigraphERAction(action);
 		// BigraphWrapper big = parser.parseBigraphERState(jsonState);
 //		Map<String, ActionWrapper> actions = parser.parseBigraphERFile(bigFile);

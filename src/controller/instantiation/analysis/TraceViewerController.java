@@ -1657,7 +1657,7 @@ public class TraceViewerController implements TraceMinerListener {
 
 		tracesObservableList.addAll(traces.values());
 
-		listViewTraces.setCellFactory(tracesListView -> new TaskCell());
+		listViewTraces.setCellFactory(tracesListView -> new TaskCell(tracesMiner));
 		listViewTraces.setItems(tracesObservableList);
 
 		lblListViewTracesEmpty.setVisible(false);

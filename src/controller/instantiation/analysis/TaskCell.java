@@ -1,10 +1,12 @@
 
 package controller.instantiation.analysis;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
+import core.instantiation.analysis.TraceMiner;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -13,6 +15,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -23,6 +26,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class TaskCell extends ListCell<GraphPath> {
@@ -64,6 +68,10 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	private static final String statesFolder = "../../../resources/example/states_1000/";
 
+	private final URL defaultBigraphERFile = getClass().getResource("../../../resources/example/systemBigraphER.big");
+	
+	private TraceMiner traceMiner;
+	
 	// private ComboBox<Integer> comboBoxTopK;
 
 	// for testing
@@ -77,11 +85,19 @@ public class TaskCell extends ListCell<GraphPath> {
 	// private int topK = 3;
 	// private int topKMax = 10;
 
+	public TaskCell(TraceMiner miner) {
+		this();
+//		loadFXML();
+		
+		traceMiner = miner;
+	}
+	
 	public TaskCell() {
 
 		// loadStateController();
 		loadFXML();
 		// loadTraceDetailsController();
+		traceMiner = null;
 	}
 
 	private void loadFXML() {
@@ -142,15 +158,24 @@ public class TaskCell extends ListCell<GraphPath> {
 	@FXML
 	void showEntities(ActionEvent event) {
 
+		//check that the .big is loaded
+		if(traceMiner != null && !traceMiner.isBigraphERFileSet()) {
+			//choose bigrapher file
+			selectBigraphERFile();
+		}
+		
 		// load trace details view if not loaded
 		if (traceDetailController == null) {
 			loadTraceDetailsController();
 			// if(traceDetailController != null) {
 			// traceDetailsMainPane = traceDetailController.getMainLayout();
 			//
+			traceDetailController.setTraceMiner(traceMiner);
 			traceDetailController.setVBox(vboxMain);
 			// //show default value for entities
 			traceDetailController.showEntities(trace);
+			
+			
 			// }
 		}
 
@@ -172,6 +197,34 @@ public class TaskCell extends ListCell<GraphPath> {
 		// }
 	}
 
+	protected void selectBigraphERFile() {
+		FileChooser fileChooser = new FileChooser();
+
+		if (defaultBigraphERFile != null) {
+			File selectedBigraphERFile = new File(defaultBigraphERFile.getPath());
+			fileChooser.setInitialFileName(selectedBigraphERFile.getName());
+
+			String folder = selectedBigraphERFile.getAbsolutePath().substring(0,
+					selectedBigraphERFile.getAbsolutePath().lastIndexOf(File.separator));
+			File folderF = new File(folder);
+
+			if (folderF.isDirectory()) {
+				fileChooser.setInitialDirectory(folderF);
+			}
+		}
+
+		// set extension to be of system model (.cps)
+		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("BigraphER files (*.big)", "*.big");
+
+		fileChooser.getExtensionFilters().add(extFilter);
+
+		File selectedTracesFile = fileChooser.showOpenDialog(null);
+
+		if (selectedTracesFile != null) {
+			traceMiner.setBigraphERFile(selectedTracesFile.getAbsolutePath());
+		}
+	}
+		
 	@Override
 	protected void updateItem(GraphPath trace, boolean empty) {
 		super.updateItem(trace, empty);

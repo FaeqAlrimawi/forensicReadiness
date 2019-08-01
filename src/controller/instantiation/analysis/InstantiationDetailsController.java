@@ -38,7 +38,7 @@ public class InstantiationDetailsController {
 	private AnchorPane anchorPaneMain;
 
 	// for testing
-	private String bigFile = "D:/Bigrapher data/lero/example/lero.big";
+//	private String bigFile = "D:/Bigrapher data/lero/example/lero.big";
 
 	private GraphPath trace;
 	private TraceMiner miner;
@@ -88,13 +88,13 @@ public class InstantiationDetailsController {
 
 		this.trace = trace;
 
-		if (miner == null) {
-			miner = new TraceMiner();
-		}
-
-		if (!miner.isBigraphERFileSet()) {
-			miner.setBigraphERFile(bigFile);
-		}
+//		if (miner == null) {
+//			miner = new TraceMiner();
+//		}
+//
+//		if (!miner.isBigraphERFileSet()) {
+//			miner.setBigraphERFile(bigFile);
+//		}
 
 		if(hboxEntities.getChildren().size()>0) {
 			hboxEntities.getChildren().clear();
@@ -137,6 +137,10 @@ public class InstantiationDetailsController {
 
 	}
 
+	public void setTraceMiner(TraceMiner miner) {
+		this.miner = miner;
+	}
+	
 	@FXML
 	void hide(ActionEvent e) {
 

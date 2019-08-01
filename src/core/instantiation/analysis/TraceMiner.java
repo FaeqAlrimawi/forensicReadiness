@@ -3661,6 +3661,10 @@ public class TraceMiner {
 		bigraphERActions = brsWrapper.getActions();
 	}
 
+	public String getBigraphERFile() {
+		return bigraphERFile;
+	}
+	
 	public boolean isBigraphERFileSet() {
 
 		if (bigraphERFile == null || bigraphERFile.isEmpty()) {
