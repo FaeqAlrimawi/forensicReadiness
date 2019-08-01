@@ -60,14 +60,17 @@ public class TaskCell extends ListCell<GraphPath> {
 	@FXML
 	private VBox vboxMain;
 
-	// for viewing a state
-	StateViewerController stateController;
-
 	// for viewing details of a trace
 	InstantiationDetailsController traceDetailController;
 	AnchorPane traceDetailsMainPane;
 
-	Stage stateViewerStage;
+	private Stage stateViewerStage;
+	private Stage reactViewerStage;
+
+	// for viewing a state
+	StateViewerController stateController;
+
+	ReactController reactController;
 
 	private GraphPath trace;
 
@@ -138,6 +141,28 @@ public class TaskCell extends ListCell<GraphPath> {
 		}
 	}
 
+	private void loadReactController() {
+
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../../../fxml/ReactView.fxml"));
+		Parent root;
+		try {
+			root = (Parent) fxmlLoader.load();
+			reactViewerStage = new Stage();
+			reactViewerStage.setScene(new Scene(root));
+
+			// get controller
+			reactController = fxmlLoader.<ReactController>getController();
+
+			if (reactController != null) {
+				reactController.setTraceMiner(traceMiner);
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	private void loadTraceDetailsController() {
 
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../../../fxml/InstantiationDetails.fxml"));
@@ -198,8 +223,8 @@ public class TaskCell extends ListCell<GraphPath> {
 	protected void selectBigraphERFile() {
 		FileChooser fileChooser = new FileChooser();
 
-		//if a file already chosen
-		if(traceMiner != null && traceMiner.isBigraphERFileSet()) {
+		// if a file already chosen
+		if (traceMiner != null && traceMiner.isBigraphERFileSet()) {
 			String bigFile = traceMiner.getBigraphERFile();
 			File selectedBigraphERFile = new File(bigFile);
 			fileChooser.setInitialFileName(selectedBigraphERFile.getName());
@@ -211,8 +236,7 @@ public class TaskCell extends ListCell<GraphPath> {
 			if (folderF.isDirectory()) {
 				fileChooser.setInitialDirectory(folderF);
 			}
-		} else
-		if (defaultBigraphERFile != null) {
+		} else if (defaultBigraphERFile != null) {
 			File selectedBigraphERFile = new File(defaultBigraphERFile.getPath());
 			fileChooser.setInitialFileName(selectedBigraphERFile.getName());
 
@@ -225,8 +249,8 @@ public class TaskCell extends ListCell<GraphPath> {
 			}
 		}
 
-		//if first time
-		if(traceMiner != null && !traceMiner.isBigraphERFileSet()) {
+		// if first time
+		if (traceMiner != null && !traceMiner.isBigraphERFileSet()) {
 			ButtonType result = showDialog("Select BigraphER File", "Please select BigraphER file (*.big)",
 					AlertType.CONFIRMATION);
 
@@ -234,7 +258,6 @@ public class TaskCell extends ListCell<GraphPath> {
 				return;
 			}
 		}
-		
 
 		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("BigraphER files (*.big)", "*.big");
 
@@ -355,6 +378,8 @@ public class TaskCell extends ListCell<GraphPath> {
 		trace = null;
 		stateController = null;
 		stateViewerStage = null;
+		reactController = null;
+		reactViewerStage = null;
 
 		lblTraceID.setText("");
 		hbox.getChildren().clear();
@@ -411,10 +436,27 @@ public class TaskCell extends ListCell<GraphPath> {
 
 				strBldr.append(state);
 
-				lblAction = new Label(" =[" + actions.get(index) + "]=> ");
-				lblAction.setStyle("-fx-text-fill: black; -fx-font-size:14px");
+				String act = actions.get(index);
+				lblAction = new Label(" =[" + act + "]=> ");
+				
+				lblAction.setStyle("-fx-text-fill: black; -fx-font-size:14px;");
 
-				lblAction.setStyle("-fx-font-weight: bold;");
+				lblAction.setOnMouseClicked(e -> {
+					showReact(act);
+				});
+
+				lblAction.setOnMouseEntered(e -> {
+//					lblAction.setStyle("-fx-font-weight: bold;");
+//					lblAction.setStyle("-fx-text-fill: black; -fx-font-size:14px;");
+					lblAction.setStyle("-fx-text-fill: black; -fx-font-size:14px; -fx-font-weight: bold;");
+					lblAction.setCursor(Cursor.HAND);
+				});
+				
+				lblAction.setOnMouseExited(e->{
+					lblAction.setStyle("-fx-text-fill: black; -fx-font-size:14px; -fx-font-weight: normal;");
+//					lblAction.setStyle("-fx-font-weight: normal;");
+				});
+				
 				strBldr.append(" =[" + actions.get(index) + "]=> ");
 			} else {
 				lblState = new Label(state + "");
@@ -422,12 +464,12 @@ public class TaskCell extends ListCell<GraphPath> {
 				lblAction = null;
 			}
 
-			lblState.setStyle("-fx-text-fill:black; -fx-font-size:15px");
+//			lblState.setStyle("-fx-text-fill:black; -fx-font-size:15px");
 
 			// setup a way to find available files for the state (svg or json)
 
 			// set color to blue if found
-			lblState.setStyle("-fx-text-fill:blue; -fx-font-size:15px");
+			lblState.setStyle("-fx-text-fill:blue; -fx-font-size:15px;");
 
 			// open state svg
 			lblState.setOnMouseClicked(e -> {
@@ -437,9 +479,17 @@ public class TaskCell extends ListCell<GraphPath> {
 			});
 
 			lblState.setOnMouseEntered(e -> {
+				lblState.setStyle("-fx-text-fill:blue; -fx-font-size:15px; -fx-font-weight: bold;");
+//				lblState.setStyle("-fx-font-weight: bold;");
 				lblState.setCursor(Cursor.HAND);
 			});
 
+			lblState.setOnMouseExited(e->{
+//				lblState.setStyle("-fx-text-fill:blue; -fx-font-size:15px");
+//				lblState.setStyle("-fx-font-weight: normal;");
+				lblState.setStyle("-fx-text-fill:blue; -fx-font-size:15px; -fx-font-weight: normal;");
+			});
+			
 			index++;
 
 			Platform.runLater(new Runnable() {
@@ -557,6 +607,38 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	}
 
+	protected void showReact(String actionName) {
+
+		if(traceMiner == null) {
+			System.err.println("Trace Miner is NUll");
+			return;
+		}
+		
+		if(!traceMiner.isBigraphERFileSet()) {
+			selectBigraphERFile();
+		}
+		
+		if(!traceMiner.isBigraphERFileSet()) {
+			return;
+		}
+		
+		if (reactController == null) {
+			loadReactController();
+		}
+
+		if (reactController == null) {
+			return;
+		}
+
+		reactController.showReact(actionName);
+		
+		reactViewerStage.setTitle("Action " + actionName);
+
+		if (!reactViewerStage.isShowing()) {
+			reactViewerStage.show();
+		}
+	}
+
 	protected ButtonType showDialog(String title, String msg, AlertType type) {
 
 		Alert alert = new Alert(type);
@@ -565,10 +647,9 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		alert.setContentText(msg);
 
-		alert.initModality(Modality.APPLICATION_MODAL);
-
 		alert.showAndWait();
 
 		return alert.getResult();
 	}
+
 }

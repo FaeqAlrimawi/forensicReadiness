@@ -3693,6 +3693,14 @@ public class TraceMiner {
 		this.statesFolder= statesFolder;
 	}
 	
+	public ActionWrapper getActionWrapper(String actionName) {
+		
+		if(bigraphERActions == null) {
+			return null;
+		}
+		
+		return bigraphERActions.get(actionName);
+	}
 	// public static void main(String[] args) {
 	//
 	// TraceMiner m = new TraceMiner();
