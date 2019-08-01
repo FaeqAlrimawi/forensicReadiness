@@ -198,6 +198,20 @@ public class TaskCell extends ListCell<GraphPath> {
 	protected void selectBigraphERFile() {
 		FileChooser fileChooser = new FileChooser();
 
+		//if a file already chosen
+		if(traceMiner != null && traceMiner.isBigraphERFileSet()) {
+			String bigFile = traceMiner.getBigraphERFile();
+			File selectedBigraphERFile = new File(bigFile);
+			fileChooser.setInitialFileName(selectedBigraphERFile.getName());
+
+			String folder = selectedBigraphERFile.getAbsolutePath().substring(0,
+					selectedBigraphERFile.getAbsolutePath().lastIndexOf(File.separator));
+			File folderF = new File(folder);
+
+			if (folderF.isDirectory()) {
+				fileChooser.setInitialDirectory(folderF);
+			}
+		} else
 		if (defaultBigraphERFile != null) {
 			File selectedBigraphERFile = new File(defaultBigraphERFile.getPath());
 			fileChooser.setInitialFileName(selectedBigraphERFile.getName());
@@ -210,6 +224,17 @@ public class TaskCell extends ListCell<GraphPath> {
 				fileChooser.setInitialDirectory(folderF);
 			}
 		}
+
+		//if first time
+		if(traceMiner != null && !traceMiner.isBigraphERFileSet()) {
+			ButtonType result = showDialog("Select BigraphER File", "Please select BigraphER file (*.big)",
+					AlertType.CONFIRMATION);
+
+			if (result == ButtonType.CANCEL) {
+				return;
+			}
+		}
+		
 
 		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("BigraphER files (*.big)", "*.big");
 
@@ -228,7 +253,15 @@ public class TaskCell extends ListCell<GraphPath> {
 	protected void selectStatesFolder() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 
-		// show defualt folder
+		// show folder if any
+		if (statesFolder != null) {
+			File selectedStatesFolder = new File(statesFolder);
+
+			if (selectedStatesFolder.isDirectory()) {
+				dirChooser.setInitialDirectory(selectedStatesFolder);
+			}
+		} else
+		// show default folder
 		if (defaultStatesFolder != null) {
 			File selectedStatesFolder = new File(defaultStatesFolder.getPath());
 
@@ -237,20 +270,31 @@ public class TaskCell extends ListCell<GraphPath> {
 			}
 		}
 
-		ButtonType result = showDialog("Select States Folder",
-				"Please select a Folder which contains the states representations (e.g., .svg)",
-				AlertType.CONFIRMATION);
+		if (statesFolder == null) {
 
-		if (result == ButtonType.CANCEL) {
-			return;
-		} else {
-			File selectedStatesFolder = dirChooser.showDialog(null);
+			ButtonType result = showDialog("Select States Folder",
+					"Please select a Folder which contains the states representations (e.g., *.svg, *.json, *.txt)",
+					AlertType.CONFIRMATION);
 
-			if (selectedStatesFolder != null) {
-				traceMiner.setStatesFolder(selectedStatesFolder.getAbsolutePath());
-				statesFolder = selectedStatesFolder.getAbsolutePath();
+			if (result == ButtonType.CANCEL) {
+				return;
 			}
 		}
+		// ButtonType result = showDialog("Select States Folder",
+		// "Please select a Folder which contains the states representations
+		// (e.g., *.svg, *.json, *.txt)",
+		// AlertType.CONFIRMATION);
+		//
+		// if (result == ButtonType.CANCEL) {
+		// return;
+		// } else {
+		File selectedStatesFolder = dirChooser.showDialog(null);
+
+		if (selectedStatesFolder != null) {
+			traceMiner.setStatesFolder(selectedStatesFolder.getAbsolutePath());
+			statesFolder = selectedStatesFolder.getAbsolutePath();
+		}
+		// }
 
 	}
 
@@ -390,67 +434,6 @@ public class TaskCell extends ListCell<GraphPath> {
 
 				showState(state);
 
-				// int currentTraceID = Integer.parseInt(lblState.getText());
-
-				// if (stateController == null) {
-				// loadStateController();
-				// }
-				//
-				// // open viewer
-				// // String path = "C:\\Users\\Faeq\\Desktop\\svg\\0.svg";
-				//
-				// if (statesFolder == null || statesFolder.isEmpty()) {
-				// // try to get it from the traceMiner
-				// if (traceMiner != null) {
-				// String statesFolder = traceMiner.getStatesFolder();
-				//
-				// if (statesFolder == null || statesFolder.isEmpty()) {
-				// selectStatesFolder();
-				// } else {
-				// this.statesFolder = statesFolder;
-				// }
-				// }
-				//
-				// }
-				//
-				// // URL stateURL = getClass().getResource(statesFolder
-				// // +File.separator+ state + ".svg");
-				//
-				// System.out.println(statesFolder);
-				// String path = statesFolder + File.separator + state + ".svg";
-
-				// if (stateURL != null) {
-				// path = stateURL.getPath();
-				//// System.out.println(path);
-				// } else {
-				// System.err.println("path not found for state " + state);
-				// }
-
-				// int tries = 10000;
-				//
-				// while (path.contains("\\") && tries > 0) {
-				// path = path.replace("\\", "/");
-				// tries--;
-				// }
-				//
-				//
-				// File file = new File(path);
-				//
-				// if (!file.exists()) {
-				// showDialog("Not found", "File not found for state [" + state
-				// + "].", AlertType.ERROR);
-				// } else {
-				// String svgPath = "file:///" + path;
-				//
-				// stateController.updateSVGPath(svgPath);
-				//
-				// stateViewerStage.setTitle("State " + state);
-				//
-				// if (!stateViewerStage.isShowing()) {
-				// stateViewerStage.show();
-				// }
-				// }
-
 			});
 
 			lblState.setOnMouseEntered(e -> {
@@ -533,6 +516,7 @@ public class TaskCell extends ListCell<GraphPath> {
 		// no state found
 		if (fileExt == null) {
 			showDialog("Not found", "File not found for state [" + state + "].", AlertType.ERROR);
+			selectStatesFolder();
 			return;
 		}
 
@@ -555,9 +539,11 @@ public class TaskCell extends ListCell<GraphPath> {
 				stateViewerStage.show();
 			}
 
+			break;
+
 		case JSON_EXT:
 		case TXT_EXT:
-			//both extensions are shown by opening the file in default editor
+			// both extensions are shown by opening the file in default editor
 			try {
 				Desktop.getDesktop().open(file);
 			} catch (IOException ex) {
@@ -568,26 +554,6 @@ public class TaskCell extends ListCell<GraphPath> {
 		default:
 			break;
 		}
-//		int tries = 10000;
-//
-//		while (path.contains("\\") && tries > 0) {
-//			path = path.replace("\\", "/");
-//			tries--;
-//		}
-//
-//		if (!file.exists()) {
-//
-//		} else {
-//			String svgPath = "file:///" + path;
-//
-//			stateController.updateSVGPath(svgPath);
-//
-//			stateViewerStage.setTitle("State " + state);
-//
-//			if (!stateViewerStage.isShowing()) {
-//				stateViewerStage.show();
-//			}
-//		}
 
 	}
 
