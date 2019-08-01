@@ -329,7 +329,7 @@
                               <AnchorPane prefHeight="400.0" prefWidth="886.0">
                                  <children>
                                     <ListView fx:id="listViewTraces" prefHeight="330.0" prefWidth="907.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                    <Label fx:id="lblListViewTracesEmpty" alignment="CENTER" layoutY="-38.0" prefHeight="395.0" prefWidth="886.0" text="List Empty " textFill="#a19494" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <Label fx:id="lblListViewTracesEmpty" alignment="CENTER" layoutY="-38.0" prefHeight="395.0" prefWidth="886.0" text="Filtered Traces" textFill="#a19494" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                        <font>
                                           <Font size="24.0" />
                                        </font>

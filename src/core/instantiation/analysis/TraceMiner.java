@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -182,7 +183,9 @@ public class TraceMiner {
 	// specifies how many entities are there in the current selected traces that
 	// are processed
 	int totalNumberOfEntitiesInCurrentTraces = 0;
-
+	
+	private String statesFolder;
+	
 	public TraceMiner() {
 
 		tracesActions = new HashMap<String, Integer>();
@@ -3679,6 +3682,15 @@ public class TraceMiner {
 	public int getTotalNumberOfEntitiesInCurrentTraces() {
 		
 		return totalNumberOfEntitiesInCurrentTraces;
+	}
+	
+	
+	public String getStatesFolder() {
+		return statesFolder;
+	}
+	
+	public void setStatesFolder(String statesFolder) {
+		this.statesFolder= statesFolder;
 	}
 	
 	// public static void main(String[] args) {

@@ -414,6 +414,10 @@ public class TraceViewerController implements TraceMinerListener {
 		} else {
 			System.out.println("nulllll");
 		}
+		
+		//set list view
+		listViewTraces.setCellFactory(tracesListView -> new TaskCell(tracesMiner));
+		
 	}
 
 	protected void checkInputAsDigital(TextField textField) {
@@ -1646,6 +1650,7 @@ public class TraceViewerController implements TraceMinerListener {
 			return;
 		}
 
+//		System.out.println("Viewing traces: " + tracesIDs);
 		// used for saving
 		shownFitleredTraces = tracesIDs;
 
@@ -1657,11 +1662,26 @@ public class TraceViewerController implements TraceMinerListener {
 
 		tracesObservableList.addAll(traces.values());
 
-		listViewTraces.setCellFactory(tracesListView -> new TaskCell(tracesMiner));
-		listViewTraces.setItems(tracesObservableList);
+//		Platform.runLater(new Runnable() {
+//			
+//			@Override
+//			public void run() {
+//				// TODO Auto-generated method stub
+//				listViewTraces.setItems(null);
+//			}
+//		});
 
-		lblListViewTracesEmpty.setVisible(false);
-
+		
+		Platform.runLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				listViewTraces.setItems(tracesObservableList);
+				lblListViewTracesEmpty.setVisible(false);
+			}
+		});
+	
 	}
 
 	@Override
