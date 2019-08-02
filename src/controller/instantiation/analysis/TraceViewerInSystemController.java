@@ -63,6 +63,9 @@ public class TraceViewerInSystemController {
 //	private TransitionSystem tranSys;
 
 	private static final String NODE_COLOUR = "white";
+	private static final String DEFAULT_ARROW_COLOUR = "#333333";
+	private static final Color TRACE_ARROW_COLOUR = Color.BLUE;
+	private static final Color ADDED_NODES_ARROW_COLOUR = Color.GREY;
 	private static final double NODE_RADIUS = 25;
 	private static final String STATE_STYLE = "-fx-font-size:18px;-fx-font-weight:bold;";
 	private static final String ACTION_NAME_STYLE = "-fx-font-size:13px;";
@@ -157,24 +160,18 @@ public class TraceViewerInSystemController {
 
 			String actionName = digraph.getLabel(inBoundState, initialState);
 			
-//			if(actionName == null || actionName.isEmpty()) {
-//				//create a labelled transition system
-//				System.out.println("no action between: " +inBoundState + " " + initialState);
-//				
-////				miner.createNewLabelledTransitionFile();
-////				return;
-//			}
-//			
-			buildSingleDirectionalLine(node, initNode, tracePane, true, false, actionName);
+			buildSingleDirectionalLine(node, initNode, tracePane, true, false, ADDED_NODES_ARROW_COLOUR, actionName );
 		}
 
 		// add to the pane
+		tracePane.getChildren().removeAll(traceNodes);
+		tracePane.getChildren().addAll(traceNodes);
 		tracePane.getChildren().addAll(previousNodes);
 
 		// position new nodes
-		double posX = initNode.getLayoutX() - (NODE_RADIUS * 2 + 20);
-		int yOffest = 10;
-		double posY = initNode.getLayoutY()-yOffest*3;
+		double posX = initNode.getLayoutX() - (NODE_RADIUS * 2 + 30);
+		int yOffest = (int) (NODE_RADIUS*2);
+		double posY = initNode.getLayoutY()-yOffest*2;
 
 		for(StackPane node : previousNodes) {
 			node.setLayoutX(posX);
@@ -183,7 +180,7 @@ public class TraceViewerInSystemController {
 			//same place
 //			posX
 			
-			posY+=yOffest;
+			posY+=yOffest*2;
 		}
 		
 //		toggleButtonActivity(btnShowPreviousStates, true);
@@ -205,8 +202,8 @@ public class TraceViewerInSystemController {
 		tracePane.getChildren().addAll(traceNodes);
 
 		// position each node
-		double posX = 100;
-		double posY = 100;
+		double posX = 150;
+		double posY = 150;
 		for (StackPane node : traceNodes) {
 
 			node.setLayoutX(posX);
@@ -241,7 +238,7 @@ public class TraceViewerInSystemController {
 
 			// create edge between current and previous
 			if (index > 0) {
-				buildSingleDirectionalLine(stateNodes.get(index - 1), node, tracePane, true, false,
+				buildSingleDirectionalLine(stateNodes.get(index - 1), node, tracePane, true, false, TRACE_ARROW_COLOUR,
 						actions.get(index - 1));
 				// count = 1;
 			}
@@ -303,6 +300,7 @@ public class TraceViewerInSystemController {
 		Label txt = new Label(text);
 		txt.setStyle(STATE_STYLE);
 		txt.setTooltip(new Tooltip(text));
+		
 		dotPane.getChildren().addAll(dot, txt);
 		dotPane.setPrefSize(paneSize, paneSize);
 		dotPane.setMaxSize(paneSize, paneSize);
@@ -383,8 +381,8 @@ public class TraceViewerInSystemController {
 	 *            Specifies whether to show arrow towards start
 	 */
 	private void buildSingleDirectionalLine(StackPane startDot, StackPane endDot, Pane parent, boolean hasEndArrow,
-			boolean hasStartArrow, String actionName) {
-		Line line = getLine(startDot, endDot);
+			boolean hasStartArrow, Color color, String actionName) {
+		Line line = getLine(startDot, endDot, color);
 		StackPane arrowAB = getArrow(true, line, startDot, endDot);
 		if (!hasEndArrow) {
 			arrowAB.setOpacity(0);
@@ -406,9 +404,9 @@ public class TraceViewerInSystemController {
 	 *            Pane for considering end point
 	 * @return Line joining the layout center points of the provided panes.
 	 */
-	private Line getLine(StackPane startDot, StackPane endDot) {
+	private Line getLine(StackPane startDot, StackPane endDot, Color color) {
 		Line line = new Line();
-		line.setStroke(Color.BLUE);
+		line.setStroke(color);
 		line.setStrokeWidth(2);
 		line.startXProperty().bind(
 				startDot.layoutXProperty().add(startDot.translateXProperty()).add(startDot.widthProperty().divide(2)));
@@ -439,7 +437,7 @@ public class TraceViewerInSystemController {
 		double size = 12; // Arrow size
 		StackPane arrow = new StackPane();
 		arrow.setStyle(
-				"-fx-background-color:#333333;-fx-border-width:1px;-fx-border-color:black;-fx-shape: \"M0,-4L4,0L0,4Z\"");//
+				"-fx-background-color:"+DEFAULT_ARROW_COLOUR+";-fx-border-width:1px;-fx-border-color:black;-fx-shape: \"M0,-4L4,0L0,4Z\"");//
 		arrow.setPrefSize(size, size);
 		arrow.setMaxSize(size, size);
 		arrow.setMinSize(size, size);
