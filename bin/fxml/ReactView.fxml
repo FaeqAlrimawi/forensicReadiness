@@ -13,6 +13,6 @@
             <Font size="14.0" />
          </font>
       </Label>
-      <HBox fx:id="hboxCodeArea" layoutX="14.0" layoutY="34.0" prefHeight="160.0" prefWidth="577.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="40.0" />
+      <HBox fx:id="hboxCodeArea" layoutX="14.0" layoutY="34.0" prefHeight="265.0" prefWidth="843.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="40.0" />
    </children>
 </AnchorPane>

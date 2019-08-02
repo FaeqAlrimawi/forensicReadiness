@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
+import core.brs.parser.ActionWrapper;
+import core.instantiation.analysis.Trace;
 import core.instantiation.analysis.TraceMiner;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 import javafx.application.Platform;
@@ -31,7 +33,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class TaskCell extends ListCell<GraphPath> {
@@ -82,6 +83,12 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	private TraceMiner traceMiner;
 
+	private String traceFilePath;
+
+	private String boldStyle = "-fx-text-fill: black; -fx-font-size:14px; -fx-font-weight:bold;";
+	private String normalStyle = "-fx-text-fill: black; -fx-font-size:14px;";
+	private String mouseEnteredStyle = "-fx-text-fill: blue; -fx-font-size:15px;";
+	
 	private static final String SVG_EXT = ".svg";
 	private static final String JSON_EXT = ".json";
 	private static final String TXT_EXT = ".txt";
@@ -178,6 +185,49 @@ public class TaskCell extends ListCell<GraphPath> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@FXML
+	void saveTrace() {
+
+		if (trace == null) {
+			System.err.println("Trace is NULL");
+			return;
+		}
+
+		if (traceMiner == null) {
+			System.err.println("Trace Miner is NULL");
+			return;
+		}
+
+		// create new trace object and save it
+		Trace newTrace = new Trace();
+
+		for (String actionName : trace.getTransitionActions()) {
+			ActionWrapper act = traceMiner.getActionWrapper(actionName);
+			newTrace.addAction(act);
+		}
+
+		// save trace
+		String traceFolder = traceMiner.getTraceFolder();
+		if (traceFolder == null || traceFolder.isEmpty()) {
+			selectTraceFolder();
+			if (traceFolder == null || traceFolder.isEmpty()) {
+				return;
+			}
+		}
+
+		String name = "/trace_" + trace.getInstanceID();
+		String path = traceFolder + name;
+		System.out.println(path);
+		boolean isSaved = newTrace.save(path);
+
+		if (isSaved) {
+			traceFilePath = path;
+			lblTraceID.setStyle(boldStyle);
+			System.out.println("trace " + trace.getInstanceID() + " is saved to " + path);
+		}
+
 	}
 
 	@FXML
@@ -303,19 +353,41 @@ public class TaskCell extends ListCell<GraphPath> {
 				return;
 			}
 		}
-		// ButtonType result = showDialog("Select States Folder",
-		// "Please select a Folder which contains the states representations
-		// (e.g., *.svg, *.json, *.txt)",
-		// AlertType.CONFIRMATION);
-		//
-		// if (result == ButtonType.CANCEL) {
-		// return;
-		// } else {
+
 		File selectedStatesFolder = dirChooser.showDialog(null);
 
 		if (selectedStatesFolder != null) {
 			traceMiner.setStatesFolder(selectedStatesFolder.getAbsolutePath());
-			statesFolder = selectedStatesFolder.getAbsolutePath();
+//			statesFolder = selectedStatesFolder.getAbsolutePath();
+		}
+		// }
+
+	}
+
+	protected void selectTraceFolder() {
+		DirectoryChooser dirChooser = new DirectoryChooser();
+
+		// show folder if any
+		if (traceMiner!= null && traceMiner.getTraceFolder() != null) {
+			File selectedStatesFolder = new File(traceMiner.getTraceFolder());
+
+			if (selectedStatesFolder.isDirectory()) {
+				dirChooser.setInitialDirectory(selectedStatesFolder);
+			}
+		} else
+		// show default folder
+		if (defaultStatesFolder != null) {
+			File selectedStatesFolder = new File(defaultStatesFolder.getPath());
+
+			if (selectedStatesFolder.isDirectory()) {
+				dirChooser.setInitialDirectory(selectedStatesFolder);
+			}
+		}
+
+		File selectedStatesFolder = dirChooser.showDialog(null);
+
+		if (selectedStatesFolder != null) {
+			 traceMiner.setTraceFolder(selectedStatesFolder.getAbsolutePath());
 		}
 		// }
 
@@ -426,6 +498,7 @@ public class TaskCell extends ListCell<GraphPath> {
 		// System.out.println("states: "+states);
 		// System.out.println("actions: "+actions);
 		// set states
+		
 		for (Integer state : states) {
 			// Circle circle = new Circle(hbox.getHeight()-2);
 			Label lblState;
@@ -438,25 +511,26 @@ public class TaskCell extends ListCell<GraphPath> {
 
 				String act = actions.get(index);
 				lblAction = new Label(" =[" + act + "]=> ");
-				
-				lblAction.setStyle("-fx-text-fill: black; -fx-font-size:14px;");
+
+				lblAction.setStyle(normalStyle);
 
 				lblAction.setOnMouseClicked(e -> {
 					showReact(act);
 				});
 
 				lblAction.setOnMouseEntered(e -> {
-//					lblAction.setStyle("-fx-font-weight: bold;");
-//					lblAction.setStyle("-fx-text-fill: black; -fx-font-size:14px;");
-					lblAction.setStyle("-fx-text-fill: black; -fx-font-size:14px; -fx-font-weight: bold;");
+					// lblAction.setStyle("-fx-font-weight: bold;");
+					// lblAction.setStyle("-fx-text-fill: black;
+					// -fx-font-size:14px;");
+					lblAction.setStyle(mouseEnteredStyle);
 					lblAction.setCursor(Cursor.HAND);
 				});
-				
-				lblAction.setOnMouseExited(e->{
-					lblAction.setStyle("-fx-text-fill: black; -fx-font-size:14px; -fx-font-weight: normal;");
-//					lblAction.setStyle("-fx-font-weight: normal;");
+
+				lblAction.setOnMouseExited(e -> {
+					lblAction.setStyle(normalStyle);
+					// lblAction.setStyle("-fx-font-weight: normal;");
 				});
-				
+
 				strBldr.append(" =[" + actions.get(index) + "]=> ");
 			} else {
 				lblState = new Label(state + "");
@@ -464,14 +538,9 @@ public class TaskCell extends ListCell<GraphPath> {
 				lblAction = null;
 			}
 
-//			lblState.setStyle("-fx-text-fill:black; -fx-font-size:15px");
+			lblState.setStyle(normalStyle);
 
-			// setup a way to find available files for the state (svg or json)
-
-			// set color to blue if found
-			lblState.setStyle("-fx-text-fill:blue; -fx-font-size:15px;");
-
-			// open state svg
+			// open state .svg, .json ...
 			lblState.setOnMouseClicked(e -> {
 
 				showState(state);
@@ -479,17 +548,14 @@ public class TaskCell extends ListCell<GraphPath> {
 			});
 
 			lblState.setOnMouseEntered(e -> {
-				lblState.setStyle("-fx-text-fill:blue; -fx-font-size:15px; -fx-font-weight: bold;");
-//				lblState.setStyle("-fx-font-weight: bold;");
+				lblState.setStyle(mouseEnteredStyle);
 				lblState.setCursor(Cursor.HAND);
 			});
 
-			lblState.setOnMouseExited(e->{
-//				lblState.setStyle("-fx-text-fill:blue; -fx-font-size:15px");
-//				lblState.setStyle("-fx-font-weight: normal;");
-				lblState.setStyle("-fx-text-fill:blue; -fx-font-size:15px; -fx-font-weight: normal;");
+			lblState.setOnMouseExited(e -> {
+				lblState.setStyle(normalStyle);
 			});
-			
+
 			index++;
 
 			Platform.runLater(new Runnable() {
@@ -514,6 +580,9 @@ public class TaskCell extends ListCell<GraphPath> {
 			public void run() {
 				// TODO Auto-generated method stub
 				// add tooltip
+				
+				//set the location of the option box
+//				hboxOptions.set
 				Tooltip tip = new Tooltip(strBldr.toString());
 				lblTraceID.setTooltip(tip);
 			}
@@ -609,19 +678,19 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	protected void showReact(String actionName) {
 
-		if(traceMiner == null) {
+		if (traceMiner == null) {
 			System.err.println("Trace Miner is NUll");
 			return;
 		}
-		
-		if(!traceMiner.isBigraphERFileSet()) {
+
+		if (!traceMiner.isBigraphERFileSet()) {
 			selectBigraphERFile();
 		}
-		
-		if(!traceMiner.isBigraphERFileSet()) {
+
+		if (!traceMiner.isBigraphERFileSet()) {
 			return;
 		}
-		
+
 		if (reactController == null) {
 			loadReactController();
 		}
@@ -631,7 +700,7 @@ public class TaskCell extends ListCell<GraphPath> {
 		}
 
 		reactController.showReact(actionName);
-		
+
 		reactViewerStage.setTitle("Action " + actionName);
 
 		if (!reactViewerStage.isShowing()) {

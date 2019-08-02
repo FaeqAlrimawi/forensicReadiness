@@ -184,7 +184,11 @@ public class TraceMiner {
 	// are processed
 	int totalNumberOfEntitiesInCurrentTraces = 0;
 	
+	//folder where states are
 	private String statesFolder;
+	
+	//folder where to save traces
+	private String traceFolder;
 	
 	public TraceMiner() {
 
@@ -3691,6 +3695,14 @@ public class TraceMiner {
 	
 	public void setStatesFolder(String statesFolder) {
 		this.statesFolder= statesFolder;
+	}
+	
+	public void setTraceFolder(String traceFolder) {
+		this.traceFolder= traceFolder;
+	}
+	
+	public String getTraceFolder() {
+		return traceFolder;
 	}
 	
 	public ActionWrapper getActionWrapper(String actionName) {

@@ -37,6 +37,9 @@ public class InstantiationDetailsController {
 	@FXML
 	private AnchorPane anchorPaneMain;
 
+//	@FXML
+//	private Button btnSaveTrace;
+	
 	// for testing
 //	private String bigFile = "D:/Bigrapher data/lero/example/lero.big";
 
@@ -76,6 +79,12 @@ public class InstantiationDetailsController {
 
 	}
 
+//	@FXML
+//	public void saveTrace(ActionEvent e) {
+//	
+//		
+//	}
+	
 	public void setVBox(VBox main) {
 		vboxMain = main;
 	}

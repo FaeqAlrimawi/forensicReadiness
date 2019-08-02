@@ -44,8 +44,13 @@ public class BigraphWrapper {
 	// generated BigraphExpression object
 	private BigraphExpression bigraphExpression;
 
+	//Bigraph object representation of this
 	private Bigraph bigraphObj;
 
+	//original state that this bigraphWrapper would refer to
+	//used when a trace is applied to this
+	private int OriginalState;
+	
 	// used to set the number of automatically created outernames for the
 	// signature of a Bigraph Object
 	protected int maxOuterNameNumber = 10;
@@ -102,6 +107,16 @@ public class BigraphWrapper {
 	}
 
 	
+	public int getOriginalState() {
+		return OriginalState;
+	}
+
+
+	public void setOriginalState(int originalState) {
+		OriginalState = originalState;
+	}
+
+
 	public boolean isCondition() {
 		return isCondition;
 	}

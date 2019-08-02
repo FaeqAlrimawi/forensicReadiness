@@ -44,7 +44,7 @@ public class BigraphERTokens {
 	public static final int WORD = 11;
 
 	// Represents exactly one whitespace character
-	public static final String TOKEN_SMALL_SPACE = "[\\t\\n\\x0B\f]";// "\\s";
+	public static final String TOKEN_SMALL_SPACE = "\\s+";//"[\\t\\n\\x0B\f]";// "\\s";
 	public static final int SMALL_SPACE = 12;
 	
 	// defines * for bigraph composition
