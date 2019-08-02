@@ -5,8 +5,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import core.instantiation.analysis.TraceMiner;
+import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 import ie.lero.spare.pattern_instantiation.GraphPath;
+import ie.lero.spare.pattern_instantiation.LabelExtractor;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -16,6 +18,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Tooltip;
@@ -34,17 +37,30 @@ public class TraceViewerInSystemController {
 	@FXML
 	private ProgressIndicator progressIndicator;
 
+	@FXML
+	private Button btnShowPreviousStates;
+	
+	@FXML
+	private Button btnLoadTransitionSystem;
+	
 	private GraphPath trace;
 
 	private Pane tracePane;
 
+	//nodes of the trace
+	private List<StackPane> traceNodes;
+	
+	//nodes of previous states (previous to the initial)
+	private List<StackPane> previousNodes;
+	
 	private double sceneX, sceneY, layoutX, layoutY;
 
 	private TraceMiner miner;
 
-	private URL defualtTransitionSystemFilePath = getClass().getResource("../../../resources/example/transitions.json");
+	private URL defualtTransitionSystemFilePath = getClass().getResource("../../../resources/example/transitions_labelled.json");
+//	private URL defualtTransitionSystemFolder = getClass().getResource("../../../resources/example");
 
-	private TransitionSystem tranSys;
+//	private TransitionSystem tranSys;
 
 	private static final String NODE_COLOUR = "white";
 	private static final double NODE_RADIUS = 25;
@@ -52,7 +68,7 @@ public class TraceViewerInSystemController {
 	private static final String ACTION_NAME_STYLE = "-fx-font-size:13px;";
 
 	private static final int previousStateNum = 2;
-	
+
 	@FXML
 	public void initialize() {
 
@@ -70,7 +86,7 @@ public class TraceViewerInSystemController {
 			if (defualtTransitionSystemFilePath != null) {
 				System.out.println("loading sys from " + defualtTransitionSystemFilePath.getPath());
 				miner.setTransitionSystemFilePath(defualtTransitionSystemFilePath.getPath());
-				tranSys = miner.loadTransitionSystem();
+				miner.loadTransitionSystem();
 				System.out.println("Done loading");
 			} else {
 
@@ -79,36 +95,100 @@ public class TraceViewerInSystemController {
 		}
 
 		progressIndicator.setVisible(false);
+		
+		toggleButtonActivity(btnLoadTransitionSystem, true);
 
 	}
 
 	@FXML
 	void showPreviousStates(ActionEvent e) {
+
+		if(miner == null) {
+			System.err.println("Trace miner is NULL");
+		}
 		
-		//shows previous states in the system
-		if(tranSys ==null) {
+		// shows previous states in the system
+		if (miner.getTransitionSystem() == null) {
 			loadTransitionSystem(null);
 		}
-		
-		if(tranSys ==null) {
+
+		if (miner.getTransitionSystem() == null) {
 			return;
 		}
-		
-		if(trace ==null) {
+
+		if (trace == null) {
 			return;
 		}
-		
-		//get initial state
+
+		// get initial state
 		List<Integer> states = trace.getStateTransitions();
+
+		if (states == null) {
+			return;
+		}
+
 		
-		if(states == null) {
+
+		// get node
+		StackPane initNode = (StackPane) traceNodes.get(0);
+
+		int initialState = Integer.parseInt(initNode.getId());
+		
+		Digraph<Integer> digraph = miner.getTransitionSystem().getDigraph();
+
+//		System.out.println(digraph);
+		// get in bound states (going to initial state)
+		List<Integer> inBoundStates = digraph.inboundNeighbors(initialState);
+
+		
+		if(previousNodes!= null) {
+			//remove from the curren pane
+//			tracePane.getChildren().removeAll(previousNodes);
 			return;
 		}
 		
-		int initialState = states.get(0);
+		previousNodes = new LinkedList<StackPane>();
+
+		// create nodes for each inbound
+		for (Integer inBoundState : inBoundStates) {
+			StackPane node = getDot(NODE_COLOUR, "" + inBoundState, NODE_RADIUS);
+			node.setId("" + inBoundState);
+			previousNodes.add(node);
+
+			String actionName = digraph.getLabel(inBoundState, initialState);
+			
+//			if(actionName == null || actionName.isEmpty()) {
+//				//create a labelled transition system
+//				System.out.println("no action between: " +inBoundState + " " + initialState);
+//				
+////				miner.createNewLabelledTransitionFile();
+////				return;
+//			}
+//			
+			buildSingleDirectionalLine(node, initNode, tracePane, true, false, actionName);
+		}
+
+		// add to the pane
+		tracePane.getChildren().addAll(previousNodes);
+
+		// position new nodes
+		double posX = initNode.getLayoutX() - (NODE_RADIUS * 2 + 20);
+		int yOffest = 10;
+		double posY = initNode.getLayoutY()-yOffest*3;
+
+		for(StackPane node : previousNodes) {
+			node.setLayoutX(posX);
+			node.setLayoutY(posY);
+			
+			//same place
+//			posX
+			
+			posY+=yOffest;
+		}
 		
+//		toggleButtonActivity(btnShowPreviousStates, true);
 	}
-	
+
 	public void showTrace(GraphPath trace) {
 
 		if (trace == null) {
@@ -120,14 +200,14 @@ public class TraceViewerInSystemController {
 
 		this.trace = trace;
 
-		List<StackPane> stateNodes = createTraceNodes(trace);
+		traceNodes = createTraceNodes(trace);
 
-		tracePane.getChildren().addAll(stateNodes);
+		tracePane.getChildren().addAll(traceNodes);
 
 		// position each node
 		double posX = 100;
 		double posY = 100;
-		for (StackPane node : stateNodes) {
+		for (StackPane node : traceNodes) {
 
 			node.setLayoutX(posX);
 			node.setLayoutY(posY);
@@ -176,8 +256,29 @@ public class TraceViewerInSystemController {
 
 	public void setTraceMiner(TraceMiner traceMiner) {
 		miner = traceMiner;
+		
+		if(miner != null) {
+			if(miner.getTransitionSystem() != null) {
+				toggleButtonActivity(btnLoadTransitionSystem, true);
+			}
+		}
 	}
 
+	
+	protected void toggleButtonActivity(Button btn, boolean isDisabled) {
+		if(btn == null) {
+			return;
+		}
+		
+		Platform.runLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				btn.setDisable(isDisabled);
+			}
+		});
+	}
 	public TraceMiner getTraceMiner() {
 		return miner;
 	}

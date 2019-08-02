@@ -63,6 +63,7 @@ import ie.lero.spare.franalyser.utility.TransitionSystem;
 //import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator;
+import ie.lero.spare.pattern_instantiation.LabelExtractor;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator.InstancesSaver;
 
 public class TraceMiner {
@@ -192,12 +193,12 @@ public class TraceMiner {
 	// key is trace id, value is path
 	Map<Integer, String> tracesSaved;
 
-	
-	//transition system info
+	// transition system info
 	private String transitionSystemFilePath;
 	private TransitionSystem transitionSystem;
-	
-	
+
+	private URL defaultOutputFolder = getClass().getResource("../../../resources/example");
+
 	public TraceMiner() {
 
 		tracesActions = new HashMap<String, Integer>();
@@ -3422,60 +3423,66 @@ public class TraceMiner {
 
 	/**
 	 * Saves the given list of trace ids into the given folder
-	 * @param targetFolder folder to save files to
-	 * @param tracesIDs List of trace ids to save
+	 * 
+	 * @param targetFolder
+	 *            folder to save files to
+	 * @param tracesIDs
+	 *            List of trace ids to save
 	 * @return List of trace ids that the methof Failed to save
 	 */
 	public List<Integer> saveSelectedTraces(String targetFolder, List<Integer> tracesIDs) {
 
-		if(targetFolder == null || tracesIDs == null) {
+		if (targetFolder == null || tracesIDs == null) {
 			return null;
 		}
-		
+
 		List<Integer> failedToSaveTraces = new LinkedList<Integer>();
 		String name = "";
-		
+
 		traceFolder = targetFolder;
-		
-		for(Integer traceID : tracesIDs) {
+
+		for (Integer traceID : tracesIDs) {
 			name = saveTrace(traceID);
-			
-			if(name == null) {
+
+			if (name == null) {
 				failedToSaveTraces.add(traceID);
 			}
 		}
-		
+
 		return failedToSaveTraces;
 	}
-	
+
 	/**
 	 * Saves the given list of trace ids into the traces folder
-	 * @param targetFolder folder to save files to
-	 * @param tracesIDs List of trace ids to save
+	 * 
+	 * @param targetFolder
+	 *            folder to save files to
+	 * @param tracesIDs
+	 *            List of trace ids to save
 	 * @return List of trace ids that the methof Failed to save
 	 */
 	public List<Integer> saveSelectedTraces(List<Integer> tracesIDs) {
 
-		if(traceFolder == null) {
+		if (traceFolder == null) {
 			return null;
 		}
-		
+
 		List<Integer> failedToSaveTraces = new LinkedList<Integer>();
 		String name = "";
-				
-		for(Integer traceID : tracesIDs) {
+
+		for (Integer traceID : tracesIDs) {
 			name = saveTrace(traceID);
-			
-			if(name == null) {
+
+			if (name == null) {
 				failedToSaveTraces.add(traceID);
 			}
 		}
-		
-//		if (listener != null) {
-//			
-//			listener.onSavingFilteredTracesComplete(isSaved);
-//		}
-		
+
+		// if (listener != null) {
+		//
+		// listener.onSavingFilteredTracesComplete(isSaved);
+		// }
+
 		return failedToSaveTraces;
 	}
 
@@ -3831,31 +3838,79 @@ public class TraceMiner {
 
 		return bigraphERActions.get(actionName);
 	}
-	
-	public TransitionSystem getTRansitionSystem() {
-		
-		if(transitionSystem == null) {
+
+	public TransitionSystem getTransitionSystem() {
+
+		if (transitionSystem == null) {
 			loadTransitionSystem();
 		}
-		
+
 		return transitionSystem;
 	}
-	
+
 	public void setTransitionSystemFilePath(String filePath) {
 		transitionSystemFilePath = filePath;
 	}
-	
+
 	public TransitionSystem loadTransitionSystem() {
-		
-		if(transitionSystemFilePath == null) {
+
+		if (transitionSystemFilePath == null) {
 			return null;
 		}
-		
+
 		transitionSystem = new TransitionSystem(transitionSystemFilePath);
-		
+
 		return transitionSystem;
-		
+
 	}
+
+	public String createNewLabelledTransitionFile() {
+
+		String outputFolder = null;
+
+		if (transitionSystemFilePath != null) {
+			if(transitionSystemFilePath.contains(File.separator)) {
+				outputFolder = transitionSystemFilePath.substring(0, transitionSystemFilePath.lastIndexOf(File.separator));	
+			} else {
+				outputFolder = transitionSystemFilePath.substring(0, transitionSystemFilePath.lastIndexOf("/"));
+			}
+			
+		}
+
+		File out = new File(outputFolder);
+
+		if (!out.isDirectory()) {
+			// check states folder
+			if (statesFolder != null) {
+				outputFolder = statesFolder;
+			} else {
+				if (defaultOutputFolder != null) {
+					outputFolder = defaultOutputFolder.getPath();
+				} else {
+					outputFolder = ".";
+				}
+
+			}
+
+		}
+		
+		if(bigraphERActions == null) {
+			System.err.println("TraceMiner::createNewLabelledTransitionFile: BigraphER file is not set");
+			return null;	
+		}
+		
+		Set<String> actions = bigraphERActions.keySet();
+		
+		LabelExtractor ext = new LabelExtractor(transitionSystem, outputFolder);
+		
+		ext.updateDigraphLabels(actions.toArray(new String[actions.size()]));
+		transitionSystemFilePath = ext.createNewLabelledTransitionFile();
+		
+		loadTransitionSystem();
+		
+		return transitionSystemFilePath;
+	}
+
 	// public static void main(String[] args) {
 	//
 	// TraceMiner m = new TraceMiner();

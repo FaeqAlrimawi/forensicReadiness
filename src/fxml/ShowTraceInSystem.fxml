@@ -12,9 +12,9 @@
    <children>
       <HBox style="-fx-background-color: white;">
          <children>
-            <Button mnemonicParsing="false" onAction="#loadTransitionSystem" text="Load transition System" />
+            <Button fx:id="btnLoadTransitionSystem" mnemonicParsing="false" onAction="#loadTransitionSystem" text="Load transition System" />
             <ProgressIndicator fx:id="progressIndicator" prefHeight="6.0" prefWidth="41.0" visible="false" />
-            <Button mnemonicParsing="false" onAction="#showPreviousStates" text="show previous states" />
+            <Button fx:id="btnShowPreviousStates" mnemonicParsing="false" onAction="#showPreviousStates" text="show previous states" />
          </children>
       </HBox>
       <StackPane fx:id="mainStackPane" prefHeight="550.0" prefWidth="950.0" style="-fx-background-color: white;" />
