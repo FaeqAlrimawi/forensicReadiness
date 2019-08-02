@@ -1,5 +1,6 @@
 package core.brs.parser;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,7 +29,12 @@ import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
  * @author Faeq
  *
  */
-public class BigraphWrapper {
+public class BigraphWrapper implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5880531546378390072L;
 
 	//determines if this Bigraph represents a condition (true) or a state (false)
 	private boolean isCondition;

@@ -24,6 +24,8 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tooltip;
@@ -61,6 +63,9 @@ public class TaskCell extends ListCell<GraphPath> {
 	@FXML
 	private VBox vboxMain;
 
+	@FXML
+	private MenuButton menuButtonOptions;
+
 	// for viewing details of a trace
 	InstantiationDetailsController traceDetailController;
 	AnchorPane traceDetailsMainPane;
@@ -75,7 +80,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	private GraphPath trace;
 
-//	private Trace newTrace;
+	// private Trace newTrace;
 
 	private final URL defaultStatesFolder = getClass().getResource("../../../resources/example/states_1000");
 
@@ -86,7 +91,7 @@ public class TaskCell extends ListCell<GraphPath> {
 	private TraceMiner traceMiner;
 
 	// holds the file path for saved trace
-//	private String traceFilePath;
+	// private String traceFilePath;
 
 	private String boldStyle = "-fx-text-fill: black; -fx-font-size:14px; -fx-font-weight:bold;";
 	private String normalStyle = "-fx-text-fill: black; -fx-font-size:14px;";
@@ -96,7 +101,13 @@ public class TaskCell extends ListCell<GraphPath> {
 	private static final String JSON_EXT = ".json";
 	private static final String TXT_EXT = ".txt";
 
-	private String[] stateExtensions = new String[] { SVG_EXT, JSON_EXT, TXT_EXT };
+	private static final String[] stateExtensions = new String[] { SVG_EXT, JSON_EXT, TXT_EXT };
+
+	// options
+	private static final String DETAILS = "details";
+	private static final String SAVE = "save";
+
+	private static final String[] OPTIONS = new String[] { DETAILS, SAVE };
 
 	public TaskCell(TraceMiner miner) {
 		this();
@@ -126,8 +137,21 @@ public class TaskCell extends ListCell<GraphPath> {
 				});
 
 				rootPane.setOnMouseExited(e -> {
-					hboxOptions.setVisible(false);
+					if(!menuButtonOptions.isShowing()) {
+						hboxOptions.setVisible(false);	
+					}
+					
 				});
+				
+				//set options menu
+				menuButtonOptions.getItems().clear();
+				for(String opt : OPTIONS) {
+					MenuItem item = new MenuItem(opt);
+					item.setOnAction(e->{
+						selectOption(opt);
+					});
+					menuButtonOptions.getItems().add(item);
+				}
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -190,7 +214,21 @@ public class TaskCell extends ListCell<GraphPath> {
 		}
 	}
 
-	@FXML
+	void selectOption(String selectedOption) {
+		
+		switch (selectedOption) {
+		case DETAILS:
+			showDetails();
+			break;
+		case SAVE:
+			saveTrace();
+			break;
+		default:
+			break;
+		}
+	}
+
+//	@FXML
 	void saveTrace() {
 		if (trace == null) {
 			System.err.println("Trace is NULL");
@@ -210,20 +248,22 @@ public class TaskCell extends ListCell<GraphPath> {
 			if (traceFolder == null || traceFolder.isEmpty()) {
 				return;
 			}
+		} else {
+			System.out.println(traceFolder);
 		}
 
 		String path = traceMiner.saveTrace(trace.getInstanceID());
 
-//		traceFilePath = path;
-		if(path != null) {
+		// traceFilePath = path;
+		if (path != null) {
 			lblTraceID.setStyle(boldStyle);
-			System.out.println("trace " + trace.getInstanceID() + " is saved to " + path);	
+			System.out.println("trace " + trace.getInstanceID() + " is saved to " + path);
 		}
-		
+
 	}
 
-	@FXML
-	void showEntities(ActionEvent event) {
+//	@FXML
+	void showDetails() {
 
 		// check that the .big is loaded
 		if (traceMiner != null && !traceMiner.isBigraphERFileSet()) {
@@ -447,7 +487,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		lblTraceID.setText("");
 		lblTraceID.setStyle(normalStyle);
-		
+
 		hbox.getChildren().clear();
 		vboxMain.getChildren().clear();
 		rootPane.getChildren().clear();
@@ -475,10 +515,10 @@ public class TaskCell extends ListCell<GraphPath> {
 			public void run() {
 				// TODO Auto-generated method stub
 				lblTraceID.setText(trace.getInstanceID() + "");
-				if(traceMiner != null && traceMiner.isTraceSaved(trace.getInstanceID())) {
+				if (traceMiner != null && traceMiner.isTraceSaved(trace.getInstanceID())) {
 					lblTraceID.setStyle(boldStyle);
 				}
-				
+
 				// hbox.getChildren().clear();
 				Pane pane = new Pane();
 				pane.setPrefWidth(10);
