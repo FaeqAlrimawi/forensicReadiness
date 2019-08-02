@@ -7,13 +7,15 @@
 <?import javafx.scene.layout.StackPane?>
 
 
-<AnchorPane xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.analysis.TraceViewerInSystemController">
+<AnchorPane prefHeight="633.0" prefWidth="1066.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.analysis.TraceViewerInSystemController">
    <children>
-      <HBox alignment="CENTER_LEFT" layoutX="-1.0" layoutY="-39.0" prefHeight="32.0" prefWidth="950.0" style="-fx-background-color: white;" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <HBox alignment="CENTER_LEFT" layoutX="-1.0" layoutY="-39.0" prefHeight="32.0" prefWidth="950.0" spacing="5.0" style="-fx-background-color: white;" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
             <Button fx:id="btnLoadTransitionSystem" mnemonicParsing="false" onAction="#loadTransitionSystem" text="Load transition System" />
             <ProgressIndicator fx:id="progressIndicator" prefHeight="6.0" prefWidth="41.0" visible="false" />
             <Button fx:id="btnShowPreviousStates" mnemonicParsing="false" onAction="#showPreviousStates" text="show previous states" />
+            <Button mnemonicParsing="false" onAction="#showNextStates" text="show next states" />
+            <Button fx:id="btnClear" mnemonicParsing="false" onAction="#clear" text="reset" />
          </children>
       </HBox>
       <StackPane fx:id="mainStackPane" layoutY="30.0" prefHeight="525.0" prefWidth="955.0" style="-fx-background-color: white;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0" />

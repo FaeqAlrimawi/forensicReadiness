@@ -52,6 +52,8 @@ public class TraceViewerInSystemController {
 	
 	//nodes of previous states (previous to the initial)
 	private List<StackPane> previousNodes;
+	//nodes of next states (next to the final state)
+	private List<StackPane> nextNodes;
 	
 	private double sceneX, sceneY, layoutX, layoutY;
 
@@ -103,6 +105,24 @@ public class TraceViewerInSystemController {
 
 	}
 
+	@FXML
+	void clear(ActionEvent e ) {
+	
+		if(previousNodes!=null) {
+			previousNodes.clear();
+			previousNodes = null;
+		}
+		
+		if(nextNodes!=null) {
+			nextNodes.clear();
+			nextNodes = null;
+		}
+		
+		tracePane.getChildren().clear();
+		
+		showTrace(trace);
+	}
+	
 	@FXML
 	void showPreviousStates(ActionEvent e) {
 
@@ -164,10 +184,10 @@ public class TraceViewerInSystemController {
 		}
 
 		// add to the pane
-		tracePane.getChildren().removeAll(traceNodes);
-		tracePane.getChildren().addAll(traceNodes);
-		tracePane.getChildren().addAll(previousNodes);
-
+//		tracePane.getChildren().removeAll(traceNodes);
+//		tracePane.getChildren().addAll(traceNodes);
+//		tracePane.getChildren().addAll(previousNodes);
+		setNodes();
 		// position new nodes
 		double posX = initNode.getLayoutX() - (NODE_RADIUS * 2 + 30);
 		int yOffest = (int) (NODE_RADIUS*2);
@@ -186,6 +206,107 @@ public class TraceViewerInSystemController {
 //		toggleButtonActivity(btnShowPreviousStates, true);
 	}
 
+	@FXML
+	void showNextStates(ActionEvent e) {
+
+		if(miner == null) {
+			System.err.println("Trace miner is NULL");
+		}
+		
+		// shows previous states in the system
+		if (miner.getTransitionSystem() == null) {
+			loadTransitionSystem(null);
+		}
+
+		if (miner.getTransitionSystem() == null) {
+			return;
+		}
+
+		if (trace == null) {
+			return;
+		}
+
+		// get initial state
+		List<Integer> states = trace.getStateTransitions();
+
+		if (states == null) {
+			return;
+		}
+
+		// get node
+		StackPane finalNode = (StackPane) traceNodes.get(traceNodes.size()-1);
+
+		int finalState = Integer.parseInt(finalNode.getId());
+		
+		Digraph<Integer> digraph = miner.getTransitionSystem().getDigraph();
+
+//		System.out.println(digraph);
+		// get in bound states (going to initial state)
+		List<Integer> outBoundStates = digraph.outboundNeighbors(finalState);
+
+		
+		if(nextNodes!= null) {
+			//remove from the curren pane
+//			tracePane.getChildren().removeAll(previousNodes);
+			return;
+		}
+		
+		nextNodes = new LinkedList<StackPane>();
+
+		// create nodes for each inbound
+		for (Integer outBoundState : outBoundStates) {
+			StackPane node = getDot(NODE_COLOUR, "" + outBoundState, NODE_RADIUS);
+			node.setId("" + outBoundState);
+			nextNodes.add(node);
+
+			String actionName = digraph.getLabel(finalState, outBoundState);
+			
+			buildSingleDirectionalLine(finalNode, node, tracePane, true, false, ADDED_NODES_ARROW_COLOUR, actionName );
+		}
+
+		// add to the pane
+		setNodes();
+//		tracePane.getChildren().removeAll(traceNodes);
+//		tracePane.getChildren().addAll(traceNodes);
+//		tracePane.getChildren().addAll(previousNodes);
+
+		// position new nodes
+		int xOffest = 30;
+		double posX = finalNode.getLayoutX() + (NODE_RADIUS * 2 + xOffest);
+		int yOffest = (int) (NODE_RADIUS*2);
+		double posY = finalNode.getLayoutY()+yOffest*2;
+
+		for(StackPane node : nextNodes) {
+			node.setLayoutX(posX);
+			node.setLayoutY(posY);
+			
+			//same place
+//			posX+=xOffest;
+			
+			posY+=yOffest;
+		}
+		
+//		toggleButtonActivity(btnShowPreviousStates, true);
+	}
+
+	
+	protected void setNodes() {
+		
+		tracePane.getChildren().removeAll(traceNodes);
+		tracePane.getChildren().addAll(traceNodes);
+		
+		if(previousNodes!= null) {
+			tracePane.getChildren().removeAll(previousNodes);
+			tracePane.getChildren().addAll(previousNodes);
+		}
+		
+		if(nextNodes!= null) {
+			tracePane.getChildren().removeAll(nextNodes);
+			tracePane.getChildren().addAll(nextNodes);
+		}
+		
+		
+	}
 	public void showTrace(GraphPath trace) {
 
 		if (trace == null) {
