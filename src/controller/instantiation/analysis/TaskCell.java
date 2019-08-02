@@ -84,7 +84,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	private final URL defaultStatesFolder = getClass().getResource("../../../resources/example/states_1000");
 
-	private String statesFolder;
+	// private String statesFolder;
 
 	private final URL defaultBigraphERFile = getClass().getResource("../../../resources/example/systemBigraphER.big");
 
@@ -137,17 +137,17 @@ public class TaskCell extends ListCell<GraphPath> {
 				});
 
 				rootPane.setOnMouseExited(e -> {
-					if(!menuButtonOptions.isShowing()) {
-						hboxOptions.setVisible(false);	
+					if (!menuButtonOptions.isShowing()) {
+						hboxOptions.setVisible(false);
 					}
-					
+
 				});
-				
-				//set options menu
+
+				// set options menu
 				menuButtonOptions.getItems().clear();
-				for(String opt : OPTIONS) {
+				for (String opt : OPTIONS) {
 					MenuItem item = new MenuItem(opt);
-					item.setOnAction(e->{
+					item.setOnAction(e -> {
 						selectOption(opt);
 					});
 					menuButtonOptions.getItems().add(item);
@@ -215,7 +215,7 @@ public class TaskCell extends ListCell<GraphPath> {
 	}
 
 	void selectOption(String selectedOption) {
-		
+
 		switch (selectedOption) {
 		case DETAILS:
 			showDetails();
@@ -228,7 +228,7 @@ public class TaskCell extends ListCell<GraphPath> {
 		}
 	}
 
-//	@FXML
+	// @FXML
 	void saveTrace() {
 		if (trace == null) {
 			System.err.println("Trace is NULL");
@@ -262,7 +262,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	}
 
-//	@FXML
+	// @FXML
 	void showDetails() {
 
 		// check that the .big is loaded
@@ -359,8 +359,8 @@ public class TaskCell extends ListCell<GraphPath> {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 
 		// show folder if any
-		if (statesFolder != null) {
-			File selectedStatesFolder = new File(statesFolder);
+		if (traceMiner != null && traceMiner.getStatesFolder() != null) {
+			File selectedStatesFolder = new File(traceMiner.getStatesFolder());
 
 			if (selectedStatesFolder.isDirectory()) {
 				dirChooser.setInitialDirectory(selectedStatesFolder);
@@ -375,7 +375,7 @@ public class TaskCell extends ListCell<GraphPath> {
 			}
 		}
 
-		if (statesFolder == null) {
+		if (traceMiner.getStatesFolder() == null) {
 
 			ButtonType result = showDialog("Select States Folder",
 					"Please select a Folder which contains the states representations (e.g., *.svg, *.json, *.txt)",
@@ -471,6 +471,7 @@ public class TaskCell extends ListCell<GraphPath> {
 					setGraphic(rootPane);
 					setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 				}
+
 			});
 
 		}
@@ -634,27 +635,18 @@ public class TaskCell extends ListCell<GraphPath> {
 			loadStateController();
 		}
 
-		if (statesFolder == null || statesFolder.isEmpty()) {
-			// try to get it from the traceMiner
-			if (traceMiner != null) {
-				String statesFolder = traceMiner.getStatesFolder();
-
-				if (statesFolder == null || statesFolder.isEmpty()) {
-					// prompt the user to select a folder containing the states
-					selectStatesFolder();
-				} else {
-					this.statesFolder = statesFolder;
-				}
-			}
+		if (traceMiner != null && traceMiner.getStatesFolder() == null) {
+			selectStatesFolder();
 
 		}
 
 		// if folder not set return
-		if (statesFolder == null || statesFolder.isEmpty()) {
+		if (traceMiner == null && traceMiner.getStatesFolder() == null) {
 			return;
 		}
 
 		// try to find a state representation as in stateExtension
+		String statesFolder = traceMiner.getStatesFolder();
 		String path = null;
 		File file = null;
 		String fileExt = null;
@@ -672,9 +664,17 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		// no state found
 		if (fileExt == null) {
-			showDialog("Not found", "File not found for state [" + state + "].", AlertType.ERROR);
-			selectStatesFolder();
-			return;
+			ButtonType res = showDialog("File not found", "File not found for state [" + state + "]. Would you Like to select another Folder?", AlertType.INFORMATION);
+			
+			if(res == ButtonType.OK) {
+				selectStatesFolder();	
+				showState(state);
+				return;
+			} else {
+				return;
+			}
+			
+//			return;
 		}
 
 		// if state found

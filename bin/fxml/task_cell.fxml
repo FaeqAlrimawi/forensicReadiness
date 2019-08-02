@@ -32,7 +32,7 @@
       </VBox>
       <HBox fx:id="hboxOptions" alignment="CENTER_RIGHT" layoutX="566.0" layoutY="8.0" prefHeight="30.0" prefWidth="86.0" spacing="5.0" visible="false" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="8.0">
          <children>
-            <MenuButton fx:id="menuButtonOptions" mnemonicParsing="false" text="Options">
+            <MenuButton fx:id="menuButtonOptions" alignment="TOP_LEFT" mnemonicParsing="false" text="Options">
               <items>
                 <MenuItem mnemonicParsing="false" text="Action 1" />
                 <MenuItem mnemonicParsing="false" text="Action 2" />
