@@ -49,6 +49,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 public class TraceViewerController implements TraceMinerListener {
@@ -584,6 +585,31 @@ public class TraceViewerController implements TraceMinerListener {
 	public void saveFilteredTraces(ActionEvent event) {
 
 		// save filtered traces
+		DirectoryChooser dirChooser = new DirectoryChooser();
+
+		if (tracesMiner != null && tracesMiner.getTraceFolder() != null) {
+			
+			File folderF = new File(tracesMiner.getTraceFolder());
+
+			if (folderF.isDirectory()) {
+				dirChooser.setInitialDirectory(folderF);
+			}
+
+		}
+
+		File selectedDir = dirChooser.showDialog(null);
+
+		if (selectedDir != null) {
+			tracesMiner.setTraceFolder(selectedDir.getAbsolutePath());
+			saveSelectedTracesAsObjects(shownFitleredTraces);
+		}
+
+	}
+	
+//	@FXML
+	public void saveFilteredTracesOrig(ActionEvent event) {
+
+		// save filtered traces
 		FileChooser fileChooser = new FileChooser();
 
 		if (selectedFilteredTracesFile != null) {
@@ -635,6 +661,50 @@ public class TraceViewerController implements TraceMinerListener {
 				// TODO Auto-generated method stub
 				tracesMiner.saveTraces(fileName, tracesIDs);
 			}
+		});
+
+	}
+	
+	protected void saveSelectedTracesAsObjects(List<Integer> tracesIDs) {
+
+		if (tracesIDs == null || tracesMiner == null) {
+			return;
+		}
+
+		executor.submit(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				List<Integer> failedToSave = tracesMiner.saveSelectedTraces(shownFitleredTraces);
+				
+				
+					Platform.runLater(new Runnable() {
+						
+						@Override
+						public void run() {
+							// TODO Auto-generated method stub
+							if(failedToSave != null && failedToSave.isEmpty()) {
+								updateImage(IMAGE_CORRECT, imgSavedTraces);
+								updateText("Saved!", lblSaved);
+							} else {
+								updateImage(IMAGE_WRONG, imgSavedTraces);
+								updateText("didn't save!", lblSaved);
+							}
+							
+							Timer t = new Timer();
+							t.schedule(new TimerTask() {
+								
+								@Override
+								public void run() {
+									// TODO Auto-generated method stub
+									updateImage(null, imgSavedTraces);
+									updateText(null, lblSaved);
+								}
+							}, 3000);
+						}
+					});
+				}
 		});
 
 	}

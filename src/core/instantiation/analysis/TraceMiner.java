@@ -166,33 +166,31 @@ public class TraceMiner {
 	// used for analysing common entities
 	BRSParser brsParser;
 
-
 	// bigraphER file
 	private String bigraphERFile;
 
-	
-	//holds information about the .big file
+	// holds information about the .big file
 	BRSWrapper brsWrapper;
-	
+
 	// map of all actions in the bigraphER file
 	// key is action name, value is an ActionWrapper object containing action
 	// info (pre, post)
-	//taken from BRSWrapper
+	// taken from BRSWrapper
 	Map<String, ActionWrapper> bigraphERActions;
 
 	// specifies how many entities are there in the current selected traces that
 	// are processed
 	int totalNumberOfEntitiesInCurrentTraces = 0;
-	
-	//folder where states are
+
+	// folder where states are
 	private String statesFolder;
-	
-	//folder where to save traces
+
+	// folder where to save traces
 	private String traceFolder;
-	
-	//key is trace id, value is path
+
+	// key is trace id, value is path
 	Map<Integer, String> tracesSaved;
-	
+
 	public TraceMiner() {
 
 		tracesActions = new HashMap<String, Integer>();
@@ -211,7 +209,7 @@ public class TraceMiner {
 		customeFilteringTraceIDs = new LinkedList<Integer>();
 
 		tracesSaved = new HashMap<Integer, String>();
-		
+
 		numberOfStates = 10000;
 
 		PADDING_STATE = -1 * numberOfStates;
@@ -823,7 +821,7 @@ public class TraceMiner {
 		if (occurrences != null && !occurrences.isEmpty() && numOfTraces > 0) {
 
 			// numOfTraces = occurrences.size();
-//			System.out.println("miner " + occurrences);
+			// System.out.println("miner " + occurrences);
 			// for now get the first n
 			for (Entry<String, Integer> entry : occurrences.entrySet()) {
 
@@ -913,18 +911,18 @@ public class TraceMiner {
 		}
 
 		for (Entry<String, Long> entry : entitiesOccur) {
-			
+
 			String action = entry.getKey();
 			long occur = entry.getValue();
 
 			double localPerc = 1;
-			
-			if(totalNumberOfEntitiesInCurrentTraces > 0) {
-				localPerc = occur * 1.0 / totalNumberOfEntitiesInCurrentTraces;	
+
+			if (totalNumberOfEntitiesInCurrentTraces > 0) {
+				localPerc = occur * 1.0 / totalNumberOfEntitiesInCurrentTraces;
 			} else {
 				localPerc = occur;
 			}
-			
+
 			switch (operation) {
 			case TraceViewerController.EQUAL:
 				if (localPerc == percentage) {
@@ -955,7 +953,7 @@ public class TraceMiner {
 
 		return result;
 	}
-	
+
 	public Map<Integer, Integer> getStatesWithOccurrencePercentage(double percentage, String operation,
 			String tracesToFilter) {
 
@@ -1181,7 +1179,7 @@ public class TraceMiner {
 			break;
 		}
 
-//		System.out.println("Res: " + entitiesOccur);
+		// System.out.println("Res: " + entitiesOccur);
 
 		for (Entry<String, Long> ent : entitiesOccur) {
 			result.put(ent.getKey(), ent.getValue());
@@ -3358,22 +3356,25 @@ public class TraceMiner {
 		return customeFilteringTraceIDs;
 	}
 
-/**
- * save a trace as a Trace object
- * @param fileName file path
- * @param tracesID trace ID
- * @return
- */
+	/**
+	 * save a trace as a Trace object
+	 * 
+	 * @param fileName
+	 *            file path
+	 * @param tracesID
+	 *            trace ID
+	 * @return
+	 */
 	public boolean saveTrace(int traceID, String fileName) {
-		
+
 		boolean isSaved = false;
-		
+
 		GraphPath trace = traces.get(traceID);
-		
-		if(trace == null) {
+
+		if (trace == null) {
 			return false;
 		}
-		
+
 		Trace newTrace = new Trace();
 
 		for (String actionName : trace.getTransitionActions()) {
@@ -3382,34 +3383,95 @@ public class TraceMiner {
 		}
 
 		isSaved = newTrace.save(fileName);
-		
-		if(isSaved) {
+
+		if (isSaved) {
 			tracesSaved.put(traceID, fileName);
 		}
-		
+
 		return isSaved;
+	}
+
+	/**
+	 * save a trace as a Trace object
+	 * 
+	 * @param tracesID
+	 *            trace ID
+	 * @return
+	 */
+	public String saveTrace(int traceID) {
+
+		String name = File.separator + "trace_" + traceID;
+		String path = traceFolder + name;
+
+		boolean isSaved = saveTrace(traceID, path);
+
+		if (isSaved) {
+			return path;
+		}
+
+		return null;
+
+	}
+
+	/**
+	 * Saves the given list of trace ids into the given folder
+	 * @param targetFolder folder to save files to
+	 * @param tracesIDs List of trace ids to save
+	 * @return List of trace ids that the methof Failed to save
+	 */
+	public List<Integer> saveSelectedTraces(String targetFolder, List<Integer> tracesIDs) {
+
+		if(targetFolder == null || tracesIDs == null) {
+			return null;
+		}
+		
+		List<Integer> failedToSaveTraces = new LinkedList<Integer>();
+		String name = "";
+		
+		traceFolder = targetFolder;
+		
+		for(Integer traceID : tracesIDs) {
+			name = saveTrace(traceID);
+			
+			if(name == null) {
+				failedToSaveTraces.add(traceID);
+			}
+		}
+		
+		return failedToSaveTraces;
 	}
 	
 	/**
-	 * save a trace as a Trace object
-	 * @param tracesID trace ID
-	 * @return
+	 * Saves the given list of trace ids into the traces folder
+	 * @param targetFolder folder to save files to
+	 * @param tracesIDs List of trace ids to save
+	 * @return List of trace ids that the methof Failed to save
 	 */
-		public String saveTrace(int traceID) {
+	public List<Integer> saveSelectedTraces(List<Integer> tracesIDs) {
 
-			String name = File.separator+"trace_" + traceID;
-			String path = traceFolder + name;
-			
-			boolean isSaved = saveTrace(traceID, path);
-			
-			if(isSaved) {
-				return path;
-			}
-			
+		if(traceFolder == null) {
 			return null;
-
 		}
 		
+		List<Integer> failedToSaveTraces = new LinkedList<Integer>();
+		String name = "";
+				
+		for(Integer traceID : tracesIDs) {
+			name = saveTrace(traceID);
+			
+			if(name == null) {
+				failedToSaveTraces.add(traceID);
+			}
+		}
+		
+//		if (listener != null) {
+//			
+//			listener.onSavingFilteredTracesComplete(isSaved);
+//		}
+		
+		return failedToSaveTraces;
+	}
+
 	public boolean saveTraces(String fileName, List<Integer> tracesIDs) {
 
 		if (fileName == null || tracesIDs == null) {
@@ -3462,17 +3524,19 @@ public class TraceMiner {
 
 	/**
 	 * Checks whether the given trace id is saved or not
+	 * 
 	 * @param traceID
 	 * @return
 	 */
 	public boolean isTraceSaved(int traceID) {
-		
+
 		return tracesSaved.containsKey(traceID);
-		
+
 	}
-	
+
 	/**
 	 * checks if traces (as instances in a json file) are loaded or not
+	 * 
 	 * @return true if loaded. Otherwise false
 	 */
 	public boolean areTracesLoaded() {
@@ -3480,7 +3544,6 @@ public class TraceMiner {
 		return isLoaded;
 	}
 
-	
 	/**
 	 * Finds all entities (i.e. Classes/Controls) between all traces. It
 	 * excludes entities given in the excluding list.
@@ -3523,7 +3586,7 @@ public class TraceMiner {
 
 		return result;
 	}
-	
+
 	/**
 	 * Finds top common entities (i.e. Classes/Controls) between all traces. It
 	 * excludes entities given in the excluding list. It limits to topK entities
@@ -3568,7 +3631,6 @@ public class TraceMiner {
 		return result;
 	}
 
-	
 	/**
 	 * Finds lowest common entities (i.e. Classes/Controls) between all traces.
 	 * It excludes entities given in the excluding list. It limits to topK
@@ -3594,8 +3656,9 @@ public class TraceMiner {
 		// List<GraphPath> traces = new LinkedList<GraphPath>();
 		// traces.add(trace);
 		List<String> actionsEntities = new LinkedList<String>();
-//		List<Map.Entry<String, Long>> result = new LinkedList<Map.Entry<String,Long>>();
-		
+		// List<Map.Entry<String, Long>> result = new
+		// LinkedList<Map.Entry<String,Long>>();
+
 		// reset number of all entities
 		totalNumberOfEntitiesInCurrentTraces = 0;
 
@@ -3635,15 +3698,15 @@ public class TraceMiner {
 
 			// allow repetition of entities
 
-//			System.out.println("Entities of " + act);
+			// System.out.println("Entities of " + act);
 			if (actionDetails != null) {
 
 				// add entities from pre
 				BigraphWrapper pre = actionDetails.getPrecondition();
 
 				if (pre != null) {
-//					System.out.println("Pre entities: ");
-					
+					// System.out.println("Pre entities: ");
+
 					Set<Entity> ents = pre.getControlMap().keySet();
 
 					for (Entity ent : ents) {
@@ -3661,7 +3724,7 @@ public class TraceMiner {
 							continue;
 						}
 
-//						System.out.println("\t-"+name);
+						// System.out.println("\t-"+name);
 						actionEntities.add(name);
 					}
 				}
@@ -3670,9 +3733,9 @@ public class TraceMiner {
 				BigraphWrapper post = actionDetails.getPostcondition();
 
 				if (post != null) {
-					
-//					System.out.println("Post entities: ");
-					
+
+					// System.out.println("Post entities: ");
+
 					Set<Entity> ents = post.getControlMap().keySet();
 
 					for (Entity ent : ents) {
@@ -3689,7 +3752,7 @@ public class TraceMiner {
 							continue;
 						}
 
-//						System.out.println("\t-"+name);
+						// System.out.println("\t-"+name);
 						actionEntities.add(name);
 					}
 				}
@@ -3704,7 +3767,9 @@ public class TraceMiner {
 
 	/**
 	 * Set the path to the *.big file
-	 * @param bigraphERFile file path
+	 * 
+	 * @param bigraphERFile
+	 *            file path
 	 */
 	public void setBigraphERFile(String bigraphERFile) {
 
@@ -3719,46 +3784,44 @@ public class TraceMiner {
 	public String getBigraphERFile() {
 		return bigraphERFile;
 	}
-	
+
 	public boolean isBigraphERFileSet() {
 
 		if (bigraphERFile == null || bigraphERFile.isEmpty()) {
 			return false;
 		}
 
-		
 		return true;
-		
+
 	}
 
 	public int getTotalNumberOfEntitiesInCurrentTraces() {
-		
+
 		return totalNumberOfEntitiesInCurrentTraces;
 	}
-	
-	
+
 	public String getStatesFolder() {
 		return statesFolder;
 	}
-	
+
 	public void setStatesFolder(String statesFolder) {
-		this.statesFolder= statesFolder;
+		this.statesFolder = statesFolder;
 	}
-	
+
 	public void setTraceFolder(String traceFolder) {
-		this.traceFolder= traceFolder;
+		this.traceFolder = traceFolder;
 	}
-	
+
 	public String getTraceFolder() {
 		return traceFolder;
 	}
-	
+
 	public ActionWrapper getActionWrapper(String actionName) {
-		
-		if(bigraphERActions == null) {
+
+		if (bigraphERActions == null) {
 			return null;
 		}
-		
+
 		return bigraphERActions.get(actionName);
 	}
 	// public static void main(String[] args) {
