@@ -1,0 +1,366 @@
+package controller.instantiation.analysis;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import core.instantiation.analysis.TraceMiner;
+import ie.lero.spare.pattern_instantiation.GraphPath;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.DoubleBinding;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
+import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
+
+public class TraceViewerInSystemController {
+
+	@FXML
+	private StackPane mainStackPane;
+
+	private GraphPath trace;
+
+	private Pane tracePane;
+
+	private String systemTransitionFilePath;
+
+	private double sceneX, sceneY, layoutX, layoutY;
+
+	private TraceMiner miner;
+	
+	private static final String NODE_COLOUR = "white";
+	private static final double NODE_RADIUS = 25;
+
+	@FXML
+	public void initialize() {
+
+		tracePane = new Pane();
+		mainStackPane.getChildren().add(tracePane);
+		mainStackPane.setPadding(new Insets(20));
+	}
+
+	public void showTrace(GraphPath trace) {
+
+		if (trace == null) {
+			System.err.println("Trace is NULL");
+			return;
+		}
+
+		tracePane.getChildren().clear();
+
+		this.trace = trace;
+
+		List<String> actions = trace.getTransitionActions();
+		List<Integer> states = trace.getStateTransitions();
+
+		List<StackPane> stateNodes = new LinkedList<StackPane>();
+
+		// create nodes and edges
+		int index = 0;
+		// int count = 2;
+		for (Integer state : states) {
+			StackPane node = getDot(NODE_COLOUR, "" + state, NODE_RADIUS);
+			// count--;
+
+			// create edge between current and previous
+			if (index > 0) {
+				System.out.println("creating edge " + states.get(index - 1) + "->" + state);
+				buildSingleDirectionalLine(stateNodes.get(index - 1), node, tracePane, true, false,
+						actions.get(index - 1));
+				// count = 1;
+			}
+
+			stateNodes.add(node);
+
+			index++;
+		}
+
+		tracePane.getChildren().addAll(stateNodes);
+
+		// StackPane.setAlignment(stateNodes.get(0), Pos.CENTER_LEFT);
+		// position each node
+
+		index = 0;
+		double posX = 20;
+		double posY = 20;
+		for (StackPane node : stateNodes) {
+
+			node.setLayoutX(posX);
+			node.setLayoutY(posY);
+			
+			// update x axis to be the circle plus some gap
+			posX += NODE_RADIUS * 2 + 100;
+			posY+=NODE_RADIUS*2 + 20;
+
+		}
+
+	}
+
+	public void setTraceMiner(TraceMiner traceMiner) {
+		miner = traceMiner;
+	}
+	
+	public TraceMiner getTraceMiner() {
+		return miner;
+	}
+	
+	
+	/**
+	 * Builds a pane consisting of circle with the provided specifications.
+	 *
+	 * @param color
+	 *            Color of the circle
+	 * @param text
+	 *            Text inside the circle
+	 * @return Draggable pane consisting a circle.
+	 */
+	private StackPane getDot(String color, String text, double radius) {
+		// double radius = 50;
+		double paneSize = 2 * radius;
+		StackPane dotPane = new StackPane();
+		Circle dot = new Circle();
+		dot.setRadius(radius);
+		dot.setStyle("-fx-fill:" + color + ";-fx-stroke-width:2px;-fx-stroke:black;");
+
+		Label txt = new Label(text);
+		txt.setStyle("-fx-font-size:18px;-fx-font-weight:bold;");
+		dotPane.getChildren().addAll(dot, txt);
+		dotPane.setPrefSize(paneSize, paneSize);
+		dotPane.setMaxSize(paneSize, paneSize);
+		dotPane.setMinSize(paneSize, paneSize);
+		dotPane.setOnMousePressed(e -> {
+			sceneX = e.getSceneX();
+			sceneY = e.getSceneY();
+			layoutX = dotPane.getLayoutX();
+			layoutY = dotPane.getLayoutY();
+		});
+
+		EventHandler<MouseEvent> dotOnMouseDraggedEventHandler = e -> {
+			// Offset of drag
+			double offsetX = e.getSceneX() - sceneX;
+			double offsetY = e.getSceneY() - sceneY;
+
+			// Taking parent bounds
+			Bounds parentBounds = dotPane.getParent().getLayoutBounds();
+
+			// Drag node bounds
+			double currPaneLayoutX = dotPane.getLayoutX();
+			double currPaneWidth = dotPane.getWidth();
+			double currPaneLayoutY = dotPane.getLayoutY();
+			double currPaneHeight = dotPane.getHeight();
+
+			if ((currPaneLayoutX + offsetX < parentBounds.getWidth() - currPaneWidth)
+					&& (currPaneLayoutX + offsetX > -1)) {
+				// If the dragNode bounds is within the parent bounds, then you
+				// can set the offset value.
+				dotPane.setTranslateX(offsetX);
+			} else if (currPaneLayoutX + offsetX < 0) {
+				// If the sum of your offset and current layout position is
+				// negative, then you ALWAYS update your translate to negative
+				// layout value
+				// which makes the final layout position to 0 in mouse released
+				// event.
+				dotPane.setTranslateX(-currPaneLayoutX);
+			} else {
+				// If your dragNode bounds are outside parent bounds,ALWAYS
+				// setting the translate value that fits your node at end.
+				dotPane.setTranslateX(parentBounds.getWidth() - currPaneLayoutX - currPaneWidth);
+			}
+
+			if ((currPaneLayoutY + offsetY < parentBounds.getHeight() - currPaneHeight)
+					&& (currPaneLayoutY + offsetY > -1)) {
+				dotPane.setTranslateY(offsetY);
+			} else if (currPaneLayoutY + offsetY < 0) {
+				dotPane.setTranslateY(-currPaneLayoutY);
+			} else {
+				dotPane.setTranslateY(parentBounds.getHeight() - currPaneLayoutY - currPaneHeight);
+			}
+		};
+		dotPane.setOnMouseDragged(dotOnMouseDraggedEventHandler);
+		dotPane.setOnMouseReleased(e -> {
+			// Updating the new layout positions
+			dotPane.setLayoutX(layoutX + dotPane.getTranslateX());
+			dotPane.setLayoutY(layoutY + dotPane.getTranslateY());
+
+			// Resetting the translate positions
+			dotPane.setTranslateX(0);
+			dotPane.setTranslateY(0);
+		});
+		return dotPane;
+	}
+
+	/**
+	 * Builds the single directional line with pointing arrows at each end.
+	 * 
+	 * @param startDot
+	 *            Pane for considering start point
+	 * @param endDot
+	 *            Pane for considering end point
+	 * @param parent
+	 *            Parent container
+	 * @param hasEndArrow
+	 *            Specifies whether to show arrow towards end
+	 * @param hasStartArrow
+	 *            Specifies whether to show arrow towards start
+	 */
+	private void buildSingleDirectionalLine(StackPane startDot, StackPane endDot, Pane parent, boolean hasEndArrow,
+			boolean hasStartArrow, String actionName) {
+		Line line = getLine(startDot, endDot);
+		StackPane arrowAB = getArrow(true, line, startDot, endDot);
+		if (!hasEndArrow) {
+			arrowAB.setOpacity(0);
+		}
+		StackPane arrowBA = getArrow(false, line, startDot, endDot);
+		if (!hasStartArrow) {
+			arrowBA.setOpacity(0);
+		}
+		StackPane weightAB = getWeight(line, actionName);
+		parent.getChildren().addAll(line, weightAB, arrowBA, arrowAB);
+	}
+
+	/**
+	 * Builds a line between the provided start and end panes center point.
+	 *
+	 * @param startDot
+	 *            Pane for considering start point
+	 * @param endDot
+	 *            Pane for considering end point
+	 * @return Line joining the layout center points of the provided panes.
+	 */
+	private Line getLine(StackPane startDot, StackPane endDot) {
+		Line line = new Line();
+		line.setStroke(Color.BLUE);
+		line.setStrokeWidth(2);
+		line.startXProperty().bind(
+				startDot.layoutXProperty().add(startDot.translateXProperty()).add(startDot.widthProperty().divide(2)));
+		line.startYProperty().bind(
+				startDot.layoutYProperty().add(startDot.translateYProperty()).add(startDot.heightProperty().divide(2)));
+		line.endXProperty()
+				.bind(endDot.layoutXProperty().add(endDot.translateXProperty()).add(endDot.widthProperty().divide(2)));
+		line.endYProperty()
+				.bind(endDot.layoutYProperty().add(endDot.translateYProperty()).add(endDot.heightProperty().divide(2)));
+		return line;
+	}
+
+	/**
+	 * Builds an arrow on the provided line pointing towards the specified pane.
+	 *
+	 * @param toLineEnd
+	 *            Specifies whether the arrow to point towards end pane or start
+	 *            pane.
+	 * @param line
+	 *            Line joining the layout center points of the provided panes.
+	 * @param startDot
+	 *            Pane which is considered as start point of line
+	 * @param endDot
+	 *            Pane which is considered as end point of line
+	 * @return Arrow towards the specified pane.
+	 */
+	private StackPane getArrow(boolean toLineEnd, Line line, StackPane startDot, StackPane endDot) {
+		double size = 12; // Arrow size
+		StackPane arrow = new StackPane();
+		arrow.setStyle(
+				"-fx-background-color:#333333;-fx-border-width:1px;-fx-border-color:black;-fx-shape: \"M0,-4L4,0L0,4Z\"");//
+		arrow.setPrefSize(size, size);
+		arrow.setMaxSize(size, size);
+		arrow.setMinSize(size, size);
+
+		// Determining the arrow visibility unless there is enough space between
+		// dots.
+		DoubleBinding xDiff = line.endXProperty().subtract(line.startXProperty());
+		DoubleBinding yDiff = line.endYProperty().subtract(line.startYProperty());
+		BooleanBinding visible = (xDiff.lessThanOrEqualTo(size).and(xDiff.greaterThanOrEqualTo(-size))
+				.and(yDiff.greaterThanOrEqualTo(-size)).and(yDiff.lessThanOrEqualTo(size))).not();
+		arrow.visibleProperty().bind(visible);
+
+		// Determining the x point on the line which is at a certain distance.
+		DoubleBinding tX = Bindings.createDoubleBinding(() -> {
+			double xDiffSqu = (line.getEndX() - line.getStartX()) * (line.getEndX() - line.getStartX());
+			double yDiffSqu = (line.getEndY() - line.getStartY()) * (line.getEndY() - line.getStartY());
+			double lineLength = Math.sqrt(xDiffSqu + yDiffSqu);
+			double dt;
+			if (toLineEnd) {
+				// When determining the point towards end, the required distance
+				// is total length minus (radius + arrow half width)
+				dt = lineLength - (endDot.getWidth() / 2) - (arrow.getWidth() / 2);
+			} else {
+				// When determining the point towards start, the required
+				// distance is just (radius + arrow half width)
+				dt = (startDot.getWidth() / 2) + (arrow.getWidth() / 2);
+			}
+
+			double t = dt / lineLength;
+			double dx = ((1 - t) * line.getStartX()) + (t * line.getEndX());
+			return dx;
+		}, line.startXProperty(), line.endXProperty(), line.startYProperty(), line.endYProperty());
+
+		// Determining the y point on the line which is at a certain distance.
+		DoubleBinding tY = Bindings.createDoubleBinding(() -> {
+			double xDiffSqu = (line.getEndX() - line.getStartX()) * (line.getEndX() - line.getStartX());
+			double yDiffSqu = (line.getEndY() - line.getStartY()) * (line.getEndY() - line.getStartY());
+			double lineLength = Math.sqrt(xDiffSqu + yDiffSqu);
+			double dt;
+			if (toLineEnd) {
+				dt = lineLength - (endDot.getHeight() / 2) - (arrow.getHeight() / 2);
+			} else {
+				dt = (startDot.getHeight() / 2) + (arrow.getHeight() / 2);
+			}
+			double t = dt / lineLength;
+			double dy = ((1 - t) * line.getStartY()) + (t * line.getEndY());
+			return dy;
+		}, line.startXProperty(), line.endXProperty(), line.startYProperty(), line.endYProperty());
+
+		arrow.layoutXProperty().bind(tX.subtract(arrow.widthProperty().divide(2)));
+		arrow.layoutYProperty().bind(tY.subtract(arrow.heightProperty().divide(2)));
+
+		DoubleBinding endArrowAngle = Bindings.createDoubleBinding(() -> {
+			double stX = toLineEnd ? line.getStartX() : line.getEndX();
+			double stY = toLineEnd ? line.getStartY() : line.getEndY();
+			double enX = toLineEnd ? line.getEndX() : line.getStartX();
+			double enY = toLineEnd ? line.getEndY() : line.getStartY();
+			double angle = Math.toDegrees(Math.atan2(enY - stY, enX - stX));
+			if (angle < 0) {
+				angle += 360;
+			}
+			return angle;
+		}, line.startXProperty(), line.endXProperty(), line.startYProperty(), line.endYProperty());
+		arrow.rotateProperty().bind(endArrowAngle);
+
+		return arrow;
+	}
+
+	/**
+	 * Builds a pane at the center of the provided line.
+	 *
+	 * @param line
+	 *            Line on which the pane need to be set.
+	 * @return Pane located at the center of the provided line.
+	 */
+	private StackPane getWeight(Line line, String actionName) {
+		// double size = 20;
+		// String actionName = "enterRoom";
+		Label lbl = new Label(actionName);
+		StackPane weight = new StackPane();
+		weight.setStyle("-fx-background-color:white;-fx-border-width:1px;");
+		// weight.setPrefSize(size, size);
+		// weight.setMaxSize(size, size);
+		// weight.setMinSize(size, size);
+		weight.getChildren().add(lbl);
+		DoubleBinding wgtSqrHalfWidth = weight.widthProperty().divide(2);
+		DoubleBinding wgtSqrHalfHeight = weight.heightProperty().divide(2);
+		DoubleBinding lineXHalfLength = line.endXProperty().subtract(line.startXProperty()).divide(2);
+		DoubleBinding lineYHalfLength = line.endYProperty().subtract(line.startYProperty()).divide(2);
+
+		weight.layoutXProperty().bind(line.startXProperty().add(lineXHalfLength.subtract(wgtSqrHalfWidth)));
+		weight.layoutYProperty().bind(line.startYProperty().add(lineYHalfLength.subtract(wgtSqrHalfHeight)));
+		return weight;
+	}
+
+}

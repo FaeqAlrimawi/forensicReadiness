@@ -7,12 +7,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-import core.brs.parser.ActionWrapper;
-import core.instantiation.analysis.Trace;
 import core.instantiation.analysis.TraceMiner;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
@@ -67,16 +64,28 @@ public class TaskCell extends ListCell<GraphPath> {
 	private MenuButton menuButtonOptions;
 
 	// for viewing details of a trace
-	InstantiationDetailsController traceDetailController;
-	AnchorPane traceDetailsMainPane;
-
-	private Stage stateViewerStage;
-	private Stage reactViewerStage;
+	private InstantiationDetailsController traceDetailController;
 
 	// for viewing a state
-	StateViewerController stateController;
+	private StateViewerController stateController;
+	
+	private ReactController reactController;
+	
+	//for viewing a trace
+	private TraceViewerInSystemController traceViewerController;
+	
+	//shows state as svg
+	private Stage stateViewerStage;
+	
+	//shows reaction rules in editor
+	private Stage reactViewerStage;
+	
+	//shows trace in system viewer sa graphical nodes
+	private Stage traceViewerStage;
 
-	ReactController reactController;
+	AnchorPane traceDetailsMainPane;
+
+
 
 	private GraphPath trace;
 
@@ -104,10 +113,12 @@ public class TaskCell extends ListCell<GraphPath> {
 	private static final String[] stateExtensions = new String[] { SVG_EXT, JSON_EXT, TXT_EXT };
 
 	// options
-	private static final String DETAILS = "details";
-	private static final String SAVE = "save";
+	private static final String DETAILS = "Show Details";
+	private static final String SHOW_TRACE = "Show Trace";
+	private static final String SAVE = "Save";
+	
 
-	private static final String[] OPTIONS = new String[] { DETAILS, SAVE };
+	private static final String[] OPTIONS = new String[] { DETAILS, SHOW_TRACE, SAVE };
 
 	public TaskCell(TraceMiner miner) {
 		this();
@@ -196,6 +207,28 @@ public class TaskCell extends ListCell<GraphPath> {
 			e.printStackTrace();
 		}
 	}
+	
+	private void loadTraceViewerController() {
+
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../../../fxml/ShowTraceInSystem.fxml"));
+		Parent root;
+		try {
+			root = (Parent) fxmlLoader.load();
+			traceViewerStage = new Stage();
+			traceViewerStage.setScene(new Scene(root));
+
+			// get controller
+			traceViewerController = fxmlLoader.<TraceViewerInSystemController>getController();
+
+//			if (traceViewerController != null) {
+//				reactController.setTraceMiner(traceMiner);
+//			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	private void loadTraceDetailsController() {
 
@@ -223,11 +256,36 @@ public class TaskCell extends ListCell<GraphPath> {
 		case SAVE:
 			saveTrace();
 			break;
+			
+		case SHOW_TRACE:
+			showTrace();
 		default:
 			break;
 		}
 	}
 
+	/**
+	 * show the trace in the traceviewer in system transition
+	 */
+	void showTrace() {
+		
+		if(traceViewerController == null) {
+			loadTraceViewerController();
+		}
+		
+		if(traceViewerController == null) {
+			return;
+		}
+		
+		traceViewerController.showTrace(trace);
+		
+		traceViewerStage.setTitle("Trace " + trace.getInstanceID());
+		
+		if(!traceViewerStage.isShowing()) {
+			traceViewerStage.show();
+		}
+	}
+	
 	// @FXML
 	void saveTrace() {
 		if (trace == null) {
