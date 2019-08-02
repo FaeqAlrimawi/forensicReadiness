@@ -29,7 +29,7 @@
             </SplitPane>
          </children>
       </VBox>
-      <HBox fx:id="hboxOptions" alignment="CENTER_RIGHT" layoutX="566.0" layoutY="8.0" prefHeight="30.0" prefWidth="152.0" spacing="5.0" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="8.0">
+      <HBox fx:id="hboxOptions" alignment="CENTER_RIGHT" layoutX="566.0" layoutY="8.0" prefHeight="30.0" prefWidth="152.0" spacing="5.0" visible="false" AnchorPane.bottomAnchor="7.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="8.0">
          <children>
             <Button fx:id="btnSaveTrace" mnemonicParsing="false" onAction="#saveTrace" prefWidth="80.0" text="save trace" />
             <Button fx:id="btnShowEntities" mnemonicParsing="false" onAction="#showEntities" prefWidth="80.0" text="Details" />

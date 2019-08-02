@@ -75,6 +75,8 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	private GraphPath trace;
 
+	private Trace newTrace;
+
 	private final URL defaultStatesFolder = getClass().getResource("../../../resources/example/states_1000");
 
 	private String statesFolder;
@@ -83,12 +85,13 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	private TraceMiner traceMiner;
 
+	// holds the file path for saved trace
 	private String traceFilePath;
 
 	private String boldStyle = "-fx-text-fill: black; -fx-font-size:14px; -fx-font-weight:bold;";
 	private String normalStyle = "-fx-text-fill: black; -fx-font-size:14px;";
-	private String mouseEnteredStyle = "-fx-text-fill: blue; -fx-font-size:15px;";
-	
+	private String mouseEnteredStyle = "-fx-text-fill: blue; -fx-font-size:14px;";
+
 	private static final String SVG_EXT = ".svg";
 	private static final String JSON_EXT = ".json";
 	private static final String TXT_EXT = ".txt";
@@ -190,6 +193,11 @@ public class TaskCell extends ListCell<GraphPath> {
 	@FXML
 	void saveTrace() {
 
+		if (newTrace != null) {
+			System.out.println("Already saved in " + traceFilePath);
+			return;
+		}
+
 		if (trace == null) {
 			System.err.println("Trace is NULL");
 			return;
@@ -200,26 +208,27 @@ public class TaskCell extends ListCell<GraphPath> {
 			return;
 		}
 
+		// check if trace folder is selected
+		String traceFolder = traceMiner.getTraceFolder();
+		if (traceFolder == null || traceFolder.isEmpty()) {
+			selectTraceFolder();
+			traceFolder = traceMiner.getTraceFolder();
+			if (traceFolder == null || traceFolder.isEmpty()) {
+				return;
+			}
+		}
+
 		// create new trace object and save it
-		Trace newTrace = new Trace();
+		newTrace = new Trace();
 
 		for (String actionName : trace.getTransitionActions()) {
 			ActionWrapper act = traceMiner.getActionWrapper(actionName);
 			newTrace.addAction(act);
 		}
 
-		// save trace
-		String traceFolder = traceMiner.getTraceFolder();
-		if (traceFolder == null || traceFolder.isEmpty()) {
-			selectTraceFolder();
-			if (traceFolder == null || traceFolder.isEmpty()) {
-				return;
-			}
-		}
-
-		String name = "/trace_" + trace.getInstanceID();
+		String name = File.separator+"trace_" + trace.getInstanceID();
 		String path = traceFolder + name;
-		System.out.println(path);
+		
 		boolean isSaved = newTrace.save(path);
 
 		if (isSaved) {
@@ -358,7 +367,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		if (selectedStatesFolder != null) {
 			traceMiner.setStatesFolder(selectedStatesFolder.getAbsolutePath());
-//			statesFolder = selectedStatesFolder.getAbsolutePath();
+			// statesFolder = selectedStatesFolder.getAbsolutePath();
 		}
 		// }
 
@@ -368,7 +377,7 @@ public class TaskCell extends ListCell<GraphPath> {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 
 		// show folder if any
-		if (traceMiner!= null && traceMiner.getTraceFolder() != null) {
+		if (traceMiner != null && traceMiner.getTraceFolder() != null) {
 			File selectedStatesFolder = new File(traceMiner.getTraceFolder());
 
 			if (selectedStatesFolder.isDirectory()) {
@@ -387,7 +396,7 @@ public class TaskCell extends ListCell<GraphPath> {
 		File selectedStatesFolder = dirChooser.showDialog(null);
 
 		if (selectedStatesFolder != null) {
-			 traceMiner.setTraceFolder(selectedStatesFolder.getAbsolutePath());
+			traceMiner.setTraceFolder(selectedStatesFolder.getAbsolutePath());
 		}
 		// }
 
@@ -498,7 +507,7 @@ public class TaskCell extends ListCell<GraphPath> {
 		// System.out.println("states: "+states);
 		// System.out.println("actions: "+actions);
 		// set states
-		
+
 		for (Integer state : states) {
 			// Circle circle = new Circle(hbox.getHeight()-2);
 			Label lblState;
@@ -580,9 +589,9 @@ public class TaskCell extends ListCell<GraphPath> {
 			public void run() {
 				// TODO Auto-generated method stub
 				// add tooltip
-				
-				//set the location of the option box
-//				hboxOptions.set
+
+				// set the location of the option box
+				// hboxOptions.set
 				Tooltip tip = new Tooltip(strBldr.toString());
 				lblTraceID.setTooltip(tip);
 			}
