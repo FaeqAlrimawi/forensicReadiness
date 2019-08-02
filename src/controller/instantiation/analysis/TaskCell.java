@@ -220,9 +220,9 @@ public class TaskCell extends ListCell<GraphPath> {
 			// get controller
 			traceViewerController = fxmlLoader.<TraceViewerInSystemController>getController();
 
-//			if (traceViewerController != null) {
-//				reactController.setTraceMiner(traceMiner);
-//			}
+			if (traceViewerController != null) {
+				traceViewerController.setTraceMiner(traceMiner);
+			}
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

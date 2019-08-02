@@ -1,18 +1,24 @@
 package controller.instantiation.analysis;
 
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
 import core.instantiation.analysis.TraceMiner;
+import ie.lero.spare.franalyser.utility.TransitionSystem;
 import ie.lero.spare.pattern_instantiation.GraphPath;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -25,19 +31,28 @@ public class TraceViewerInSystemController {
 	@FXML
 	private StackPane mainStackPane;
 
+	@FXML
+	private ProgressIndicator progressIndicator;
+
 	private GraphPath trace;
 
 	private Pane tracePane;
 
-	private String systemTransitionFilePath;
-
 	private double sceneX, sceneY, layoutX, layoutY;
 
 	private TraceMiner miner;
-	
+
+	private URL defualtTransitionSystemFilePath = getClass().getResource("../../../resources/example/transitions.json");
+
+	private TransitionSystem tranSys;
+
 	private static final String NODE_COLOUR = "white";
 	private static final double NODE_RADIUS = 25;
+	private static final String STATE_STYLE = "-fx-font-size:18px;-fx-font-weight:bold;";
+	private static final String ACTION_NAME_STYLE = "-fx-font-size:13px;";
 
+	private static final int previousStateNum = 2;
+	
 	@FXML
 	public void initialize() {
 
@@ -46,6 +61,54 @@ public class TraceViewerInSystemController {
 		mainStackPane.setPadding(new Insets(20));
 	}
 
+	@FXML
+	void loadTransitionSystem(ActionEvent e) {
+
+		progressIndicator.setVisible(true);
+
+		if (miner != null) {
+			if (defualtTransitionSystemFilePath != null) {
+				System.out.println("loading sys from " + defualtTransitionSystemFilePath.getPath());
+				miner.setTransitionSystemFilePath(defualtTransitionSystemFilePath.getPath());
+				tranSys = miner.loadTransitionSystem();
+				System.out.println("Done loading");
+			} else {
+
+			}
+
+		}
+
+		progressIndicator.setVisible(false);
+
+	}
+
+	@FXML
+	void showPreviousStates(ActionEvent e) {
+		
+		//shows previous states in the system
+		if(tranSys ==null) {
+			loadTransitionSystem(null);
+		}
+		
+		if(tranSys ==null) {
+			return;
+		}
+		
+		if(trace ==null) {
+			return;
+		}
+		
+		//get initial state
+		List<Integer> states = trace.getStateTransitions();
+		
+		if(states == null) {
+			return;
+		}
+		
+		int initialState = states.get(0);
+		
+	}
+	
 	public void showTrace(GraphPath trace) {
 
 		if (trace == null) {
@@ -57,6 +120,32 @@ public class TraceViewerInSystemController {
 
 		this.trace = trace;
 
+		List<StackPane> stateNodes = createTraceNodes(trace);
+
+		tracePane.getChildren().addAll(stateNodes);
+
+		// position each node
+		double posX = 100;
+		double posY = 100;
+		for (StackPane node : stateNodes) {
+
+			node.setLayoutX(posX);
+			node.setLayoutY(posY);
+
+			// update x axis to be the circle plus some gap
+			posX += NODE_RADIUS * 2 + 100;
+			posY += NODE_RADIUS * 2 + 20;
+
+		}
+
+	}
+
+	public List<StackPane> createTraceNodes(GraphPath trace) {
+
+		if (trace == null) {
+			return null;
+		}
+
 		List<String> actions = trace.getTransitionActions();
 		List<Integer> states = trace.getStateTransitions();
 
@@ -67,11 +156,11 @@ public class TraceViewerInSystemController {
 		// int count = 2;
 		for (Integer state : states) {
 			StackPane node = getDot(NODE_COLOUR, "" + state, NODE_RADIUS);
+			node.setId(state + "");
 			// count--;
 
 			// create edge between current and previous
 			if (index > 0) {
-				System.out.println("creating edge " + states.get(index - 1) + "->" + state);
 				buildSingleDirectionalLine(stateNodes.get(index - 1), node, tracePane, true, false,
 						actions.get(index - 1));
 				// count = 1;
@@ -82,36 +171,17 @@ public class TraceViewerInSystemController {
 			index++;
 		}
 
-		tracePane.getChildren().addAll(stateNodes);
-
-		// StackPane.setAlignment(stateNodes.get(0), Pos.CENTER_LEFT);
-		// position each node
-
-		index = 0;
-		double posX = 20;
-		double posY = 20;
-		for (StackPane node : stateNodes) {
-
-			node.setLayoutX(posX);
-			node.setLayoutY(posY);
-			
-			// update x axis to be the circle plus some gap
-			posX += NODE_RADIUS * 2 + 100;
-			posY+=NODE_RADIUS*2 + 20;
-
-		}
-
+		return stateNodes;
 	}
 
 	public void setTraceMiner(TraceMiner traceMiner) {
 		miner = traceMiner;
 	}
-	
+
 	public TraceMiner getTraceMiner() {
 		return miner;
 	}
-	
-	
+
 	/**
 	 * Builds a pane consisting of circle with the provided specifications.
 	 *
@@ -130,7 +200,8 @@ public class TraceViewerInSystemController {
 		dot.setStyle("-fx-fill:" + color + ";-fx-stroke-width:2px;-fx-stroke:black;");
 
 		Label txt = new Label(text);
-		txt.setStyle("-fx-font-size:18px;-fx-font-weight:bold;");
+		txt.setStyle(STATE_STYLE);
+		txt.setTooltip(new Tooltip(text));
 		dotPane.getChildren().addAll(dot, txt);
 		dotPane.setPrefSize(paneSize, paneSize);
 		dotPane.setMaxSize(paneSize, paneSize);
@@ -347,8 +418,9 @@ public class TraceViewerInSystemController {
 		// double size = 20;
 		// String actionName = "enterRoom";
 		Label lbl = new Label(actionName);
+		lbl.setStyle(ACTION_NAME_STYLE);
 		StackPane weight = new StackPane();
-		weight.setStyle("-fx-background-color:white;-fx-border-width:1px;");
+		weight.setStyle("-fx-background-color:white");
 		// weight.setPrefSize(size, size);
 		// weight.setMaxSize(size, size);
 		// weight.setMinSize(size, size);

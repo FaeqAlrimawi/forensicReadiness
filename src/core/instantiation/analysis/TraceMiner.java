@@ -58,6 +58,7 @@ import core.brs.parser.BigraphWrapper;
 import core.brs.parser.utilities.JSONTerms;
 import core.utilities.Query;
 import cyberPhysical_Incident.Entity;
+import ie.lero.spare.franalyser.utility.TransitionSystem;
 //import ie.lero.spare.franalyser.utility.FileManipulator;
 //import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.pattern_instantiation.GraphPath;
@@ -191,6 +192,12 @@ public class TraceMiner {
 	// key is trace id, value is path
 	Map<Integer, String> tracesSaved;
 
+	
+	//transition system info
+	private String transitionSystemFilePath;
+	private TransitionSystem transitionSystem;
+	
+	
 	public TraceMiner() {
 
 		tracesActions = new HashMap<String, Integer>();
@@ -3823,6 +3830,31 @@ public class TraceMiner {
 		}
 
 		return bigraphERActions.get(actionName);
+	}
+	
+	public TransitionSystem getTRansitionSystem() {
+		
+		if(transitionSystem == null) {
+			loadTransitionSystem();
+		}
+		
+		return transitionSystem;
+	}
+	
+	public void setTransitionSystemFilePath(String filePath) {
+		transitionSystemFilePath = filePath;
+	}
+	
+	public TransitionSystem loadTransitionSystem() {
+		
+		if(transitionSystemFilePath == null) {
+			return null;
+		}
+		
+		transitionSystem = new TransitionSystem(transitionSystemFilePath);
+		
+		return transitionSystem;
+		
 	}
 	// public static void main(String[] args) {
 	//
