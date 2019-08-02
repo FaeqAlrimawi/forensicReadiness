@@ -5,12 +5,11 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
-
-<AnchorPane fx:id="rootPane" prefHeight="319.0" prefWidth="871.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/10.0.1" fx:controller="controller.instantiation.analysis.ReactController">
+<AnchorPane fx:id="rootPane" prefHeight="319.0" prefWidth="871.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.analysis.ReactController">
    <children>
-      <Label fx:id="lblActionName" layoutX="14.0" layoutY="6.0" prefHeight="22.0" prefWidth="572.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="6.0">
+      <Label fx:id="lblActionName" layoutX="14.0" layoutY="6.0" prefHeight="34.0" prefWidth="843.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="6.0">
          <font>
-            <Font size="14.0" />
+            <Font name="System Bold" size="14.0" />
          </font>
       </Label>
       <HBox fx:id="hboxCodeArea" layoutX="14.0" layoutY="34.0" prefHeight="265.0" prefWidth="843.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="40.0" />

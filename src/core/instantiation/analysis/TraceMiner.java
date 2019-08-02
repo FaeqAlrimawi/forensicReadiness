@@ -190,6 +190,9 @@ public class TraceMiner {
 	//folder where to save traces
 	private String traceFolder;
 	
+	//key is trace id, value is path
+	Map<Integer, String> tracesSaved;
+	
 	public TraceMiner() {
 
 		tracesActions = new HashMap<String, Integer>();
@@ -207,6 +210,8 @@ public class TraceMiner {
 		claSPTraceIDs = new LinkedList<Integer>();
 		customeFilteringTraceIDs = new LinkedList<Integer>();
 
+		tracesSaved = new HashMap<Integer, String>();
+		
 		numberOfStates = 10000;
 
 		PADDING_STATE = -1 * numberOfStates;
@@ -3353,6 +3358,58 @@ public class TraceMiner {
 		return customeFilteringTraceIDs;
 	}
 
+/**
+ * save a trace as a Trace object
+ * @param fileName file path
+ * @param tracesID trace ID
+ * @return
+ */
+	public boolean saveTrace(int traceID, String fileName) {
+		
+		boolean isSaved = false;
+		
+		GraphPath trace = traces.get(traceID);
+		
+		if(trace == null) {
+			return false;
+		}
+		
+		Trace newTrace = new Trace();
+
+		for (String actionName : trace.getTransitionActions()) {
+			ActionWrapper act = getActionWrapper(actionName);
+			newTrace.addAction(act);
+		}
+
+		isSaved = newTrace.save(fileName);
+		
+		if(isSaved) {
+			tracesSaved.put(traceID, fileName);
+		}
+		
+		return isSaved;
+	}
+	
+	/**
+	 * save a trace as a Trace object
+	 * @param tracesID trace ID
+	 * @return
+	 */
+		public String saveTrace(int traceID) {
+
+			String name = File.separator+"trace_" + traceID;
+			String path = traceFolder + name;
+			
+			boolean isSaved = saveTrace(traceID, path);
+			
+			if(isSaved) {
+				return path;
+			}
+			
+			return null;
+
+		}
+		
 	public boolean saveTraces(String fileName, List<Integer> tracesIDs) {
 
 		if (fileName == null || tracesIDs == null) {
@@ -3403,36 +3460,27 @@ public class TraceMiner {
 		return isSaved;
 	}
 
+	/**
+	 * Checks whether the given trace id is saved or not
+	 * @param traceID
+	 * @return
+	 */
+	public boolean isTraceSaved(int traceID) {
+		
+		return tracesSaved.containsKey(traceID);
+		
+	}
+	
+	/**
+	 * checks if traces (as instances in a json file) are loaded or not
+	 * @return true if loaded. Otherwise false
+	 */
 	public boolean areTracesLoaded() {
 
 		return isLoaded;
 	}
 
-	// public List<Map.Entry<String, Long>> findCommonEntities(GraphPath trace,
-	// int Occurrence) {
-	//
-	// // finds the top (with Occurrence) in the given trace
-	// List<GraphPath> traces = new LinkedList<GraphPath>();
-	// traces.add(trace);
-	//
-	// List<String> actionsEntities = convertToEntities(trace, null);
-	//
-	// Map<String, Long> map =
-	// actionsEntities.stream().collect(Collectors.groupingBy(w -> w,
-	// Collectors.counting()));
-	//
-	// List<Map.Entry<String, Long>> result = map.entrySet().stream()
-	// .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).limit(Occurrence)
-	// .collect(Collectors.toList());
-	//
-	// // convertedInstancesFileName = convertUsingActionEntities(traces);
-	//
-	// // generateClustersUsingTextMining();
-	// //
-	//
-	// return result;
-	// }
-
+	
 	/**
 	 * Finds all entities (i.e. Classes/Controls) between all traces. It
 	 * excludes entities given in the excluding list.

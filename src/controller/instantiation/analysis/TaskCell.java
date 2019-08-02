@@ -75,7 +75,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	private GraphPath trace;
 
-	private Trace newTrace;
+//	private Trace newTrace;
 
 	private final URL defaultStatesFolder = getClass().getResource("../../../resources/example/states_1000");
 
@@ -86,7 +86,7 @@ public class TaskCell extends ListCell<GraphPath> {
 	private TraceMiner traceMiner;
 
 	// holds the file path for saved trace
-	private String traceFilePath;
+//	private String traceFilePath;
 
 	private String boldStyle = "-fx-text-fill: black; -fx-font-size:14px; -fx-font-weight:bold;";
 	private String normalStyle = "-fx-text-fill: black; -fx-font-size:14px;";
@@ -192,12 +192,6 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	@FXML
 	void saveTrace() {
-
-		if (newTrace != null) {
-			System.out.println("Already saved in " + traceFilePath);
-			return;
-		}
-
 		if (trace == null) {
 			System.err.println("Trace is NULL");
 			return;
@@ -218,25 +212,14 @@ public class TaskCell extends ListCell<GraphPath> {
 			}
 		}
 
-		// create new trace object and save it
-		newTrace = new Trace();
+		String path = traceMiner.saveTrace(trace.getInstanceID());
 
-		for (String actionName : trace.getTransitionActions()) {
-			ActionWrapper act = traceMiner.getActionWrapper(actionName);
-			newTrace.addAction(act);
-		}
-
-		String name = File.separator+"trace_" + trace.getInstanceID();
-		String path = traceFolder + name;
-		
-		boolean isSaved = newTrace.save(path);
-
-		if (isSaved) {
-			traceFilePath = path;
+//		traceFilePath = path;
+		if(path != null) {
 			lblTraceID.setStyle(boldStyle);
-			System.out.println("trace " + trace.getInstanceID() + " is saved to " + path);
+			System.out.println("trace " + trace.getInstanceID() + " is saved to " + path);	
 		}
-
+		
 	}
 
 	@FXML
@@ -463,6 +446,8 @@ public class TaskCell extends ListCell<GraphPath> {
 		reactViewerStage = null;
 
 		lblTraceID.setText("");
+		lblTraceID.setStyle(normalStyle);
+		
 		hbox.getChildren().clear();
 		vboxMain.getChildren().clear();
 		rootPane.getChildren().clear();
@@ -490,6 +475,10 @@ public class TaskCell extends ListCell<GraphPath> {
 			public void run() {
 				// TODO Auto-generated method stub
 				lblTraceID.setText(trace.getInstanceID() + "");
+				if(traceMiner != null && traceMiner.isTraceSaved(trace.getInstanceID())) {
+					lblTraceID.setStyle(boldStyle);
+				}
+				
 				// hbox.getChildren().clear();
 				Pane pane = new Pane();
 				pane.setPrefWidth(10);

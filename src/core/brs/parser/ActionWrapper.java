@@ -1,5 +1,6 @@
 package core.brs.parser;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,7 +10,12 @@ import java.util.stream.Collectors;
 
 import cyberPhysical_Incident.Entity;
 
-public class ActionWrapper {
+public class ActionWrapper implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5906901715923235705L;
 
 	private String actionName;
 
