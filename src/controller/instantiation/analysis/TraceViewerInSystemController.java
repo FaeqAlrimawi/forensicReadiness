@@ -1,5 +1,7 @@
 package controller.instantiation.analysis;
 
+import java.awt.RenderingHints.Key;
+import java.awt.event.KeyEvent;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,6 +16,8 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -26,6 +30,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -87,6 +92,7 @@ public class TraceViewerInSystemController {
 	private static final Color ADDED_NODES_ARROW_COLOUR = Color.GREY;
 	private static final double NODE_RADIUS = 25;
 	private static final String STATE_STYLE = "-fx-font-size:18px;-fx-font-weight:bold;";
+	private static final String EXTRA_STATE_STYLE = "-fx-font-size:18px;-fx-font-weight:bold; -fx-text-fill:grey";
 	private static final String STATE_PERC_STYLE = "-fx-font-size:10px;-fx-text-fill:red;";
 	private static final String ACTION_NAME_STYLE = "-fx-font-size:13px;";
 	private static final String ACTION_PERC_STYLE = "-fx-font-size:10px;-fx-text-fill:red;";
@@ -108,6 +114,49 @@ public class TraceViewerInSystemController {
 		mainStackPane.getChildren().add(tracePane);
 		mainStackPane.setPadding(new Insets(20));
 
+		//show trace by pressing enter
+		txtFieldCurrentShownTrace.setOnKeyPressed(e->{
+			if(e.getCode() == KeyCode.ENTER) {
+				String strTrace = txtFieldCurrentShownTrace.getText();
+				
+				try{
+					int traceID = Integer.parseInt(strTrace);
+					
+					List<Integer> currentTracesIDs = miner.getCurrentShownTraces();
+					
+					if(currentTracesIDs.contains(traceID)) {
+						GraphPath trace = miner.getTrace(traceID);
+						
+						if(trace!=null) {
+							this.trace = trace;
+							clear(null);
+						}
+					} else {
+						//it's a trace that's not in the filtered
+						//do nothing at the moment.
+						txtFieldCurrentShownTrace.setText(trace.getInstanceID()+"");
+					}
+					
+				}catch(NumberFormatException excp) {
+					//set text back to current trace
+					txtFieldCurrentShownTrace.setText(trace.getInstanceID()+"");
+				}
+			}
+		});
+		
+		//allow only numbers
+		txtFieldCurrentShownTrace.textProperty().addListener(new ChangeListener<String>() {
+
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				// TODO Auto-generated method stub
+				if (!newValue.matches("\\d*")) {
+//					txtFieldCurrentShownTrace.setText(newValue.replaceAll("[^\\d]", ""));
+					txtFieldCurrentShownTrace.setText(trace.getInstanceID()+"");
+		        }
+			}
+		});
+		
 		mapStatePerc = new HashMap<Integer, Label>();
 
 		mapActionPerc = new HashMap<String, List<Label>>();
@@ -203,7 +252,7 @@ public class TraceViewerInSystemController {
 
 		// create nodes for each inbound
 		for (Integer inBoundState : inBoundStates) {
-			StackPane node = getDot(NODE_COLOUR, "" + inBoundState, NODE_RADIUS);
+			StackPane node = getDot(NODE_COLOUR, "" + inBoundState, EXTRA_STATE_STYLE, NODE_RADIUS);
 			node.setId("" + inBoundState);
 			previousNodes.add(node);
 
@@ -283,7 +332,7 @@ public class TraceViewerInSystemController {
 
 		// create nodes for each inbound
 		for (Integer outBoundState : outBoundStates) {
-			StackPane node = getDot(NODE_COLOUR, "" + outBoundState, NODE_RADIUS);
+			StackPane node = getDot(NODE_COLOUR, "" + outBoundState, EXTRA_STATE_STYLE, NODE_RADIUS);
 			node.setId("" + outBoundState);
 			nextNodes.add(node);
 
@@ -533,7 +582,7 @@ public class TraceViewerInSystemController {
 		int index = 0;
 		// int count = 2;
 		for (Integer state : states) {
-			StackPane node = getDot(NODE_COLOUR, "" + state, NODE_RADIUS);
+			StackPane node = getDot(NODE_COLOUR, "" + state, STATE_STYLE, NODE_RADIUS);
 			node.setId(state + "");
 			// count--;
 
@@ -598,7 +647,7 @@ public class TraceViewerInSystemController {
 	 *            Text inside the circle
 	 * @return Draggable pane consisting a circle.
 	 */
-	private StackPane getDot(String color, String text, double radius) {
+	private StackPane getDot(String color, String state, String stateLabelStyle, double radius) {
 		// double radius = 50;
 		double paneSize = 2 * radius;
 		StackPane dotPane = new StackPane();
@@ -607,9 +656,9 @@ public class TraceViewerInSystemController {
 		dot.setStyle("-fx-fill:" + color + ";-fx-stroke-width:2px;-fx-stroke:black;");
 
 		// state label
-		Label lblState = new Label(text);
-		lblState.setStyle(STATE_STYLE);
-		lblState.setTooltip(new Tooltip(text));
+		Label lblState = new Label(state);
+		lblState.setStyle(stateLabelStyle);
+		lblState.setTooltip(new Tooltip(state));
 
 		// open state if it exists
 		lblState.setOnMouseEntered(e -> {
@@ -619,9 +668,9 @@ public class TraceViewerInSystemController {
 		lblState.setOnMouseClicked(e -> {
 			try {
 				if (!isDragging) {
-					int state = Integer.parseInt(text);
+					int stat = Integer.parseInt(state);
 					if (traceCell != null && trace != null) {
-						traceCell.showState(state);
+						traceCell.showState(stat);
 					}
 				}
 
@@ -645,9 +694,9 @@ public class TraceViewerInSystemController {
 		lblStatePerc.setStyle(STATE_PERC_STYLE);
 
 		try {
-			int state = Integer.parseInt(text);
+			int stat = Integer.parseInt(state);
 			// add to the map
-			mapStatePerc.put(state, lblStatePerc);
+			mapStatePerc.put(stat, lblStatePerc);
 		} catch (NumberFormatException excp) {
 			// txt is not state
 			// nothing happens

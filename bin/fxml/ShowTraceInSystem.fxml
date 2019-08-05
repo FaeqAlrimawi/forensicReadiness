@@ -29,7 +29,7 @@
                   <Tooltip text="Previous Trace" />
                </tooltip>
             </Button>
-            <TextField fx:id="txtFieldCurrentShownTrace" alignment="CENTER" editable="false" prefHeight="25.0" prefWidth="84.0" />
+            <TextField fx:id="txtFieldCurrentShownTrace" alignment="CENTER" prefHeight="25.0" prefWidth="84.0" />
             <Button mnemonicParsing="false" onAction="#showNextTrace" text="&gt;">
                <tooltip>
                   <Tooltip text="Next Trace" />
