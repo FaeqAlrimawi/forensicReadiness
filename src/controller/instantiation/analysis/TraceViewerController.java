@@ -1724,6 +1724,8 @@ public class TraceViewerController implements TraceMinerListener {
 		// used for saving
 		shownFitleredTraces = tracesIDs;
 
+		tracesMiner.setCurrentShownTraces(shownFitleredTraces);
+		
 		Map<Integer, GraphPath> traces = tracesMiner.getTraces(tracesIDs);
 
 		ObservableList<GraphPath> tracesObservableList;

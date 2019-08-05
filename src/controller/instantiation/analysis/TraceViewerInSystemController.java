@@ -1,8 +1,11 @@
 package controller.instantiation.analysis;
 
 import java.net.URL;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import core.instantiation.analysis.TraceMiner;
 import ie.lero.spare.franalyser.utility.Digraph;
@@ -16,17 +19,22 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 
 public class TraceViewerInSystemController {
 
@@ -42,14 +50,19 @@ public class TraceViewerInSystemController {
 	@FXML
 	private Button btnLoadTransitionSystem;
 
+	@FXML
+	private TextField txtFieldCurrentShownTrace;
+
+	private Stage currentStage;
+
 	private GraphPath trace;
 
 	// holds the nodes of the trace (and any other added nodes e.g., prev/next)
 	private Pane tracePane;
 
-	//used to distinugish between drag and click
+	// used to distinugish between drag and click
 	private boolean isDragging = false;
-	
+
 	// reference to the task cell that contains the trace
 	private TaskCell traceCell;
 
@@ -67,16 +80,26 @@ public class TraceViewerInSystemController {
 
 	private URL defualtTransitionSystemFilePath = getClass()
 			.getResource("../../../resources/example/transitions_labelled.json");
-	
+
 	private static final String NODE_COLOUR = "white";
 	private static final String DEFAULT_ARROW_COLOUR = "#333333";
 	private static final Color TRACE_ARROW_COLOUR = Color.BLUE;
 	private static final Color ADDED_NODES_ARROW_COLOUR = Color.GREY;
 	private static final double NODE_RADIUS = 25;
 	private static final String STATE_STYLE = "-fx-font-size:18px;-fx-font-weight:bold;";
+	private static final String STATE_PERC_STYLE = "-fx-font-size:10px;-fx-text-fill:red;";
 	private static final String ACTION_NAME_STYLE = "-fx-font-size:13px;";
+	private static final String ACTION_PERC_STYLE = "-fx-font-size:10px;-fx-text-fill:red;";
+
+	// key is state, value is the label for its percentage
+	private Map<Integer, Label> mapStatePerc;
+
+	// key is action, value is the label for its percentage
+	private Map<String, List<Label>> mapActionPerc;
 
 	private static final int previousStateNum = 2;
+
+	private int currentNumberOfShownTraces = 0;
 
 	@FXML
 	public void initialize() {
@@ -84,6 +107,11 @@ public class TraceViewerInSystemController {
 		tracePane = new Pane();
 		mainStackPane.getChildren().add(tracePane);
 		mainStackPane.setPadding(new Insets(20));
+
+		mapStatePerc = new HashMap<Integer, Label>();
+
+		mapActionPerc = new HashMap<String, List<Label>>();
+
 	}
 
 	@FXML
@@ -289,6 +317,137 @@ public class TraceViewerInSystemController {
 		// toggleButtonActivity(btnShowPreviousStates, true);
 	}
 
+	@FXML
+	void showStatesPercentages(ActionEvent e) {
+
+		if (miner == null || trace == null) {
+			return;
+		}
+
+		// miner.getStateOccurrence(traces);
+
+		int numOfTraces = miner.getNumberOfTraces();
+
+		// show states perc
+		for (Entry<Integer, Label> entry : mapStatePerc.entrySet()) {
+			Label lbl = entry.getValue();
+			double perc = miner.getStatePercentage(entry.getKey(), TraceMiner.ALL);
+			int stateOccur = miner.getStateOccurrence(entry.getKey(), TraceMiner.ALL);
+
+			if (perc == -1) {
+				lbl.setText("---");
+				lbl.setTooltip(new Tooltip("State does not occur in any trace"));
+				continue;
+			}
+
+			int precision = 1000;
+			int percn = precision / 100;
+
+			// conver to a DD.D%
+			double percDbl = ((int) (Math.round(perc * precision))) * 1.0 / percn;
+
+			// set label
+			lbl.setText(percDbl + "%");
+			lbl.setTooltip(new Tooltip("Occurrence: " + stateOccur + "/" + numOfTraces));
+		}
+
+		// show actions perc
+		for (Entry<String, List<Label>> entry : mapActionPerc.entrySet()) {
+
+			String actionName = entry.getKey();
+			List<Label> lbls = entry.getValue();
+
+			double perc = miner.getActionOccurrencePercentage(actionName, TraceMiner.ALL);
+			int actionOccur = miner.getActionOccurrence(actionName, TraceMiner.ALL);
+
+			if (perc == -1) {
+				for (Label lbl : lbls) {
+					lbl.setText("---");
+					lbl.setTooltip(new Tooltip("Action does not occur in any trace"));
+				}
+
+				continue;
+			}
+
+			int precision = 1000;
+			int percn = precision / 100;
+
+			// conver to a DD.D%
+			double percDbl = ((int) (Math.round(perc * precision))) * 1.0 / percn;
+
+			// set label
+			for (Label lbl : lbls) {
+				lbl.setText(percDbl + "%");
+				lbl.setTooltip(new Tooltip("Occurrence: " + actionOccur + "/" + numOfTraces));
+			}
+		}
+
+	}
+
+	@FXML
+	void showPreviousTrace(ActionEvent e) {
+
+		if (miner == null) {
+			return;
+		}
+
+		// show previous trace
+
+		// get trace
+		List<Integer> currentShownTraces = miner.getCurrentShownTraces();
+
+		if (currentShownTraces == null) {
+			return;
+		}
+
+		// update value
+		currentNumberOfShownTraces = currentShownTraces.size();
+
+		int currentTraceIndex = currentShownTraces.indexOf(trace.getInstanceID());
+
+		if (currentTraceIndex > 0) {
+			int prevTraceIndex = currentShownTraces.get(currentTraceIndex - 1);
+			GraphPath prevTrace = miner.getTrace(prevTraceIndex);
+
+			if (prevTrace != null) {
+				trace = prevTrace;
+				clear(null);
+			}
+		}
+	}
+
+	@FXML
+	void showNextTrace(ActionEvent e) {
+
+		if (miner == null) {
+			return;
+		}
+
+		// show previous trace
+
+		// get trace
+		List<Integer> currentShownTraces = miner.getCurrentShownTraces();
+
+		if (currentShownTraces == null) {
+			return;
+		}
+
+		// update value
+		currentNumberOfShownTraces = currentShownTraces.size();
+
+		int currentTraceIndex = currentShownTraces.indexOf(trace.getInstanceID());
+
+		if (currentTraceIndex < currentNumberOfShownTraces - 1) {
+			int nextTraceIndex = currentShownTraces.get(currentTraceIndex + 1);
+			GraphPath nextTrace = miner.getTrace(nextTraceIndex);
+
+			if (nextTrace != null) {
+				trace = nextTrace;
+				clear(null);
+			}
+		}
+	}
+
 	protected void setNodes() {
 
 		tracePane.getChildren().removeAll(traceNodes);
@@ -322,7 +481,7 @@ public class TraceViewerInSystemController {
 		tracePane.getChildren().addAll(traceNodes);
 
 		// position each node
-		double posX = 150;
+		double posX = 250;
 		double posY = 150;
 		for (StackPane node : traceNodes) {
 
@@ -334,6 +493,28 @@ public class TraceViewerInSystemController {
 			posY += NODE_RADIUS * 2 + 20;
 
 		}
+
+		Platform.runLater(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				txtFieldCurrentShownTrace.setText(trace.getInstanceID() + "");
+				txtFieldCurrentShownTrace.setTooltip(new Tooltip("Showing trace with ID: " + trace.getInstanceID()));
+
+				// change window title
+				if (currentStage == null) {
+					Window wind = txtFieldCurrentShownTrace.getScene().getWindow();
+
+					if (wind instanceof Stage) {
+						currentStage = (Stage)wind;
+					}
+				} else {
+					currentStage.setTitle("Trace " + trace.getInstanceID());
+				}
+
+			}
+		});
 
 	}
 
@@ -375,9 +556,13 @@ public class TraceViewerInSystemController {
 		miner = traceMiner;
 
 		if (miner != null) {
+			// set transition system button
 			if (miner.getTransitionSystem() != null) {
 				toggleButtonActivity(btnLoadTransitionSystem, true);
 			}
+
+			// set current list of traces
+			currentNumberOfShownTraces = miner.getCurrentShownTraces().size();
 		}
 	}
 
@@ -403,126 +588,6 @@ public class TraceViewerInSystemController {
 	public void setTaskCell(TaskCell traceCell) {
 		this.traceCell = traceCell;
 	}
-
-	// private void loadStateController() {
-	//
-	// FXMLLoader fxmlLoader = new
-	// FXMLLoader(getClass().getResource("../../../fxml/state_viewer.fxml"));
-	// Parent root;
-	// try {
-	// root = (Parent) fxmlLoader.load();
-	// stateViewerStage = new Stage();
-	// stateViewerStage.setScene(new Scene(root));
-	//
-	// // get controller
-	// stateController = fxmlLoader.<StateViewerController>getController();
-	// } catch (IOException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	// }
-	//
-	// protected void showState(int state) {
-	//
-	// if (stateController == null) {
-	// loadStateController();
-	// }
-	//
-	// if (traceMiner != null && traceMiner.getStatesFolder() == null) {
-	// selectStatesFolder();
-	//
-	// }
-	//
-	// // if folder not set return
-	// if (traceMiner == null && traceMiner.getStatesFolder() == null) {
-	// return;
-	// }
-	//
-	// // try to find a state representation as in stateExtension
-	// String statesFolder = traceMiner.getStatesFolder();
-	// String path = null;
-	// File file = null;
-	// String fileExt = null;
-	//
-	// for (String ext : stateExtensions) {
-	// path = statesFolder + File.separator + state + ext;
-	// file = new File(path);
-	//
-	// if (file.exists()) {
-	// fileExt = ext;
-	// break;
-	// }
-	//
-	// }
-	//
-	// // no state found
-	// if (fileExt == null) {
-	// ButtonType res = showDialog("File not found",
-	// "File not found for state [" + state + "]. Would you Like to select
-	// another Folder?",
-	// AlertType.INFORMATION);
-	//
-	// if (res == ButtonType.OK) {
-	// selectStatesFolder();
-	// showState(state);
-	// return;
-	// } else {
-	// return;
-	// }
-	//
-	// // return;
-	// }
-	//
-	// // if state found
-	// switch (fileExt) {
-	// case SVG_EXT:
-	// // show svg
-	// int tries = 10000;
-	// while (path.contains("\\") && tries > 0) {
-	// path = path.replace("\\", "/");
-	// tries--;
-	// }
-	// String svgPath = "file:///" + path;
-	//
-	// stateController.updateSVGPath(svgPath);
-	//
-	// stateViewerStage.setTitle("State " + state);
-	//
-	// if (!stateViewerStage.isShowing()) {
-	// stateViewerStage.show();
-	// }
-	//
-	// break;
-	//
-	// case JSON_EXT:
-	// case TXT_EXT:
-	// // both extensions are shown by opening the file in default editor
-	// try {
-	// Desktop.getDesktop().open(file);
-	// } catch (IOException ex) {
-	// // TODO Auto-generated catch block
-	// ex.printStackTrace();
-	// }
-	// break;
-	// default:
-	// break;
-	// }
-	//
-	// }
-
-	// protected ButtonType showDialog(String title, String msg, AlertType type)
-	// {
-	//
-	// Alert alert = new Alert(type);
-	//
-	// alert.setTitle(title);
-	//
-	// alert.setContentText(msg);
-	//
-	// alert.showAndWait();
-	//
-	// return alert.getResult();
-	// }
 
 	/**
 	 * Builds a pane consisting of circle with the provided specifications.
@@ -553,13 +618,13 @@ public class TraceViewerInSystemController {
 
 		lblState.setOnMouseClicked(e -> {
 			try {
-				if(!isDragging) {
+				if (!isDragging) {
 					int state = Integer.parseInt(text);
 					if (traceCell != null && trace != null) {
 						traceCell.showState(state);
 					}
 				}
-				
+
 			} catch (NumberFormatException excp) {
 				// txt is not state
 				// nothing happens
@@ -567,22 +632,42 @@ public class TraceViewerInSystemController {
 
 		});
 
-		lblState.setOnMouseDragged(e->{
+		lblState.setOnMouseDragged(e -> {
 			isDragging = true;
 		});
-		
-		lblState.setOnMousePressed(e->{
+
+		lblState.setOnMousePressed(e -> {
 			isDragging = false;
 		});
-		
-//		lblState.setOnMouseDragExited(e->{
-//			isDragging = false;
-//		});
-		
-		dotPane.getChildren().addAll(dot, lblState);
+
+		// state percentage
+		Label lblStatePerc = new Label();
+		lblStatePerc.setStyle(STATE_PERC_STYLE);
+
+		try {
+			int state = Integer.parseInt(text);
+			// add to the map
+			mapStatePerc.put(state, lblStatePerc);
+		} catch (NumberFormatException excp) {
+			// txt is not state
+			// nothing happens
+		}
+
+		Pane p = new Pane();
+		p.setPrefSize(3, 45);
+
+		VBox vboxLbl = new VBox();
+
+		vboxLbl.getChildren().add(p);
+		vboxLbl.getChildren().add(lblStatePerc);
+		vboxLbl.getChildren().add(lblState);
+		vboxLbl.setAlignment(Pos.CENTER);
+		dotPane.getChildren().addAll(dot, vboxLbl, lblState);
+
 		dotPane.setPrefSize(paneSize, paneSize);
 		dotPane.setMaxSize(paneSize, paneSize);
 		dotPane.setMinSize(paneSize, paneSize);
+
 		dotPane.setOnMousePressed(e -> {
 			sceneX = e.getSceneX();
 			sceneY = e.getSceneY();
@@ -795,19 +880,36 @@ public class TraceViewerInSystemController {
 
 		Label lblAction = new Label(actionName);
 		lblAction.setStyle(ACTION_NAME_STYLE);
-		lblAction.setOnMouseClicked(e->{
-			if(traceCell!=null && trace !=null) {
+		lblAction.setOnMouseClicked(e -> {
+			if (traceCell != null && trace != null) {
 				traceCell.showReact(actionName);
 			}
 		});
-		
-		lblAction.setOnMouseEntered(e->{
+
+		lblAction.setOnMouseEntered(e -> {
 			lblAction.setCursor(Cursor.HAND);
 		});
-		
+
+		Label lblActionPerc = new Label();
+		lblActionPerc.setStyle(ACTION_PERC_STYLE);
+
+		// add to the map
+		if (mapActionPerc.containsKey(actionName)) {
+			List<Label> lbls = mapActionPerc.get(actionName);
+			lbls.add(lblActionPerc);
+		} else {
+			List<Label> lbls = new LinkedList<Label>();
+			lbls.add(lblActionPerc);
+			mapActionPerc.put(actionName, lbls);
+		}
+
+		VBox vboxAction = new VBox();
+		vboxAction.setAlignment(Pos.CENTER);
+		vboxAction.getChildren().addAll(lblAction, lblActionPerc);
+
 		StackPane weight = new StackPane();
 		weight.setStyle("-fx-background-color:white");
-		weight.getChildren().add(lblAction);
+		weight.getChildren().add(vboxAction);
 		DoubleBinding wgtSqrHalfWidth = weight.widthProperty().divide(2);
 		DoubleBinding wgtSqrHalfHeight = weight.heightProperty().divide(2);
 		DoubleBinding lineXHalfLength = line.endXProperty().subtract(line.startXProperty()).divide(2);

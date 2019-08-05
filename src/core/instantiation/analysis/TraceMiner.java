@@ -99,7 +99,7 @@ public class TraceMiner {
 	// constants for mining operators
 	public final static int SHORTEST = 0;
 	public final static int ALL = 1;
-	// public final static int CLASP = 2;
+	public final static int CLASP = 2;
 
 	String clusterFolder = "clusters generated";
 	String clustersOutputFileName = "clustersGenerated.txt";
@@ -115,11 +115,15 @@ public class TraceMiner {
 	// key:action name, value: id
 	Map<String, Integer> tracesActions;
 
-	// key:action name, value: occurrence
+	// key:action name, value: occurrence (at least one occurrence in a trace)
 	Map<String, Integer> tracesActionsOccurence;
 
-	// key:state number, value: occurrence
+	int totalNumberOfActionOccurrences = 0;
+
+	// key:state number, value: occurrence (occurrence in a trace)
 	Map<Integer, Integer> statesOccurrences;
+
+	int totalNumberOfStateOccurrences = 0;
 
 	// key:action name, value: occurrence
 	Map<String, Integer> shortestActionsOccurence;
@@ -147,6 +151,8 @@ public class TraceMiner {
 	List<Integer> claSPTraceIDs;
 	List<Integer> customeFilteringTraceIDs;
 
+	List<Integer> currentShownTraces;
+	
 	String outputFolder;
 
 	// min action length
@@ -2828,6 +2834,7 @@ public class TraceMiner {
 									Integer state = Integer.parseInt(objState.toString());
 									// compact format
 									states.add(state);
+									// totalNumberOfStateOccurrences++;
 								} else {
 									JSONObject objTransition = (JSONObject) objState;
 									// expanded format
@@ -2842,32 +2849,41 @@ public class TraceMiner {
 									// add state
 									if (!states.contains(srcState)) {
 										states.add(srcState);
+
+										// check state occurence
+										if (statesOccurrences.containsKey(srcState)) {
+											int oldOccurrence = statesOccurrences.get(srcState);
+											oldOccurrence++;
+											statesOccurrences.put(srcState, oldOccurrence);
+										} else { // if not, then create a new
+													// entry
+											statesOccurrences.put(srcState, 1);
+										}
+
+										// totalNumberOfStateOccurrences++;
 									}
 
 									if (!states.contains(tgtState)) {
 										states.add(tgtState);
+
+										// check state occurence
+										if (statesOccurrences.containsKey(tgtState)) {
+											int oldOccurrence = statesOccurrences.get(tgtState);
+											oldOccurrence++;
+											statesOccurrences.put(tgtState, oldOccurrence);
+										} else { // if not, then create a new
+													// entry
+											statesOccurrences.put(tgtState, 1);
+										}
+
+										// totalNumberOfStateOccurrences++;
+
 									}
 
 									// add action
 									actions.add(actionState);
 
-									// check state occurence
-									if (statesOccurrences.containsKey(srcState)) {
-										int oldOccurrence = statesOccurrences.get(srcState);
-										oldOccurrence++;
-										statesOccurrences.put(srcState, oldOccurrence);
-									} else { // if not, then create a new entry
-										statesOccurrences.put(srcState, 1);
-									}
-
-									// check state occurence
-									if (statesOccurrences.containsKey(tgtState)) {
-										int oldOccurrence = statesOccurrences.get(tgtState);
-										oldOccurrence++;
-										statesOccurrences.put(tgtState, oldOccurrence);
-									} else { // if not, then create a new entry
-										statesOccurrences.put(tgtState, 1);
-									}
+									totalNumberOfActionOccurrences++;
 
 									// check action occurence
 									if (tracesActionsOccurence.containsKey(actionState)) {
@@ -3271,6 +3287,17 @@ public class TraceMiner {
 
 		return result;
 	}
+	
+	public GraphPath getTrace(int tracesID) {
+
+			if (traces.containsKey(tracesID)) {
+				return traces.get(tracesID);
+			}
+
+		return null;
+	}
+	
+	
 
 	public List<Integer> getTracesWithActions(String query) {
 
@@ -3869,12 +3896,13 @@ public class TraceMiner {
 		String outputFolder = null;
 
 		if (transitionSystemFilePath != null) {
-			if(transitionSystemFilePath.contains(File.separator)) {
-				outputFolder = transitionSystemFilePath.substring(0, transitionSystemFilePath.lastIndexOf(File.separator));	
+			if (transitionSystemFilePath.contains(File.separator)) {
+				outputFolder = transitionSystemFilePath.substring(0,
+						transitionSystemFilePath.lastIndexOf(File.separator));
 			} else {
 				outputFolder = transitionSystemFilePath.substring(0, transitionSystemFilePath.lastIndexOf("/"));
 			}
-			
+
 		}
 
 		File out = new File(outputFolder);
@@ -3893,23 +3921,196 @@ public class TraceMiner {
 			}
 
 		}
-		
-		if(bigraphERActions == null) {
+
+		if (bigraphERActions == null) {
 			System.err.println("TraceMiner::createNewLabelledTransitionFile: BigraphER file is not set");
-			return null;	
+			return null;
 		}
-		
+
 		Set<String> actions = bigraphERActions.keySet();
-		
+
 		LabelExtractor ext = new LabelExtractor(transitionSystem, outputFolder);
-		
+
 		ext.updateDigraphLabels(actions.toArray(new String[actions.size()]));
 		transitionSystemFilePath = ext.createNewLabelledTransitionFile();
-		
+
 		loadTransitionSystem();
-		
+
 		return transitionSystemFilePath;
 	}
+
+	public double getStatePercentage(int state, int tracesCategory) {
+
+		if (!statesOccurrences.containsKey(state)) {
+			return -1;
+		}
+
+		double perc = 0;
+
+		switch (tracesCategory) {
+		case ALL:
+			// find a state perc in all traces
+
+			int stateOuccr = statesOccurrences.get(state);
+			int totalNumOfTraces = traces.size();
+			if (totalNumOfTraces > 0) {
+				perc = stateOuccr * 1.0 / totalNumOfTraces;
+			} else {
+				perc = 1;
+			}
+
+			break;
+
+		case SHORTEST:
+
+			break;
+		case CLASP:
+
+			break;
+		default:
+			break;
+		}
+
+		return perc;
+	}
+
+	/**
+	 * Returns the action occurrence of the given action name. Occurrence is the
+	 * percentage of the action appearance in the given traces (i.e
+	 * tracesCategory)
+	 * 
+	 * @param actionName
+	 * @param tracesCategory
+	 *            (All, Shortest, Clasp)
+	 * @return percentage
+	 */
+	public double getActionOccurrencePercentage(String actionName, int tracesCategory) {
+
+		if (!tracesActionsOccurence.containsKey(actionName)) {
+			return -1;
+		}
+
+		double perc = 0;
+		
+		switch (tracesCategory) {
+		case ALL:
+			// find a state perc in all traces
+
+			int actionOuccr = tracesActionsOccurence.get(actionName);
+			int totalNumOfTraces = traces.size();
+
+			if (totalNumOfTraces > 0) {
+				perc = actionOuccr * 1.0 / totalNumOfTraces;
+//				System.out.println("total: " + totalNumOfTraces + "\naction occur:" + actionOuccr + "\nperc: " + perc);
+			} else {
+				perc = 1;
+			}
+
+			break;
+
+		case SHORTEST:
+
+			break;
+		case CLASP:
+
+			break;
+		default:
+			break;
+		}
+
+		return perc;
+	}
+
+	public int getStateOccurrence(int state, int tracesCategory) {
+
+		switch (tracesCategory) {
+		case ALL:
+			// find a state perc in all traces
+
+			if (statesOccurrences.containsKey(state)) {
+				return statesOccurrences.get(state);
+			} else {
+				return -1;
+			}
+
+		case SHORTEST:
+
+			break;
+		case CLASP:
+
+			break;
+		default:
+			return -1;
+		}
+
+		return -1;
+	}
+
+	public int getActionOccurrence(String actionName, int tracesCategory) {
+
+		switch (tracesCategory) {
+		case ALL:
+			// find a state perc in all traces
+
+			if (tracesActionsOccurence.containsKey(actionName)) {
+				return tracesActionsOccurence.get(actionName);
+			} else {
+				return -1;
+			}
+
+		case SHORTEST:
+
+			break;
+		case CLASP:
+
+			break;
+		default:
+			return -1;
+		}
+
+		return -1;
+	}
+
+	public int getStateOccurrence(int state) {
+
+		if (statesOccurrences.containsKey(state)) {
+			return statesOccurrences.get(state);
+		} else {
+			return -1;
+		}
+	}
+
+	public int getTotalNumberOfStateOccurrences() {
+
+		totalNumberOfStateOccurrences = 0;
+
+		for (Integer occurs : statesOccurrences.values()) {
+			totalNumberOfStateOccurrences += occurs;
+		}
+
+		return totalNumberOfStateOccurrences;
+	}
+
+	public int getTotalNumberOfActionOccurrences() {
+
+		totalNumberOfActionOccurrences = 0;
+
+		for (Integer occurs : tracesActionsOccurence.values()) {
+			totalNumberOfActionOccurrences += occurs;
+		}
+
+		return totalNumberOfActionOccurrences;
+	}
+
+	public List<Integer> getCurrentShownTraces() {
+		return currentShownTraces;
+	}
+
+	public void setCurrentShownTraces(List<Integer> currentShownTraces) {
+		this.currentShownTraces = currentShownTraces;
+	}
+	
+	
 
 	// public static void main(String[] args) {
 	//
