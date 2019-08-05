@@ -1,7 +1,5 @@
 package controller.instantiation.analysis;
 
-import java.awt.RenderingHints.Key;
-import java.awt.event.KeyEvent;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -58,6 +56,12 @@ public class TraceViewerInSystemController {
 	@FXML
 	private TextField txtFieldCurrentShownTrace;
 
+	@FXML
+	private Button btnSaveTrace;
+	
+	@FXML
+	private Label lblNumberOfShownTraces;
+	
 	private Stage currentStage;
 
 	private GraphPath trace;
@@ -96,14 +100,15 @@ public class TraceViewerInSystemController {
 	private static final String STATE_PERC_STYLE = "-fx-font-size:10px;-fx-text-fill:red;";
 	private static final String ACTION_NAME_STYLE = "-fx-font-size:13px;";
 	private static final String ACTION_PERC_STYLE = "-fx-font-size:10px;-fx-text-fill:red;";
-
+	private static final String NOT_FOUND = "---";
+	
 	// key is state, value is the label for its percentage
 	private Map<Integer, Label> mapStatePerc;
 
 	// key is action, value is the label for its percentage
 	private Map<String, List<Label>> mapActionPerc;
 
-	private static final int previousStateNum = 2;
+//	private static final int previousStateNum = 2;
 
 	private int currentNumberOfShownTraces = 0;
 
@@ -117,29 +122,41 @@ public class TraceViewerInSystemController {
 		//show trace by pressing enter
 		txtFieldCurrentShownTrace.setOnKeyPressed(e->{
 			if(e.getCode() == KeyCode.ENTER) {
-				String strTrace = txtFieldCurrentShownTrace.getText();
+				String strTraceIndex = txtFieldCurrentShownTrace.getText();
 				
 				try{
-					int traceID = Integer.parseInt(strTrace);
+//					String[] items = strTrace.split(" ");
+//					int traceID =trace.getInstanceID();
+//					if(items.length>1) {
+//						traceID = Integer.parseInt(items[0]);
+//					} else {
+//						traceID = Integer.parseInt(strTrace);
+//					}
+//					int traceID = Integer.parseInt(strTrace);
+					
+					int traceIndex = Integer.parseInt(strTraceIndex);
 					
 					List<Integer> currentTracesIDs = miner.getCurrentShownTraces();
 					
-					if(currentTracesIDs.contains(traceID)) {
+					if(traceIndex > 0 && traceIndex <= currentTracesIDs.size()) {
+						int traceID = currentTracesIDs.get(traceIndex-1);
 						GraphPath trace = miner.getTrace(traceID);
 						
 						if(trace!=null) {
 							this.trace = trace;
-							clear(null);
+							reset(null);
 						}
 					} else {
 						//it's a trace that's not in the filtered
 						//do nothing at the moment.
-						txtFieldCurrentShownTrace.setText(trace.getInstanceID()+"");
+						traceIndex = miner.getCurrentShownTraces().indexOf(trace.getInstanceID())+1;
+						txtFieldCurrentShownTrace.setText(traceIndex+"");
 					}
 					
 				}catch(NumberFormatException excp) {
 					//set text back to current trace
-					txtFieldCurrentShownTrace.setText(trace.getInstanceID()+"");
+					int traceIndex = miner.getCurrentShownTraces().indexOf(trace.getInstanceID())+1;
+					txtFieldCurrentShownTrace.setText(traceIndex + "");
 				}
 			}
 		});
@@ -152,7 +169,8 @@ public class TraceViewerInSystemController {
 				// TODO Auto-generated method stub
 				if (!newValue.matches("\\d*")) {
 //					txtFieldCurrentShownTrace.setText(newValue.replaceAll("[^\\d]", ""));
-					txtFieldCurrentShownTrace.setText(trace.getInstanceID()+"");
+					int traceIndex = miner.getCurrentShownTraces().indexOf(trace.getInstanceID())+1;
+					txtFieldCurrentShownTrace.setText(traceIndex + "/"+currentNumberOfShownTraces);
 		        }
 			}
 		});
@@ -187,7 +205,7 @@ public class TraceViewerInSystemController {
 	}
 
 	@FXML
-	void clear(ActionEvent e) {
+	void reset(ActionEvent e) {
 
 		if (previousNodes != null) {
 			previousNodes.clear();
@@ -201,6 +219,16 @@ public class TraceViewerInSystemController {
 
 		tracePane.getChildren().clear();
 
+		//check if saved
+		//used for prev/next trace showing
+		if(trace!= null && miner!= null) {
+			boolean isSaved = miner.isTraceSaved(trace.getInstanceID());
+			if(isSaved) {
+				toggleButtonActivity(btnSaveTrace, true);
+			} else{
+				toggleButtonActivity(btnSaveTrace, false);
+			}
+		}
 		showTrace(trace);
 	}
 
@@ -261,10 +289,6 @@ public class TraceViewerInSystemController {
 			buildSingleDirectionalLine(node, initNode, tracePane, true, false, ADDED_NODES_ARROW_COLOUR, actionName);
 		}
 
-		// add to the pane
-		// tracePane.getChildren().removeAll(traceNodes);
-		// tracePane.getChildren().addAll(traceNodes);
-		// tracePane.getChildren().addAll(previousNodes);
 		setNodes();
 		// position new nodes
 		double posX = initNode.getLayoutX() - (NODE_RADIUS * 2 + 30);
@@ -343,10 +367,7 @@ public class TraceViewerInSystemController {
 
 		// add to the pane
 		setNodes();
-		// tracePane.getChildren().removeAll(traceNodes);
-		// tracePane.getChildren().addAll(traceNodes);
-		// tracePane.getChildren().addAll(previousNodes);
-
+		
 		// position new nodes
 		int xOffest = 30;
 		double posX = finalNode.getLayoutX() + (NODE_RADIUS * 2 + xOffest);
@@ -384,7 +405,7 @@ public class TraceViewerInSystemController {
 			int stateOccur = miner.getStateOccurrence(entry.getKey(), TraceMiner.ALL);
 
 			if (perc == -1) {
-				lbl.setText("---");
+				lbl.setText(NOT_FOUND);
 				lbl.setTooltip(new Tooltip("State does not occur in any trace"));
 				continue;
 			}
@@ -411,7 +432,7 @@ public class TraceViewerInSystemController {
 
 			if (perc == -1) {
 				for (Label lbl : lbls) {
-					lbl.setText("---");
+					lbl.setText(NOT_FOUND);
 					lbl.setTooltip(new Tooltip("Action does not occur in any trace"));
 				}
 
@@ -460,7 +481,7 @@ public class TraceViewerInSystemController {
 
 			if (prevTrace != null) {
 				trace = prevTrace;
-				clear(null);
+				reset(null);
 			}
 		}
 	}
@@ -492,11 +513,26 @@ public class TraceViewerInSystemController {
 
 			if (nextTrace != null) {
 				trace = nextTrace;
-				clear(null);
+				reset(null);
 			}
 		}
 	}
 
+	@FXML
+	void saveTrace(ActionEvent e) {
+		
+		if(traceCell == null) {
+			return;
+		}
+		
+		String path = traceCell.saveTrace(trace);
+		
+		if(path != null) {
+			toggleButtonActivity(btnSaveTrace, true);
+		}
+		
+	}
+	
 	protected void setNodes() {
 
 		tracePane.getChildren().removeAll(traceNodes);
@@ -548,7 +584,8 @@ public class TraceViewerInSystemController {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				txtFieldCurrentShownTrace.setText(trace.getInstanceID() + "");
+				int traceIndex = miner.getCurrentShownTraces().indexOf(trace.getInstanceID())+1;
+				txtFieldCurrentShownTrace.setText(traceIndex+"");
 				txtFieldCurrentShownTrace.setTooltip(new Tooltip("Showing trace with ID: " + trace.getInstanceID()));
 
 				// change window title
@@ -601,9 +638,10 @@ public class TraceViewerInSystemController {
 		return stateNodes;
 	}
 
-	public void setTraceMiner(TraceMiner traceMiner) {
+	public void setTraceMiner(TraceMiner traceMiner, GraphPath trace) {
 		miner = traceMiner;
-
+		this.trace = trace;
+		
 		if (miner != null) {
 			// set transition system button
 			if (miner.getTransitionSystem() != null) {
@@ -612,6 +650,18 @@ public class TraceViewerInSystemController {
 
 			// set current list of traces
 			currentNumberOfShownTraces = miner.getCurrentShownTraces().size();
+			
+			lblNumberOfShownTraces.setText("/"+currentNumberOfShownTraces);
+			
+			//set save button
+			if(trace!=null) {
+				boolean isSaved = miner.isTraceSaved(trace.getInstanceID());
+				
+				if(isSaved) {
+				toggleButtonActivity(btnSaveTrace, true);
+				}
+			}
+			
 		}
 	}
 

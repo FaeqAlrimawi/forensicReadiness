@@ -112,10 +112,10 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	// options
 	private static final String DETAILS = "Show Details";
-	private static final String SHOW_TRACE = "Show Trace";
+	private static final String SHOW_ENTITIES = "Show Entities";
 	private static final String SAVE = "Save";
 
-	private static final String[] OPTIONS = new String[] { DETAILS, SHOW_TRACE, SAVE };
+	private static final String[] OPTIONS = new String[] { DETAILS, SHOW_ENTITIES, SAVE };
 
 	public TaskCell(TraceMiner miner) {
 		this();
@@ -218,7 +218,8 @@ public class TaskCell extends ListCell<GraphPath> {
 			traceViewerController = fxmlLoader.<TraceViewerInSystemController>getController();
 
 			if (traceViewerController != null) {
-				traceViewerController.setTraceMiner(traceMiner);
+				
+				traceViewerController.setTraceMiner(traceMiner, trace);
 				traceViewerController.setTaskCell(this);
 			}
 
@@ -249,14 +250,21 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		switch (selectedOption) {
 		case DETAILS:
-			showDetails();
+			showTrace();
 			break;
 		case SAVE:
-			saveTrace();
+			String path = saveTrace(trace);
+			// traceFilePath = path;
+			if (path != null) {
+				lblTraceID.setStyle(boldStyle);
+
+			}
+
 			break;
 
-		case SHOW_TRACE:
-			showTrace();
+		case SHOW_ENTITIES:
+			showDetails();
+			
 		default:
 			break;
 		}
@@ -285,15 +293,15 @@ public class TaskCell extends ListCell<GraphPath> {
 	}
 
 	// @FXML
-	void saveTrace() {
+	String saveTrace(GraphPath trace) {
 		if (trace == null) {
 			System.err.println("Trace is NULL");
-			return;
+			return null;
 		}
 
 		if (traceMiner == null) {
 			System.err.println("Trace Miner is NULL");
-			return;
+			return null;
 		}
 
 		// check if trace folder is selected
@@ -302,7 +310,7 @@ public class TaskCell extends ListCell<GraphPath> {
 			selectTraceFolder();
 			traceFolder = traceMiner.getTraceFolder();
 			if (traceFolder == null || traceFolder.isEmpty()) {
-				return;
+				return null;
 			}
 		} else {
 			System.out.println(traceFolder);
@@ -310,12 +318,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		String path = traceMiner.saveTrace(trace.getInstanceID());
 
-		// traceFilePath = path;
-		if (path != null) {
-			lblTraceID.setStyle(boldStyle);
-			System.out.println("trace " + trace.getInstanceID() + " is saved to " + path);
-		}
-
+		return path;
 	}
 
 	// @FXML
@@ -724,7 +727,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		// no state found
 		if (fileExt == null) {
-			ButtonType res = showDialog("File not found", "State [" + state +"] file is missing",
+			ButtonType res = showDialog("File not found", "State [" + state + "] file is missing",
 					"File not found for state [" + state + "]. Would you Like to select another Folder?",
 					AlertType.CONFIRMATION);
 
