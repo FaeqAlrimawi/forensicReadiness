@@ -6,9 +6,7 @@ import java.util.List;
 
 import core.instantiation.analysis.TraceMiner;
 import ie.lero.spare.franalyser.utility.Digraph;
-import ie.lero.spare.franalyser.utility.TransitionSystem;
 import ie.lero.spare.pattern_instantiation.GraphPath;
-import ie.lero.spare.pattern_instantiation.LabelExtractor;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -18,6 +16,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -39,31 +38,36 @@ public class TraceViewerInSystemController {
 
 	@FXML
 	private Button btnShowPreviousStates;
-	
+
 	@FXML
 	private Button btnLoadTransitionSystem;
-	
+
 	private GraphPath trace;
 
+	// holds the nodes of the trace (and any other added nodes e.g., prev/next)
 	private Pane tracePane;
 
-	//nodes of the trace
+	//used to distinugish between drag and click
+	private boolean isDragging = false;
+	
+	// reference to the task cell that contains the trace
+	private TaskCell traceCell;
+
+	// nodes of the trace
 	private List<StackPane> traceNodes;
-	
-	//nodes of previous states (previous to the initial)
+
+	// nodes of previous states (previous to the initial)
 	private List<StackPane> previousNodes;
-	//nodes of next states (next to the final state)
+	// nodes of next states (next to the final state)
 	private List<StackPane> nextNodes;
-	
+
 	private double sceneX, sceneY, layoutX, layoutY;
 
 	private TraceMiner miner;
 
-	private URL defualtTransitionSystemFilePath = getClass().getResource("../../../resources/example/transitions_labelled.json");
-//	private URL defualtTransitionSystemFolder = getClass().getResource("../../../resources/example");
-
-//	private TransitionSystem tranSys;
-
+	private URL defualtTransitionSystemFilePath = getClass()
+			.getResource("../../../resources/example/transitions_labelled.json");
+	
 	private static final String NODE_COLOUR = "white";
 	private static final String DEFAULT_ARROW_COLOUR = "#333333";
 	private static final Color TRACE_ARROW_COLOUR = Color.BLUE;
@@ -100,36 +104,36 @@ public class TraceViewerInSystemController {
 		}
 
 		progressIndicator.setVisible(false);
-		
+
 		toggleButtonActivity(btnLoadTransitionSystem, true);
 
 	}
 
 	@FXML
-	void clear(ActionEvent e ) {
-	
-		if(previousNodes!=null) {
+	void clear(ActionEvent e) {
+
+		if (previousNodes != null) {
 			previousNodes.clear();
 			previousNodes = null;
 		}
-		
-		if(nextNodes!=null) {
+
+		if (nextNodes != null) {
 			nextNodes.clear();
 			nextNodes = null;
 		}
-		
+
 		tracePane.getChildren().clear();
-		
+
 		showTrace(trace);
 	}
-	
+
 	@FXML
 	void showPreviousStates(ActionEvent e) {
 
-		if(miner == null) {
+		if (miner == null) {
 			System.err.println("Trace miner is NULL");
 		}
-		
+
 		// shows previous states in the system
 		if (miner.getTransitionSystem() == null) {
 			loadTransitionSystem(null);
@@ -150,26 +154,23 @@ public class TraceViewerInSystemController {
 			return;
 		}
 
-		
-
 		// get node
 		StackPane initNode = (StackPane) traceNodes.get(0);
 
 		int initialState = Integer.parseInt(initNode.getId());
-		
+
 		Digraph<Integer> digraph = miner.getTransitionSystem().getDigraph();
 
-//		System.out.println(digraph);
+		// System.out.println(digraph);
 		// get in bound states (going to initial state)
 		List<Integer> inBoundStates = digraph.inboundNeighbors(initialState);
 
-		
-		if(previousNodes!= null) {
-			//remove from the curren pane
-//			tracePane.getChildren().removeAll(previousNodes);
+		if (previousNodes != null) {
+			// remove from the curren pane
+			// tracePane.getChildren().removeAll(previousNodes);
 			return;
 		}
-		
+
 		previousNodes = new LinkedList<StackPane>();
 
 		// create nodes for each inbound
@@ -179,40 +180,40 @@ public class TraceViewerInSystemController {
 			previousNodes.add(node);
 
 			String actionName = digraph.getLabel(inBoundState, initialState);
-			
-			buildSingleDirectionalLine(node, initNode, tracePane, true, false, ADDED_NODES_ARROW_COLOUR, actionName );
+
+			buildSingleDirectionalLine(node, initNode, tracePane, true, false, ADDED_NODES_ARROW_COLOUR, actionName);
 		}
 
 		// add to the pane
-//		tracePane.getChildren().removeAll(traceNodes);
-//		tracePane.getChildren().addAll(traceNodes);
-//		tracePane.getChildren().addAll(previousNodes);
+		// tracePane.getChildren().removeAll(traceNodes);
+		// tracePane.getChildren().addAll(traceNodes);
+		// tracePane.getChildren().addAll(previousNodes);
 		setNodes();
 		// position new nodes
 		double posX = initNode.getLayoutX() - (NODE_RADIUS * 2 + 30);
-		int yOffest = (int) (NODE_RADIUS*2);
-		double posY = initNode.getLayoutY()-yOffest*2;
+		int yOffest = (int) (NODE_RADIUS * 2);
+		double posY = initNode.getLayoutY() - yOffest * 2;
 
-		for(StackPane node : previousNodes) {
+		for (StackPane node : previousNodes) {
 			node.setLayoutX(posX);
 			node.setLayoutY(posY);
-			
-			//same place
-//			posX
-			
-			posY+=yOffest*2;
+
+			// same place
+			// posX
+
+			posY += yOffest * 2;
 		}
-		
-//		toggleButtonActivity(btnShowPreviousStates, true);
+
+		// toggleButtonActivity(btnShowPreviousStates, true);
 	}
 
 	@FXML
 	void showNextStates(ActionEvent e) {
 
-		if(miner == null) {
+		if (miner == null) {
 			System.err.println("Trace miner is NULL");
 		}
-		
+
 		// shows previous states in the system
 		if (miner.getTransitionSystem() == null) {
 			loadTransitionSystem(null);
@@ -234,23 +235,22 @@ public class TraceViewerInSystemController {
 		}
 
 		// get node
-		StackPane finalNode = (StackPane) traceNodes.get(traceNodes.size()-1);
+		StackPane finalNode = (StackPane) traceNodes.get(traceNodes.size() - 1);
 
 		int finalState = Integer.parseInt(finalNode.getId());
-		
+
 		Digraph<Integer> digraph = miner.getTransitionSystem().getDigraph();
 
-//		System.out.println(digraph);
+		// System.out.println(digraph);
 		// get in bound states (going to initial state)
 		List<Integer> outBoundStates = digraph.outboundNeighbors(finalState);
 
-		
-		if(nextNodes!= null) {
-			//remove from the curren pane
-//			tracePane.getChildren().removeAll(previousNodes);
+		if (nextNodes != null) {
+			// remove from the curren pane
+			// tracePane.getChildren().removeAll(previousNodes);
 			return;
 		}
-		
+
 		nextNodes = new LinkedList<StackPane>();
 
 		// create nodes for each inbound
@@ -260,53 +260,52 @@ public class TraceViewerInSystemController {
 			nextNodes.add(node);
 
 			String actionName = digraph.getLabel(finalState, outBoundState);
-			
-			buildSingleDirectionalLine(finalNode, node, tracePane, true, false, ADDED_NODES_ARROW_COLOUR, actionName );
+
+			buildSingleDirectionalLine(finalNode, node, tracePane, true, false, ADDED_NODES_ARROW_COLOUR, actionName);
 		}
 
 		// add to the pane
 		setNodes();
-//		tracePane.getChildren().removeAll(traceNodes);
-//		tracePane.getChildren().addAll(traceNodes);
-//		tracePane.getChildren().addAll(previousNodes);
+		// tracePane.getChildren().removeAll(traceNodes);
+		// tracePane.getChildren().addAll(traceNodes);
+		// tracePane.getChildren().addAll(previousNodes);
 
 		// position new nodes
 		int xOffest = 30;
 		double posX = finalNode.getLayoutX() + (NODE_RADIUS * 2 + xOffest);
-		int yOffest = (int) (NODE_RADIUS*2);
-		double posY = finalNode.getLayoutY()+yOffest*2;
+		int yOffest = (int) (NODE_RADIUS * 2);
+		double posY = finalNode.getLayoutY() + yOffest * 2;
 
-		for(StackPane node : nextNodes) {
+		for (StackPane node : nextNodes) {
 			node.setLayoutX(posX);
 			node.setLayoutY(posY);
-			
-			//same place
-//			posX+=xOffest;
-			
-			posY+=yOffest;
+
+			// same place
+			// posX+=xOffest;
+
+			posY += yOffest;
 		}
-		
-//		toggleButtonActivity(btnShowPreviousStates, true);
+
+		// toggleButtonActivity(btnShowPreviousStates, true);
 	}
 
-	
 	protected void setNodes() {
-		
+
 		tracePane.getChildren().removeAll(traceNodes);
 		tracePane.getChildren().addAll(traceNodes);
-		
-		if(previousNodes!= null) {
+
+		if (previousNodes != null) {
 			tracePane.getChildren().removeAll(previousNodes);
 			tracePane.getChildren().addAll(previousNodes);
 		}
-		
-		if(nextNodes!= null) {
+
+		if (nextNodes != null) {
 			tracePane.getChildren().removeAll(nextNodes);
 			tracePane.getChildren().addAll(nextNodes);
 		}
-		
-		
+
 	}
+
 	public void showTrace(GraphPath trace) {
 
 		if (trace == null) {
@@ -374,22 +373,21 @@ public class TraceViewerInSystemController {
 
 	public void setTraceMiner(TraceMiner traceMiner) {
 		miner = traceMiner;
-		
-		if(miner != null) {
-			if(miner.getTransitionSystem() != null) {
+
+		if (miner != null) {
+			if (miner.getTransitionSystem() != null) {
 				toggleButtonActivity(btnLoadTransitionSystem, true);
 			}
 		}
 	}
 
-	
 	protected void toggleButtonActivity(Button btn, boolean isDisabled) {
-		if(btn == null) {
+		if (btn == null) {
 			return;
 		}
-		
+
 		Platform.runLater(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
@@ -397,9 +395,134 @@ public class TraceViewerInSystemController {
 			}
 		});
 	}
+
 	public TraceMiner getTraceMiner() {
 		return miner;
 	}
+
+	public void setTaskCell(TaskCell traceCell) {
+		this.traceCell = traceCell;
+	}
+
+	// private void loadStateController() {
+	//
+	// FXMLLoader fxmlLoader = new
+	// FXMLLoader(getClass().getResource("../../../fxml/state_viewer.fxml"));
+	// Parent root;
+	// try {
+	// root = (Parent) fxmlLoader.load();
+	// stateViewerStage = new Stage();
+	// stateViewerStage.setScene(new Scene(root));
+	//
+	// // get controller
+	// stateController = fxmlLoader.<StateViewerController>getController();
+	// } catch (IOException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// }
+	// }
+	//
+	// protected void showState(int state) {
+	//
+	// if (stateController == null) {
+	// loadStateController();
+	// }
+	//
+	// if (traceMiner != null && traceMiner.getStatesFolder() == null) {
+	// selectStatesFolder();
+	//
+	// }
+	//
+	// // if folder not set return
+	// if (traceMiner == null && traceMiner.getStatesFolder() == null) {
+	// return;
+	// }
+	//
+	// // try to find a state representation as in stateExtension
+	// String statesFolder = traceMiner.getStatesFolder();
+	// String path = null;
+	// File file = null;
+	// String fileExt = null;
+	//
+	// for (String ext : stateExtensions) {
+	// path = statesFolder + File.separator + state + ext;
+	// file = new File(path);
+	//
+	// if (file.exists()) {
+	// fileExt = ext;
+	// break;
+	// }
+	//
+	// }
+	//
+	// // no state found
+	// if (fileExt == null) {
+	// ButtonType res = showDialog("File not found",
+	// "File not found for state [" + state + "]. Would you Like to select
+	// another Folder?",
+	// AlertType.INFORMATION);
+	//
+	// if (res == ButtonType.OK) {
+	// selectStatesFolder();
+	// showState(state);
+	// return;
+	// } else {
+	// return;
+	// }
+	//
+	// // return;
+	// }
+	//
+	// // if state found
+	// switch (fileExt) {
+	// case SVG_EXT:
+	// // show svg
+	// int tries = 10000;
+	// while (path.contains("\\") && tries > 0) {
+	// path = path.replace("\\", "/");
+	// tries--;
+	// }
+	// String svgPath = "file:///" + path;
+	//
+	// stateController.updateSVGPath(svgPath);
+	//
+	// stateViewerStage.setTitle("State " + state);
+	//
+	// if (!stateViewerStage.isShowing()) {
+	// stateViewerStage.show();
+	// }
+	//
+	// break;
+	//
+	// case JSON_EXT:
+	// case TXT_EXT:
+	// // both extensions are shown by opening the file in default editor
+	// try {
+	// Desktop.getDesktop().open(file);
+	// } catch (IOException ex) {
+	// // TODO Auto-generated catch block
+	// ex.printStackTrace();
+	// }
+	// break;
+	// default:
+	// break;
+	// }
+	//
+	// }
+
+	// protected ButtonType showDialog(String title, String msg, AlertType type)
+	// {
+	//
+	// Alert alert = new Alert(type);
+	//
+	// alert.setTitle(title);
+	//
+	// alert.setContentText(msg);
+	//
+	// alert.showAndWait();
+	//
+	// return alert.getResult();
+	// }
 
 	/**
 	 * Builds a pane consisting of circle with the provided specifications.
@@ -418,11 +541,45 @@ public class TraceViewerInSystemController {
 		dot.setRadius(radius);
 		dot.setStyle("-fx-fill:" + color + ";-fx-stroke-width:2px;-fx-stroke:black;");
 
-		Label txt = new Label(text);
-		txt.setStyle(STATE_STYLE);
-		txt.setTooltip(new Tooltip(text));
+		// state label
+		Label lblState = new Label(text);
+		lblState.setStyle(STATE_STYLE);
+		lblState.setTooltip(new Tooltip(text));
+
+		// open state if it exists
+		lblState.setOnMouseEntered(e -> {
+			lblState.setCursor(Cursor.HAND);
+		});
+
+		lblState.setOnMouseClicked(e -> {
+			try {
+				if(!isDragging) {
+					int state = Integer.parseInt(text);
+					if (traceCell != null && trace != null) {
+						traceCell.showState(state);
+					}
+				}
+				
+			} catch (NumberFormatException excp) {
+				// txt is not state
+				// nothing happens
+			}
+
+		});
+
+		lblState.setOnMouseDragged(e->{
+			isDragging = true;
+		});
 		
-		dotPane.getChildren().addAll(dot, txt);
+		lblState.setOnMousePressed(e->{
+			isDragging = false;
+		});
+		
+//		lblState.setOnMouseDragExited(e->{
+//			isDragging = false;
+//		});
+		
+		dotPane.getChildren().addAll(dot, lblState);
 		dotPane.setPrefSize(paneSize, paneSize);
 		dotPane.setMaxSize(paneSize, paneSize);
 		dotPane.setMinSize(paneSize, paneSize);
@@ -557,8 +714,8 @@ public class TraceViewerInSystemController {
 	private StackPane getArrow(boolean toLineEnd, Line line, StackPane startDot, StackPane endDot) {
 		double size = 12; // Arrow size
 		StackPane arrow = new StackPane();
-		arrow.setStyle(
-				"-fx-background-color:"+DEFAULT_ARROW_COLOUR+";-fx-border-width:1px;-fx-border-color:black;-fx-shape: \"M0,-4L4,0L0,4Z\"");//
+		arrow.setStyle("-fx-background-color:" + DEFAULT_ARROW_COLOUR
+				+ ";-fx-border-width:1px;-fx-border-color:black;-fx-shape: \"M0,-4L4,0L0,4Z\"");//
 		arrow.setPrefSize(size, size);
 		arrow.setMaxSize(size, size);
 		arrow.setMinSize(size, size);
@@ -635,16 +792,22 @@ public class TraceViewerInSystemController {
 	 * @return Pane located at the center of the provided line.
 	 */
 	private StackPane getWeight(Line line, String actionName) {
-		// double size = 20;
-		// String actionName = "enterRoom";
-		Label lbl = new Label(actionName);
-		lbl.setStyle(ACTION_NAME_STYLE);
+
+		Label lblAction = new Label(actionName);
+		lblAction.setStyle(ACTION_NAME_STYLE);
+		lblAction.setOnMouseClicked(e->{
+			if(traceCell!=null && trace !=null) {
+				traceCell.showReact(actionName);
+			}
+		});
+		
+		lblAction.setOnMouseEntered(e->{
+			lblAction.setCursor(Cursor.HAND);
+		});
+		
 		StackPane weight = new StackPane();
 		weight.setStyle("-fx-background-color:white");
-		// weight.setPrefSize(size, size);
-		// weight.setMaxSize(size, size);
-		// weight.setMinSize(size, size);
-		weight.getChildren().add(lbl);
+		weight.getChildren().add(lblAction);
 		DoubleBinding wgtSqrHalfWidth = weight.widthProperty().divide(2);
 		DoubleBinding wgtSqrHalfHeight = weight.heightProperty().divide(2);
 		DoubleBinding lineXHalfLength = line.endXProperty().subtract(line.startXProperty()).divide(2);

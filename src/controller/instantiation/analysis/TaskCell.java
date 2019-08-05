@@ -68,24 +68,22 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	// for viewing a state
 	private StateViewerController stateController;
-	
+
 	private ReactController reactController;
-	
-	//for viewing a trace
+
+	// for viewing a trace
 	private TraceViewerInSystemController traceViewerController;
-	
-	//shows state as svg
+
+	// shows state as svg
 	private Stage stateViewerStage;
-	
-	//shows reaction rules in editor
+
+	// shows reaction rules in editor
 	private Stage reactViewerStage;
-	
-	//shows trace in system viewer sa graphical nodes
+
+	// shows trace in system viewer sa graphical nodes
 	private Stage traceViewerStage;
 
 	AnchorPane traceDetailsMainPane;
-
-
 
 	private GraphPath trace;
 
@@ -116,7 +114,6 @@ public class TaskCell extends ListCell<GraphPath> {
 	private static final String DETAILS = "Show Details";
 	private static final String SHOW_TRACE = "Show Trace";
 	private static final String SAVE = "Save";
-	
 
 	private static final String[] OPTIONS = new String[] { DETAILS, SHOW_TRACE, SAVE };
 
@@ -207,7 +204,7 @@ public class TaskCell extends ListCell<GraphPath> {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void loadTraceViewerController() {
 
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../../../fxml/ShowTraceInSystem.fxml"));
@@ -222,6 +219,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 			if (traceViewerController != null) {
 				traceViewerController.setTraceMiner(traceMiner);
+				traceViewerController.setTaskCell(this);
 			}
 
 		} catch (IOException e) {
@@ -256,7 +254,7 @@ public class TaskCell extends ListCell<GraphPath> {
 		case SAVE:
 			saveTrace();
 			break;
-			
+
 		case SHOW_TRACE:
 			showTrace();
 		default:
@@ -268,24 +266,24 @@ public class TaskCell extends ListCell<GraphPath> {
 	 * show the trace in the traceviewer in system transition
 	 */
 	void showTrace() {
-		
-		if(traceViewerController == null) {
+
+		if (traceViewerController == null) {
 			loadTraceViewerController();
 		}
-		
-		if(traceViewerController == null) {
+
+		if (traceViewerController == null) {
 			return;
 		}
-		
+
 		traceViewerController.showTrace(trace);
-		
+
 		traceViewerStage.setTitle("Trace " + trace.getInstanceID());
-		
-		if(!traceViewerStage.isShowing()) {
+
+		if (!traceViewerStage.isShowing()) {
 			traceViewerStage.show();
 		}
 	}
-	
+
 	// @FXML
 	void saveTrace() {
 		if (trace == null) {
@@ -391,8 +389,8 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		// if first time
 		if (traceMiner != null && !traceMiner.isBigraphERFileSet()) {
-			ButtonType result = showDialog("Select BigraphER File", "Please select BigraphER file (*.big)",
-					AlertType.CONFIRMATION);
+			ButtonType result = showDialog("Select BigraphER File", "BigraphER file needed",
+					"Please select BigraphER file (*.big)", AlertType.CONFIRMATION);
 
 			if (result == ButtonType.CANCEL) {
 				return;
@@ -435,7 +433,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		if (traceMiner.getStatesFolder() == null) {
 
-			ButtonType result = showDialog("Select States Folder",
+			ButtonType result = showDialog("Select States Folder", "States Folder is needed",
 					"Please select a Folder which contains the states representations (e.g., *.svg, *.json, *.txt)",
 					AlertType.CONFIRMATION);
 
@@ -689,17 +687,21 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	protected void showState(int state) {
 
+		if (traceMiner == null) {
+			return;
+		}
+
 		if (stateController == null) {
 			loadStateController();
 		}
 
-		if (traceMiner != null && traceMiner.getStatesFolder() == null) {
+		if (traceMiner.getStatesFolder() == null) {
 			selectStatesFolder();
 
 		}
 
 		// if folder not set return
-		if (traceMiner == null && traceMiner.getStatesFolder() == null) {
+		if (traceMiner.getStatesFolder() == null) {
 			return;
 		}
 
@@ -722,17 +724,19 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		// no state found
 		if (fileExt == null) {
-			ButtonType res = showDialog("File not found", "File not found for state [" + state + "]. Would you Like to select another Folder?", AlertType.INFORMATION);
-			
-			if(res == ButtonType.OK) {
-				selectStatesFolder();	
+			ButtonType res = showDialog("File not found", "State [" + state +"] file is missing",
+					"File not found for state [" + state + "]. Would you Like to select another Folder?",
+					AlertType.CONFIRMATION);
+
+			if (res == ButtonType.OK) {
+				selectStatesFolder();
 				showState(state);
 				return;
 			} else {
 				return;
 			}
-			
-//			return;
+
+			// return;
 		}
 
 		// if state found
@@ -804,11 +808,13 @@ public class TaskCell extends ListCell<GraphPath> {
 		}
 	}
 
-	protected ButtonType showDialog(String title, String msg, AlertType type) {
+	protected ButtonType showDialog(String title, String headerMsg, String msg, AlertType type) {
 
 		Alert alert = new Alert(type);
 
 		alert.setTitle(title);
+
+		alert.setHeaderText(headerMsg);
 
 		alert.setContentText(msg);
 
