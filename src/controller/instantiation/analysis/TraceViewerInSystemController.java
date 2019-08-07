@@ -87,7 +87,14 @@ public class TraceViewerInSystemController {
 	// key is state, value is the list of nodes (as stackPane)
 	private Map<Integer, List<StackPane>> mapNextNodes;
 
-//	private ContextMenu nodeContextMenu;
+	// key is state, stackpane is graphical node
+	private Map<Integer, StackPane> statesNodes;
+
+	// key is state, value is a list of stackpanes that represent the outgoing
+	// arrows from the state
+	private Map<Integer, List<StackPane>> statesArrows;
+
+	// private ContextMenu nodeContextMenu;
 
 	private double sceneX, sceneY, layoutX, layoutY;
 
@@ -107,6 +114,7 @@ public class TraceViewerInSystemController {
 	private static final String ACTION_NAME_STYLE = "-fx-font-size:13px;";
 	private static final String ACTION_PERC_STYLE = "-fx-font-size:10px;-fx-text-fill:red;";
 	private static final String NOT_FOUND = "---";
+	private static final String ARROW_ID_SEPARATOR = "-";
 
 	// node context menu items
 	private static final String MENU_ITEM_SHOW_NEXT = "Show Next States";
@@ -185,6 +193,8 @@ public class TraceViewerInSystemController {
 		// init maps for next and previous fo the states
 		mapNextNodes = new HashMap<Integer, List<StackPane>>();
 		mapPreviousNodes = new HashMap<Integer, List<StackPane>>();
+		statesNodes = new HashMap<Integer, StackPane>();
+		statesArrows = new HashMap<Integer, List<StackPane>>();
 
 		// init context menu for states
 		// createNodeContextMenu();
@@ -201,6 +211,7 @@ public class TraceViewerInSystemController {
 			itm.setOnAction(e -> {
 				switch (item) {
 				case MENU_ITEM_SHOW_NEXT:
+					System.out.println("get next for: " + stateStack.getId());
 					int state = getStateFromNode(stateStack);
 					showNextStates(state);
 					break;
@@ -215,30 +226,88 @@ public class TraceViewerInSystemController {
 		ContextMenu conMenu = new ContextMenu();
 		conMenu.getItems().addAll(items);
 
-		// set actions
-//		for (MenuItem item : items) {
-//
-//		}
-
 		return conMenu;
 	}
 
 	protected int getStateFromNode(StackPane node) {
-	
+
 		int state = -1;
-		
+
 		String stateStr = node.getId();
 
 		try {
 			state = Integer.parseInt(stateStr);
-//			showNextStates(state);
+			// showNextStates(state);
 		} catch (Exception exp) {
 
 		}
-		
+
 		return state;
 	}
-	
+
+	protected List<Integer> getStatesFromArrow(StackPane arrow) {
+
+		List<Integer> states = new LinkedList<Integer>();
+
+		String stateStr = arrow.getId();
+
+		try {
+
+			String[] parts = stateStr.split(ARROW_ID_SEPARATOR);
+
+			// first part is the start state, the 2nd is the end state
+			int startState = Integer.parseInt(parts[0]);
+			int endState = Integer.parseInt(parts[1]);
+
+			states.add(startState);
+			states.add(endState);
+
+		} catch (Exception exp) {
+			return null;
+		}
+
+		return states;
+	}
+
+	protected StackPane getNodeFromState(int state) {
+
+		// check trace nodes
+		for (StackPane stateNode : traceNodes) {
+			int ndState = getStateFromNode(stateNode);
+
+			if (state == ndState) {
+				return stateNode;
+			}
+		}
+
+		// check next states
+		for (List<StackPane> nodes : mapNextNodes.values()) {
+			for (StackPane stateNode : nodes) {
+				int ndState = getStateFromNode(stateNode);
+
+				if (state == ndState) {
+					return stateNode;
+
+				}
+			}
+		}
+
+		// check previous states
+		for (List<StackPane> nodes : mapPreviousNodes.values()) {
+			for (StackPane stateNode : nodes) {
+				int ndState = getStateFromNode(stateNode);
+
+				if (state == ndState) {
+					return stateNode;
+
+				}
+			}
+
+		}
+
+		return null;
+	}
+
 	@FXML
 	void loadTransitionSystem(ActionEvent e) {
 
@@ -273,6 +342,10 @@ public class TraceViewerInSystemController {
 		if (mapNextNodes != null) {
 			mapNextNodes.clear();
 			// mapNextNodes = null;
+		}
+
+		if (statesNodes != null) {
+			statesNodes.clear();
 		}
 
 		tracePane.getChildren().clear();
@@ -310,17 +383,34 @@ public class TraceViewerInSystemController {
 		showNextStates(finalState);
 	}
 
+	protected boolean areConnected(int startState, int endState) {
+
+		// checks if there's an arrow drawn between the given two states
+		if (statesArrows.containsKey(startState)) {
+
+			// check each arrow for the start state
+			for (StackPane arw : statesArrows.get(startState)) {
+				List<Integer> arrowEnds = getStatesFromArrow(arw);
+
+				if (arrowEnds != null && arrowEnds.size() > 1) {
+					int arwEndState = arrowEnds.get(1);
+
+					if (endState == arwEndState) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
 	/**
 	 * Shows the next states of the given state
 	 * 
 	 * @param state
 	 */
 	void showNextStates(int state) {
-
-		if (mapNextNodes.containsKey(state)) {
-			// already done
-			return;
-		}
 
 		if (miner == null) {
 			System.err.println("Trace miner is NULL");
@@ -339,35 +429,9 @@ public class TraceViewerInSystemController {
 			return;
 		}
 
-		// // get state
-		List<Integer> states = trace.getStateTransitions();
-		//
-		// if (states == null) {
-		// return;
-		// }
-
-		if (!states.contains(state)) {
-			return;
-		}
-
 		StackPane stateNode = null;
 
-		// get node
-		for (StackPane node : traceNodes) {
-			// StackPane stateNode = (StackPane) traceNodes.get(state);
-			String id = node.getId();
-
-			try {
-				int stateInt = Integer.parseInt(id);
-
-				if (state == stateInt) {
-					stateNode = node;
-					break;
-				}
-			} catch (Exception e) {
-				// TODO: handle exception
-			}
-		}
+		stateNode = getNodeFromState(state);
 
 		if (stateNode == null) {
 			System.err.println("Couldn't find state " + state);
@@ -384,20 +448,33 @@ public class TraceViewerInSystemController {
 
 		// create nodes for each inbound
 		for (Integer outBoundState : outBoundStates) {
-			
-			
-			//if the outbound state is in the trace then no need to add it
-			if(states.contains(outBoundState)) {
-				continue;
+
+			StackPane node = null;
+			/// if the inbound state is already drawn then create an arrow to
+			/// the given state
+			if (statesNodes.containsKey(outBoundState)) {
+				node = statesNodes.get(outBoundState);
+
+				// check if arrow is alread drawn
+				if (!areConnected(state, outBoundState)) {
+					String actionName = digraph.getLabel(state, outBoundState);
+
+					buildSingleDirectionalLine(stateNode, node, tracePane, true, false, ADDED_NODES_ARROW_COLOUR,
+							actionName);
+				}
+
+			} else {
+				// a new node is created with the arrow
+				node = getDot(NODE_COLOUR, "" + outBoundState, EXTRA_STATE_STYLE, NODE_RADIUS);
+				node.setId("" + outBoundState);
+				nextNodes.add(node);
+				// statesNodes.put(outBoundState, node);
+				String actionName = digraph.getLabel(state, outBoundState);
+
+				buildSingleDirectionalLine(stateNode, node, tracePane, true, false, ADDED_NODES_ARROW_COLOUR,
+						actionName);
 			}
-			
-			StackPane node = getDot(NODE_COLOUR, "" + outBoundState, EXTRA_STATE_STYLE, NODE_RADIUS);
-			node.setId("" + outBoundState);
-			nextNodes.add(node);
 
-			String actionName = digraph.getLabel(state, outBoundState);
-
-			buildSingleDirectionalLine(stateNode, node, tracePane, true, false, ADDED_NODES_ARROW_COLOUR, actionName);
 		}
 
 		mapNextNodes.put(state, nextNodes);
@@ -430,11 +507,6 @@ public class TraceViewerInSystemController {
 	 */
 	void showPreviousStates(int state) {
 
-		if (mapPreviousNodes.containsKey(state)) {
-			// already done
-			return;
-		}
-
 		if (miner == null) {
 			System.err.println("Trace miner is NULL");
 		}
@@ -452,31 +524,7 @@ public class TraceViewerInSystemController {
 			return;
 		}
 
-		// // get state
-		List<Integer> states = trace.getStateTransitions();
-
-		if (!states.contains(state)) {
-			return;
-		}
-
-		StackPane stateNode = null;
-
-		// get node
-		for (StackPane node : traceNodes) {
-			// StackPane stateNode = (StackPane) traceNodes.get(state);
-			String id = node.getId();
-
-			try {
-				int stateInt = Integer.parseInt(id);
-
-				if (state == stateInt) {
-					stateNode = node;
-					break;
-				}
-			} catch (Exception e) {
-				// TODO: handle exception
-			}
-		}
+		StackPane stateNode = getNodeFromState(state);
 
 		if (stateNode == null) {
 			System.err.println("Couldn't find state " + state);
@@ -493,19 +541,34 @@ public class TraceViewerInSystemController {
 
 		// create nodes for each inbound
 		for (Integer inBoundState : inBoundStates) {
-			
-			//if the inbound state is in the trace then no need to add it
-			if(states.contains(inBoundState)) {
-				continue;
+
+			StackPane node = null;
+
+			/// if the inbound state is already drawn then create an arrow to
+			/// the given state
+			if (statesNodes.containsKey(inBoundState)) {
+				node = statesNodes.get(inBoundState);
+
+				// check if arrow is alread drawn
+				if (!areConnected(state, inBoundState)) {
+					String actionName = digraph.getLabel(inBoundState, state);
+
+					buildSingleDirectionalLine(node, stateNode, tracePane, true, false, ADDED_NODES_ARROW_COLOUR,
+							actionName);
+				}
+
+			} else {
+				// a new node is created with the arrow
+				node = getDot(NODE_COLOUR, "" + inBoundState, EXTRA_STATE_STYLE, NODE_RADIUS);
+				node.setId("" + inBoundState);
+				previousNodes.add(node);
+				// statesNodes.put(outBoundState, node);
+				String actionName = digraph.getLabel(inBoundState, state);
+
+				buildSingleDirectionalLine(node, stateNode, tracePane, true, false, ADDED_NODES_ARROW_COLOUR,
+						actionName);
 			}
-			
-			StackPane node = getDot(NODE_COLOUR, "" + inBoundState, EXTRA_STATE_STYLE, NODE_RADIUS);
-			node.setId("" + inBoundState);
-			previousNodes.add(node);
 
-			String actionName = digraph.getLabel(inBoundState, state);
-
-			buildSingleDirectionalLine(node, stateNode, tracePane, true, false, ADDED_NODES_ARROW_COLOUR, actionName);
 		}
 
 		mapPreviousNodes.put(state, previousNodes);
@@ -528,6 +591,18 @@ public class TraceViewerInSystemController {
 			posY += yOffest * 2;
 		}
 
+	}
+
+	protected boolean isNodeShown(int state) {
+
+		// check trace if the node exist
+
+		if (statesNodes.containsKey(state)) {
+			// already done
+			return true;
+		}
+
+		return false;
 	}
 
 	@FXML
@@ -604,8 +679,6 @@ public class TraceViewerInSystemController {
 			return;
 		}
 
-		// show previous trace
-
 		// get trace
 		List<Integer> currentShownTraces = miner.getCurrentShownTraces();
 
@@ -635,8 +708,6 @@ public class TraceViewerInSystemController {
 		if (miner == null) {
 			return;
 		}
-
-		// show previous trace
 
 		// get trace
 		List<Integer> currentShownTraces = miner.getCurrentShownTraces();
@@ -678,21 +749,8 @@ public class TraceViewerInSystemController {
 
 	protected void setNodes() {
 
-		// remove trace nodes
-		tracePane.getChildren().removeAll(traceNodes);
-		tracePane.getChildren().addAll(traceNodes);
-
-		// remove and re-add previous nodes if any
-		for (List<StackPane> preNodes : mapPreviousNodes.values()) {
-			tracePane.getChildren().removeAll(preNodes);
-			tracePane.getChildren().addAll(preNodes);
-		}
-
-		// remove and re-add next nodes if any
-		for (List<StackPane> nextNodes : mapNextNodes.values()) {
-			tracePane.getChildren().removeAll(nextNodes);
-			tracePane.getChildren().addAll(nextNodes);
-		}
+		tracePane.getChildren().removeAll(statesNodes.values());
+		tracePane.getChildren().addAll(statesNodes.values());
 
 	}
 
@@ -777,6 +835,9 @@ public class TraceViewerInSystemController {
 			}
 
 			stateNodes.add(node);
+
+			// add to all nodes
+			// this.statesNodes.put(state, node);
 
 			index++;
 		}
@@ -922,7 +983,7 @@ public class TraceViewerInSystemController {
 		});
 
 		ContextMenu nodeContextMenu = createNodeContextMenu(dotPane);
-		
+
 		// set context menu for the node
 		dotPane.setOnContextMenuRequested(e -> {
 			nodeContextMenu.setY(e.getScreenY());
@@ -981,6 +1042,11 @@ public class TraceViewerInSystemController {
 			dotPane.setTranslateX(0);
 			dotPane.setTranslateY(0);
 		});
+
+		// add new node to current nodes
+		int stat = Integer.parseInt(state);
+		statesNodes.put(stat, dotPane);
+
 		return dotPane;
 	}
 
@@ -1002,15 +1068,34 @@ public class TraceViewerInSystemController {
 			boolean hasStartArrow, Color color, String actionName) {
 		Line line = getLine(startDot, endDot, color);
 		StackPane arrowAB = getArrow(true, line, startDot, endDot);
+
+		// set id of arrow to startID-endID
+		arrowAB.setId(startDot.getId() + ARROW_ID_SEPARATOR + endDot.getId());
 		if (!hasEndArrow) {
 			arrowAB.setOpacity(0);
 		}
-		StackPane arrowBA = getArrow(false, line, startDot, endDot);
-		if (!hasStartArrow) {
-			arrowBA.setOpacity(0);
+		// StackPane arrowBA = getArrow(false, line, startDot, endDot);
+		// if (!hasStartArrow) {
+		// arrowBA.setOpacity(0);
+		// }
+
+		// add arrow to all arrows
+		int startState = getStateFromNode(startDot);
+
+		if (startState != -1) {
+			if (statesArrows.containsKey(startState)) {
+				List<StackPane> arws = statesArrows.get(startState);
+				arws.add(arrowAB);
+			} else {
+				List<StackPane> arws = new LinkedList<StackPane>();
+				arws.add(arrowAB);
+				statesArrows.put(startState, arws);
+			}
+
 		}
+
 		StackPane weightAB = getWeight(line, actionName);
-		parent.getChildren().addAll(line, weightAB, arrowBA, arrowAB);
+		parent.getChildren().addAll(line, weightAB, arrowAB);
 	}
 
 	/**
