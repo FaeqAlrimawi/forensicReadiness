@@ -28,6 +28,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
@@ -63,6 +64,9 @@ public class TraceViewerInSystemController {
 
 	@FXML
 	private Label lblNumberOfShownTraces;
+
+	@FXML
+	private ScrollPane scrollPaneTraceViewer;
 
 	private Stage currentStage;
 
@@ -185,6 +189,10 @@ public class TraceViewerInSystemController {
 				}
 			}
 		});
+
+		// bind width and height to the scroll
+		mainStackPane.prefHeightProperty().bind(Bindings.add(-5, scrollPaneTraceViewer.heightProperty()));
+		mainStackPane.prefWidthProperty().bind(Bindings.add(-5, scrollPaneTraceViewer.widthProperty()));
 
 		mapStatePerc = new HashMap<Integer, Label>();
 
@@ -405,6 +413,32 @@ public class TraceViewerInSystemController {
 		return false;
 	}
 
+	protected void checkForVerticalScrolling(double posY) {
+
+		// check if the given posY goes beyond the height of the main stack
+		if (posY > mainStackPane.getHeight()) {
+
+			mainStackPane.prefHeightProperty().unbind();
+			mainStackPane.setPrefHeight(posY+NODE_RADIUS*2);
+		}
+
+		// mainStackPane.prefHeightProperty().bind(Bindings.add(-5,
+		// scrollPaneTraceViewer.heightProperty()));
+	}
+
+	protected void checkForHorizontalScrolling(double posX) {
+
+		// check if the given posY goes beyond the height of the main stack
+		if (posX > mainStackPane.getWidth()) {
+
+			mainStackPane.prefWidthProperty().unbind();
+			mainStackPane.setPrefWidth(posX+NODE_RADIUS*2);
+		}
+
+		// mainStackPane.prefHeightProperty().bind(Bindings.add(-5,
+		// scrollPaneTraceViewer.heightProperty()));
+	}
+
 	/**
 	 * Shows the next states of the given state
 	 * 
@@ -485,6 +519,9 @@ public class TraceViewerInSystemController {
 		// position new nodes
 		int xOffest = 30;
 		double posX = stateNode.getLayoutX() + (NODE_RADIUS * 2 + xOffest);
+		
+		checkForHorizontalScrolling(posX);
+		
 		int yOffest = (int) (NODE_RADIUS * 2);
 		double posY = stateNode.getLayoutY() + yOffest * 2;
 
@@ -496,6 +533,8 @@ public class TraceViewerInSystemController {
 			// posX+=xOffest;
 
 			posY += yOffest;
+
+			checkForVerticalScrolling(posY);
 		}
 
 	}
@@ -578,6 +617,8 @@ public class TraceViewerInSystemController {
 
 		// position new nodes
 		double posX = stateNode.getLayoutX() - (NODE_RADIUS * 2 + 30);
+		checkForHorizontalScrolling(posX);
+		
 		int yOffest = (int) (NODE_RADIUS * 2);
 		double posY = stateNode.getLayoutY() - yOffest * 2;
 
@@ -589,6 +630,8 @@ public class TraceViewerInSystemController {
 			// posX
 
 			posY += yOffest * 2;
+			
+			checkForVerticalScrolling(posY);
 		}
 
 	}
