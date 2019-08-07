@@ -24,7 +24,9 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -58,10 +60,10 @@ public class TraceViewerInSystemController {
 
 	@FXML
 	private Button btnSaveTrace;
-	
+
 	@FXML
 	private Label lblNumberOfShownTraces;
-	
+
 	private Stage currentStage;
 
 	private GraphPath trace;
@@ -79,9 +81,13 @@ public class TraceViewerInSystemController {
 	private List<StackPane> traceNodes;
 
 	// nodes of previous states (previous to the initial)
-	private List<StackPane> previousNodes;
+	private Map<Integer, List<StackPane>> mapPreviousNodes;
+
 	// nodes of next states (next to the final state)
-	private List<StackPane> nextNodes;
+	// key is state, value is the list of nodes (as stackPane)
+	private Map<Integer, List<StackPane>> mapNextNodes;
+
+//	private ContextMenu nodeContextMenu;
 
 	private double sceneX, sceneY, layoutX, layoutY;
 
@@ -101,14 +107,19 @@ public class TraceViewerInSystemController {
 	private static final String ACTION_NAME_STYLE = "-fx-font-size:13px;";
 	private static final String ACTION_PERC_STYLE = "-fx-font-size:10px;-fx-text-fill:red;";
 	private static final String NOT_FOUND = "---";
-	
+
+	// node context menu items
+	private static final String MENU_ITEM_SHOW_NEXT = "Show Next States";
+
+	private static final String[] NODE_CONTEXT_MENU_ITEMS = new String[] { MENU_ITEM_SHOW_NEXT };
+
 	// key is state, value is the label for its percentage
 	private Map<Integer, Label> mapStatePerc;
 
 	// key is action, value is the label for its percentage
 	private Map<String, List<Label>> mapActionPerc;
 
-//	private static final int previousStateNum = 2;
+	// private static final int previousStateNum = 2;
 
 	private int currentNumberOfShownTraces = 0;
 
@@ -119,68 +130,115 @@ public class TraceViewerInSystemController {
 		mainStackPane.getChildren().add(tracePane);
 		mainStackPane.setPadding(new Insets(20));
 
-		//show trace by pressing enter
-		txtFieldCurrentShownTrace.setOnKeyPressed(e->{
-			if(e.getCode() == KeyCode.ENTER) {
+		// show trace by pressing enter
+		txtFieldCurrentShownTrace.setOnKeyPressed(e -> {
+			if (e.getCode() == KeyCode.ENTER) {
 				String strTraceIndex = txtFieldCurrentShownTrace.getText();
-				
-				try{
-//					String[] items = strTrace.split(" ");
-//					int traceID =trace.getInstanceID();
-//					if(items.length>1) {
-//						traceID = Integer.parseInt(items[0]);
-//					} else {
-//						traceID = Integer.parseInt(strTrace);
-//					}
-//					int traceID = Integer.parseInt(strTrace);
-					
+
+				try {
 					int traceIndex = Integer.parseInt(strTraceIndex);
-					
+
 					List<Integer> currentTracesIDs = miner.getCurrentShownTraces();
-					
-					if(traceIndex > 0 && traceIndex <= currentTracesIDs.size()) {
-						int traceID = currentTracesIDs.get(traceIndex-1);
+
+					if (traceIndex > 0 && traceIndex <= currentTracesIDs.size()) {
+						int traceID = currentTracesIDs.get(traceIndex - 1);
 						GraphPath trace = miner.getTrace(traceID);
-						
-						if(trace!=null) {
+
+						if (trace != null) {
 							this.trace = trace;
 							reset(null);
 						}
 					} else {
-						//it's a trace that's not in the filtered
-						//do nothing at the moment.
-						traceIndex = miner.getCurrentShownTraces().indexOf(trace.getInstanceID())+1;
-						txtFieldCurrentShownTrace.setText(traceIndex+"");
+						// it's a trace that's not in the filtered
+						// do nothing at the moment.
+						traceIndex = miner.getCurrentShownTraces().indexOf(trace.getInstanceID()) + 1;
+						txtFieldCurrentShownTrace.setText(traceIndex + "");
 					}
-					
-				}catch(NumberFormatException excp) {
-					//set text back to current trace
-					int traceIndex = miner.getCurrentShownTraces().indexOf(trace.getInstanceID())+1;
+
+				} catch (NumberFormatException excp) {
+					// set text back to current trace
+					int traceIndex = miner.getCurrentShownTraces().indexOf(trace.getInstanceID()) + 1;
 					txtFieldCurrentShownTrace.setText(traceIndex + "");
 				}
 			}
 		});
-		
-		//allow only numbers
+
+		// allow only numbers
 		txtFieldCurrentShownTrace.textProperty().addListener(new ChangeListener<String>() {
 
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				// TODO Auto-generated method stub
 				if (!newValue.matches("\\d*")) {
-//					txtFieldCurrentShownTrace.setText(newValue.replaceAll("[^\\d]", ""));
-					int traceIndex = miner.getCurrentShownTraces().indexOf(trace.getInstanceID())+1;
-					txtFieldCurrentShownTrace.setText(traceIndex + "/"+currentNumberOfShownTraces);
-		        }
+					// txtFieldCurrentShownTrace.setText(newValue.replaceAll("[^\\d]",
+					// ""));
+					int traceIndex = miner.getCurrentShownTraces().indexOf(trace.getInstanceID()) + 1;
+					txtFieldCurrentShownTrace.setText(traceIndex + "/" + currentNumberOfShownTraces);
+				}
 			}
 		});
-		
+
 		mapStatePerc = new HashMap<Integer, Label>();
 
 		mapActionPerc = new HashMap<String, List<Label>>();
 
+		// init maps for next and previous fo the states
+		mapNextNodes = new HashMap<Integer, List<StackPane>>();
+		mapPreviousNodes = new HashMap<Integer, List<StackPane>>();
+
+		// init context menu for states
+		// createNodeContextMenu();
 	}
 
+	protected ContextMenu createNodeContextMenu(StackPane stateStack) {
+
+		List<MenuItem> items = new LinkedList<MenuItem>();
+
+		for (String item : NODE_CONTEXT_MENU_ITEMS) {
+			final MenuItem itm = new MenuItem(item);
+			items.add(itm);
+
+			itm.setOnAction(e -> {
+				switch (item) {
+				case MENU_ITEM_SHOW_NEXT:
+					int state = getStateFromNode(stateStack);
+					showNextStates(state);
+					break;
+
+				default:
+					break;
+				}
+			});
+
+		}
+
+		ContextMenu conMenu = new ContextMenu();
+		conMenu.getItems().addAll(items);
+
+		// set actions
+//		for (MenuItem item : items) {
+//
+//		}
+
+		return conMenu;
+	}
+
+	protected int getStateFromNode(StackPane node) {
+	
+		int state = -1;
+		
+		String stateStr = node.getId();
+
+		try {
+			state = Integer.parseInt(stateStr);
+//			showNextStates(state);
+		} catch (Exception exp) {
+
+		}
+		
+		return state;
+	}
+	
 	@FXML
 	void loadTransitionSystem(ActionEvent e) {
 
@@ -207,25 +265,25 @@ public class TraceViewerInSystemController {
 	@FXML
 	void reset(ActionEvent e) {
 
-		if (previousNodes != null) {
-			previousNodes.clear();
-			previousNodes = null;
+		if (mapPreviousNodes != null) {
+			mapPreviousNodes.clear();
+			// previousNodes = null;
 		}
 
-		if (nextNodes != null) {
-			nextNodes.clear();
-			nextNodes = null;
+		if (mapNextNodes != null) {
+			mapNextNodes.clear();
+			// mapNextNodes = null;
 		}
 
 		tracePane.getChildren().clear();
 
-		//check if saved
-		//used for prev/next trace showing
-		if(trace!= null && miner!= null) {
+		// check if saved
+		// used for prev/next trace showing
+		if (trace != null && miner != null) {
 			boolean isSaved = miner.isTraceSaved(trace.getInstanceID());
-			if(isSaved) {
+			if (isSaved) {
 				toggleButtonActivity(btnSaveTrace, true);
-			} else{
+			} else {
 				toggleButtonActivity(btnSaveTrace, false);
 			}
 		}
@@ -235,82 +293,35 @@ public class TraceViewerInSystemController {
 	@FXML
 	void showPreviousStates(ActionEvent e) {
 
-		if (miner == null) {
-			System.err.println("Trace miner is NULL");
-		}
-
-		// shows previous states in the system
-		if (miner.getTransitionSystem() == null) {
-			loadTransitionSystem(null);
-		}
-
-		if (miner.getTransitionSystem() == null) {
-			return;
-		}
-
-		if (trace == null) {
-			return;
-		}
-
-		// get initial state
-		List<Integer> states = trace.getStateTransitions();
-
-		if (states == null) {
-			return;
-		}
-
-		// get node
 		StackPane initNode = (StackPane) traceNodes.get(0);
 
 		int initialState = Integer.parseInt(initNode.getId());
 
-		Digraph<Integer> digraph = miner.getTransitionSystem().getDigraph();
-
-		// System.out.println(digraph);
-		// get in bound states (going to initial state)
-		List<Integer> inBoundStates = digraph.inboundNeighbors(initialState);
-
-		if (previousNodes != null) {
-			// remove from the curren pane
-			// tracePane.getChildren().removeAll(previousNodes);
-			return;
-		}
-
-		previousNodes = new LinkedList<StackPane>();
-
-		// create nodes for each inbound
-		for (Integer inBoundState : inBoundStates) {
-			StackPane node = getDot(NODE_COLOUR, "" + inBoundState, EXTRA_STATE_STYLE, NODE_RADIUS);
-			node.setId("" + inBoundState);
-			previousNodes.add(node);
-
-			String actionName = digraph.getLabel(inBoundState, initialState);
-
-			buildSingleDirectionalLine(node, initNode, tracePane, true, false, ADDED_NODES_ARROW_COLOUR, actionName);
-		}
-
-		setNodes();
-		// position new nodes
-		double posX = initNode.getLayoutX() - (NODE_RADIUS * 2 + 30);
-		int yOffest = (int) (NODE_RADIUS * 2);
-		double posY = initNode.getLayoutY() - yOffest * 2;
-
-		for (StackPane node : previousNodes) {
-			node.setLayoutX(posX);
-			node.setLayoutY(posY);
-
-			// same place
-			// posX
-
-			posY += yOffest * 2;
-		}
-
-		// toggleButtonActivity(btnShowPreviousStates, true);
+		showPreviousStates(initialState);
 	}
 
 	@FXML
 	void showNextStates(ActionEvent e) {
 
+		// // get node
+		StackPane finalNode = (StackPane) traceNodes.get(traceNodes.size() - 1);
+		int finalState = Integer.parseInt(finalNode.getId());
+
+		showNextStates(finalState);
+	}
+
+	/**
+	 * Shows the next states of the given state
+	 * 
+	 * @param state
+	 */
+	void showNextStates(int state) {
+
+		if (mapNextNodes.containsKey(state)) {
+			// already done
+			return;
+		}
+
 		if (miner == null) {
 			System.err.println("Trace miner is NULL");
 		}
@@ -328,51 +339,77 @@ public class TraceViewerInSystemController {
 			return;
 		}
 
-		// get initial state
+		// // get state
 		List<Integer> states = trace.getStateTransitions();
+		//
+		// if (states == null) {
+		// return;
+		// }
 
-		if (states == null) {
+		if (!states.contains(state)) {
 			return;
 		}
 
-		// get node
-		StackPane finalNode = (StackPane) traceNodes.get(traceNodes.size() - 1);
+		StackPane stateNode = null;
 
-		int finalState = Integer.parseInt(finalNode.getId());
+		// get node
+		for (StackPane node : traceNodes) {
+			// StackPane stateNode = (StackPane) traceNodes.get(state);
+			String id = node.getId();
+
+			try {
+				int stateInt = Integer.parseInt(id);
+
+				if (state == stateInt) {
+					stateNode = node;
+					break;
+				}
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		}
+
+		if (stateNode == null) {
+			System.err.println("Couldn't find state " + state);
+			return;
+		}
 
 		Digraph<Integer> digraph = miner.getTransitionSystem().getDigraph();
 
 		// System.out.println(digraph);
 		// get in bound states (going to initial state)
-		List<Integer> outBoundStates = digraph.outboundNeighbors(finalState);
+		List<Integer> outBoundStates = digraph.outboundNeighbors(state);
 
-		if (nextNodes != null) {
-			// remove from the curren pane
-			// tracePane.getChildren().removeAll(previousNodes);
-			return;
-		}
-
-		nextNodes = new LinkedList<StackPane>();
+		List<StackPane> nextNodes = new LinkedList<StackPane>();
 
 		// create nodes for each inbound
 		for (Integer outBoundState : outBoundStates) {
+			
+			
+			//if the outbound state is in the trace then no need to add it
+			if(states.contains(outBoundState)) {
+				continue;
+			}
+			
 			StackPane node = getDot(NODE_COLOUR, "" + outBoundState, EXTRA_STATE_STYLE, NODE_RADIUS);
 			node.setId("" + outBoundState);
 			nextNodes.add(node);
 
-			String actionName = digraph.getLabel(finalState, outBoundState);
+			String actionName = digraph.getLabel(state, outBoundState);
 
-			buildSingleDirectionalLine(finalNode, node, tracePane, true, false, ADDED_NODES_ARROW_COLOUR, actionName);
+			buildSingleDirectionalLine(stateNode, node, tracePane, true, false, ADDED_NODES_ARROW_COLOUR, actionName);
 		}
 
-		// add to the pane
+		mapNextNodes.put(state, nextNodes);
+
+		// remove and re-add nodes
 		setNodes();
-		
+
 		// position new nodes
 		int xOffest = 30;
-		double posX = finalNode.getLayoutX() + (NODE_RADIUS * 2 + xOffest);
+		double posX = stateNode.getLayoutX() + (NODE_RADIUS * 2 + xOffest);
 		int yOffest = (int) (NODE_RADIUS * 2);
-		double posY = finalNode.getLayoutY() + yOffest * 2;
+		double posY = stateNode.getLayoutY() + yOffest * 2;
 
 		for (StackPane node : nextNodes) {
 			node.setLayoutX(posX);
@@ -384,7 +421,113 @@ public class TraceViewerInSystemController {
 			posY += yOffest;
 		}
 
-		// toggleButtonActivity(btnShowPreviousStates, true);
+	}
+
+	/**
+	 * Shows the previous states of the given state
+	 * 
+	 * @param state
+	 */
+	void showPreviousStates(int state) {
+
+		if (mapPreviousNodes.containsKey(state)) {
+			// already done
+			return;
+		}
+
+		if (miner == null) {
+			System.err.println("Trace miner is NULL");
+		}
+
+		// shows previous states in the system
+		if (miner.getTransitionSystem() == null) {
+			loadTransitionSystem(null);
+		}
+
+		if (miner.getTransitionSystem() == null) {
+			return;
+		}
+
+		if (trace == null) {
+			return;
+		}
+
+		// // get state
+		List<Integer> states = trace.getStateTransitions();
+
+		if (!states.contains(state)) {
+			return;
+		}
+
+		StackPane stateNode = null;
+
+		// get node
+		for (StackPane node : traceNodes) {
+			// StackPane stateNode = (StackPane) traceNodes.get(state);
+			String id = node.getId();
+
+			try {
+				int stateInt = Integer.parseInt(id);
+
+				if (state == stateInt) {
+					stateNode = node;
+					break;
+				}
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		}
+
+		if (stateNode == null) {
+			System.err.println("Couldn't find state " + state);
+			return;
+		}
+
+		Digraph<Integer> digraph = miner.getTransitionSystem().getDigraph();
+
+		// System.out.println(digraph);
+		// get in bound states (going to initial state)
+		List<Integer> inBoundStates = digraph.inboundNeighbors(state);
+
+		List<StackPane> previousNodes = new LinkedList<StackPane>();
+
+		// create nodes for each inbound
+		for (Integer inBoundState : inBoundStates) {
+			
+			//if the inbound state is in the trace then no need to add it
+			if(states.contains(inBoundState)) {
+				continue;
+			}
+			
+			StackPane node = getDot(NODE_COLOUR, "" + inBoundState, EXTRA_STATE_STYLE, NODE_RADIUS);
+			node.setId("" + inBoundState);
+			previousNodes.add(node);
+
+			String actionName = digraph.getLabel(inBoundState, state);
+
+			buildSingleDirectionalLine(node, stateNode, tracePane, true, false, ADDED_NODES_ARROW_COLOUR, actionName);
+		}
+
+		mapPreviousNodes.put(state, previousNodes);
+
+		// remove and re-add nodes
+		setNodes();
+
+		// position new nodes
+		double posX = stateNode.getLayoutX() - (NODE_RADIUS * 2 + 30);
+		int yOffest = (int) (NODE_RADIUS * 2);
+		double posY = stateNode.getLayoutY() - yOffest * 2;
+
+		for (StackPane node : previousNodes) {
+			node.setLayoutX(posX);
+			node.setLayoutY(posY);
+
+			// same place
+			// posX
+
+			posY += yOffest * 2;
+		}
+
 	}
 
 	@FXML
@@ -520,30 +663,33 @@ public class TraceViewerInSystemController {
 
 	@FXML
 	void saveTrace(ActionEvent e) {
-		
-		if(traceCell == null) {
+
+		if (traceCell == null) {
 			return;
 		}
-		
+
 		String path = traceCell.saveTrace(trace);
-		
-		if(path != null) {
+
+		if (path != null) {
 			toggleButtonActivity(btnSaveTrace, true);
 		}
-		
+
 	}
-	
+
 	protected void setNodes() {
 
+		// remove trace nodes
 		tracePane.getChildren().removeAll(traceNodes);
 		tracePane.getChildren().addAll(traceNodes);
 
-		if (previousNodes != null) {
-			tracePane.getChildren().removeAll(previousNodes);
-			tracePane.getChildren().addAll(previousNodes);
+		// remove and re-add previous nodes if any
+		for (List<StackPane> preNodes : mapPreviousNodes.values()) {
+			tracePane.getChildren().removeAll(preNodes);
+			tracePane.getChildren().addAll(preNodes);
 		}
 
-		if (nextNodes != null) {
+		// remove and re-add next nodes if any
+		for (List<StackPane> nextNodes : mapNextNodes.values()) {
 			tracePane.getChildren().removeAll(nextNodes);
 			tracePane.getChildren().addAll(nextNodes);
 		}
@@ -584,8 +730,8 @@ public class TraceViewerInSystemController {
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				int traceIndex = miner.getCurrentShownTraces().indexOf(trace.getInstanceID())+1;
-				txtFieldCurrentShownTrace.setText(traceIndex+"");
+				int traceIndex = miner.getCurrentShownTraces().indexOf(trace.getInstanceID()) + 1;
+				txtFieldCurrentShownTrace.setText(traceIndex + "");
 				txtFieldCurrentShownTrace.setTooltip(new Tooltip("Showing trace with ID: " + trace.getInstanceID()));
 
 				// change window title
@@ -593,7 +739,7 @@ public class TraceViewerInSystemController {
 					Window wind = txtFieldCurrentShownTrace.getScene().getWindow();
 
 					if (wind instanceof Stage) {
-						currentStage = (Stage)wind;
+						currentStage = (Stage) wind;
 					}
 				} else {
 					currentStage.setTitle("Trace " + trace.getInstanceID());
@@ -641,7 +787,7 @@ public class TraceViewerInSystemController {
 	public void setTraceMiner(TraceMiner traceMiner, GraphPath trace) {
 		miner = traceMiner;
 		this.trace = trace;
-		
+
 		if (miner != null) {
 			// set transition system button
 			if (miner.getTransitionSystem() != null) {
@@ -650,18 +796,18 @@ public class TraceViewerInSystemController {
 
 			// set current list of traces
 			currentNumberOfShownTraces = miner.getCurrentShownTraces().size();
-			
-			lblNumberOfShownTraces.setText("/"+currentNumberOfShownTraces);
-			
-			//set save button
-			if(trace!=null) {
+
+			lblNumberOfShownTraces.setText("/" + currentNumberOfShownTraces);
+
+			// set save button
+			if (trace != null) {
 				boolean isSaved = miner.isTraceSaved(trace.getInstanceID());
-				
-				if(isSaved) {
-				toggleButtonActivity(btnSaveTrace, true);
+
+				if (isSaved) {
+					toggleButtonActivity(btnSaveTrace, true);
 				}
 			}
-			
+
 		}
 	}
 
@@ -761,6 +907,7 @@ public class TraceViewerInSystemController {
 		vboxLbl.getChildren().add(lblStatePerc);
 		vboxLbl.getChildren().add(lblState);
 		vboxLbl.setAlignment(Pos.CENTER);
+
 		dotPane.getChildren().addAll(dot, vboxLbl, lblState);
 
 		dotPane.setPrefSize(paneSize, paneSize);
@@ -772,6 +919,15 @@ public class TraceViewerInSystemController {
 			sceneY = e.getSceneY();
 			layoutX = dotPane.getLayoutX();
 			layoutY = dotPane.getLayoutY();
+		});
+
+		ContextMenu nodeContextMenu = createNodeContextMenu(dotPane);
+		
+		// set context menu for the node
+		dotPane.setOnContextMenuRequested(e -> {
+			nodeContextMenu.setY(e.getScreenY());
+			nodeContextMenu.setX(e.getScreenX());
+			nodeContextMenu.show(dotPane.getScene().getWindow());
 		});
 
 		EventHandler<MouseEvent> dotOnMouseDraggedEventHandler = e -> {
