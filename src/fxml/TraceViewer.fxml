@@ -328,7 +328,7 @@
                                     <Pane prefHeight="25.0" prefWidth="235.0" />
                                     <TextField fx:id="textFieldSearchFiltered" prefHeight="25.0" prefWidth="155.0" promptText="Search">
                                        <tooltip>
-                                          <Tooltip text="Search states in filtered traces (1, 4, 6)" />
+                                          <Tooltip text="Search states in filtered traces (e.g., 1, 4, 6)" />
                                        </tooltip>
                                     </TextField>
                                  </children>
