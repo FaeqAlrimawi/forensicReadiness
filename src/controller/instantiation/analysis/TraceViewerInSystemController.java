@@ -976,7 +976,7 @@ public class TraceViewerInSystemController {
 
 		traceNodes = createTraceNodes(trace);
 
-//		tracePane.getChildren().addAll(traceNodes);
+		tracePane.getChildren().addAll(traceNodes);
 
 		// position each node
 		double posX = 250;

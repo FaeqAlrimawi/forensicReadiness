@@ -277,13 +277,12 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		if (traceViewerController == null) {
 			loadTraceViewerController();
+			traceViewerController.showTrace(trace);
 		}
 
 		if (traceViewerController == null) {
 			return;
 		}
-
-		traceViewerController.showTrace(trace);
 
 		traceViewerStage.setTitle("Trace " + trace.getInstanceID());
 
