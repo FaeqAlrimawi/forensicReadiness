@@ -121,9 +121,11 @@ public class TraceViewerInSystemController {
 	private static final String ARROW_ID_SEPARATOR = "-";
 
 	// node context menu items
-	private static final String MENU_ITEM_SHOW_NEXT = "Show Next States";
+	private static final String MENU_ITEM_SHOW_NEXT = "Next States";
+	private static final String MENU_ITEM_SHOW_PREVIOUS = "Previous States";
 
-	private static final String[] NODE_CONTEXT_MENU_ITEMS = new String[] { MENU_ITEM_SHOW_NEXT };
+	private static final String[] NODE_CONTEXT_MENU_ITEMS = new String[] { MENU_ITEM_SHOW_NEXT,
+			MENU_ITEM_SHOW_PREVIOUS };
 
 	// key is state, value is the label for its percentage
 	private Map<Integer, Label> mapStatePerc;
@@ -190,6 +192,9 @@ public class TraceViewerInSystemController {
 			}
 		});
 
+		// scrollpane
+		// scrollPaneTraceViewer.setFitToHeight(true);
+		// scrollPaneTraceViewer.setFitToWidth(true);
 		// bind width and height to the scroll
 		mainStackPane.prefHeightProperty().bind(Bindings.add(-5, scrollPaneTraceViewer.heightProperty()));
 		mainStackPane.prefWidthProperty().bind(Bindings.add(-5, scrollPaneTraceViewer.widthProperty()));
@@ -211,6 +216,7 @@ public class TraceViewerInSystemController {
 	protected ContextMenu createNodeContextMenu(StackPane stateStack) {
 
 		List<MenuItem> items = new LinkedList<MenuItem>();
+		// int state = -1;
 
 		for (String item : NODE_CONTEXT_MENU_ITEMS) {
 			final MenuItem itm = new MenuItem(item);
@@ -218,11 +224,18 @@ public class TraceViewerInSystemController {
 
 			itm.setOnAction(e -> {
 				switch (item) {
+				// show next states
 				case MENU_ITEM_SHOW_NEXT:
-					System.out.println("get next for: " + stateStack.getId());
+					// System.out.println("get next for: " +
+					// stateStack.getId());
 					int state = getStateFromNode(stateStack);
 					showNextStates(state);
 					break;
+
+				// show previous
+				case MENU_ITEM_SHOW_PREVIOUS:
+					int stat = getStateFromNode(stateStack);
+					showPreviousStates(stat);
 
 				default:
 					break;
@@ -253,6 +266,12 @@ public class TraceViewerInSystemController {
 		return state;
 	}
 
+	/**
+	 * gets the states (start:index-0, end:index-1) from the given arrow
+	 * 
+	 * @param arrow
+	 * @return
+	 */
 	protected List<Integer> getStatesFromArrow(StackPane arrow) {
 
 		List<Integer> states = new LinkedList<Integer>();
@@ -277,6 +296,12 @@ public class TraceViewerInSystemController {
 		return states;
 	}
 
+	/**
+	 * Gets the graphical node from the given state
+	 * 
+	 * @param state
+	 * @return
+	 */
 	protected StackPane getNodeFromState(int state) {
 
 		// check trace nodes
@@ -371,26 +396,14 @@ public class TraceViewerInSystemController {
 		showTrace(trace);
 	}
 
-	@FXML
-	void showPreviousStates(ActionEvent e) {
-
-		StackPane initNode = (StackPane) traceNodes.get(0);
-
-		int initialState = Integer.parseInt(initNode.getId());
-
-		showPreviousStates(initialState);
-	}
-
-	@FXML
-	void showNextStates(ActionEvent e) {
-
-		// // get node
-		StackPane finalNode = (StackPane) traceNodes.get(traceNodes.size() - 1);
-		int finalState = Integer.parseInt(finalNode.getId());
-
-		showNextStates(finalState);
-	}
-
+	/**
+	 * Checks whether the given two states have an arrow drawn between them in
+	 * the view
+	 * 
+	 * @param startState
+	 * @param endState
+	 * @return
+	 */
 	protected boolean areConnected(int startState, int endState) {
 
 		// checks if there's an arrow drawn between the given two states
@@ -411,32 +424,6 @@ public class TraceViewerInSystemController {
 		}
 
 		return false;
-	}
-
-	protected void checkForVerticalScrolling(double posY) {
-
-		// check if the given posY goes beyond the height of the main stack
-		if (posY > mainStackPane.getHeight()) {
-
-			mainStackPane.prefHeightProperty().unbind();
-			mainStackPane.setPrefHeight(posY+NODE_RADIUS*2);
-		}
-
-		// mainStackPane.prefHeightProperty().bind(Bindings.add(-5,
-		// scrollPaneTraceViewer.heightProperty()));
-	}
-
-	protected void checkForHorizontalScrolling(double posX) {
-
-		// check if the given posY goes beyond the height of the main stack
-		if (posX > mainStackPane.getWidth()) {
-
-			mainStackPane.prefWidthProperty().unbind();
-			mainStackPane.setPrefWidth(posX+NODE_RADIUS*2);
-		}
-
-		// mainStackPane.prefHeightProperty().bind(Bindings.add(-5,
-		// scrollPaneTraceViewer.heightProperty()));
 	}
 
 	/**
@@ -517,25 +504,10 @@ public class TraceViewerInSystemController {
 		setNodes();
 
 		// position new nodes
-		int xOffest = 30;
-		double posX = stateNode.getLayoutX() + (NODE_RADIUS * 2 + xOffest);
-		
-		checkForHorizontalScrolling(posX);
-		
-		int yOffest = (int) (NODE_RADIUS * 2);
-		double posY = stateNode.getLayoutY() + yOffest * 2;
+		double xOffest = NODE_RADIUS * 2 + 50;
+		double yOffset = NODE_RADIUS * 2;
 
-		for (StackPane node : nextNodes) {
-			node.setLayoutX(posX);
-			node.setLayoutY(posY);
-
-			// same place
-			// posX+=xOffest;
-
-			posY += yOffest;
-
-			checkForVerticalScrolling(posY);
-		}
+		locatedNodesRelativeTo(stateNode, nextNodes, xOffest, yOffset);
 
 	}
 
@@ -589,7 +561,7 @@ public class TraceViewerInSystemController {
 				node = statesNodes.get(inBoundState);
 
 				// check if arrow is alread drawn
-				if (!areConnected(state, inBoundState)) {
+				if (!areConnected(inBoundState, state)) {
 					String actionName = digraph.getLabel(inBoundState, state);
 
 					buildSingleDirectionalLine(node, stateNode, tracePane, true, false, ADDED_NODES_ARROW_COLOUR,
@@ -615,24 +587,11 @@ public class TraceViewerInSystemController {
 		// remove and re-add nodes
 		setNodes();
 
-		// position new nodes
-		double posX = stateNode.getLayoutX() - (NODE_RADIUS * 2 + 30);
-		checkForHorizontalScrolling(posX);
-		
-		int yOffest = (int) (NODE_RADIUS * 2);
-		double posY = stateNode.getLayoutY() - yOffest * 2;
+		double xOffset = -60;
+		double yOffset = NODE_RADIUS * 2;
 
-		for (StackPane node : previousNodes) {
-			node.setLayoutX(posX);
-			node.setLayoutY(posY);
-
-			// same place
-			// posX
-
-			posY += yOffest * 2;
-			
-			checkForVerticalScrolling(posY);
-		}
+		// locate new nodes in the view
+		locatedNodesRelativeTo(stateNode, previousNodes, xOffset, yOffset);
 
 	}
 
@@ -646,6 +605,74 @@ public class TraceViewerInSystemController {
 		}
 
 		return false;
+	}
+
+	protected void locatedNodesRelativeTo(StackPane mainNode, List<StackPane> nodesToLocate, double xOffest,
+			double yOffset) {
+
+		// int xOffest = 60;
+		double posX = mainNode.getLayoutX() + xOffest;
+
+		if(posX <0) {
+			posX = NODE_RADIUS;
+		}
+		
+		checkForHorizontalScrolling(posX);
+
+		// int yOffest = (int) (NODE_RADIUS * 2);
+		double posY = mainNode.getLayoutY() + yOffset + (NODE_RADIUS * 3);
+
+		for (StackPane node : nodesToLocate) {
+			node.setLayoutX(posX);
+			node.setLayoutY(posY);
+
+			// same place
+			// posX+=xOffest;
+
+			posY += yOffset;
+
+			if(posY<0) {
+				posY = NODE_RADIUS;
+			}
+			
+			checkForVerticalScrolling(posY);
+		}
+
+	}
+
+	protected void checkForVerticalScrolling(double posY) {
+
+		// check if the given posY goes beyond the height of the main stack
+		if (posY > mainStackPane.getPrefHeight()) {
+
+			mainStackPane.prefHeightProperty().unbind();
+
+			double newHeight = posY + NODE_RADIUS * 2;
+			mainStackPane.setPrefHeight(newHeight);
+			// scrollPaneTraceViewer.setVvalue(newHeight);
+		}
+
+		// mainStackPane.prefHeightProperty().bind(Bindings.add(-5,
+		// scrollPaneTraceViewer.heightProperty()));
+	}
+
+	protected void checkForHorizontalScrolling(double posX) {
+
+		// check if the given posY goes beyond the height of the main stack
+		System.out.println("posX: " + posX + "\nstack width: " + mainStackPane.getPrefWidth() + "\nminWidth: " +mainStackPane.getMinWidth());
+		if (posX > mainStackPane.getPrefWidth()) {
+
+			mainStackPane.prefWidthProperty().unbind();
+			mainStackPane.setPrefWidth(posX + (NODE_RADIUS * 4));
+		} else if (posX < 0) {
+			System.out.println("posx: " + posX + "\nminWidth: " + mainStackPane.getMinWidth());
+			mainStackPane.prefWidthProperty().unbind();
+			mainStackPane.setLayoutX(posX - NODE_RADIUS * 2);
+			// mainStackPane.setPrefWidth(posX + (NODE_RADIUS * 4));
+		}
+
+		// mainStackPane.prefHeightProperty().bind(Bindings.add(-5,
+		// scrollPaneTraceViewer.heightProperty()));
 	}
 
 	@FXML

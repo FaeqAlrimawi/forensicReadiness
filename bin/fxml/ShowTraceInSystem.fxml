@@ -13,7 +13,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.analysis.TraceViewerInSystemController">
    <center>
-      <ScrollPane fx:id="scrollPaneTraceViewer" prefHeight="550.0" prefWidth="1100.0">
+      <ScrollPane fx:id="scrollPaneTraceViewer" fitToHeight="true" fitToWidth="true" prefHeight="550.0" prefWidth="1100.0">
          <content>
             <StackPane fx:id="mainStackPane" minHeight="-Infinity" minWidth="-Infinity" prefHeight="525.0" prefWidth="1060.0" style="-fx-background-color: white;" />
          </content>
@@ -24,8 +24,6 @@
          <children>
             <Button fx:id="btnLoadTransitionSystem" mnemonicParsing="false" onAction="#loadTransitionSystem" text="Load transition System" />
             <ProgressIndicator fx:id="progressIndicator" prefHeight="6.0" prefWidth="41.0" visible="false" />
-            <Button fx:id="btnShowPreviousStates" mnemonicParsing="false" onAction="#showPreviousStates" text="Previous States" />
-            <Button mnemonicParsing="false" onAction="#showNextStates" text="Next States" />
             <Button mnemonicParsing="false" onAction="#showStatesPercentages" text="Occurrences %" />
             <Button fx:id="btnClear" mnemonicParsing="false" onAction="#reset" text="reset" />
             <Button fx:id="btnSaveTrace" mnemonicParsing="false" onAction="#saveTrace" text="save" />
