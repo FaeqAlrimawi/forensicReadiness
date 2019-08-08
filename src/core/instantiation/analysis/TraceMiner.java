@@ -152,7 +152,7 @@ public class TraceMiner {
 	List<Integer> customeFilteringTraceIDs;
 
 	List<Integer> currentShownTraces;
-	
+
 	String outputFolder;
 
 	// min action length
@@ -3287,17 +3287,15 @@ public class TraceMiner {
 
 		return result;
 	}
-	
+
 	public GraphPath getTrace(int tracesID) {
 
-			if (traces.containsKey(tracesID)) {
-				return traces.get(tracesID);
-			}
+		if (traces.containsKey(tracesID)) {
+			return traces.get(tracesID);
+		}
 
 		return null;
 	}
-	
-	
 
 	public List<Integer> getTracesWithActions(String query) {
 
@@ -3991,7 +3989,7 @@ public class TraceMiner {
 		}
 
 		double perc = 0;
-		
+
 		switch (tracesCategory) {
 		case ALL:
 			// find a state perc in all traces
@@ -4001,7 +3999,8 @@ public class TraceMiner {
 
 			if (totalNumOfTraces > 0) {
 				perc = actionOuccr * 1.0 / totalNumOfTraces;
-//				System.out.println("total: " + totalNumOfTraces + "\naction occur:" + actionOuccr + "\nperc: " + perc);
+				// System.out.println("total: " + totalNumOfTraces + "\naction
+				// occur:" + actionOuccr + "\nperc: " + perc);
 			} else {
 				perc = 1;
 			}
@@ -4109,8 +4108,34 @@ public class TraceMiner {
 	public void setCurrentShownTraces(List<Integer> currentShownTraces) {
 		this.currentShownTraces = currentShownTraces;
 	}
-	
-	
+
+	public List<Integer> findTracesWithStates(List<Integer> states, List<Integer> tracesIDsToSearch) {
+
+		if(states == null || tracesIDsToSearch == null) {
+			return null;
+		}
+		
+		List<Integer> result = new LinkedList<Integer>();
+
+		// get traces
+		Map<Integer, GraphPath> tracesToSearch = getTraces(tracesIDsToSearch);
+
+		if (tracesToSearch == null || tracesToSearch.isEmpty()) {
+			return result;
+		}
+
+		for (Entry<Integer, GraphPath> traceEntry : tracesToSearch.entrySet()) {
+			List<Integer> traceStates = traceEntry.getValue().getStateTransitions();
+
+			int subIndex = Collections.indexOfSubList(traceStates, states);
+
+			if (subIndex != -1) {
+				result.add(traceEntry.getKey());
+			}
+		}
+
+		return result;
+	}
 
 	// public static void main(String[] args) {
 	//

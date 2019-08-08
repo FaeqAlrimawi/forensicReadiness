@@ -54,7 +54,6 @@ import javafx.stage.FileChooser;
 
 public class TraceViewerController implements TraceMinerListener {
 
-	
 	@FXML
 	private Label lblSaved;
 
@@ -190,7 +189,9 @@ public class TraceViewerController implements TraceMinerListener {
 	@FXML
 	private ListView<GraphPath> listViewTraces;
 
-	
+	@FXML
+	private TextField textFieldSearchFiltered;
+
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
@@ -206,13 +207,14 @@ public class TraceViewerController implements TraceMinerListener {
 	private int numberOfTraces = -1;
 
 	private String bigFile = "D:/Bigrapher data/lero/example/lero.big";
-	
+
 	// used for progress bar
 	// private double singleTraceProgressValue = 0.1;
 	private int currentTraceNumber = 0;
 
 	private ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
+	private static final String SEARCH_FILTERED_SEPARATOR = ",";
 	private static final String SHORTEST = "Shortest";
 	private static final String SHORTEST_CLASP = "Shortest length & Share longest partial sequence (ClaSP)";
 	private static final String CUSTOMISE = "Customise";
@@ -236,7 +238,10 @@ public class TraceViewerController implements TraceMinerListener {
 	public static final String SHORTEST_CLASP_TRACES = "Shortest ClaSP Traces";
 	public static final String CUSTOMISED_TRACES = "Customised Traces";
 
+	// filtered traces currently shown
 	private List<Integer> shownFitleredTraces;
+	// original filtered traces
+	private List<Integer> originalShownFitleredTraces;
 
 	// private AutoCompleteTextField autoCompleteActionsFiled;
 	private AutoCompleteTextArea autoCompleteActionsArea;
@@ -254,9 +259,9 @@ public class TraceViewerController implements TraceMinerListener {
 	String chartTitle = "";
 
 	StateViewerController stateViewerController;
-	
+
 	private String traceExampleFile = "resources/example/instantiations_10000.json";
-	
+
 	@FXML
 	public void initialize() {
 
@@ -355,7 +360,7 @@ public class TraceViewerController implements TraceMinerListener {
 				case STATES:
 					setupTopStatesChart(selectedOccurrenceType);
 					break;
-					
+
 				case ENTITIES:
 					setupTopEntitiesChart(selectedOccurrenceType);
 				default:
@@ -379,10 +384,10 @@ public class TraceViewerController implements TraceMinerListener {
 				case STATES:
 					setupTopStatesChart(PERCENTAGE);
 					break;
-					
+
 				case ENTITIES:
-					//to be done
-//					setupTopEntitiesChart(selectedOccurrenceType);
+					// to be done
+					// setupTopEntitiesChart(selectedOccurrenceType);
 				default:
 					break;
 				}
@@ -406,19 +411,73 @@ public class TraceViewerController implements TraceMinerListener {
 		checkInputAsDigital(textFieldOccurrenceFilterPercentage);
 		checkInputAsDigital(textFieldActionOccurrence);
 
-		//get example
+		// get example
 		URL exampleTraces = TraceViewerController.class.getClassLoader().getResource(traceExampleFile);
-		
-		if(exampleTraces!=null) {
+
+		if (exampleTraces != null) {
 			textFieldSystemFile.setText(exampleTraces.getPath());
 			selectedTracesFile = new File(exampleTraces.getPath());
 		} else {
 			System.out.println("nulllll");
 		}
-		
-		//set list view
+
+		// ===search filtered traces
+		textFieldSearchFiltered.setOnKeyPressed(e -> {
+
+			// if enter is pressed then refersh
+			if (e.getCode() == KeyCode.ENTER) {
+				String searchQuery = textFieldSearchFiltered.getText();
+				List<Integer> states = analyseFilterSearchQuery(searchQuery);
+
+				//search for traces
+				List<Integer> searchResultTraces = searchFilteredList(states);
+				viewTraces(searchResultTraces);
+			}
+		});
+
+		// shows all filtered traces
+		textFieldSearchFiltered.textProperty().addListener(new ChangeListener<String>() {
+
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				// TODO Auto-generated method stub
+				if (newValue.isEmpty()) {
+					viewTraces(originalShownFitleredTraces);
+				}
+			}
+		});
+		// set list view
 		listViewTraces.setCellFactory(tracesListView -> new TaskCell(tracesMiner));
+
+	}
+
+	protected List<Integer> analyseFilterSearchQuery(String searchQuery) {
+
+		if (searchQuery == null || searchQuery.isEmpty()) {
+			return null;
+		}
+
+		// query : state-#, state-#,..
+		List<Integer> states = new LinkedList<Integer>();
+
+		String[] statesStr = searchQuery.split(SEARCH_FILTERED_SEPARATOR);
+
 		
+		for (String stateStr : statesStr) {
+
+			try {
+				stateStr = stateStr.trim();
+				int state = Integer.parseInt(stateStr);
+				states.add(state);
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		}
+
+		System.out.println("query: "  + searchQuery+"\nstates: "+states);
+		
+		return states;
+
 	}
 
 	protected void checkInputAsDigital(TextField textField) {
@@ -505,7 +564,10 @@ public class TraceViewerController implements TraceMinerListener {
 				public void run() {
 					// TODO Auto-generated method stub
 					toggleButtonDisability(btnAnalyse, true);
-					findShortestTraces();
+					shownFitleredTraces = findShortestTraces();
+					originalShownFitleredTraces = shownFitleredTraces;
+
+					viewTraces(shownFitleredTraces);
 					toggleButtonDisability(btnAnalyse, false);
 				}
 			});
@@ -519,7 +581,10 @@ public class TraceViewerController implements TraceMinerListener {
 				public void run() {
 					// TODO Auto-generated method stub
 					toggleButtonDisability(btnAnalyse, true);
-					mineShortestTracesUsingClaSP();
+					shownFitleredTraces = mineShortestTracesUsingClaSP();
+					originalShownFitleredTraces = shownFitleredTraces;
+
+					viewTraces(shownFitleredTraces);
 					toggleButtonDisability(btnAnalyse, false);
 				}
 			});
@@ -533,7 +598,10 @@ public class TraceViewerController implements TraceMinerListener {
 				public void run() {
 					// TODO Auto-generated method stub
 					toggleButtonDisability(btnAnalyse, true);
-					mineBasedOnCustomisedFilter();
+					shownFitleredTraces = mineBasedOnCustomisedFilter();
+					originalShownFitleredTraces = shownFitleredTraces;
+
+					viewTraces(shownFitleredTraces);
 					toggleButtonDisability(btnAnalyse, false);
 				}
 			});
@@ -543,9 +611,9 @@ public class TraceViewerController implements TraceMinerListener {
 		default:
 			// shortest
 		}
+
 	}
 
-	
 	@FXML
 	public void refreshGraph(ActionEvent event) {
 
@@ -571,7 +639,7 @@ public class TraceViewerController implements TraceMinerListener {
 		case STATES:
 			setupTopStatesChart(operation);
 			break;
-			
+
 		case ENTITIES:
 			setupTopEntitiesChart(operation);
 
@@ -588,7 +656,7 @@ public class TraceViewerController implements TraceMinerListener {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 
 		if (tracesMiner != null && tracesMiner.getTraceFolder() != null) {
-			
+
 			File folderF = new File(tracesMiner.getTraceFolder());
 
 			if (folderF.isDirectory()) {
@@ -605,8 +673,8 @@ public class TraceViewerController implements TraceMinerListener {
 		}
 
 	}
-	
-//	@FXML
+
+	// @FXML
 	public void saveFilteredTracesOrig(ActionEvent event) {
 
 		// save filtered traces
@@ -664,7 +732,7 @@ public class TraceViewerController implements TraceMinerListener {
 		});
 
 	}
-	
+
 	protected void saveSelectedTracesAsObjects(List<Integer> tracesIDs) {
 
 		if (tracesIDs == null || tracesMiner == null) {
@@ -677,71 +745,72 @@ public class TraceViewerController implements TraceMinerListener {
 			public void run() {
 				// TODO Auto-generated method stub
 				List<Integer> failedToSave = tracesMiner.saveSelectedTraces(shownFitleredTraces);
-				
-				
-					Platform.runLater(new Runnable() {
-						
-						@Override
-						public void run() {
-							// TODO Auto-generated method stub
-							if(failedToSave != null && failedToSave.isEmpty()) {
-								updateImage(IMAGE_CORRECT, imgSavedTraces);
-								updateText("Saved!", lblSaved);
-							} else {
-								updateImage(IMAGE_WRONG, imgSavedTraces);
-								updateText("didn't save!", lblSaved);
-							}
-							
-							Timer t = new Timer();
-							t.schedule(new TimerTask() {
-								
-								@Override
-								public void run() {
-									// TODO Auto-generated method stub
-									updateImage(null, imgSavedTraces);
-									updateText(null, lblSaved);
-								}
-							}, 3000);
+
+				Platform.runLater(new Runnable() {
+
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						if (failedToSave != null && failedToSave.isEmpty()) {
+							updateImage(IMAGE_CORRECT, imgSavedTraces);
+							updateText("Saved!", lblSaved);
+						} else {
+							updateImage(IMAGE_WRONG, imgSavedTraces);
+							updateText("didn't save!", lblSaved);
 						}
-					});
-				}
+
+						Timer t = new Timer();
+						t.schedule(new TimerTask() {
+
+							@Override
+							public void run() {
+								// TODO Auto-generated method stub
+								updateImage(null, imgSavedTraces);
+								updateText(null, lblSaved);
+							}
+						}, 3000);
+					}
+				});
+			}
 		});
 
 	}
 
-//	@FXML
-//	public void viewSVG(ActionEvent event) {
-//
-//		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("../fxml/state_viewer.fxml"));
-//		Parent root;
-//		try {
-//			root = (Parent) fxmlLoader.load();
-//			Stage stage = new Stage();
-//			stage.setScene(new Scene(root));
-//			
-//			//get controller
-//			stateViewerController = fxmlLoader.<StateViewerController>getController();
-//			
-//			String path = "C:\\Users\\Faeq\\Desktop\\svg\\0.svg";
-//			int tries = 10000;
-//			
-//			while(path.contains("\\") && tries > 0) {
-//				path = path.replace("\\", "/");
-//				tries--;
-//			}
-//			
-//			String svgPath = "file:///"+path;
-//			stateViewerController.updateSVGPath(svgPath);
-//			stage.show();
-////			   main.stg.close();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//
-//	}
+	// @FXML
+	// public void viewSVG(ActionEvent event) {
+	//
+	// FXMLLoader fxmlLoader = new
+	// FXMLLoader(getClass().getResource("../fxml/state_viewer.fxml"));
+	// Parent root;
+	// try {
+	// root = (Parent) fxmlLoader.load();
+	// Stage stage = new Stage();
+	// stage.setScene(new Scene(root));
+	//
+	// //get controller
+	// stateViewerController =
+	// fxmlLoader.<StateViewerController>getController();
+	//
+	// String path = "C:\\Users\\Faeq\\Desktop\\svg\\0.svg";
+	// int tries = 10000;
+	//
+	// while(path.contains("\\") && tries > 0) {
+	// path = path.replace("\\", "/");
+	// tries--;
+	// }
+	//
+	// String svgPath = "file:///"+path;
+	// stateViewerController.updateSVGPath(svgPath);
+	// stage.show();
+	//// main.stg.close();
+	// } catch (IOException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// }
+	//
+	// }
 
-	protected void mineBasedOnCustomisedFilter() {
+	protected List<Integer> mineBasedOnCustomisedFilter() {
 
 		progressIndicatorFilter.setVisible(true);
 
@@ -803,7 +872,9 @@ public class TraceViewerController implements TraceMinerListener {
 		progressIndicatorFilter.setVisible(false);
 
 		// view traces
-		viewTraces(tracesMiner.getCustomisedTracesIDs());
+		// viewTraces(tracesMiner.getCustomisedTracesIDs());
+
+		return tracesMiner.getCustomisedTracesIDs();
 
 	}
 
@@ -982,7 +1053,7 @@ public class TraceViewerController implements TraceMinerListener {
 		});
 	}
 
-	protected void findShortestTraces() {
+	protected List<Integer> findShortestTraces() {
 
 		int numOfShortestTraces = 0;
 
@@ -1013,11 +1084,12 @@ public class TraceViewerController implements TraceMinerListener {
 		});
 
 		// show traces
-		viewTraces(tracesMiner.getShortestTracesIDs());
+		// viewTraces(tracesMiner.getShortestTracesIDs());
+		return tracesMiner.getShortestTracesIDs();
 
 	}
 
-	protected void mineShortestTracesUsingClaSP() {
+	protected List<Integer> mineShortestTracesUsingClaSP() {
 
 		int numofTraces = 0;
 
@@ -1048,7 +1120,8 @@ public class TraceViewerController implements TraceMinerListener {
 		});
 
 		// show traces
-		viewTraces(tracesMiner.getShortestClaSPTracesIDs());
+		// viewTraces(tracesMiner.getShortestClaSPTracesIDs());
+		return tracesMiner.getShortestClaSPTracesIDs();
 
 	}
 
@@ -1346,29 +1419,30 @@ public class TraceViewerController implements TraceMinerListener {
 		int numberOfEntitiesInSelection = -1;
 
 		// set number of entities based on selection
-//		switch (tracesToFilter) {
-//		case ALL_TRACES:
-//			numberOfTracesInSelection = numberOfTraces;
-//			break;
-//
-//		case SHORTEST_TRACES:
-//			numberOfTracesInSelection = tracesMiner.getShortestTracesNumber();
-//			break;
-//
-//		case SHORTEST_CLASP_TRACES:
-//			numberOfTracesInSelection = tracesMiner.getShortestClaSPTracesIDs().size();
-//			break;
-//
-//		case CUSTOMISED_TRACES:
-//			numberOfTracesInSelection = tracesMiner.getCustomisedTracesNumber();
-//			break;
-//
-//		default:
-//			numberOfTracesInSelection = numberOfTraces;
-//			break;
-//		}
-		
-		//load .big file if not loaded
+		// switch (tracesToFilter) {
+		// case ALL_TRACES:
+		// numberOfTracesInSelection = numberOfTraces;
+		// break;
+		//
+		// case SHORTEST_TRACES:
+		// numberOfTracesInSelection = tracesMiner.getShortestTracesNumber();
+		// break;
+		//
+		// case SHORTEST_CLASP_TRACES:
+		// numberOfTracesInSelection =
+		// tracesMiner.getShortestClaSPTracesIDs().size();
+		// break;
+		//
+		// case CUSTOMISED_TRACES:
+		// numberOfTracesInSelection = tracesMiner.getCustomisedTracesNumber();
+		// break;
+		//
+		// default:
+		// numberOfTracesInSelection = numberOfTraces;
+		// break;
+		// }
+
+		// load .big file if not loaded
 		tracesMiner.setBigraphERFile(bigFile);
 
 		// invoke operation from the miner based on selection
@@ -1397,13 +1471,13 @@ public class TraceViewerController implements TraceMinerListener {
 
 			topEntities = tracesMiner.getEntitiesWithOccurrencePercentage(perc, op, tracesToFilter);
 
-//			System.out.println("Entities: " + topEntities);
+			// System.out.println("Entities: " + topEntities);
 			break;
 
 		default:
 			// highest occurrence in all
 			chartTitle = "Entities with " + selectedOccurrenceType + " Occurrence in All Traces";
-//			topEntities = tracesMiner.getHighestActionOccurrence();
+			// topEntities = tracesMiner.getHighestActionOccurrence();
 
 			break;
 		}
@@ -1417,9 +1491,9 @@ public class TraceViewerController implements TraceMinerListener {
 
 		final int numOfEntities = entities.size();
 
-		//get total number of entities
+		// get total number of entities
 		numberOfEntitiesInSelection = tracesMiner.getTotalNumberOfEntitiesInCurrentTraces();
-		
+
 		List<XYChart.Series<String, Integer>> series = new LinkedList<XYChart.Series<String, Integer>>();
 
 		// XYChart.Series<String, Integer> series1 = new XYChart.Series<String,
@@ -1431,15 +1505,16 @@ public class TraceViewerController implements TraceMinerListener {
 			// bug does not allow the correct order of labels
 			long occur = occurrences.get(i);
 
-			// convert occurrence into percentage if the number of entities known
-			if(numberOfEntitiesInSelection>0) {
+			// convert occurrence into percentage if the number of entities
+			// known
+			if (numberOfEntitiesInSelection > 0) {
 				int occurPerc = (int) Math.floor((occur * 1.0 / numberOfEntitiesInSelection) * 100);
 				series1.getData().add(new XYChart.Data<String, Integer>("", occurPerc));
-	
+
 			} else {
 				series1.getData().add(new XYChart.Data<String, Integer>("", (int) occur));
 			}
-			
+
 			series1.setName(entities.get(i));
 
 			series.add(series1);
@@ -1464,7 +1539,7 @@ public class TraceViewerController implements TraceMinerListener {
 		});
 
 	}
-	
+
 	protected void setupTopStatesChart(String selectedOccurrenceType) {
 
 		// int numOfOccurrences = 10;
@@ -1689,22 +1764,22 @@ public class TraceViewerController implements TraceMinerListener {
 	}
 
 	protected void toggleButtonDisability(Button button, boolean isDisabled) {
-	
+
 		Platform.runLater(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				if(isDisabled){
-					button.setDisable(true);	
-				} else{
+				if (isDisabled) {
+					button.setDisable(true);
+				} else {
 					button.setDisable(false);
 				}
-				
+
 			}
 		});
 	}
-	
+
 	protected void viewTraces(List<Integer> tracesIDs) {
 
 		if (tracesIDs == null) {
@@ -1720,12 +1795,12 @@ public class TraceViewerController implements TraceMinerListener {
 			return;
 		}
 
-//		System.out.println("Viewing traces: " + tracesIDs);
+		// System.out.println("Viewing traces: " + tracesIDs);
 		// used for saving
 		shownFitleredTraces = tracesIDs;
 
 		tracesMiner.setCurrentShownTraces(shownFitleredTraces);
-		
+
 		Map<Integer, GraphPath> traces = tracesMiner.getTraces(tracesIDs);
 
 		ObservableList<GraphPath> tracesObservableList;
@@ -1734,18 +1809,8 @@ public class TraceViewerController implements TraceMinerListener {
 
 		tracesObservableList.addAll(traces.values());
 
-//		Platform.runLater(new Runnable() {
-//			
-//			@Override
-//			public void run() {
-//				// TODO Auto-generated method stub
-//				listViewTraces.setItems(null);
-//			}
-//		});
-
-		
 		Platform.runLater(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
@@ -1753,7 +1818,21 @@ public class TraceViewerController implements TraceMinerListener {
 				lblListViewTracesEmpty.setVisible(false);
 			}
 		});
-	
+
+	}
+
+	protected List<Integer> searchFilteredList(List<Integer> states) {
+
+		// search the filtered traces for the given sequence of states
+		if (tracesMiner == null) {
+			return null;
+		}
+
+		List<Integer> tracesIDs = tracesMiner.findTracesWithStates(states, originalShownFitleredTraces);
+
+		// viewTraces(tracesIDs);
+
+		return tracesIDs;
 	}
 
 	@Override
@@ -1768,7 +1847,5 @@ public class TraceViewerController implements TraceMinerListener {
 			updateText("didn't save!", lblSaved);
 		}
 	}
-	
-	
 
 }
