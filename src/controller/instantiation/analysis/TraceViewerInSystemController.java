@@ -97,6 +97,12 @@ public class TraceViewerInSystemController {
 	// key is state, value is a list of stackpanes that represent the outgoing
 	// arrows from the state
 	private Map<Integer, List<StackPane>> statesArrows;
+	
+	//key is arrow, value is the arrow line
+	private Map<StackPane, Line> arrowsLines;
+	
+	//key is arrow, value is the arrow label
+	private Map<StackPane, StackPane> arrowsLabels;
 
 	// private ContextMenu nodeContextMenu;
 
@@ -121,12 +127,18 @@ public class TraceViewerInSystemController {
 	private static final String ARROW_ID_SEPARATOR = "-";
 
 	// node context menu items
-	private static final String MENU_ITEM_SHOW_NEXT = "Next States";
-	private static final String MENU_ITEM_SHOW_PREVIOUS = "Previous States";
+	private static final String MENU_ITEM_SHOW_NEXT = "Show Next";
+	private static final String MENU_ITEM_HIDE_NEXT = "Hide Next";
+	private static final String MENU_ITEM_SHOW_PREVIOUS = "Show Previous";
+	private static final String MENU_ITEM_HIDE_PREVIOUS = "Hide Previous";
 
 	private static final String[] NODE_CONTEXT_MENU_ITEMS = new String[] { MENU_ITEM_SHOW_NEXT,
-			MENU_ITEM_SHOW_PREVIOUS };
+			MENU_ITEM_SHOW_PREVIOUS, MENU_ITEM_HIDE_NEXT, MENU_ITEM_HIDE_PREVIOUS };
 
+	private static final List<String> NODE_CONTEXT_MENU_IGNORE_ITEMS = new LinkedList<String>(){ {add(MENU_ITEM_HIDE_NEXT);
+			add(MENU_ITEM_HIDE_PREVIOUS);} };
+
+	
 	// key is state, value is the label for its percentage
 	private Map<Integer, Label> mapStatePerc;
 
@@ -193,8 +205,6 @@ public class TraceViewerInSystemController {
 		});
 
 		// scrollpane
-		// scrollPaneTraceViewer.setFitToHeight(true);
-		// scrollPaneTraceViewer.setFitToWidth(true);
 		// bind width and height to the scroll
 		mainStackPane.prefHeightProperty().bind(Bindings.add(-5, scrollPaneTraceViewer.heightProperty()));
 		mainStackPane.prefWidthProperty().bind(Bindings.add(-5, scrollPaneTraceViewer.widthProperty()));
@@ -209,6 +219,9 @@ public class TraceViewerInSystemController {
 		statesNodes = new HashMap<Integer, StackPane>();
 		statesArrows = new HashMap<Integer, List<StackPane>>();
 
+		arrowsLines = new HashMap<StackPane, Line>();
+		arrowsLabels = new HashMap<StackPane, StackPane>();
+		
 		// init context menu for states
 		// createNodeContextMenu();
 	}
@@ -219,24 +232,40 @@ public class TraceViewerInSystemController {
 		// int state = -1;
 
 		for (String item : NODE_CONTEXT_MENU_ITEMS) {
+			
+			if(NODE_CONTEXT_MENU_IGNORE_ITEMS.contains(item)) {
+				continue;
+			}
+			
 			final MenuItem itm = new MenuItem(item);
 			items.add(itm);
 
 			itm.setOnAction(e -> {
-				switch (item) {
+				switch (itm.getText()) {
 				// show next states
 				case MENU_ITEM_SHOW_NEXT:
-					// System.out.println("get next for: " +
-					// stateStack.getId());
+					//get state
 					int state = getStateFromNode(stateStack);
+					//show next states
 					showNextStates(state);
+					itm.setText(MENU_ITEM_HIDE_NEXT);
 					break;
 
+				case MENU_ITEM_HIDE_NEXT:
+					int st = getStateFromNode(stateStack);
+					removeNextStates(st);
+					itm.setText(MENU_ITEM_SHOW_NEXT);
+					break;
+					
 				// show previous
 				case MENU_ITEM_SHOW_PREVIOUS:
 					int stat = getStateFromNode(stateStack);
 					showPreviousStates(stat);
+					itm.setText(MENU_ITEM_HIDE_PREVIOUS);
 
+					break;
+					
+				
 				default:
 					break;
 				}
@@ -381,6 +410,10 @@ public class TraceViewerInSystemController {
 			statesNodes.clear();
 		}
 
+		if(statesArrows!=null) {
+			statesArrows.clear();
+		}
+		
 		tracePane.getChildren().clear();
 
 		// check if saved
@@ -393,6 +426,7 @@ public class TraceViewerInSystemController {
 				toggleButtonActivity(btnSaveTrace, false);
 			}
 		}
+		
 		showTrace(trace);
 	}
 
@@ -510,6 +544,90 @@ public class TraceViewerInSystemController {
 		locatedNodesRelativeTo(stateNode, nextNodes, xOffest, yOffset);
 
 	}
+	
+	void removeNextStates(int state) {
+		
+		//remove all arrows and states that goes out of the given state
+		
+		if(!statesArrows.containsKey(state)) {
+			return;
+		}
+		
+		//remove next states
+		List<StackPane> nextStates = mapNextNodes.get(state);
+
+		tracePane.getChildren().removeAll(nextStates);
+		
+		mapNextNodes.clear();
+		
+		//remove arrows
+		List<StackPane> nextArrows = statesArrows.get(state);
+		
+		List<StackPane> arrowsToRemove = new LinkedList<StackPane>();
+//		List<StackPane> nodesToRemove = new LinkedList<StackPane>();
+		
+		for(StackPane arw: nextArrows) {
+			
+			//get end states
+			List<Integer> arwStates = getStatesFromArrow(arw);
+			
+			if(arwStates.size()>1) {
+				
+				int endState = arwStates.get(1);
+				
+//				//if the next state is part of the original trace then ignore
+				if(trace.getStateTransitions().contains(endState)) {
+					continue;
+					
+				}
+//				
+//				StackPane endStateNode = getNodeFromState(arwStates.get(1));
+//				nodesToRemove.add(endStateNode);
+				
+				//remove node
+				statesNodes.remove(endState);
+				
+				//remove line
+				if(arrowsLines.containsKey(arw)) {
+					tracePane.getChildren().remove(arrowsLines.get(arw));
+					arrowsLines.remove(arw);
+					
+				}
+				
+				//remove labels
+				if(arrowsLabels.containsKey(arw)) {
+					tracePane.getChildren().remove(arrowsLabels.get(arw));
+					arrowsLabels.remove(arw);
+					
+				}
+				
+				//to remove arrow head
+				arrowsToRemove.add(arw);
+				
+			}
+			
+			
+			
+		}
+		
+		//remove arrow head
+		statesArrows.get(state).removeAll(arrowsToRemove);
+		tracePane.getChildren().removeAll(arrowsToRemove);
+//		statesArrows.remove(state);
+		
+//		setNodes();
+		//remove states
+//		tracePane.getChildren().removeAll(nodesToRemove);
+		//update states map
+		
+		//remove arrows
+//		tracePane.getChildren().removeAll(nextArrows);
+		
+//		for(StackPane arw: nextArrows) {
+//			List<Object> comps = arrowsComponents.get(arw);
+//			tracePane.getChildren().removeAll(comps);
+//		}
+	}
 
 	/**
 	 * Shows the previous states of the given state
@@ -613,10 +731,10 @@ public class TraceViewerInSystemController {
 		// int xOffest = 60;
 		double posX = mainNode.getLayoutX() + xOffest;
 
-		if(posX <0) {
+		if (posX < 0) {
 			posX = NODE_RADIUS;
 		}
-		
+
 		checkForHorizontalScrolling(posX);
 
 		// int yOffest = (int) (NODE_RADIUS * 2);
@@ -631,10 +749,10 @@ public class TraceViewerInSystemController {
 
 			posY += yOffset;
 
-			if(posY<0) {
+			if (posY < 0) {
 				posY = NODE_RADIUS;
 			}
-			
+
 			checkForVerticalScrolling(posY);
 		}
 
@@ -659,7 +777,8 @@ public class TraceViewerInSystemController {
 	protected void checkForHorizontalScrolling(double posX) {
 
 		// check if the given posY goes beyond the height of the main stack
-		System.out.println("posX: " + posX + "\nstack width: " + mainStackPane.getPrefWidth() + "\nminWidth: " +mainStackPane.getMinWidth());
+		System.out.println("posX: " + posX + "\nstack width: " + mainStackPane.getPrefWidth() + "\nminWidth: "
+				+ mainStackPane.getMinWidth());
 		if (posX > mainStackPane.getPrefWidth()) {
 
 			mainStackPane.prefWidthProperty().unbind();
@@ -671,8 +790,6 @@ public class TraceViewerInSystemController {
 			// mainStackPane.setPrefWidth(posX + (NODE_RADIUS * 4));
 		}
 
-		// mainStackPane.prefHeightProperty().bind(Bindings.add(-5,
-		// scrollPaneTraceViewer.heightProperty()));
 	}
 
 	@FXML
@@ -820,6 +937,27 @@ public class TraceViewerInSystemController {
 	protected void setNodes() {
 
 		tracePane.getChildren().removeAll(statesNodes.values());
+		
+		
+//		for(List<StackPane> arws: statesArrows.values()){
+//			tracePane.getChildren().removeAll(arws);	
+//		}
+//		tracePane.getChildren().removeAll(statesArrows.values());
+//		tracePane.getChildren().removeAll(arrowsLines.values());
+//		tracePane.getChildren().removeAll(arrowsLabels.values());
+		
+		
+	
+		//order is important
+		
+//		tracePane.getChildren().addAll(arrowsLines.values());
+//		tracePane.getChildren().addAll(arrowsLabels.values());
+//		
+//		for(List<StackPane> arws: statesArrows.values()){
+//			tracePane.getChildren().addAll(arws);	
+//		}
+//		
+		
 		tracePane.getChildren().addAll(statesNodes.values());
 
 	}
@@ -831,13 +969,14 @@ public class TraceViewerInSystemController {
 			return;
 		}
 
-		tracePane.getChildren().clear();
+//		tracePane.getChildren().clear();
 
+		
 		this.trace = trace;
 
 		traceNodes = createTraceNodes(trace);
 
-		tracePane.getChildren().addAll(traceNodes);
+//		tracePane.getChildren().addAll(traceNodes);
 
 		// position each node
 		double posX = 250;
@@ -893,21 +1032,37 @@ public class TraceViewerInSystemController {
 		int index = 0;
 		// int count = 2;
 		for (Integer state : states) {
-			StackPane node = getDot(NODE_COLOUR, "" + state, STATE_STYLE, NODE_RADIUS);
-			node.setId(state + "");
-			// count--;
+			StackPane node = null;
 
-			// create edge between current and previous
-			if (index > 0) {
-				buildSingleDirectionalLine(stateNodes.get(index - 1), node, tracePane, true, false, TRACE_ARROW_COLOUR,
-						actions.get(index - 1));
-				// count = 1;
+			if (statesNodes.containsKey(state)) {
+				node = statesNodes.get(state);
+
+				if (index > 0) {
+
+					int previousState = states.get(index - 1);
+					
+					//if they don't already have a connection (i.e. arrow) drawn
+					if (!areConnected(previousState, state)) {
+						buildSingleDirectionalLine(stateNodes.get(index - 1), node, tracePane, true, false,
+								ADDED_NODES_ARROW_COLOUR, actions.get(index - 1));
+					}
+				}
+
+			} else {
+				node = getDot(NODE_COLOUR, "" + state, STATE_STYLE, NODE_RADIUS);
+				// a new node is created with the arrow
+				node = getDot(NODE_COLOUR, "" + state, EXTRA_STATE_STYLE, NODE_RADIUS);
+				
+				node.setId("" + state);
+				
+				if (index > 0) {
+					buildSingleDirectionalLine(stateNodes.get(index - 1), node, tracePane, true, false, TRACE_ARROW_COLOUR,
+							actions.get(index - 1));
+				}
+				
 			}
 
 			stateNodes.add(node);
-
-			// add to all nodes
-			// this.statesNodes.put(state, node);
 
 			index++;
 		}
@@ -1136,7 +1291,14 @@ public class TraceViewerInSystemController {
 	 */
 	private void buildSingleDirectionalLine(StackPane startDot, StackPane endDot, Pane parent, boolean hasEndArrow,
 			boolean hasStartArrow, Color color, String actionName) {
+		
+		//line
 		Line line = getLine(startDot, endDot, color);
+
+		//label
+		StackPane weightAB = getWeight(line, actionName);
+	
+		//arrow head
 		StackPane arrowAB = getArrow(true, line, startDot, endDot);
 
 		// set id of arrow to startID-endID
@@ -1144,10 +1306,6 @@ public class TraceViewerInSystemController {
 		if (!hasEndArrow) {
 			arrowAB.setOpacity(0);
 		}
-		// StackPane arrowBA = getArrow(false, line, startDot, endDot);
-		// if (!hasStartArrow) {
-		// arrowBA.setOpacity(0);
-		// }
 
 		// add arrow to all arrows
 		int startState = getStateFromNode(startDot);
@@ -1163,8 +1321,13 @@ public class TraceViewerInSystemController {
 			}
 
 		}
-
-		StackPane weightAB = getWeight(line, actionName);
+		
+		//add arrow's components
+		arrowsLines.put(arrowAB, line);
+		arrowsLabels.put(arrowAB, weightAB);
+//		List<Object> arwComps = new LinkedList<Object>(){{add(line); add(weightAB);}};
+//		arrowsComponents.put(arrowAB, arwComps);
+		
 		parent.getChildren().addAll(line, weightAB, arrowAB);
 	}
 

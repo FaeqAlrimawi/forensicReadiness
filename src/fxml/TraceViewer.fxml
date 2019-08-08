@@ -326,7 +326,11 @@
                                     <Separator orientation="VERTICAL" prefHeight="18.0" prefWidth="11.0" />
                                     <Label prefHeight="27.0" prefWidth="424.0" text="State-number =[action name]=&gt; State-number =[action name]=&gt; ..." textFill="#8a8686" />
                                     <Pane prefHeight="25.0" prefWidth="235.0" />
-                                    <TextField fx:id="textFieldSearchFiltered" prefHeight="25.0" prefWidth="155.0" promptText="Search" />
+                                    <TextField fx:id="textFieldSearchFiltered" prefHeight="25.0" prefWidth="155.0" promptText="Search">
+                                       <tooltip>
+                                          <Tooltip text="Search states in filtered traces (1, 4, 6)" />
+                                       </tooltip>
+                                    </TextField>
                                  </children>
                                  <VBox.margin>
                                     <Insets bottom="5.0" />
