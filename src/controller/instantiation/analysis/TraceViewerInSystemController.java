@@ -324,9 +324,11 @@ public class TraceViewerInSystemController {
 		comboBoxAddedTraces.setOnAction(e -> {
 
 			int selectedTraceID = comboBoxAddedTraces.getValue();
-			clearHighlights();
-			highlightTrace(selectedTraceID, HIGHLIGHT_STYLE, HIGHLIGHT_STYLE);
-			highLightedTracesIDs.add(selectedTraceID);
+			// clearHighlights();
+			// highlightTrace(selectedTraceID, HIGHLIGHT_STYLE,
+			// HIGHLIGHT_STYLE);
+			// highLightedTracesIDs.add(selectedTraceID);
+			removeTrace(selectedTraceID);
 
 		});
 	}
@@ -636,16 +638,16 @@ public class TraceViewerInSystemController {
 			statesIngoingArrows.clear();
 		}
 
-		if(highLightedTracesIDs!=null) {
+		if (highLightedTracesIDs != null) {
 			highLightedTracesIDs.clear();
 		}
-		
-		if(addedTracesIDs!=null) {
+
+		if (addedTracesIDs != null) {
 			addedTracesIDs.clear();
 		}
-		
+
 		comboBoxAddedTraces.getItems().clear();
-		
+
 		tracePane.getChildren().clear();
 
 		// check if saved
@@ -1272,7 +1274,7 @@ public class TraceViewerInSystemController {
 
 		tracePane.getChildren().addAll(traceNodes);
 
-		//set arrow lines style
+		// set arrow lines style
 		highlightTrace(trace.getInstanceID(), NORMAL_HIGHLIGHT_STYLE, TRACE_ARROW_HIGHLIGHT_STYLE);
 		// position each node
 		double posX = 250;
@@ -1430,11 +1432,34 @@ public class TraceViewerInSystemController {
 		List<Integer> states = trace.getStateTransitions();
 		// List<String> actions = trace.getTransitionActions();
 
+		int index = 1;
 		for (Integer state : states) {
-			removeState(state);
+
+			if (index <= states.size() - 1) {
+				StackPane node = statesNodes.get(state);
+
+				if (node != null) {
+					List<StackPane> arrowHeads = statesOutgoingArrows.get(state);
+
+					// find the arrow to the next state
+					if (arrowHeads != null) {
+						for (StackPane arrowHead : arrowHeads) {
+							int endState = getEndStateFromArrow(arrowHead);
+							if (endState == states.get(index)) {
+								removeArrow(state, arrowHead);
+								break;
+							}
+
+						}
+					}
+
+				}
+			}
+
 		}
 
-		// remove states
+		// remove states if they have no outgoing arrows
+		
 
 	}
 
@@ -1455,77 +1480,110 @@ public class TraceViewerInSystemController {
 		// remove any arrows
 
 		// remove next arrows
-		List<StackPane> arrowOutgoingHeads = statesOutgoingArrows.get(state);
-		List<StackPane> arrowIngoingHeads = statesIngoingArrows.get(state);
-
-		List<Node> nodesToRemove = new LinkedList<Node>();
-
-		if (arrowOutgoingHeads != null) {
-			for (StackPane arrowHead : arrowOutgoingHeads) {
-				nodesToRemove.add(arrowHead);
-
-				// get line
-				Line arrowLine = arrowsLines.get(arrowHead);
-				if (arrowLine != null) {
-					arrowsLines.remove(arrowHead);
-					nodesToRemove.add(arrowLine);
-				}
-
-				// get label
-				StackPane arrowLabel = arrowsLabels.get(arrowHead);
-
-				if (arrowLabel != null) {
-					arrowsLabels.remove(arrowLabel);
-					nodesToRemove.add(arrowLabel);
-				}
-
-			}
-
-			// remove arrows heads
-			statesOutgoingArrows.remove(state);
-		}
-
-		// remove previous
-		if (arrowIngoingHeads != null) {
-			for (StackPane arrowHead : arrowIngoingHeads) {
-
-				// if it is already visited then continue
-				if (nodesToRemove.contains(arrowHead)) {
-					continue;
-				}
-
-				nodesToRemove.add(arrowHead);
-
-				// get line
-				Line arrowLine = arrowsLines.get(arrowHead);
-				if (arrowLine != null) {
-					arrowsLines.remove(arrowHead);
-					nodesToRemove.add(arrowLine);
-				}
-
-				// get label
-				StackPane arrowLabel = arrowsLabels.get(arrowHead);
-
-				if (arrowLabel != null) {
-					arrowsLabels.remove(arrowLabel);
-					nodesToRemove.add(arrowLabel);
-				}
-
-			}
-
-			// remove arrows heads
-			statesIngoingArrows.remove(state);
-		}
+		// List<StackPane> arrowOutgoingHeads = statesOutgoingArrows.get(state);
+		// List<StackPane> arrowIngoingHeads = statesIngoingArrows.get(state);
+		//
+		// // if(arrowOutgoingHeads.size()> 1 && arrowIngoingHeads.size() > 1) {
+		// // return;
+		// // }
+		//
+		// List<Node> nodesToRemove = new LinkedList<Node>();
+		//
+		// // if it is not null and there's only one outgoing arrow then delete
+		// if (arrowOutgoingHeads != null) {
+		// for (StackPane arrowHead : arrowOutgoingHeads) {
+		// nodesToRemove.add(arrowHead);
+		//
+		// // get line
+		// Line arrowLine = arrowsLines.get(arrowHead);
+		// if (arrowLine != null) {
+		// arrowsLines.remove(arrowHead);
+		// nodesToRemove.add(arrowLine);
+		// }
+		//
+		// // get label
+		// StackPane arrowLabel = arrowsLabels.get(arrowHead);
+		//
+		// if (arrowLabel != null) {
+		// arrowsLabels.remove(arrowLabel);
+		// nodesToRemove.add(arrowLabel);
+		// }
+		//
+		// }
+		//
+		// // remove arrows heads
+		// statesOutgoingArrows.remove(state);
+		// }
+		//
+		// // remove previous
+		// if (arrowIngoingHeads != null) {
+		// for (StackPane arrowHead : arrowIngoingHeads) {
+		//
+		// // if it is already visited then continue
+		// if (nodesToRemove.contains(arrowHead)) {
+		// continue;
+		// }
+		//
+		// nodesToRemove.add(arrowHead);
+		//
+		// // get line
+		// Line arrowLine = arrowsLines.get(arrowHead);
+		// if (arrowLine != null) {
+		// arrowsLines.remove(arrowHead);
+		// nodesToRemove.add(arrowLine);
+		// }
+		//
+		// // get label
+		// StackPane arrowLabel = arrowsLabels.get(arrowHead);
+		//
+		// if (arrowLabel != null) {
+		// arrowsLabels.remove(arrowLabel);
+		// nodesToRemove.add(arrowLabel);
+		// }
+		//
+		// }
+		//
+		// // remove arrows heads
+		// statesIngoingArrows.remove(state);
+		// }
 
 		// remove from pane
 		// remove state
 		if (statesNodes.containsKey(state)) {
-			tracePane.getChildren().removeAll(statesNodes.get(state));
+			tracePane.getChildren().remove(statesNodes.get(state));
 			statesNodes.remove(state);
 		}
 
 		// remove arrows from pane
-		tracePane.getChildren().removeAll(nodesToRemove);
+		// tracePane.getChildren().removeAll(nodesToRemove);
+	}
+
+	protected void removeArrow(int startState, StackPane arrow) {
+
+		// get line
+		Line arrowLine = arrowsLines.get(arrow);
+		List<Node> nodesToRemove = new LinkedList<Node>();
+
+		if (arrowLine != null) {
+			arrowsLines.remove(arrow);
+			nodesToRemove.add(arrowLine);
+		}
+
+		// get label
+		StackPane arrowLabel = arrowsLabels.get(arrow);
+
+		if (arrowLabel != null) {
+			arrowsLabels.remove(arrowLabel);
+			nodesToRemove.add(arrowLabel);
+		}
+
+		// remove arrows heads
+		List<StackPane> arrows = statesOutgoingArrows.get(startState);
+
+		if (arrows != null) {
+			arrows.remove(arrow);
+		}
+
 	}
 
 	protected void highlightTrace(int traceID, String nodeHighLightStyle, String arrowHighLightStyle) {
@@ -1575,7 +1633,7 @@ public class TraceViewerInSystemController {
 			index++;
 		}
 
-//		highLightedTracesIDs.add(traceID);
+		// highLightedTracesIDs.add(traceID);
 		// remove states
 
 	}
@@ -1606,11 +1664,11 @@ public class TraceViewerInSystemController {
 	protected void clearHighlights() {
 		// remove highlight from other higlighted traces
 		if (!highLightedTracesIDs.isEmpty()) {
-			
+
 			for (Integer highlightedTraceID : highLightedTracesIDs) {
 				highlightTrace(highlightedTraceID, NORMAL_HIGHLIGHT_STYLE, NORMAL_HIGHLIGHT_STYLE);
 			}
-			
+
 			highLightedTracesIDs.clear();
 		}
 	}
