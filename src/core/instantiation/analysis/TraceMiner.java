@@ -4111,10 +4111,10 @@ public class TraceMiner {
 
 	public List<Integer> findTracesWithStates(List<Integer> states, List<Integer> tracesIDsToSearch) {
 
-		if(states == null || tracesIDsToSearch == null) {
+		if (states == null || tracesIDsToSearch == null) {
 			return null;
 		}
-		
+
 		List<Integer> result = new LinkedList<Integer>();
 
 		// get traces
@@ -4130,6 +4130,61 @@ public class TraceMiner {
 			int subIndex = Collections.indexOfSubList(traceStates, states);
 
 			if (subIndex != -1) {
+				result.add(traceEntry.getKey());
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Finds all traces that contain the given states in the order given (not
+	 * necessarly consecutive)
+	 * 
+	 * @param states
+	 * @param tracesIDsToSearch
+	 * @return
+	 */
+	public List<Integer> findTracesContainingStates(List<Integer> states, List<Integer> tracesIDsToSearch) {
+
+		// a trace should contain all states
+		// the order should be preserved e.g., state-1 index should be more than
+		// that of state-0
+
+		if (states == null || tracesIDsToSearch == null) {
+			return null;
+		}
+
+		List<Integer> result = new LinkedList<Integer>();
+
+		// get traces
+		Map<Integer, GraphPath> tracesToSearch = getTraces(tracesIDsToSearch);
+
+		if (tracesToSearch == null || tracesToSearch.isEmpty()) {
+			return result;
+		}
+
+		trace_loop: for (Entry<Integer, GraphPath> traceEntry : tracesToSearch.entrySet()) {
+			List<Integer> traceStates = traceEntry.getValue().getStateTransitions();
+
+			// int subIndex = Collections.indexOfSubList(traceStates, states);
+
+			// it should contain all given states
+			if (traceStates.containsAll(states)) {
+				// it should be in order
+				int index = -1;
+				for (int i = 0; i < states.size(); i++) {
+					int newIndex = traceStates.indexOf(states.get(i));
+
+					// if the current index of the state is less than or equal
+					// than the last one then skip
+					if (newIndex <= index) {
+						continue trace_loop;
+					}
+				}
+
+				// if this point is reached then the trace matches the given
+				// states
 				result.add(traceEntry.getKey());
 			}
 		}
