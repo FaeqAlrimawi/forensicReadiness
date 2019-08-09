@@ -49,6 +49,18 @@ import javafx.stage.Window;
 public class TraceViewerInSystemController {
 
 	@FXML
+	private HBox hboxTraceNavigator;
+	
+//	@FXML
+//	private HBox hboxBottomPart;
+	
+	@FXML
+	private HBox hboxIndicator;
+	
+	@FXML
+	private Label lblProgressIndicator;
+	
+	@FXML
 	private VBox vBoxCommands;
 
 	@FXML
@@ -244,6 +256,9 @@ public class TraceViewerInSystemController {
 		// bind width and height to the scroll
 //		scrollPaneEntities.prefHeightProperty().bind(Bindings.add(-200, vBoxCommands.heightProperty()));
 		scrollPaneEntities.prefWidthProperty().bind(Bindings.add(-1*hboxShowEntities.getPrefWidth(), vBoxCommands.widthProperty()));
+
+		//bind indicator width
+//		hboxIndicator.prefWidthProperty().bind(Bindings.add(-1*hboxBottomPart.getPrefWidth()/2-hboxTraceNavigator.getPrefWidth()*2, hboxBottomPart.widthProperty()));
 		
 		//holds info about percentage of states and actions
 		mapStatePerc = new HashMap<Integer, Label>();
@@ -527,8 +542,10 @@ public class TraceViewerInSystemController {
 	@FXML
 	void loadTransitionSystem(ActionEvent e) {
 
-		progressIndicator.setVisible(true);
+//		progressIndicator.setVisible(true);
 
+		setIndicator(true, "Loading transition system");
+		
 		if (miner != null) {
 			if (defualtTransitionSystemFilePath != null) {
 				System.out.println("loading sys from " + defualtTransitionSystemFilePath.getPath());
@@ -541,8 +558,9 @@ public class TraceViewerInSystemController {
 
 		}
 
-		progressIndicator.setVisible(false);
-
+//		progressIndicator.setVisible(false);
+		setIndicator(false, "");
+		
 		toggleButtonActivity(btnLoadTransitionSystem, true);
 
 	}
@@ -581,6 +599,9 @@ public class TraceViewerInSystemController {
 			}
 		}
 
+		//reset entities
+		hboxEntities.getChildren().clear();
+		
 		showTrace(trace);
 	}
 
@@ -1337,6 +1358,20 @@ public class TraceViewerInSystemController {
 
 	public void setTaskCell(TaskCell traceCell) {
 		this.traceCell = traceCell;
+	}
+	
+	protected void setIndicator(boolean showIndicator, String msg) {
+		
+		Platform.runLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				progressIndicator.setVisible(showIndicator);
+				lblProgressIndicator.setText(msg);
+			}
+		});
+		
 	}
 
 	/**

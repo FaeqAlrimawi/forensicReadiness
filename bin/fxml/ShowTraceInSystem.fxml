@@ -5,10 +5,12 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -27,7 +29,6 @@
             <HBox alignment="CENTER_LEFT" prefHeight="32.0" prefWidth="950.0" spacing="5.0" style="-fx-background-color: white;">
                <children>
                   <Button fx:id="btnLoadTransitionSystem" mnemonicParsing="false" onAction="#loadTransitionSystem" text="Load transition System" />
-                  <ProgressIndicator fx:id="progressIndicator" prefHeight="6.0" prefWidth="41.0" visible="false" />
                   <Button mnemonicParsing="false" onAction="#showStatesPercentages" text="Occurrences %" />
                   <Button fx:id="btnClear" mnemonicParsing="false" onAction="#reset" text="reset" />
                   <Button fx:id="btnSaveTrace" mnemonicParsing="false" onAction="#saveTrace" text="save" />
@@ -36,6 +37,7 @@
                   <Insets left="5.0" />
                </padding>
             </HBox>
+            <Separator prefWidth="200.0" />
             <HBox alignment="CENTER_LEFT" prefHeight="54.0" prefWidth="1105.0" spacing="5.0" style="-fx-background-color: white;">
                <children>
                   <HBox fx:id="hboxShowEntities" alignment="CENTER" prefHeight="54.0" prefWidth="185.0" spacing="3.0">
@@ -44,7 +46,7 @@
                         <Spinner fx:id="spinnerTopK" editable="true" prefHeight="25.0" prefWidth="64.0" />
                      </children>
                   </HBox>
-                  <ScrollPane fx:id="scrollPaneEntities" prefHeight="54.0" prefWidth="913.0" vbarPolicy="NEVER">
+                  <ScrollPane fx:id="scrollPaneEntities" prefHeight="54.0" prefWidth="913.0" style="-fx-background-color: white; -fx-border-color: grey;" vbarPolicy="NEVER">
                      <content>
                         <HBox fx:id="hboxEntities" prefHeight="45.0" spacing="10.0">
                            <padding>
@@ -56,27 +58,43 @@
                </children>
             </HBox>
          </children>
+         <padding>
+            <Insets bottom="3.0" />
+         </padding>
       </VBox>
    </top>
    <bottom>
-      <HBox alignment="CENTER" prefHeight="25.0" prefWidth="1061.0" spacing="3.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
+      <FlowPane vgap="3.0" BorderPane.alignment="CENTER">
          <children>
-            <Button mnemonicParsing="false" onAction="#showPreviousTrace" text="&lt;">
-               <tooltip>
-                  <Tooltip text="Previous Trace" />
-               </tooltip>
-            </Button>
-            <TextField fx:id="txtFieldCurrentShownTrace" alignment="CENTER" prefHeight="25.0" prefWidth="56.0" />
-            <Label fx:id="lblNumberOfShownTraces" />
-            <Button mnemonicParsing="false" onAction="#showNextTrace" text="&gt;">
-               <tooltip>
-                  <Tooltip text="Next Trace" />
-               </tooltip>
-            </Button>
+            <HBox fx:id="hboxTraceNavigator" alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="161.0" spacing="5.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#showPreviousTrace" text="&lt;">
+                     <tooltip>
+                        <Tooltip text="Previous Trace" />
+                     </tooltip>
+                  </Button>
+                  <TextField fx:id="txtFieldCurrentShownTrace" alignment="CENTER" prefHeight="25.0" prefWidth="56.0" />
+                  <Label fx:id="lblNumberOfShownTraces" />
+                  <Button mnemonicParsing="false" onAction="#showNextTrace" text="&gt;">
+                     <tooltip>
+                        <Tooltip text="Next Trace" />
+                     </tooltip>
+                  </Button>
+               </children>
+               <padding>
+                  <Insets left="5.0" />
+               </padding>
+            </HBox>
+            <HBox fx:id="hboxIndicator" prefHeight="25.0" prefWidth="395.0">
+               <children>
+                  <ProgressIndicator fx:id="progressIndicator" prefHeight="6.0" prefWidth="41.0" visible="false" />
+                  <Label fx:id="lblProgressIndicator" prefHeight="25.0" prefWidth="182.0" />
+               </children>
+            </HBox>
          </children>
          <padding>
-            <Insets bottom="5.0" left="5.0" />
+            <Insets bottom="3.0" top="3.0" />
          </padding>
-      </HBox>
+      </FlowPane>
    </bottom>
 </BorderPane>
