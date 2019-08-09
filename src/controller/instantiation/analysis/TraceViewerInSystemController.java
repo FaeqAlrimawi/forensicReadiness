@@ -53,6 +53,9 @@ import javafx.stage.Window;
 public class TraceViewerInSystemController {
 
 	@FXML
+	private HBox hboxTraceDetails;
+	
+	@FXML
 	private ComboBox<Integer> comboBoxAddedTraces;
 
 	@FXML
@@ -179,9 +182,10 @@ public class TraceViewerInSystemController {
 	private static final String NOT_FOUND = "---";
 	private static final String ARROW_ID_SEPARATOR = "-";
 
-	private static final String HIGHLIGHT_STYLE = "-fx-stroke-width:3px;-fx-stroke:blue;";
-	private static final String NORMAL_HIGHLIGHT_STYLE = "-fx-stroke-width:2px;-fx-stroke:grey;";
-	private static final String TRACE_ARROW_HIGHLIGHT_STYLE = "-fx-stroke-width:2px;-fx-stroke:red;";
+	private static final String HIGHLIGHT_STYLE = "-fx-stroke-width:3px;-fx-stroke:blue;-fx-opacity:1;";
+	private static final String NORMAL_HIGHLIGHT_STYLE = "-fx-stroke-width:2px;-fx-stroke:grey;-fx-opacity:1;";
+	private static final String ARROW_NORMAL_HIGHLIGHT_STYLE = "-fx-stroke-width:2px;-fx-stroke:grey;-fx-opacity:1;";
+	private static final String TRACE_ARROW_HIGHLIGHT_STYLE = "-fx-stroke-width:2px;-fx-stroke:red;-fx-opacity:1;";
 
 	// node context menu items
 	private static final String MENU_ITEM_SHOW_NEXT = "Show Next";
@@ -270,10 +274,6 @@ public class TraceViewerInSystemController {
 		mainStackPane.prefHeightProperty().bind(Bindings.add(-5, scrollPaneTraceViewer.heightProperty()));
 		mainStackPane.prefWidthProperty().bind(Bindings.add(-5, scrollPaneTraceViewer.widthProperty()));
 
-		// scrollpane for entities
-		// bind width and height to the scroll
-		// scrollPaneEntities.prefHeightProperty().bind(Bindings.add(-200,
-		// vBoxCommands.heightProperty()));
 		scrollPaneEntities.prefWidthProperty()
 				.bind(Bindings.add(-1 * hboxShowEntities.getPrefWidth(), vBoxCommands.widthProperty()));
 
@@ -323,12 +323,18 @@ public class TraceViewerInSystemController {
 		// set up the combobox for the added traces
 		comboBoxAddedTraces.setOnAction(e -> {
 
-			int selectedTraceID = comboBoxAddedTraces.getValue();
-			// clearHighlights();
-			// highlightTrace(selectedTraceID, HIGHLIGHT_STYLE,
-			// HIGHLIGHT_STYLE);
-			// highLightedTracesIDs.add(selectedTraceID);
-			removeTrace(selectedTraceID);
+			Integer selectedTraceID = comboBoxAddedTraces.getValue();
+			
+			if(selectedTraceID == null) {
+				return;
+			}
+			
+			clearHighlights();
+			
+			highlightTrace(selectedTraceID, HIGHLIGHT_STYLE, HIGHLIGHT_STYLE);
+			highLightedTracesIDs.add(selectedTraceID);
+			populateCell(selectedTraceID);
+			// removeTrace(selectedTraceID);
 
 		});
 	}
@@ -647,7 +653,8 @@ public class TraceViewerInSystemController {
 		}
 
 		comboBoxAddedTraces.getItems().clear();
-
+		hboxTraceDetails.getChildren().clear();
+		
 		tracePane.getChildren().clear();
 
 		// check if saved
@@ -969,15 +976,6 @@ public class TraceViewerInSystemController {
 					removePreviousStates(preState);
 				}
 			}
-
-			// if(!trace.getStateTransitions().contains(preState) &&
-			// mapNextNodes.containsKey(preState)) {
-			// removeNextStates(preState);
-			// }
-			// if(!trace.getStateTransitions().contains(preState)) {
-			// System.out.println("removing for: " +preState);
-			// removeNextStates(preState);
-			// }
 
 			List<StackPane> preArws = statesOutgoingArrows.get(preState);
 
@@ -1313,9 +1311,27 @@ public class TraceViewerInSystemController {
 
 			}
 		});
+		
+		if(!addedTracesIDs.contains(trace.getInstanceID())) {
+			addedTracesIDs.add(trace.getInstanceID());
+			updateAddedTracesIDsComboBox(addedTracesIDs);
+		}
 
 	}
 
+	protected void updateAddedTracesIDsComboBox(List<Integer> tracesIDs) {
+	
+		Platform.runLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				ObservableList<Integer> list = FXCollections.observableArrayList(tracesIDs);
+				comboBoxAddedTraces.setItems(list);
+			}
+		});
+	}
+	
 	/**
 	 * adds all partial traces between from and end states
 	 * 
@@ -1392,19 +1408,20 @@ public class TraceViewerInSystemController {
 		// add trace id
 		if (!addedTracesIDs.contains(newTrace.getInstanceID())) {
 			addedTracesIDs.add(newTrace.getInstanceID());
+			updateAddedTracesIDsComboBox(addedTracesIDs);
 		}
 
-		// update combobox
-		Platform.runLater(new Runnable() {
-
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				ObservableList<Integer> items = FXCollections.observableArrayList(addedTracesIDs);
-
-				comboBoxAddedTraces.setItems(items);
-			}
-		});
+//		// update combobox
+//		Platform.runLater(new Runnable() {
+//
+//			@Override
+//			public void run() {
+//				// TODO Auto-generated method stub
+//				ObservableList<Integer> items = FXCollections.observableArrayList(addedTracesIDs);
+//
+//				comboBoxAddedTraces.setItems(items);
+//			}
+//		});
 
 	}
 
@@ -1459,8 +1476,8 @@ public class TraceViewerInSystemController {
 		}
 
 		// remove states if they have no outgoing arrows
-		
 
+		// to be done
 	}
 
 	protected void removeState(int state) {
@@ -1621,6 +1638,7 @@ public class TraceViewerInSystemController {
 						for (StackPane arrowHead : arrowHeads) {
 							int endState = getEndStateFromArrow(arrowHead);
 							if (endState == states.get(index)) {
+								//highlight arrow
 								highlightArrow(arrowHead, arrowHighLightStyle);
 							}
 
@@ -1652,13 +1670,40 @@ public class TraceViewerInSystemController {
 	protected void highlightArrow(StackPane arrowHead, String highLightStyle) {
 
 		Line arrowLine = arrowsLines.get(arrowHead);
-
+		StackPane label = arrowsLabels.get(arrowHead);
+		
 		if (arrowLine == null) {
 			return;
 		}
 
-		arrowLine.setStyle(highLightStyle);
-		// arrowHead.setStyle(highLightStyle);
+		List<Integer> states = getStatesFromArrow(arrowHead);
+
+		if (states != null) {
+
+			//set line style
+			if (trace != null && trace.getStateTransitions().containsAll(states)
+					&& highLightStyle.equals(NORMAL_HIGHLIGHT_STYLE)) {
+				arrowLine.setStyle(TRACE_ARROW_HIGHLIGHT_STYLE);
+
+			} else {
+				arrowLine.setStyle(highLightStyle);
+			}
+			
+			//set label style
+			if(label!=null) {
+				if(!highLightStyle.contains("-fx-background-color")) {
+					
+					label.setStyle(highLightStyle+";-fx-background-color:white;");	
+				}
+				
+			}
+
+		}
+
+		
+		
+		 arrowHead.setOpacity(1);
+		 
 	}
 
 	protected void clearHighlights() {
@@ -1666,13 +1711,43 @@ public class TraceViewerInSystemController {
 		if (!highLightedTracesIDs.isEmpty()) {
 
 			for (Integer highlightedTraceID : highLightedTracesIDs) {
-				highlightTrace(highlightedTraceID, NORMAL_HIGHLIGHT_STYLE, NORMAL_HIGHLIGHT_STYLE);
+				highlightTrace(highlightedTraceID, ARROW_NORMAL_HIGHLIGHT_STYLE, ARROW_NORMAL_HIGHLIGHT_STYLE);
 			}
 
 			highLightedTracesIDs.clear();
+//			setOpacityForAll(0.4);
 		}
 	}
 
+	protected void setOpacityForAll(double opacity) {
+		
+		
+		//set opacity for nodes
+		for(StackPane node:  statesNodes.values()) {
+			node.setOpacity(opacity);
+		}
+		
+		//set opacity for arrows
+		for(List<StackPane> arrows: statesOutgoingArrows.values()){
+			for(StackPane arw:  arrows) {
+				//set for arrow head
+				arw.setOpacity(opacity);
+				
+				//set for line
+				Line line = arrowsLines.get(arw);
+				if(line!=null) {
+					line.setOpacity(opacity);
+				}
+				
+				//set for label
+				StackPane label = arrowsLabels.get(arw);
+				if(label!=null) {
+					label.setOpacity(opacity);
+				}
+				
+			}
+		}
+	}
 	/**
 	 * add a partial-trace for the given trace states
 	 * 
@@ -1902,6 +1977,63 @@ public class TraceViewerInSystemController {
 
 	}
 
+	protected void populateCell(int traceID) {
+
+		hboxTraceDetails.getChildren().clear();
+		if (trace == null) {
+			return;
+		}
+
+		if(miner == null) {
+			return;
+		}
+		
+		GraphPath trace = miner.getTrace(traceID);
+
+		int index = 0;
+		int size = trace.getStateTransitions().size() - 1;
+		List<Integer> states = trace.getStateTransitions();
+		List<String> actions = trace.getTransitionActions();
+		StringBuilder strBldr = new StringBuilder();
+
+		for (Integer state : states) {
+			// Circle circle = new Circle(hbox.getHeight()-2);
+			Label lblState;
+			Label lblAction;
+			if (index != size) {
+
+				lblState = new Label(state + "");
+
+				strBldr.append(state);
+
+				String act = actions.get(index);
+				lblAction = new Label(" =[" + act + "]=> ");
+
+				strBldr.append(" =[" + actions.get(index) + "]=> ");
+			} else {
+				lblState = new Label(state + "");
+				strBldr.append(state);
+				lblAction = null;
+			}
+
+			index++;
+
+			Platform.runLater(new Runnable() {
+
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					hboxTraceDetails.getChildren().add(lblState);
+					if (lblAction != null) {
+						hboxTraceDetails.getChildren().add(lblAction);
+					}
+
+				}
+			});
+
+		}
+	}
+	
 	/**
 	 * Builds a pane consisting of circle with the provided specifications.
 	 *

@@ -6,7 +6,6 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
@@ -27,22 +26,23 @@
    <top>
       <VBox fx:id="vBoxCommands" spacing="5.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
          <children>
-            <HBox alignment="CENTER_LEFT" prefHeight="32.0" prefWidth="950.0" spacing="5.0" style="-fx-background-color: white;">
+            <FlowPane alignment="CENTER_LEFT" hgap="5.0" prefHeight="0.0" prefWidth="1105.0">
                <children>
                   <Button fx:id="btnLoadTransitionSystem" mnemonicParsing="false" onAction="#loadTransitionSystem" text="Load transition System" />
                   <Button mnemonicParsing="false" onAction="#showStatesPercentages" text="Occurrences %" />
                   <Button fx:id="btnClear" mnemonicParsing="false" onAction="#reset" text="reset" />
                   <Button fx:id="btnSaveTrace" mnemonicParsing="false" onAction="#saveTrace" text="save" />
-                  <ComboBox fx:id="comboBoxAddedTraces" prefHeight="25.0" prefWidth="131.0" promptText="added traces" />
+                  <HBox alignment="CENTER_LEFT" spacing="3.0">
+                     <children>
+                        <ComboBox fx:id="comboBoxAddedTraces" prefHeight="25.0" prefWidth="131.0" promptText="added traces" />
+                        <HBox fx:id="hboxTraceDetails" alignment="CENTER_LEFT" prefHeight="32.0" prefWidth="627.0" />
+                     </children>
+                  </HBox>
                </children>
-               <padding>
-                  <Insets left="5.0" />
-               </padding>
-            </HBox>
-            <Separator prefWidth="200.0" />
-            <HBox alignment="CENTER_LEFT" prefHeight="54.0" prefWidth="1105.0" spacing="5.0" style="-fx-background-color: white;">
+            </FlowPane>
+            <HBox alignment="CENTER_LEFT" prefHeight="54.0" prefWidth="1105.0" spacing="3.0" style="-fx-background-color: white;">
                <children>
-                  <HBox fx:id="hboxShowEntities" alignment="CENTER" prefHeight="54.0" prefWidth="185.0" spacing="3.0">
+                  <HBox fx:id="hboxShowEntities" alignment="CENTER" prefHeight="54.0" prefWidth="174.0" spacing="3.0">
                      <children>
                         <Button fx:id="btnShowEntities" mnemonicParsing="false" onAction="#showEntities" text="show top entities" />
                         <Spinner fx:id="spinnerTopK" editable="true" prefHeight="25.0" prefWidth="64.0" />
@@ -61,14 +61,17 @@
             </HBox>
          </children>
          <padding>
-            <Insets bottom="3.0" />
+            <Insets bottom="5.0" />
          </padding>
+         <BorderPane.margin>
+            <Insets left="3.0" />
+         </BorderPane.margin>
       </VBox>
    </top>
    <bottom>
       <FlowPane vgap="3.0" BorderPane.alignment="CENTER">
          <children>
-            <HBox fx:id="hboxTraceNavigator" alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="161.0" spacing="5.0">
+            <HBox fx:id="hboxTraceNavigator" alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="184.0" spacing="5.0">
                <children>
                   <Button mnemonicParsing="false" onAction="#showPreviousTrace" text="&lt;">
                      <tooltip>
@@ -87,10 +90,10 @@
                   <Insets left="5.0" />
                </padding>
             </HBox>
-            <HBox fx:id="hboxIndicator" prefHeight="25.0" prefWidth="395.0">
+            <HBox fx:id="hboxIndicator" prefHeight="25.0" prefWidth="699.0">
                <children>
                   <ProgressIndicator fx:id="progressIndicator" prefHeight="6.0" prefWidth="41.0" visible="false" />
-                  <Label fx:id="lblProgressIndicator" prefHeight="25.0" prefWidth="182.0" />
+                  <Label fx:id="lblProgressIndicator" prefHeight="25.0" prefWidth="655.0" />
                </children>
             </HBox>
          </children>
