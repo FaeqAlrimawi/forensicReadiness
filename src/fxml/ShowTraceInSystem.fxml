@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
@@ -32,6 +33,7 @@
                   <Button mnemonicParsing="false" onAction="#showStatesPercentages" text="Occurrences %" />
                   <Button fx:id="btnClear" mnemonicParsing="false" onAction="#reset" text="reset" />
                   <Button fx:id="btnSaveTrace" mnemonicParsing="false" onAction="#saveTrace" text="save" />
+                  <ComboBox fx:id="comboBoxAddedTraces" prefHeight="25.0" prefWidth="131.0" promptText="added traces" />
                </children>
                <padding>
                   <Insets left="5.0" />
