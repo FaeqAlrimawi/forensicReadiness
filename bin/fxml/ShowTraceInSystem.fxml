@@ -5,11 +5,13 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.analysis.TraceViewerInSystemController">
    <center>
@@ -20,15 +22,41 @@
       </ScrollPane>
    </center>
    <top>
-      <HBox alignment="CENTER_LEFT" prefHeight="32.0" prefWidth="950.0" spacing="5.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
+      <VBox fx:id="vBoxCommands" spacing="5.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="btnLoadTransitionSystem" mnemonicParsing="false" onAction="#loadTransitionSystem" text="Load transition System" />
-            <ProgressIndicator fx:id="progressIndicator" prefHeight="6.0" prefWidth="41.0" visible="false" />
-            <Button mnemonicParsing="false" onAction="#showStatesPercentages" text="Occurrences %" />
-            <Button fx:id="btnClear" mnemonicParsing="false" onAction="#reset" text="reset" />
-            <Button fx:id="btnSaveTrace" mnemonicParsing="false" onAction="#saveTrace" text="save" />
+            <HBox alignment="CENTER_LEFT" prefHeight="32.0" prefWidth="950.0" spacing="5.0" style="-fx-background-color: white;">
+               <children>
+                  <Button fx:id="btnLoadTransitionSystem" mnemonicParsing="false" onAction="#loadTransitionSystem" text="Load transition System" />
+                  <ProgressIndicator fx:id="progressIndicator" prefHeight="6.0" prefWidth="41.0" visible="false" />
+                  <Button mnemonicParsing="false" onAction="#showStatesPercentages" text="Occurrences %" />
+                  <Button fx:id="btnClear" mnemonicParsing="false" onAction="#reset" text="reset" />
+                  <Button fx:id="btnSaveTrace" mnemonicParsing="false" onAction="#saveTrace" text="save" />
+               </children>
+               <padding>
+                  <Insets left="5.0" />
+               </padding>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" prefHeight="54.0" prefWidth="1105.0" spacing="5.0" style="-fx-background-color: white;">
+               <children>
+                  <HBox fx:id="hboxShowEntities" alignment="CENTER" prefHeight="54.0" prefWidth="185.0" spacing="3.0">
+                     <children>
+                        <Button fx:id="btnShowEntities" mnemonicParsing="false" onAction="#showEntities" text="show top entities" />
+                        <Spinner fx:id="spinnerTopK" editable="true" prefHeight="25.0" prefWidth="64.0" />
+                     </children>
+                  </HBox>
+                  <ScrollPane fx:id="scrollPaneEntities" prefHeight="54.0" prefWidth="913.0" vbarPolicy="NEVER">
+                     <content>
+                        <HBox fx:id="hboxEntities" prefHeight="45.0" spacing="10.0">
+                           <padding>
+                              <Insets left="5.0" top="5.0" />
+                           </padding>
+                        </HBox>
+                     </content>
+                  </ScrollPane>
+               </children>
+            </HBox>
          </children>
-      </HBox>
+      </VBox>
    </top>
    <bottom>
       <HBox alignment="CENTER" prefHeight="25.0" prefWidth="1061.0" spacing="3.0" style="-fx-background-color: white;" BorderPane.alignment="CENTER">

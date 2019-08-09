@@ -45,6 +45,8 @@ public class InstantiationDetailsController {
 
 	private GraphPath trace;
 	private TraceMiner miner;
+	
+	//key is entity name, value is occurrence
 	private List<Map.Entry<String, Long>> topEntities;
 
 	// used for common entities

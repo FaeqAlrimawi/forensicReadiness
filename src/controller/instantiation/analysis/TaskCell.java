@@ -360,7 +360,7 @@ public class TaskCell extends ListCell<GraphPath> {
 	/**
 	 * Select BigraphER file (*.big)
 	 */
-	protected void selectBigraphERFile() {
+	public void selectBigraphERFile() {
 		FileChooser fileChooser = new FileChooser();
 
 		// if a file already chosen
@@ -392,7 +392,7 @@ public class TaskCell extends ListCell<GraphPath> {
 		// if first time
 		if (traceMiner != null && !traceMiner.isBigraphERFileSet()) {
 			ButtonType result = showDialog("Select BigraphER File", "BigraphER file needed",
-					"Please select BigraphER file (*.big)", AlertType.CONFIRMATION);
+					"Please select BigraphER file (*.big)", AlertType.CONFIRMATION, true);
 
 			if (result == ButtonType.CANCEL) {
 				return;
@@ -413,7 +413,7 @@ public class TaskCell extends ListCell<GraphPath> {
 	/**
 	 * Select states folder (which contains the .svg representation)
 	 */
-	protected void selectStatesFolder() {
+	public void selectStatesFolder() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 
 		// show folder if any
@@ -437,7 +437,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 			ButtonType result = showDialog("Select States Folder", "States Folder is needed",
 					"Please select a Folder which contains the states representations (e.g., *.svg, *.json, *.txt)",
-					AlertType.CONFIRMATION);
+					AlertType.CONFIRMATION, true);
 
 			if (result == ButtonType.CANCEL) {
 				return;
@@ -454,7 +454,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	}
 
-	protected void selectTraceFolder() {
+	public void selectTraceFolder() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 
 		// show folder if any
@@ -728,7 +728,7 @@ public class TaskCell extends ListCell<GraphPath> {
 		if (fileExt == null) {
 			ButtonType res = showDialog("File not found", "State [" + state + "] file is missing",
 					"File not found for state [" + state + "]. Would you Like to select another Folder?",
-					AlertType.CONFIRMATION);
+					AlertType.CONFIRMATION, true);
 
 			if (res == ButtonType.OK) {
 				selectStatesFolder();
@@ -810,7 +810,7 @@ public class TaskCell extends ListCell<GraphPath> {
 		}
 	}
 
-	protected ButtonType showDialog(String title, String headerMsg, String msg, AlertType type) {
+	protected ButtonType showDialog(String title, String headerMsg, String msg, AlertType type, boolean showAndWait) {
 
 		Alert alert = new Alert(type);
 
@@ -820,7 +820,12 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		alert.setContentText(msg);
 
-		alert.showAndWait();
+		if(showAndWait) {
+			alert.showAndWait();	
+		} else {
+			alert.show();
+		}
+		
 
 		return alert.getResult();
 	}

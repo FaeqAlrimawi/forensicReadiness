@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import core.brs.parser.utilities.JSONTerms;
 import core.instantiation.analysis.TraceMiner;
 import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.pattern_instantiation.GraphPath;
@@ -29,10 +30,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -44,6 +48,15 @@ import javafx.stage.Window;
 
 public class TraceViewerInSystemController {
 
+	@FXML
+	private VBox vBoxCommands;
+
+	@FXML
+	private ScrollPane scrollPaneEntities;
+
+	@FXML
+	private HBox hboxShowEntities;
+	
 	@FXML
 	private StackPane mainStackPane;
 
@@ -67,6 +80,21 @@ public class TraceViewerInSystemController {
 
 	@FXML
 	private ScrollPane scrollPaneTraceViewer;
+
+	@FXML
+	private Spinner<Integer> spinnerTopK;
+
+	@FXML
+	private HBox hboxEntities;
+
+	private int minEntityNum = 1;
+	private int maxEntityNum = 100;
+
+	// key is entity name, value is occurrence
+	private List<Map.Entry<String, Long>> topEntities;
+
+	// used for common entities
+	private int topK = 3;
 
 	private Stage currentStage;
 
@@ -207,13 +235,18 @@ public class TraceViewerInSystemController {
 			}
 		});
 
-		// scrollpane
+		// scrollpane for trace
 		// bind width and height to the scroll
 		mainStackPane.prefHeightProperty().bind(Bindings.add(-5, scrollPaneTraceViewer.heightProperty()));
 		mainStackPane.prefWidthProperty().bind(Bindings.add(-5, scrollPaneTraceViewer.widthProperty()));
 
+		// scrollpane for entities
+		// bind width and height to the scroll
+//		scrollPaneEntities.prefHeightProperty().bind(Bindings.add(-200, vBoxCommands.heightProperty()));
+		scrollPaneEntities.prefWidthProperty().bind(Bindings.add(-1*hboxShowEntities.getPrefWidth(), vBoxCommands.widthProperty()));
+		
+		//holds info about percentage of states and actions
 		mapStatePerc = new HashMap<Integer, Label>();
-
 		mapActionPerc = new HashMap<String, List<Label>>();
 
 		// init maps for next and previous fo the states
@@ -225,8 +258,26 @@ public class TraceViewerInSystemController {
 		arrowsLines = new HashMap<StackPane, Line>();
 		arrowsLabels = new HashMap<StackPane, StackPane>();
 
-		// init context menu for states
-		// createNodeContextMenu();
+		// set top entities
+		// set up spinner
+		SpinnerValueFactory<Integer> valueFactory = //
+				new SpinnerValueFactory.IntegerSpinnerValueFactory(minEntityNum, maxEntityNum, topK);
+
+		spinnerTopK.setValueFactory(valueFactory);
+
+		// add listener for when changed
+		spinnerTopK.valueProperty().addListener(new ChangeListener<Integer>() {
+			//
+			// @Override
+			public void changed(ObservableValue<? extends Integer> observable, Integer oldValue, Integer newValue) {
+				// TODO Auto-generated method stub
+				topK = newValue;
+
+				if (miner != null && miner.isBigraphERFileSet()) {
+					showEntities(null);
+				}
+			}
+		});
 	}
 
 	protected ContextMenu createNodeContextMenu(StackPane stateStack) {
@@ -286,6 +337,70 @@ public class TraceViewerInSystemController {
 		conMenu.getItems().addAll(items);
 
 		return conMenu;
+	}
+
+	@FXML
+	void showEntities(ActionEvent e) {
+
+		if (trace == null) {
+			System.err.println("Trace is null");
+			return;
+		}
+
+		if (miner == null) {
+			System.err.println("Trace miner is null");
+			return;
+		}
+
+		// this.trace = trace;
+
+		if (!miner.isBigraphERFileSet()) {
+			traceCell.selectBigraphERFile();
+		}
+
+		if (!miner.isBigraphERFileSet()) {
+			return;
+		}
+
+		// get common entities
+		List<GraphPath> traces = new LinkedList<GraphPath>();
+		traces.add(trace);
+
+		topK = spinnerTopK.getValue();
+
+		topEntities = miner.findTopCommonEntities(traces, JSONTerms.BIG_IRRELEVANT_TERMS, topK);
+
+		if (hboxEntities.getChildren().size() > 0) {
+			hboxEntities.getChildren().clear();
+		}
+
+		StringBuilder bldrStyle = new StringBuilder();
+
+		// add style to labels
+		// font: 14, color: black, weight: bold
+		bldrStyle.append("-fx-text-fill: black; -fx-font-size:14px; -fx-font-weight: bold;")
+				// background
+				.append("-fx-background-color: white;")
+				// border
+				.append("-fx-border-color: grey;");
+
+		String style = bldrStyle.toString();
+
+		// create labels for each entity
+		List<Label> resLbls = new LinkedList<Label>();
+
+		for (Map.Entry<String, Long> entry : topEntities) {
+			Label lbl = new Label(" " + entry.getKey() + " <" + entry.getValue() + "> ");
+			lbl.setStyle(style);
+			resLbls.add(lbl);
+		}
+
+		// set selected value
+		// comboBoxTopK.getSelectionModel().select(topK - 1);
+		spinnerTopK.getValueFactory().setValue(topK);
+		// add labels to hbox
+		hboxEntities.getChildren().addAll(resLbls);
+
 	}
 
 	protected int getStateFromNode(StackPane node) {
@@ -592,7 +707,6 @@ public class TraceViewerInSystemController {
 			return;
 		}
 
-		
 		// remove next states
 		List<StackPane> nextStates = mapNextNodes.get(state);
 
@@ -600,12 +714,12 @@ public class TraceViewerInSystemController {
 		for (StackPane node : nextStates) {
 			int endState = getStateFromNode(node);
 
-//			if (statesArrows.containsKey(endState)) {
-				removeNextStates(endState);
-				
-				System.out.println("removing pre: " + endState);
-				removePreviousStates(endState);
-//			}
+			// if (statesArrows.containsKey(endState)) {
+			removeNextStates(endState);
+
+			System.out.println("removing pre: " + endState);
+			removePreviousStates(endState);
+			// }
 		}
 
 		// remove arrows
@@ -760,33 +874,33 @@ public class TraceViewerInSystemController {
 		}
 
 		List<Integer> inBoundStates = graph.inboundNeighbors(state);
-		
+
 		List<StackPane> arrowsToRemove = new LinkedList<StackPane>();
 
 		for (Integer preState : inBoundStates) {
-			
-			//check the previous previous
-			for(Integer prePreState: graph.inboundNeighbors(preState)) {
-				if(statesArrows.containsKey(prePreState) && !trace.getStateTransitions().contains(prePreState)) {
+
+			// check the previous previous
+			for (Integer prePreState : graph.inboundNeighbors(preState)) {
+				if (statesArrows.containsKey(prePreState) && !trace.getStateTransitions().contains(prePreState)) {
 					removePreviousStates(preState);
 				}
 			}
-			
-//			if(!trace.getStateTransitions().contains(preState) && mapNextNodes.containsKey(preState)) {
-//				removeNextStates(preState);	
-//			}
-//			if(!trace.getStateTransitions().contains(preState)) {
-//				System.out.println("removing for: " +preState);
-//				removeNextStates(preState);	
-//			}
-			
-			
+
+			// if(!trace.getStateTransitions().contains(preState) &&
+			// mapNextNodes.containsKey(preState)) {
+			// removeNextStates(preState);
+			// }
+			// if(!trace.getStateTransitions().contains(preState)) {
+			// System.out.println("removing for: " +preState);
+			// removeNextStates(preState);
+			// }
+
 			List<StackPane> preArws = statesArrows.get(preState);
 
-			if(preArws ==null) {
+			if (preArws == null) {
 				return;
 			}
-			
+
 			for (StackPane arw : preArws) {
 				int endState = getEndStateFromArrow(arw);
 
@@ -822,10 +936,9 @@ public class TraceViewerInSystemController {
 
 		}
 
-		if(preStates!=null) {
-			tracePane.getChildren().removeAll(preStates);	
+		if (preStates != null) {
+			tracePane.getChildren().removeAll(preStates);
 		}
-		
 
 		mapPreviousNodes.remove(state);
 	}
