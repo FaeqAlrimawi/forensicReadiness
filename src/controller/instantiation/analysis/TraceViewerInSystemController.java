@@ -1,5 +1,6 @@
 package controller.instantiation.analysis;
 
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -41,6 +43,8 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
@@ -51,6 +55,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -189,6 +194,9 @@ public class TraceViewerInSystemController {
 	private URL defualtTransitionSystemFilePath = getClass()
 			.getResource("../../../resources/example/transitions_labelled.json");
 
+	private String imgDeletePath = "../../../resources/icons/delete.png";
+//	private InputStream imgDel = getClass().getResourceAsStream(imgDeletePath);
+	
 	private static final String NODE_COLOUR = "white";
 	private static final String HIGHLIGHTED_NODE_COLOUR = "#efe8ff";
 	private static final String DEFAULT_ARROW_COLOUR = "#333333";
@@ -369,11 +377,13 @@ public class TraceViewerInSystemController {
 					return;
 				}
 
-				clearHighlights();
+//				clearHighlights();
 
 				highlightTrace(selectedTraceID, HIGHLIGHT_STYLE, HIGHLIGHT_STYLE);
-				highLightedTracesIDs.add(selectedTraceID);
-				populateCell(selectedTraceID);
+				addTraceIDToDisplay(selectedTraceID);
+//				highLightedTracesIDs.add(selectedTraceID);
+//				populateCell(selectedTraceID);
+				
 				// removeTrace(selectedTraceID);
 
 			}
@@ -393,20 +403,21 @@ public class TraceViewerInSystemController {
 		checkboxShowOnlySelectedTrace.setOnAction(e -> {
 
 			if (checkboxShowOnlySelectedTrace.isSelected()) {
-				Integer traceID = comboBoxAddedTraces.getSelectionModel().getSelectedItem();
-				Random rand = new Random();
-				int index = rand.nextInt(comboBoxAddedTraces.getItems().size());
-				Integer randomTraceID = comboBoxAddedTraces.getItems().get(index);
-				index = rand.nextInt(comboBoxAddedTraces.getItems().size());
-				Integer random2 = comboBoxAddedTraces.getItems().get(index);
-				if (traceID != null) {
-					// show only selected trace
-					List<Integer> traces = new LinkedList<Integer>();
-					traces.add(traceID);
-					traces.add(randomTraceID);
-					traces.add(random2);
-					showOnlyTraces(traces);
-				}
+//				Integer traceID = comboBoxAddedTraces.getSelectionModel().getSelectedItem();
+//				Random rand = new Random();
+//				int index = rand.nextInt(comboBoxAddedTraces.getItems().size());
+//				Integer randomTraceID = comboBoxAddedTraces.getItems().get(index);
+//				index = rand.nextInt(comboBoxAddedTraces.getItems().size());
+//				Integer random2 = comboBoxAddedTraces.getItems().get(index);
+//				if (traceID != null) {
+//					// show only selected trace
+//					List<Integer> traces = new LinkedList<Integer>();
+//					traces.add(traceID);
+//					traces.add(randomTraceID);
+//					traces.add(random2);
+//					showOnlyTraces(traces);
+//				}
+				showOnlyTraces(highLightedTracesIDs);
 
 			} else {
 				showAllAddedTraces();
@@ -1485,6 +1496,7 @@ public class TraceViewerInSystemController {
 
 	protected String getrandomColoredHighLightStyle() {
 
+		
 		Random rand = new Random();
 //		int bound = 1000000;
 		
@@ -1873,6 +1885,8 @@ public class TraceViewerInSystemController {
 				}
 			}
 		}
+		
+		setNodes();
 	}
 
 	protected void highlightState(int state, String highLightStyle) {
@@ -2497,63 +2511,134 @@ public class TraceViewerInSystemController {
 
 	}
 
-	protected void populateCell(int traceID) {
+//	protected void populateCell(int traceID) {
+//
+//		flowPaneTraceDetails.getChildren().clear();
+//		if (trace == null) {
+//			return;
+//		}
+//
+//		if (miner == null) {
+//			return;
+//		}
+//
+//		GraphPath trace = miner.getTrace(traceID);
+//
+//		int index = 0;
+//		int size = trace.getStateTransitions().size() - 1;
+//		List<Integer> states = trace.getStateTransitions();
+//		List<String> actions = trace.getTransitionActions();
+//		StringBuilder strBldr = new StringBuilder();
+//
+//		for (Integer state : states) {
+//			// Circle circle = new Circle(hbox.getHeight()-2);
+//			Label lblState;
+//			Label lblAction;
+//			if (index != size) {
+//
+//				lblState = new Label(state + "");
+//				InputStream imgDel = getClass().getResourceAsStream(imgDeletePath);
+//				ImageView imgView = new ImageView(new Image(imgDel));
+//				//add image
+////				if(imgDel!=null) {
+////					Image img = new Image(imgDel);
+//					lblState.setGraphic(imgView);
+//					lblState.setAlignment(Pos.CENTER_LEFT);
+////				}
+//					lblState.setContentDisplay(ContentDisplay.RIGHT);
+//					
+//				lblState.setStyle("-fx-border-color: grey;-fx-border-width:1;-fx-background-color:white; -fx-font-size:14;");
+//				strBldr.append(state);
+//
+//				String act = actions.get(index);
+//				lblAction = new Label(" =[" + act + "]=> ");
+//
+//				strBldr.append(" =[" + actions.get(index) + "]=> ");
+//			} else {
+//				lblState = new Label(state + "");
+//				
+//				//add image
+////				if(imgDel!=null) {
+////					Image img = new Image(imgDel);
+////					lblState.setGraphic(new ImageView(img));
+////				}
+//				
+//				strBldr.append(state);
+//				lblAction = null;
+//			}
+//
+//			index++;
+//
+//			Platform.runLater(new Runnable() {
+//
+//				@Override
+//				public void run() {
+//					// TODO Auto-generated method stub
+//					flowPaneTraceDetails.getChildren().add(lblState);
+//					if (lblAction != null) {
+//						flowPaneTraceDetails.getChildren().add(lblAction);
+//					}
+//
+//				}
+//			});
+//
+//		}
+//	}
 
-		flowPaneTraceDetails.getChildren().clear();
-		if (trace == null) {
+	protected void addTraceIDToDisplay(Integer traceID) {
+
+		if(highLightedTracesIDs.contains(traceID)) {
 			return;
 		}
-
-		if (miner == null) {
-			return;
-		}
-
-		GraphPath trace = miner.getTrace(traceID);
-
-		int index = 0;
-		int size = trace.getStateTransitions().size() - 1;
-		List<Integer> states = trace.getStateTransitions();
-		List<String> actions = trace.getTransitionActions();
-		StringBuilder strBldr = new StringBuilder();
-
-		for (Integer state : states) {
-			// Circle circle = new Circle(hbox.getHeight()-2);
-			Label lblState;
-			Label lblAction;
-			if (index != size) {
-
-				lblState = new Label(state + "");
-
-				strBldr.append(state);
-
-				String act = actions.get(index);
-				lblAction = new Label(" =[" + act + "]=> ");
-
-				strBldr.append(" =[" + actions.get(index) + "]=> ");
+		
+		//label
+		Label traceLabel = new Label(traceID + "");
+		traceLabel.setFont(new Font(14));
+		
+		//image
+		InputStream imgDel = getClass().getResourceAsStream(imgDeletePath);
+		ImageView imgView = new ImageView(new Image(imgDel));
+		
+		//container 
+		HBox hbox = new HBox();
+		hbox.setAlignment(Pos.CENTER_LEFT);
+		hbox.setSpacing(3);
+		
+		imgView.setOnMouseEntered(e->{
+		
+			imgView.setCursor(Cursor.HAND);
+		});
+		
+		imgView.setOnMouseClicked(e->{
+			flowPaneTraceDetails.getChildren().remove(hbox);
+			highLightedTracesIDs.remove(traceID);
+			if(checkboxShowOnlySelectedTrace.isSelected()) {
+				showOnlyTraces(highLightedTracesIDs);
 			} else {
-				lblState = new Label(state + "");
-				strBldr.append(state);
-				lblAction = null;
-			}
-
-			index++;
-
-			Platform.runLater(new Runnable() {
-
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-					flowPaneTraceDetails.getChildren().add(lblState);
-					if (lblAction != null) {
-						flowPaneTraceDetails.getChildren().add(lblAction);
-					}
-
+				for(Integer trID: highLightedTracesIDs){
+					highlightTrace(trID, HIGHLIGHT_STYLE, HIGHLIGHT_STYLE);	
 				}
-			});
+				
+			}
+		});
+		
+	
+		hbox.getChildren().addAll(traceLabel, imgView);
+		
+		//add image
+//		traceLabel.setGraphic(imgView);
+//		traceLabel.setAlignment(Pos.CENTER_LEFT);
+//		traceLabel.setContentDisplay(ContentDisplay.RIGHT);
 
-		}
+		//set style
+		hbox.setStyle("-fx-border-color: grey;-fx-border-width:1;-fx-background-color:white;");
+		
+		//add to the list of shown traces
+		flowPaneTraceDetails.getChildren().add(hbox);
+		
+		highLightedTracesIDs.add(traceID);
 	}
-
+	
 	protected void addComponentToTrace(int traceID, Node comp) {
 
 		if (NOT_A_TRACE == traceID) {
