@@ -200,13 +200,14 @@ public class TraceViewerInSystemController {
 	
 	private static final String NODE_COLOUR = "white";
 	private static final String HIGHLIGHTED_NODE_COLOUR = "#efe8ff";
+	private static final String HIGHLIGHTED_END_NODE_COLOUR = "#ffb1b1";
 	private static final String DEFAULT_ARROW_COLOUR = "#333333";
 	private static final Color TRACE_ARROW_COLOUR = Color.BLUE;
 	private static final String HIGHLIGHT_TRACE_ARROW_COLOUR = "blue";
 	private static final Color ADDED_NODES_ARROW_COLOUR = Color.GREY;
 	private static final double NODE_RADIUS = 25;
 	private static final String STATE_STYLE = "-fx-font-size:18px;-fx-font-weight:bold;";
-	private static final String EXTRA_STATE_STYLE = "-fx-font-size:18px;-fx-font-weight:bold; -fx-text-fill:grey";
+	private static final String EXTRA_STATE_STYLE = "-fx-font-size:18px;-fx-font-weight:bold; -fx-text-fill:black";
 	private static final String STATE_PERC_STYLE = "-fx-font-size:10px;-fx-text-fill:red;";
 	private static final String ACTION_NAME_STYLE = "-fx-font-size:13px;";
 	private static final String ACTION_PERC_STYLE = "-fx-font-size:10px;-fx-text-fill:red;";
@@ -218,7 +219,7 @@ public class TraceViewerInSystemController {
 			+ ";-fx-stroke-width:2px;-fx-stroke:black;";
 	private static final String START_NODE_HIGHLIGHT_STYLE = "-fx-fill:" + HIGHLIGHTED_NODE_COLOUR
 			+ ";-fx-stroke-width:3px;-fx-stroke:black;";
-	private static final String END_NODE_HIGHLIGHT_STYLE = "-fx-fill:" + HIGHLIGHTED_NODE_COLOUR
+	private static final String END_NODE_HIGHLIGHT_STYLE = "-fx-fill:" + HIGHLIGHTED_END_NODE_COLOUR
 			+ ";-fx-stroke-width:3px;-fx-stroke:black;";
 
 	// arrow styles
@@ -386,7 +387,7 @@ public class TraceViewerInSystemController {
 				} else {
 					String color = null;
 					if(highLightedTracesIDs.containsKey(selectedTraceID)) {
-						color = highLightedTracesIDs.get(color);
+						color = highLightedTracesIDs.get(selectedTraceID);
 					}
 					
 					String style = HIGHLIGHT_STYLE;
@@ -394,18 +395,9 @@ public class TraceViewerInSystemController {
 					if(color!=null) {
 						style = style.replace(HIGHLIGHT_TRACE_ARROW_COLOUR, color);
 					}
-					
+//					System.out.println("showing in all: " + selectedTraceID);
 					highlightTrace(selectedTraceID, HIGHLIGHT_STYLE, style);	
 				}
-				
-				
-				
-				
-//				highLightedTracesIDs.add(selectedTraceID);
-//				populateCell(selectedTraceID);
-				
-				// removeTrace(selectedTraceID);
-
 			}
 		});
 
@@ -423,20 +415,6 @@ public class TraceViewerInSystemController {
 		checkboxShowOnlySelectedTrace.setOnAction(e -> {
 
 			if (checkboxShowOnlySelectedTrace.isSelected()) {
-//				Integer traceID = comboBoxAddedTraces.getSelectionModel().getSelectedItem();
-//				Random rand = new Random();
-//				int index = rand.nextInt(comboBoxAddedTraces.getItems().size());
-//				Integer randomTraceID = comboBoxAddedTraces.getItems().get(index);
-//				index = rand.nextInt(comboBoxAddedTraces.getItems().size());
-//				Integer random2 = comboBoxAddedTraces.getItems().get(index);
-//				if (traceID != null) {
-//					// show only selected trace
-//					List<Integer> traces = new LinkedList<Integer>();
-//					traces.add(traceID);
-//					traces.add(randomTraceID);
-//					traces.add(random2);
-//					showOnlyTraces(traces);
-//				}
 				showOnlyTraces(highLightedTracesIDs);
 
 			} else {
@@ -905,6 +883,10 @@ public class TraceViewerInSystemController {
 				buildSingleDirectionalLine(stateNode, node, tracePane, true, false, ADDED_NODES_ARROW_COLOUR,
 						actionName, NOT_A_TRACE);
 			}
+			
+			if(node!=null && !tracePane.getChildren().contains(node)) {
+				tracePane.getChildren().add(node);
+			}
 
 		}
 
@@ -1065,6 +1047,9 @@ public class TraceViewerInSystemController {
 						actionName, NOT_A_TRACE);
 			}
 
+			if(node!=null && !tracePane.getChildren().contains(node)) {
+				tracePane.getChildren().add(node);
+			}
 		}
 
 		mapPreviousNodes.put(state, previousNodes);
@@ -1942,6 +1927,7 @@ public class TraceViewerInSystemController {
 				arrowLine.setStyle(TRACE_ARROW_HIGHLIGHT_STYLE);
 
 			} else {
+//				System.out.println(highLightStyle);
 				arrowLine.setStyle(highLightStyle);
 			}
 
@@ -2477,11 +2463,11 @@ public class TraceViewerInSystemController {
 		// just makes sure that all nodes are on top
 		setNodes();
 
-		Integer traceID = comboBoxAddedTraces.getSelectionModel().getSelectedItem();
-
-		if (traceID != null) {
-			highlightTrace(traceID, HIGHLIGHT_STYLE, HIGHLIGHT_STYLE);
-		}
+//		Integer traceID = comboBoxAddedTraces.getSelectionModel().getSelectedItem();
+//
+//		if (traceID != null) {
+//			highlightTrace(traceID, HIGHLIGHT_STYLE, HIGHLIGHT_STYLE);
+//		}
 
 	}
 
@@ -2622,9 +2608,9 @@ public class TraceViewerInSystemController {
 			if(checkboxShowOnlySelectedTrace.isSelected()) {
 				showOnlyTraces(highLightedTracesIDs);
 			} else {
-				for(Integer trID: highLightedTracesIDs.keySet()){
-					highlightTrace(trID, HIGHLIGHT_STYLE, HIGHLIGHT_STYLE);	
-				}
+//				for(Integer trID: highLightedTracesIDs.keySet()){
+					highlightTrace(traceID, NORMAL_HIGHLIGHT_STYLE, NORMAL_HIGHLIGHT_STYLE);	
+//				}
 				
 			}
 		});
