@@ -397,11 +397,14 @@ public class TraceViewerInSystemController {
 				Random rand = new Random();
 				int index = rand.nextInt(comboBoxAddedTraces.getItems().size());
 				Integer randomTraceID = comboBoxAddedTraces.getItems().get(index);
+				index = rand.nextInt(comboBoxAddedTraces.getItems().size());
+				Integer random2 = comboBoxAddedTraces.getItems().get(index);
 				if (traceID != null) {
 					// show only selected trace
 					List<Integer> traces = new LinkedList<Integer>();
 					traces.add(traceID);
 					traces.add(randomTraceID);
+					traces.add(random2);
 					showOnlyTraces(traces);
 				}
 
@@ -1483,17 +1486,32 @@ public class TraceViewerInSystemController {
 	protected String getrandomColoredHighLightStyle() {
 
 		Random rand = new Random();
-		int bound = 1000000;
+//		int bound = 1000000;
 		
-		//get random color
-		int color = rand.nextInt(bound);
+		String[] options = new String[]{"1", "2","3", "4", "5", "6","7","8","9","a","b","c","d","e","f"};
+		//get random color (has to be six figures
+		StringBuilder strBldr = new StringBuilder();
+		
+		strBldr.append("#");
+		
+		for(int i=0;i<6;i++) {
+			
+			if(i==0) {
+				//for the first it shouldn't be f just to avoid all f's (i.e. white)
+				strBldr.append(options[rand.nextInt(options.length-1)]);
+			} else{
+				strBldr.append(options[rand.nextInt(options.length)]);
+			}
+		}
+		
+//		int color = rand.nextInt(bound);
 
-		String colr = "#" + color;
+//		String colr = "#" + color;
 
 		String style = HIGHLIGHT_STYLE;
 
 		if (style.contains(HIGHLIGHT_TRACE_ARROW_COLOUR)) {
-			style = style.replace(HIGHLIGHT_TRACE_ARROW_COLOUR, colr);
+			style = style.replace(HIGHLIGHT_TRACE_ARROW_COLOUR, strBldr.toString());
 		}
 
 		return style;
