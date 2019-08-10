@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import core.brs.parser.utilities.JSONTerms;
 import core.instantiation.analysis.TraceMiner;
@@ -56,6 +57,9 @@ import javafx.stage.Window;
 public class TraceViewerInSystemController {
 
 	@FXML
+	private CheckBox checkboxShowOccurrence;
+
+	@FXML
 	private CheckBox checkBoxHideActionsNames;
 
 	@FXML
@@ -98,8 +102,8 @@ public class TraceViewerInSystemController {
 	@FXML
 	private ProgressIndicator progressIndicator;
 
-	@FXML
-	private Button btnShowPreviousStates;
+	// @FXML
+	// private Button btnShowPreviousStates;
 
 	@FXML
 	private Button btnLoadTransitionSystem;
@@ -168,6 +172,10 @@ public class TraceViewerInSystemController {
 	// key is arrow, value is the arrow label
 	private Map<StackPane, StackPane> arrowsLabels;
 
+	// key is trace id, value is the list of GUI components (e.g., circle, line,
+	// arrow head)
+	private Map<Integer, List<Node>> tracesComponents;
+
 	// added trace ids
 	List<Integer> addedTracesIDs;
 	List<Integer> highLightedTracesIDs;
@@ -185,7 +193,7 @@ public class TraceViewerInSystemController {
 	private static final String HIGHLIGHTED_NODE_COLOUR = "#efe8ff";
 	private static final String DEFAULT_ARROW_COLOUR = "#333333";
 	private static final Color TRACE_ARROW_COLOUR = Color.BLUE;
-	private static final Color HIGHLIGHT_TRACE_ARROW_COLOUR = Color.GREEN;
+	private static final String HIGHLIGHT_TRACE_ARROW_COLOUR = "blue";
 	private static final Color ADDED_NODES_ARROW_COLOUR = Color.GREY;
 	private static final double NODE_RADIUS = 25;
 	private static final String STATE_STYLE = "-fx-font-size:18px;-fx-font-weight:bold;";
@@ -205,10 +213,13 @@ public class TraceViewerInSystemController {
 			+ ";-fx-stroke-width:3px;-fx-stroke:black;";
 
 	// arrow styles
-	private static final String HIGHLIGHT_STYLE = "-fx-stroke-width:3px;-fx-stroke:blue;-fx-opacity:1;";
+	private static final String HIGHLIGHT_STYLE = "-fx-stroke-width:3px;-fx-stroke:" + HIGHLIGHT_TRACE_ARROW_COLOUR
+			+ ";-fx-opacity:1;";
 	private static final String NORMAL_HIGHLIGHT_STYLE = "-fx-stroke-width:2px;-fx-stroke:grey;-fx-opacity:1;";
 	private static final String ARROW_NORMAL_HIGHLIGHT_STYLE = "-fx-stroke-width:2px;-fx-stroke:grey;-fx-opacity:1;";
 	private static final String TRACE_ARROW_HIGHLIGHT_STYLE = "-fx-stroke-width:2px;-fx-stroke:red;-fx-opacity:1;";
+
+	private static final int NOT_A_TRACE = -1;
 
 	// node context menu items
 	private static final String MENU_ITEM_SHOW_NEXT = "Show Next";
@@ -319,6 +330,8 @@ public class TraceViewerInSystemController {
 		arrowsLines = new HashMap<StackPane, Line>();
 		arrowsLabels = new HashMap<StackPane, StackPane>();
 
+		tracesComponents = new HashMap<Integer, List<Node>>();
+
 		// added traces ids
 		addedTracesIDs = new LinkedList<Integer>();
 		highLightedTracesIDs = new LinkedList<Integer>();
@@ -380,9 +393,31 @@ public class TraceViewerInSystemController {
 		checkboxShowOnlySelectedTrace.setOnAction(e -> {
 
 			if (checkboxShowOnlySelectedTrace.isSelected()) {
-				showOnlySelectedTrace();
+				Integer traceID = comboBoxAddedTraces.getSelectionModel().getSelectedItem();
+				Random rand = new Random();
+				int index = rand.nextInt(comboBoxAddedTraces.getItems().size());
+				Integer randomTraceID = comboBoxAddedTraces.getItems().get(index);
+				if (traceID != null) {
+					// show only selected trace
+					List<Integer> traces = new LinkedList<Integer>();
+					traces.add(traceID);
+					traces.add(randomTraceID);
+					showOnlyTraces(traces);
+				}
+
 			} else {
 				showAllAddedTraces();
+			}
+		});
+
+		// set up checl box for showing the occurrences of states and actions
+		checkboxShowOccurrence.setOnAction(e -> {
+
+			if (checkboxShowOccurrence.isSelected()) {
+				// show occurrence
+				showStatesAndActionsOccurrences();
+			} else {
+				hideStatesAndActionsOccurrences();
 			}
 		});
 
@@ -815,19 +850,19 @@ public class TraceViewerInSystemController {
 					String actionName = digraph.getLabel(state, outBoundState);
 
 					buildSingleDirectionalLine(stateNode, node, tracePane, true, false, ADDED_NODES_ARROW_COLOUR,
-							actionName);
+							actionName, NOT_A_TRACE);
 				}
 
 			} else {
 				// a new node is created with the arrow
-				node = getDot(NODE_COLOUR, "" + outBoundState, EXTRA_STATE_STYLE, NODE_RADIUS);
+				node = getDot(NODE_COLOUR, "" + outBoundState, EXTRA_STATE_STYLE, NODE_RADIUS, NOT_A_TRACE);
 				node.setId("" + outBoundState);
 				nextNodes.add(node);
 				// statesNodes.put(outBoundState, node);
 				String actionName = digraph.getLabel(state, outBoundState);
 
 				buildSingleDirectionalLine(stateNode, node, tracePane, true, false, ADDED_NODES_ARROW_COLOUR,
-						actionName);
+						actionName, NOT_A_TRACE);
 			}
 
 		}
@@ -839,7 +874,7 @@ public class TraceViewerInSystemController {
 
 		// position new nodes
 		double xOffest = NODE_RADIUS * 2 + 50;
-		double yOffset = NODE_RADIUS * 2;
+		double yOffset = NODE_RADIUS * 3;
 
 		locatedNodesRelativeTo(stateNode, nextNodes, xOffest, yOffset);
 
@@ -974,19 +1009,19 @@ public class TraceViewerInSystemController {
 					String actionName = digraph.getLabel(inBoundState, state);
 
 					buildSingleDirectionalLine(node, stateNode, tracePane, true, false, ADDED_NODES_ARROW_COLOUR,
-							actionName);
+							actionName, NOT_A_TRACE);
 				}
 
 			} else {
 				// a new node is created with the arrow
-				node = getDot(NODE_COLOUR, "" + inBoundState, EXTRA_STATE_STYLE, NODE_RADIUS);
+				node = getDot(NODE_COLOUR, "" + inBoundState, EXTRA_STATE_STYLE, NODE_RADIUS, NOT_A_TRACE);
 				node.setId("" + inBoundState);
 				previousNodes.add(node);
 				// statesNodes.put(outBoundState, node);
 				String actionName = digraph.getLabel(inBoundState, state);
 
 				buildSingleDirectionalLine(node, stateNode, tracePane, true, false, ADDED_NODES_ARROW_COLOUR,
-						actionName);
+						actionName, NOT_A_TRACE);
 			}
 
 		}
@@ -1160,8 +1195,10 @@ public class TraceViewerInSystemController {
 
 	}
 
-	@FXML
-	void showStatesPercentages(ActionEvent e) {
+	/**
+	 * shows the states and actions ocurrence labels
+	 */
+	void showStatesAndActionsOccurrences() {
 
 		if (miner == null || trace == null) {
 			return;
@@ -1222,6 +1259,32 @@ public class TraceViewerInSystemController {
 			for (Label lbl : lbls) {
 				lbl.setText(percDbl + "%");
 				lbl.setTooltip(new Tooltip("Occurrence: " + actionOccur + "/" + numOfTraces));
+			}
+		}
+
+	}
+
+	/**
+	 * Hides the states and actions ocurrence labels
+	 */
+	void hideStatesAndActionsOccurrences() {
+
+		// hide states perc
+		for (Entry<Integer, Label> entry : mapStatePerc.entrySet()) {
+
+			Label lbl = entry.getValue();
+			lbl.setText("");
+			lbl.setTooltip(null);
+		}
+
+		// hid actions perc
+		for (Entry<String, List<Label>> entry : mapActionPerc.entrySet()) {
+
+			List<Label> lbls = entry.getValue();
+
+			for (Label lbl : lbls) {
+				lbl.setText("");
+				lbl.setTooltip(null);
 			}
 		}
 
@@ -1302,13 +1365,27 @@ public class TraceViewerInSystemController {
 
 	}
 
+	/**
+	 * Removes and adds again the nodes to make them on top
+	 */
 	protected void setNodes() {
 
-		tracePane.getChildren().removeAll(statesNodes.values());
-		tracePane.getChildren().addAll(statesNodes.values());
+		for (StackPane node : statesNodes.values()) {
+			if (tracePane.getChildren().contains(node)) {
+				tracePane.getChildren().remove(node);
+				tracePane.getChildren().add(node);
+			}
+		}
+		// tracePane.getChildren().removeAll(statesNodes.values());
+		// tracePane.getChildren().addAll(statesNodes.values());
 
 	}
 
+	/**
+	 * shows the given trace (initially used)
+	 * 
+	 * @param trace
+	 */
 	public void showTrace(GraphPath trace) {
 
 		if (trace == null) {
@@ -1371,6 +1448,7 @@ public class TraceViewerInSystemController {
 		if (!addedTracesIDs.contains(trace.getInstanceID())) {
 			addedTracesIDs.add(trace.getInstanceID());
 			updateAddedTracesIDsComboBox(addedTracesIDs);
+			comboBoxAddedTraces.getSelectionModel().selectFirst();
 		}
 
 	}
@@ -1400,6 +1478,26 @@ public class TraceViewerInSystemController {
 				comboBoxAddedTraces.getItems().add(traceID);
 			}
 		});
+	}
+
+	protected String getrandomColoredHighLightStyle() {
+
+		Random rand = new Random();
+		int bound = 1000000;
+		
+		//get random color
+		int color = rand.nextInt(bound);
+
+		String colr = "#" + color;
+
+		String style = HIGHLIGHT_STYLE;
+
+		if (style.contains(HIGHLIGHT_TRACE_ARROW_COLOUR)) {
+			style = style.replace(HIGHLIGHT_TRACE_ARROW_COLOUR, colr);
+		}
+
+		return style;
+
 	}
 
 	/**
@@ -1661,6 +1759,16 @@ public class TraceViewerInSystemController {
 
 	}
 
+	/**
+	 * Highlights the trace with the given ID using the given styles for the
+	 * nodes (circles) and arrows.
+	 * 
+	 * @param traceID
+	 * @param nodeHighLightStyle
+	 *            Node style
+	 * @param arrowHighLightStyle
+	 *            arrow style (i.e. line)
+	 */
 	protected void highlightTrace(int traceID, String nodeHighLightStyle, String arrowHighLightStyle) {
 
 		// removes the given trace
@@ -1737,12 +1845,12 @@ public class TraceViewerInSystemController {
 		// highLightedTracesIDs.add(traceID);
 		// remove states
 
-		//add state nodes if thy're not added
-		for(Integer state : states) {
+		// add state nodes if thy're not added
+		for (Integer state : states) {
 			node = statesNodes.get(state);
-			
-			if(node!=null) {
-				if(!tracePane.getChildren().contains(node)){
+
+			if (node != null) {
+				if (!tracePane.getChildren().contains(node)) {
 					tracePane.getChildren().add(node);
 				}
 			}
@@ -1793,29 +1901,33 @@ public class TraceViewerInSystemController {
 
 		}
 		arrowHead.setOpacity(1);
-		
-		if(!tracePane.getChildren().contains(arrowLine)) {
+
+		if (!tracePane.getChildren().contains(arrowLine)) {
 			tracePane.getChildren().add(arrowLine);
 		}
-		
-		if(!tracePane.getChildren().contains(arrowHead)) {
+
+		if (!tracePane.getChildren().contains(arrowHead)) {
 			tracePane.getChildren().add(arrowHead);
 		}
-		
-		if(!tracePane.getChildren().contains(label) && !checkBoxHideActionsNames.isSelected()) {
+
+		if (!tracePane.getChildren().contains(label) && !checkBoxHideActionsNames.isSelected()) {
 			tracePane.getChildren().add(label);
 		}
 
 	}
 
 	protected void clearHighlights() {
-		
-		//if show only highlight trace is selected then just hide all traces
-		if(checkboxShowOnlySelectedTrace.isSelected()) {
-			showOnlySelectedTrace();
+
+		// if show only highlight trace is selected then just hide all traces
+		if (checkboxShowOnlySelectedTrace.isSelected()) {
+			Integer traceID = comboBoxAddedTraces.getSelectionModel().getSelectedItem();
+			if (traceID != null) {
+				showOnlyTraces(traceID);
+			}
+
 			return;
 		}
-		
+
 		// remove highlight from other higlighted traces
 		if (!highLightedTracesIDs.isEmpty()) {
 
@@ -1922,6 +2034,7 @@ public class TraceViewerInSystemController {
 			return null;
 		}
 
+		int traceID = trace.getInstanceID();
 		List<String> actions = trace.getTransitionActions();
 		List<Integer> states = trace.getStateTransitions();
 
@@ -1944,20 +2057,20 @@ public class TraceViewerInSystemController {
 					// drawn
 					if (!areConnected(previousState, state)) {
 						buildSingleDirectionalLine(stateNodes.get(index - 1), node, tracePane, true, false,
-								ADDED_NODES_ARROW_COLOUR, actions.get(index - 1));
+								ADDED_NODES_ARROW_COLOUR, actions.get(index - 1), traceID);
 					}
 				}
 
 			} else {
-				node = getDot(NODE_COLOUR, "" + state, STATE_STYLE, NODE_RADIUS);
+				node = getDot(NODE_COLOUR, "" + state, STATE_STYLE, NODE_RADIUS, traceID);
 				// a new node is created with the arrow
-				node = getDot(NODE_COLOUR, "" + state, EXTRA_STATE_STYLE, NODE_RADIUS);
+				node = getDot(NODE_COLOUR, "" + state, EXTRA_STATE_STYLE, NODE_RADIUS, traceID);
 
 				node.setId("" + state);
 
 				if (index > 0) {
 					buildSingleDirectionalLine(stateNodes.get(index - 1), node, tracePane, true, false,
-							ADDED_NODES_ARROW_COLOUR, actions.get(index - 1));
+							ADDED_NODES_ARROW_COLOUR, actions.get(index - 1), traceID);
 				}
 
 			}
@@ -2017,14 +2130,14 @@ public class TraceViewerInSystemController {
 					// drawn
 					if (!areConnected(previousState, state)) {
 						buildSingleDirectionalLine(stateNodes.get(index - 1), node, tracePane, true, false,
-								ADDED_NODES_ARROW_COLOUR, actionName);
+								ADDED_NODES_ARROW_COLOUR, actionName, NOT_A_TRACE);
 					}
 				}
 
 			} else {
-				node = getDot(NODE_COLOUR, "" + state, STATE_STYLE, NODE_RADIUS);
+				node = getDot(NODE_COLOUR, "" + state, STATE_STYLE, NODE_RADIUS, NOT_A_TRACE);
 				// a new node is created with the arrow
-				node = getDot(NODE_COLOUR, "" + state, EXTRA_STATE_STYLE, NODE_RADIUS);
+				node = getDot(NODE_COLOUR, "" + state, EXTRA_STATE_STYLE, NODE_RADIUS, NOT_A_TRACE);
 
 				node.setId("" + state);
 
@@ -2032,7 +2145,7 @@ public class TraceViewerInSystemController {
 					int previousState = traceStates.get(index - 1);
 					String actionName = graph.getLabel(previousState, state);
 					buildSingleDirectionalLine(stateNodes.get(index - 1), node, tracePane, true, false,
-							TRACE_ARROW_COLOUR, actionName);
+							TRACE_ARROW_COLOUR, actionName, NOT_A_TRACE);
 				}
 
 			}
@@ -2171,23 +2284,24 @@ public class TraceViewerInSystemController {
 				// get label
 				StackPane label = arrowsLabels.get(arw);
 
-				//if show only one trace is selected, then show actions for that trace
-				if(checkboxShowOnlySelectedTrace.isSelected()) {
+				// if show only one trace is selected, then show actions for
+				// that trace
+				if (checkboxShowOnlySelectedTrace.isSelected()) {
 					Line line = arrowsLines.get(arw);
-					
-					//checks if a line is added then an action can be added
-					if(tracePane.getChildren().contains(line)) {
-						if(!tracePane.getChildren().contains(label)){
-							tracePane.getChildren().add(label);	
+
+					// checks if a line is added then an action can be added
+					if (tracePane.getChildren().contains(line)) {
+						if (!tracePane.getChildren().contains(label)) {
+							tracePane.getChildren().add(label);
 						}
-						
+
 					}
 				} else {
 					if (!tracePane.getChildren().contains(label)) {
 						tracePane.getChildren().add(label);
-					}	
+					}
 				}
-				
+
 			}
 		}
 
@@ -2197,13 +2311,14 @@ public class TraceViewerInSystemController {
 	 * shows only the highlighted trace
 	 * 
 	 */
-	protected void showOnlySelectedTrace() {
+	protected void showOnlyTraces(int traceID) {
 
-		Integer traceID = comboBoxAddedTraces.getSelectionModel().getSelectedItem();
+		// Integer traceID =
+		// comboBoxAddedTraces.getSelectionModel().getSelectedItem();
 
-		if (traceID == null) {
-			return;
-		}
+		// if (traceID == null) {
+		// return;
+		// }
 
 		// hide everything
 
@@ -2226,6 +2341,45 @@ public class TraceViewerInSystemController {
 	}
 
 	/**
+	 * shows only the highlighted trace
+	 * 
+	 */
+	protected void showOnlyTraces(List<Integer> tracesIDs) {
+
+		// Integer traceID =
+		// comboBoxAddedTraces.getSelectionModel().getSelectedItem();
+
+		if (tracesIDs == null) {
+			return;
+		}
+
+		// hide everything
+
+		// hide nodes
+		hideNodes();
+
+		// hide arrow lines
+		hideArrowsLines();
+
+		// hide arrow heads
+		hideArrowsHeads();
+
+		// hide labels
+		// if it they are not already hiden
+		if (!checkBoxHideActionsNames.isSelected()) {
+			hideActionsNames();
+		}
+
+		for (Integer traceID : tracesIDs) {
+			String arrowStyle = getrandomColoredHighLightStyle();
+			highlightTrace(traceID, HIGHLIGHT_STYLE, arrowStyle);
+		}
+
+		setNodes();
+
+	}
+
+	/**
 	 * shows all added traces
 	 * 
 	 */
@@ -2233,7 +2387,7 @@ public class TraceViewerInSystemController {
 
 		// show everything
 
-		////preserve order////
+		//// preserve order////
 		// show arrow lines
 		showArrowsLines();
 
@@ -2243,16 +2397,16 @@ public class TraceViewerInSystemController {
 		// show nodes
 		showNodes();
 		///////
-		
+
 		// show labels
 		// if it they are not already hiden
 		if (!checkBoxHideActionsNames.isSelected()) {
 			showActionsNames();
 		}
 
-		//just makes sure that all nodes are on top
+		// just makes sure that all nodes are on top
 		setNodes();
-		
+
 		Integer traceID = comboBoxAddedTraces.getSelectionModel().getSelectedItem();
 
 		if (traceID != null) {
@@ -2382,6 +2536,22 @@ public class TraceViewerInSystemController {
 		}
 	}
 
+	protected void addComponentToTrace(int traceID, Node comp) {
+
+		if (NOT_A_TRACE == traceID) {
+			return;
+		}
+
+		// add to trace components
+		if (tracesComponents.containsKey(traceID)) {
+			List<Node> comps = tracesComponents.get(traceID);
+			comps.add(comp);
+		} else {
+			List<Node> comps = new LinkedList<Node>();
+			comps.add(comp);
+		}
+	}
+
 	/**
 	 * Builds a pane consisting of circle with the provided specifications.
 	 *
@@ -2391,7 +2561,7 @@ public class TraceViewerInSystemController {
 	 *            Text inside the circle
 	 * @return Draggable pane consisting a circle.
 	 */
-	private StackPane getDot(String color, String state, String stateLabelStyle, double radius) {
+	private StackPane getDot(String color, String state, String stateLabelStyle, double radius, int traceID) {
 		// double radius = 50;
 		double paneSize = 2 * radius;
 		StackPane dotPane = new StackPane();
@@ -2534,6 +2704,9 @@ public class TraceViewerInSystemController {
 		int stat = Integer.parseInt(state);
 		statesNodes.put(stat, dotPane);
 
+		// also add to trace components
+		addComponentToTrace(traceID, dotPane);
+
 		return dotPane;
 	}
 
@@ -2552,7 +2725,7 @@ public class TraceViewerInSystemController {
 	 *            Specifies whether to show arrow towards start
 	 */
 	private void buildSingleDirectionalLine(StackPane startDot, StackPane endDot, Pane parent, boolean hasEndArrow,
-			boolean hasStartArrow, Color color, String actionName) {
+			boolean hasStartArrow, Color color, String actionName, int traceID) {
 
 		// line
 		Line line = getLine(startDot, endDot, color);
@@ -2607,6 +2780,11 @@ public class TraceViewerInSystemController {
 		// List<Object> arwComps = new LinkedList<Object>(){{add(line);
 		// add(weightAB);}};
 		// arrowsComponents.put(arrowAB, arwComps);
+
+		// also add to trace components
+		addComponentToTrace(traceID, arrowAB);
+		addComponentToTrace(traceID, line);
+		addComponentToTrace(traceID, weightAB);
 
 		parent.getChildren().addAll(line, weightAB, arrowAB);
 	}
