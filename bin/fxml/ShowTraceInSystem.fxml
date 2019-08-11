@@ -21,9 +21,9 @@
 
 <BorderPane minHeight="650.0" minWidth="900.0" prefHeight="775.0" prefWidth="1453.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.analysis.TraceViewerInSystemController">
    <center>
-      <SplitPane dividerPositions="0.24603721571330117">
+      <SplitPane dividerPositions="0.15024121295658166">
          <items>
-            <VBox minHeight="10.0" minWidth="10.0" prefHeight="709.0" prefWidth="313.0" spacing="5.0">
+            <VBox minHeight="10.0" minWidth="10.0" prefHeight="709.0" prefWidth="322.0" spacing="5.0">
                <children>
                   <VBox spacing="5.0">
                      <children>
@@ -42,7 +42,7 @@
                               </ScrollPane>
                            </children>
                         </VBox>
-                        <HBox spacing="3.0">
+                        <VBox minWidth="10.0" prefHeight="51.0" prefWidth="317.0">
                            <children>
                               <CheckBox fx:id="checkBoxHideActionsNames" mnemonicParsing="false" prefHeight="17.0" prefWidth="116.0" text="hide action name" />
                               <CheckBox fx:id="checkboxShowOnlySelectedTrace" mnemonicParsing="false" text="Only selected trace" />
@@ -52,7 +52,18 @@
                                  </tooltip>
                               </CheckBox>
                            </children>
-                        </HBox>
+                        </VBox>
+                     </children>
+                  </VBox>
+                  <Separator prefWidth="200.0" />
+                  <VBox spacing="3.0">
+                     <children>
+                        <Label text="Actions" />
+                        <ScrollPane fitToWidth="true" prefHeight="101.0" prefWidth="348.0" style="-fx-background-color: white;">
+                           <content>
+                              <FlowPane fx:id="flowPaneActions" hgap="3.0" prefHeight="99.0" prefWidth="346.0" vgap="3.0" />
+                           </content>
+                        </ScrollPane>
                      </children>
                   </VBox>
                   <Separator prefWidth="370.0" />

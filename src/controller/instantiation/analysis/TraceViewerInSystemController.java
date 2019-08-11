@@ -17,7 +17,6 @@ import core.instantiation.analysis.TraceMiner;
 import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 import javafx.application.Platform;
-import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
@@ -36,7 +35,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -58,11 +56,13 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
 public class TraceViewerInSystemController {
+
+	@FXML
+	private FlowPane flowPaneActions;
 
 	@FXML
 	private CheckBox checkboxShowOccurrence;
@@ -189,6 +189,10 @@ public class TraceViewerInSystemController {
 	// key is trace id, value is arrows color
 	Map<Integer, String> highLightedTracesIDs;
 
+	//key is action name, value is list of trace ids that contain the action
+	Map<String, List<Integer>> mapActions;
+	
+	
 	// private ContextMenu nodeContextMenu;
 
 	private double sceneX, sceneY, layoutX, layoutY;
@@ -347,6 +351,8 @@ public class TraceViewerInSystemController {
 
 		tracesComponents = new HashMap<Integer, List<Node>>();
 
+		mapActions = new HashMap<String, List<Integer>>();
+		
 		// added traces ids
 		addedTracesIDs = new LinkedList<Integer>();
 		highLightedTracesIDs = new HashMap<Integer, String>();
@@ -387,6 +393,9 @@ public class TraceViewerInSystemController {
 				// clearHighlights();
 				addTraceIDToDisplay(selectedTraceID);
 
+				//update actions
+				showActionsInList();
+				
 				if (checkboxShowOnlySelectedTrace.isSelected()) {
 					showOnlyTraces(highLightedTracesIDs);
 				} else {
@@ -424,6 +433,7 @@ public class TraceViewerInSystemController {
 
 			} else {
 				showAllAddedTraces();
+				showActionsInList();
 			}
 		});
 
@@ -495,6 +505,9 @@ public class TraceViewerInSystemController {
 					}
 
 					getAllTracesFromTo(sttt, lastState);
+					
+					//show actions related
+					showActionsInList();
 
 				default:
 					break;
@@ -511,11 +524,6 @@ public class TraceViewerInSystemController {
 
 	@FXML
 	void showEntities(ActionEvent e) {
-
-		if (trace == null) {
-			System.err.println("Trace is null");
-			return;
-		}
 
 		if (miner == null) {
 			System.err.println("Trace miner is null");
@@ -564,7 +572,7 @@ public class TraceViewerInSystemController {
 		int corner = 5;
 
 		// font: 14, color: black, weight: bold
-		bldrStyle.append("-fx-text-fill: black; -fx-font-size:14px; -fx-font-weight: bold;")
+		bldrStyle.append("-fx-text-fill: black; -fx-font-size:12px;")
 				// background
 				.append("-fx-background-color: white;")
 				// border
@@ -592,7 +600,109 @@ public class TraceViewerInSystemController {
 		flowPaneEntities.getChildren().addAll(resLbls);
 
 	}
+	
+	/**
+	 * Shows actions contianed in the traces
+	 * @param e
+	 */
 
+	void showActionsInList() {
+
+		if (miner == null) {
+			System.err.println("Trace miner is null");
+			return;
+		}
+
+//		if (!miner.isBigraphERFileSet()) {
+//			traceCell.selectBigraphERFile();
+//		}
+
+//		if (!miner.isBigraphERFileSet()) {
+//			return;
+//		}
+
+		// get common entities
+		// traces are the added ones (including the original shown)
+		Collection<GraphPath> traces = null;
+
+		// look for highlighted
+		if (highLightedTracesIDs.size() > 0) {
+			List<Integer> trcs = new LinkedList<Integer>(highLightedTracesIDs.keySet());
+			Map<Integer, GraphPath> tracesMap = miner.getTraces(trcs);
+			traces = tracesMap.values();
+		} else // then all added
+		if (addedTracesIDs.size() > 0) {
+			Map<Integer, GraphPath> tracesMap = miner.getTraces(addedTracesIDs);
+			traces = tracesMap.values();
+		} else {// finally original trace
+			traces = new LinkedList<GraphPath>();
+			traces.add(trace);
+		}
+
+		if(traces == null) {
+			return;
+		}
+
+
+		//clear actions map
+		mapActions.clear();
+		
+		for(GraphPath trace : traces) {
+			List<String> traceActions = trace.getTraceActions();
+			
+			for(String action: traceActions) {
+				//if it contains the action, then add the trace id
+				if(mapActions.containsKey(action)) {
+					mapActions.get(action).add(trace.getInstanceID());
+				} else {
+					List<Integer> traceIDs = new LinkedList<Integer>();
+					traceIDs.add(trace.getInstanceID());
+					mapActions.put(action, traceIDs); 
+				}
+			}
+		}
+		
+//		topEntities = miner.findTopCommonEntities(traces, JSONTerms.BIG_IRRELEVANT_TERMS, topK);
+
+		if (flowPaneActions.getChildren().size() > 0) {
+			flowPaneActions.getChildren().clear();
+		}
+
+		StringBuilder bldrStyle = new StringBuilder();
+
+		// add style to labels
+		int corner = 5;
+
+		// font: 14, color: black, weight: bold
+		bldrStyle.append("-fx-text-fill: black; -fx-font-size:12px; -fx-font-weight: bold;")
+				// background
+				.append("-fx-background-color: white;")
+				// border
+				.append("-fx-border-color: grey;")
+				// border corner
+				.append("-fx-border-radius:").append(corner).append(" ").append(corner).append(" ").append(corner)
+				.append(" ").append(corner).append(";").append(";fx-background-radius:").append(corner).append(" ")
+				.append(corner).append(" ").append(corner).append(" ").append(corner).append(";");
+
+		String style = bldrStyle.toString();
+
+		// create labels for each entity
+		List<Label> resLbls = new LinkedList<Label>();
+
+		for (Map.Entry<String, List<Integer>> entry : mapActions.entrySet()) {
+			Label lbl = new Label(" " + entry.getKey() + " <" + entry.getValue().size() + "> ");
+			lbl.setStyle(style);
+			resLbls.add(lbl);
+		}
+
+		// set selected value
+		// comboBoxTopK.getSelectionModel().select(topK - 1);
+//		spinnerTopK.getValueFactory().setValue(topK);
+		// add labels to hbox
+		flowPaneActions.getChildren().addAll(resLbls);
+
+	}
+	
 	protected int getStateFromNode(StackPane node) {
 
 		int state = -1;
@@ -754,14 +864,14 @@ public class TraceViewerInSystemController {
 
 		// check if saved
 		// used for prev/next trace showing
-		if (trace != null && miner != null) {
-			boolean isSaved = miner.isTraceSaved(trace.getInstanceID());
-			if (isSaved) {
-				toggleButtonActivity(btnSaveTrace, true);
-			} else {
-				toggleButtonActivity(btnSaveTrace, false);
-			}
-		}
+		// if (trace != null && miner != null) {
+		// boolean isSaved = miner.isTraceSaved(trace.getInstanceID());
+		// if (isSaved) {
+		// toggleButtonActivity(btnSaveTrace, true);
+		// } else {
+		// toggleButtonActivity(btnSaveTrace, false);
+		// }
+		// }
 
 		// reset entities
 		flowPaneEntities.getChildren().clear();
@@ -1430,7 +1540,7 @@ public class TraceViewerInSystemController {
 		List<Integer> tracesToSave = null;
 		List<Integer> tracesSaved = new LinkedList<Integer>();
 		List<Integer> tracesFailed = new LinkedList<Integer>();
-		
+
 		// save highlighted if any
 		if (highLightedTracesIDs.size() > 0) {
 			tracesToSave = new LinkedList<Integer>(highLightedTracesIDs.keySet());
@@ -1451,32 +1561,31 @@ public class TraceViewerInSystemController {
 		for (Integer traceID : tracesToSave) {
 			GraphPath trace = miner.getTrace(traceID);
 			path = traceCell.saveTrace(trace);
-			
-			if(path!=null) {
+
+			if (path != null) {
 				tracesSaved.add(traceID);
 			} else {
 				tracesFailed.add(traceID);
 			}
 		}
 
-		if(tracesSaved.size() == tracesToSave.size()) {
-			setIndicator(false, "All saved ("+tracesSaved.size()+"): " +tracesSaved);
-			toggleButtonActivity(btnSaveTrace, true);
+		if (tracesSaved.size() == tracesToSave.size()) {
+			setIndicator(false, "All saved (" + tracesSaved.size() + "): " + tracesSaved);
+			// toggleButtonActivity(btnSaveTrace, true);
 		} else {
-			setIndicator(false, "Failed to save ("+tracesFailed.size()+": " + tracesFailed);
+			setIndicator(false, "Failed to save (" + tracesFailed.size() + ": " + tracesFailed);
 		}
-		
-		Timer t=  new Timer();
-		
+
+		Timer t = new Timer();
+
 		t.schedule(new TimerTask() {
-			
+
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
 				setIndicator(false, "");
 			}
 		}, 4000);
-		
 
 	}
 
@@ -1642,12 +1751,6 @@ public class TraceViewerInSystemController {
 		// get ids of all traces that contain the two given states
 		List<Integer> tracesIDs = miner.findTracesContainingStates(states, miner.getCurrentShownTraces());
 
-		// if(tracesIDs.isEmpty()) {
-		// System.out.println("No traces identified");
-		// } else {
-		// System.out.println("traces identified: " + tracesIDs);
-		// }
-
 		Map<Integer, GraphPath> traces = miner.getTraces(tracesIDs);
 
 		// filter to get the last state to be the end state
@@ -1656,7 +1759,6 @@ public class TraceViewerInSystemController {
 
 			if (traceStates != null && traceStates.getLast() == endState) {
 				// a trace is identified then add
-				// System.out.println("traces identified: " + tracesIDs);
 				addTrace(trace);
 			}
 		}
@@ -1688,6 +1790,8 @@ public class TraceViewerInSystemController {
 				nodes.add(stateNode);
 				stateNode.setLayoutX(xOffest);
 				stateNode.setLayoutX(yOffest);
+				xOffest += stateNode.getLayoutX();
+				yOffest += stateNode.getLayoutY();
 			} else {
 				xOffest += stateNode.getLayoutX();
 				yOffest += stateNode.getLayoutY();
