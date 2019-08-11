@@ -9,12 +9,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import core.brs.parser.utilities.JSONTerms;
 import core.instantiation.analysis.TraceMiner;
 import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 import javafx.application.Platform;
+import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
@@ -319,6 +322,7 @@ public class TraceViewerInSystemController {
 		mainStackPane.prefHeightProperty().bind(Bindings.add(-5, scrollPaneTraceViewer.heightProperty()));
 		mainStackPane.prefWidthProperty().bind(Bindings.add(-5, scrollPaneTraceViewer.widthProperty()));
 
+		hboxTraceNavigator.prefWidthProperty().bind(Bindings.add(-3, scrollPaneTraceViewer.widthProperty()));
 		// scrollPaneEntities.prefWidthProperty()
 		// .bind(Bindings.add(-1 * hboxShowEntities.getPrefWidth()-5,
 		// vBoxCommands.widthProperty()));
@@ -558,16 +562,17 @@ public class TraceViewerInSystemController {
 
 		// add style to labels
 		int corner = 5;
-		
+
 		// font: 14, color: black, weight: bold
 		bldrStyle.append("-fx-text-fill: black; -fx-font-size:14px; -fx-font-weight: bold;")
 				// background
 				.append("-fx-background-color: white;")
 				// border
 				.append("-fx-border-color: grey;")
-				//border corner
-				.append("-fx-border-radius:").append(corner).append(" ").append(corner).append(" ").append(corner).append(" ").append(corner).append(";")
-				.append(";fx-background-radius:").append(corner).append(" ").append(corner).append(" ").append(corner).append(" ").append(corner).append(";");
+				// border corner
+				.append("-fx-border-radius:").append(corner).append(" ").append(corner).append(" ").append(corner)
+				.append(" ").append(corner).append(";").append(";fx-background-radius:").append(corner).append(" ")
+				.append(corner).append(" ").append(corner).append(" ").append(corner).append(";");
 
 		String style = bldrStyle.toString();
 
@@ -672,7 +677,6 @@ public class TraceViewerInSystemController {
 	 */
 	protected StackPane getNodeFromState(int state) {
 
-
 		for (StackPane stateNode : statesNodes.values()) {
 			int ndState = getStateFromNode(stateNode);
 
@@ -680,41 +684,6 @@ public class TraceViewerInSystemController {
 				return stateNode;
 			}
 		}
-
-		
-		// check trace nodes
-//		for (StackPane stateNode : traceNodes) {
-//			int ndState = getStateFromNode(stateNode);
-//
-//			if (state == ndState) {
-//				return stateNode;
-//			}
-//		}
-//
-//		// check next states
-//		for (List<StackPane> nodes : mapNextNodes.values()) {
-//			for (StackPane stateNode : nodes) {
-//				int ndState = getStateFromNode(stateNode);
-//
-//				if (state == ndState) {
-//					return stateNode;
-//
-//				}
-//			}
-//		}
-//
-//		// check previous states
-//		for (List<StackPane> nodes : mapPreviousNodes.values()) {
-//			for (StackPane stateNode : nodes) {
-//				int ndState = getStateFromNode(stateNode);
-//
-//				if (state == ndState) {
-//					return stateNode;
-//
-//				}
-//			}
-//
-//		}
 
 		return null;
 	}
@@ -879,13 +848,33 @@ public class TraceViewerInSystemController {
 			/// the given state
 			if (statesNodes.containsKey(outBoundState)) {
 				node = statesNodes.get(outBoundState);
+				// nextNodes.add(node);
 
 				// check if arrow is alread drawn
 				if (!areConnected(state, outBoundState)) {
 					String actionName = digraph.getLabel(state, outBoundState);
 
-					buildSingleDirectionalLine(stateNode, node, tracePane, true, false, ADDED_NODES_ARROW_COLOUR,
-							actionName, NOT_A_TRACE);
+					StackPane arrowHead = buildSingleDirectionalLine(stateNode, node, tracePane, true, false,
+							ADDED_NODES_ARROW_COLOUR, actionName, NOT_A_TRACE);
+
+					// if the node is hidden then hide the arrow
+					if (!tracePane.getChildren().contains(node)) {
+						hideArrow(arrowHead);
+					}
+				} else {
+					// show the arrow if the node is shown
+
+					// find the arrow
+					for (StackPane arw : statesOutgoingArrows.get(state)) {
+						int endState = getEndStateFromArrow(arw);
+						if (endState == outBoundState) {
+							// if (tracePane.getChildren().contains(node)) {
+							showArrow(arw);
+							// }
+						}
+
+					}
+
 				}
 
 			} else {
@@ -931,68 +920,85 @@ public class TraceViewerInSystemController {
 		List<StackPane> nextStates = mapNextNodes.get(state);
 
 		// remove all next next
-		if(nextStates!=null) {
-		for (StackPane node : nextStates) {
-			int endState = getStateFromNode(node);
+		if (nextStates != null) {
+			for (StackPane node : nextStates) {
+				int endState = getStateFromNode(node);
 
-			// if (statesArrows.containsKey(endState)) {
-			removeNextStates(endState);
+				// if (statesArrows.containsKey(endState)) {
+				removeNextStates(endState);
 
-			System.out.println("removing pre: " + endState);
-			removePreviousStates(endState);
-			// }
+				// System.out.println("removing pre: " + endState);
+				removePreviousStates(endState);
+				// }
+			}
 		}
-		}
-		
+
 		// remove arrows
 		List<StackPane> nextArrows = statesOutgoingArrows.get(state);
 
 		List<StackPane> arrowsToRemove = new LinkedList<StackPane>();
+		List<StackPane> statesToRemove = new LinkedList<StackPane>();
 
-		if(nextArrows!=null) {
-		for (StackPane arw : nextArrows) {
+		if (nextArrows != null) {
 
-			// get end states
-			int endState = getEndStateFromArrow(arw);
+			arrow_loop: for (StackPane arw : nextArrows) {
 
-			if (endState != -1) {
+				// get end states
+				int endState = getEndStateFromArrow(arw);
 
-				// //if the next state is part of the original trace then ignore
-				if (trace.getStateTransitions().contains(endState)) {
-					continue;
+				if (endState != -1) {
+
+					// //if the next state is part of an added/highlighted trace
+					// then ignore
+					List<Integer> tracesToSearch = null;
+
+					if (checkboxShowOnlySelectedTrace.isSelected()) {
+						tracesToSearch = new LinkedList<Integer>(highLightedTracesIDs.keySet());
+					} else {
+						tracesToSearch = addedTracesIDs;
+					}
+
+					for (Integer traceID : tracesToSearch) {
+						GraphPath trace = miner.getTrace(traceID);
+						if (trace != null && trace.getStateTransitions().contains(endState)) {
+							continue arrow_loop;
+
+						}
+
+					}
+
+					// remove node
+					StackPane node = statesNodes.remove(endState);
+
+					statesToRemove.add(node);
+
+					// remove line
+					if (arrowsLines.containsKey(arw)) {
+						tracePane.getChildren().remove(arrowsLines.get(arw));
+						arrowsLines.remove(arw);
+
+					}
+
+					// remove labels
+					if (arrowsLabels.containsKey(arw)) {
+						tracePane.getChildren().remove(arrowsLabels.get(arw));
+						arrowsLabels.remove(arw);
+
+					}
+
+					// to remove arrow head
+					arrowsToRemove.add(arw);
 
 				}
-
-				// remove node
-				statesNodes.remove(endState);
-
-				// remove line
-				if (arrowsLines.containsKey(arw)) {
-					tracePane.getChildren().remove(arrowsLines.get(arw));
-					arrowsLines.remove(arw);
-
-				}
-
-				// remove labels
-				if (arrowsLabels.containsKey(arw)) {
-					tracePane.getChildren().remove(arrowsLabels.get(arw));
-					arrowsLabels.remove(arw);
-
-				}
-
-				// to remove arrow head
-				arrowsToRemove.add(arw);
 
 			}
+		}
 
-		}
-		}
-		
 		// remove arrow head
 		statesOutgoingArrows.get(state).removeAll(arrowsToRemove);
 		tracePane.getChildren().removeAll(arrowsToRemove);
 
-		tracePane.getChildren().removeAll(nextStates);
+		tracePane.getChildren().removeAll(statesToRemove);
 
 		mapNextNodes.remove(state);
 
@@ -1104,7 +1110,7 @@ public class TraceViewerInSystemController {
 
 		List<StackPane> arrowsToRemove = new LinkedList<StackPane>();
 
-		for (Integer preState : inBoundStates) {
+		preState_loop: for (Integer preState : inBoundStates) {
 
 			// check the previous previous
 			for (Integer prePreState : graph.inboundNeighbors(preState)) {
@@ -1123,8 +1129,25 @@ public class TraceViewerInSystemController {
 			for (StackPane arw : preArws) {
 				int endState = getEndStateFromArrow(arw);
 
+				// check that pre state is not one of the states of the added
+				// traces
+				List<Integer> tracesToSearch = null;
+				if (checkboxShowOnlySelectedTrace.isSelected()) {
+					tracesToSearch = new LinkedList<Integer>(highLightedTracesIDs.keySet());
+				} else {
+					tracesToSearch = addedTracesIDs;
+				}
+
+				for (Integer traceID : tracesToSearch) {
+					GraphPath trace = miner.getTrace(traceID);
+					if (trace.getStateTransitions().contains(preState)) {
+						continue preState_loop;
+					}
+				}
+
 				// remove state and arrow
-				if (endState == state && !trace.getStateTransitions().contains(preState)) {
+
+				if (endState == state) {
 
 					// remove node
 					statesNodes.remove(preState);
@@ -1403,11 +1426,57 @@ public class TraceViewerInSystemController {
 			return;
 		}
 
-		String path = traceCell.saveTrace(trace);
+		String path = null;
+		List<Integer> tracesToSave = null;
+		List<Integer> tracesSaved = new LinkedList<Integer>();
+		List<Integer> tracesFailed = new LinkedList<Integer>();
+		
+		// save highlighted if any
+		if (highLightedTracesIDs.size() > 0) {
+			tracesToSave = new LinkedList<Integer>(highLightedTracesIDs.keySet());
+		} else
+		// look at added traces
+		if (addedTracesIDs.size() > 0) {
+			tracesToSave = addedTracesIDs;
 
-		if (path != null) {
-			toggleButtonActivity(btnSaveTrace, true);
+		} else {
+			// save original
+			tracesToSave = new LinkedList<Integer>();
+			if (trace != null) {
+				tracesToSave.add(trace.getInstanceID());
+			}
+
 		}
+
+		for (Integer traceID : highLightedTracesIDs.keySet()) {
+			GraphPath trace = miner.getTrace(traceID);
+			path = traceCell.saveTrace(trace);
+			
+			if(path!=null) {
+				tracesSaved.add(traceID);
+			} else {
+				tracesFailed.add(traceID);
+			}
+		}
+
+		if(tracesSaved.size() == tracesToSave.size()) {
+			setIndicator(false, "All saved: " +tracesSaved);
+			toggleButtonActivity(btnSaveTrace, true);
+		} else {
+			setIndicator(false, "Failed to save: " + tracesFailed);
+		}
+		
+		Timer t=  new Timer();
+		
+		t.schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				setIndicator(false, "");
+			}
+		}, 4000);
+		
 
 	}
 
@@ -2315,6 +2384,58 @@ public class TraceViewerInSystemController {
 
 	}
 
+	protected void hideArrow(StackPane arrowHead) {
+
+		if (arrowHead == null) {
+			return;
+		}
+
+		// get line
+		Line line = arrowsLines.get(arrowHead);
+
+		if (line != null) {
+			tracePane.getChildren().remove(line);
+		}
+
+		// get label
+		StackPane label = arrowsLabels.get(arrowHead);
+
+		if (label != null) {
+			tracePane.getChildren().remove(label);
+		}
+
+		// remove head
+		tracePane.getChildren().remove(arrowHead);
+
+	}
+
+	protected void showArrow(StackPane arrowHead) {
+
+		if (arrowHead == null) {
+			return;
+		}
+
+		// get line
+		Line line = arrowsLines.get(arrowHead);
+
+		if (line != null && !tracePane.getChildren().contains(line)) {
+			tracePane.getChildren().add(line);
+		}
+
+		// get label
+		StackPane label = arrowsLabels.get(arrowHead);
+
+		if (label != null && !tracePane.getChildren().contains(label)) {
+			tracePane.getChildren().add(label);
+		}
+
+		// remove head
+		if (!tracePane.getChildren().contains(arrowHead)) {
+			tracePane.getChildren().add(arrowHead);
+		}
+
+	}
+
 	/**
 	 * hides labels in the traces shown
 	 */
@@ -2612,14 +2733,15 @@ public class TraceViewerInSystemController {
 		HBox hbox = new HBox();
 		hbox.setAlignment(Pos.CENTER_LEFT);
 		hbox.setSpacing(5);
-		
+
 		int padding = 2;
 		hbox.setPadding(new Insets(padding, padding, padding, padding));
-		
+
 		int corner = 5;
 		// set style
 		hbox.setStyle("-fx-border-color:grey;-fx-border-width:1;-fx-background-color:white;-fx-border-radius:" + corner
-				+ " " + corner + " " + corner + " " + corner + " " + ";fx-background-radius:"+corner+" "+corner+" "+corner+" "+corner+";");
+				+ " " + corner + " " + corner + " " + corner + " " + ";fx-background-radius:" + corner + " " + corner
+				+ " " + corner + " " + corner + ";");
 
 		imgView.setOnMouseEntered(e -> {
 
@@ -2835,7 +2957,7 @@ public class TraceViewerInSystemController {
 	 * @param hasStartArrow
 	 *            Specifies whether to show arrow towards start
 	 */
-	private void buildSingleDirectionalLine(StackPane startDot, StackPane endDot, Pane parent, boolean hasEndArrow,
+	private StackPane buildSingleDirectionalLine(StackPane startDot, StackPane endDot, Pane parent, boolean hasEndArrow,
 			boolean hasStartArrow, Color color, String actionName, int traceID) {
 
 		// line
@@ -2898,6 +3020,8 @@ public class TraceViewerInSystemController {
 		addComponentToTrace(traceID, weightAB);
 
 		parent.getChildren().addAll(line, weightAB, arrowAB);
+
+		return arrowAB;
 	}
 
 	/**
