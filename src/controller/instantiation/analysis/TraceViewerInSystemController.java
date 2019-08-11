@@ -183,7 +183,7 @@ public class TraceViewerInSystemController {
 
 	// added trace ids
 	List<Integer> addedTracesIDs;
-	//key is trace id, value is arrows color
+	// key is trace id, value is arrows color
 	Map<Integer, String> highLightedTracesIDs;
 
 	// private ContextMenu nodeContextMenu;
@@ -196,8 +196,9 @@ public class TraceViewerInSystemController {
 			.getResource("../../../resources/example/transitions_labelled.json");
 
 	private String imgDeletePath = "../../../resources/icons/delete.png";
-//	private InputStream imgDel = getClass().getResourceAsStream(imgDeletePath);
-	
+	// private InputStream imgDel =
+	// getClass().getResourceAsStream(imgDeletePath);
+
 	private static final String NODE_COLOUR = "white";
 	private static final String HIGHLIGHTED_NODE_COLOUR = "#efe8ff";
 	private static final String HIGHLIGHTED_END_NODE_COLOUR = "#ffb1b1";
@@ -379,24 +380,24 @@ public class TraceViewerInSystemController {
 					return;
 				}
 
-//				clearHighlights();
+				// clearHighlights();
 				addTraceIDToDisplay(selectedTraceID);
-				
-				if(checkboxShowOnlySelectedTrace.isSelected()) {
+
+				if (checkboxShowOnlySelectedTrace.isSelected()) {
 					showOnlyTraces(highLightedTracesIDs);
 				} else {
 					String color = null;
-					if(highLightedTracesIDs.containsKey(selectedTraceID)) {
+					if (highLightedTracesIDs.containsKey(selectedTraceID)) {
 						color = highLightedTracesIDs.get(selectedTraceID);
 					}
-					
+
 					String style = HIGHLIGHT_STYLE;
-					
-					if(color!=null) {
+
+					if (color != null) {
 						style = style.replace(HIGHLIGHT_TRACE_ARROW_COLOUR, color);
 					}
-//					System.out.println("showing in all: " + selectedTraceID);
-					highlightTrace(selectedTraceID, HIGHLIGHT_STYLE, style);	
+					// System.out.println("showing in all: " + selectedTraceID);
+					highlightTrace(selectedTraceID, HIGHLIGHT_STYLE, style);
 				}
 			}
 		});
@@ -530,17 +531,17 @@ public class TraceViewerInSystemController {
 		// get common entities
 		// traces are the added ones (including the original shown)
 		Collection<GraphPath> traces = null;
-		
-		//look for highlighted
-		if(highLightedTracesIDs.size()>0) {
+
+		// look for highlighted
+		if (highLightedTracesIDs.size() > 0) {
 			List<Integer> trcs = new LinkedList<Integer>(highLightedTracesIDs.keySet());
 			Map<Integer, GraphPath> tracesMap = miner.getTraces(trcs);
 			traces = tracesMap.values();
-		} else //then all added
+		} else // then all added
 		if (addedTracesIDs.size() > 0) {
 			Map<Integer, GraphPath> tracesMap = miner.getTraces(addedTracesIDs);
 			traces = tracesMap.values();
-		} else {//finally original trace
+		} else {// finally original trace
 			traces = new LinkedList<GraphPath>();
 			traces.add(trace);
 		}
@@ -556,12 +557,17 @@ public class TraceViewerInSystemController {
 		StringBuilder bldrStyle = new StringBuilder();
 
 		// add style to labels
+		int corner = 5;
+		
 		// font: 14, color: black, weight: bold
 		bldrStyle.append("-fx-text-fill: black; -fx-font-size:14px; -fx-font-weight: bold;")
 				// background
 				.append("-fx-background-color: white;")
 				// border
-				.append("-fx-border-color: grey;");
+				.append("-fx-border-color: grey;")
+				//border corner
+				.append("-fx-border-radius:").append(corner).append(" ").append(corner).append(" ").append(corner).append(" ").append(corner).append(";")
+				.append(";fx-background-radius:").append(corner).append(" ").append(corner).append(" ").append(corner).append(" ").append(corner).append(";");
 
 		String style = bldrStyle.toString();
 
@@ -666,8 +672,8 @@ public class TraceViewerInSystemController {
 	 */
 	protected StackPane getNodeFromState(int state) {
 
-		// check trace nodes
-		for (StackPane stateNode : traceNodes) {
+
+		for (StackPane stateNode : statesNodes.values()) {
 			int ndState = getStateFromNode(stateNode);
 
 			if (state == ndState) {
@@ -675,30 +681,40 @@ public class TraceViewerInSystemController {
 			}
 		}
 
-		// check next states
-		for (List<StackPane> nodes : mapNextNodes.values()) {
-			for (StackPane stateNode : nodes) {
-				int ndState = getStateFromNode(stateNode);
-
-				if (state == ndState) {
-					return stateNode;
-
-				}
-			}
-		}
-
-		// check previous states
-		for (List<StackPane> nodes : mapPreviousNodes.values()) {
-			for (StackPane stateNode : nodes) {
-				int ndState = getStateFromNode(stateNode);
-
-				if (state == ndState) {
-					return stateNode;
-
-				}
-			}
-
-		}
+		
+		// check trace nodes
+//		for (StackPane stateNode : traceNodes) {
+//			int ndState = getStateFromNode(stateNode);
+//
+//			if (state == ndState) {
+//				return stateNode;
+//			}
+//		}
+//
+//		// check next states
+//		for (List<StackPane> nodes : mapNextNodes.values()) {
+//			for (StackPane stateNode : nodes) {
+//				int ndState = getStateFromNode(stateNode);
+//
+//				if (state == ndState) {
+//					return stateNode;
+//
+//				}
+//			}
+//		}
+//
+//		// check previous states
+//		for (List<StackPane> nodes : mapPreviousNodes.values()) {
+//			for (StackPane stateNode : nodes) {
+//				int ndState = getStateFromNode(stateNode);
+//
+//				if (state == ndState) {
+//					return stateNode;
+//
+//				}
+//			}
+//
+//		}
 
 		return null;
 	}
@@ -883,8 +899,8 @@ public class TraceViewerInSystemController {
 				buildSingleDirectionalLine(stateNode, node, tracePane, true, false, ADDED_NODES_ARROW_COLOUR,
 						actionName, NOT_A_TRACE);
 			}
-			
-			if(node!=null && !tracePane.getChildren().contains(node)) {
+
+			if (node != null && !tracePane.getChildren().contains(node)) {
 				tracePane.getChildren().add(node);
 			}
 
@@ -915,6 +931,7 @@ public class TraceViewerInSystemController {
 		List<StackPane> nextStates = mapNextNodes.get(state);
 
 		// remove all next next
+		if(nextStates!=null) {
 		for (StackPane node : nextStates) {
 			int endState = getStateFromNode(node);
 
@@ -925,12 +942,14 @@ public class TraceViewerInSystemController {
 			removePreviousStates(endState);
 			// }
 		}
-
+		}
+		
 		// remove arrows
 		List<StackPane> nextArrows = statesOutgoingArrows.get(state);
 
 		List<StackPane> arrowsToRemove = new LinkedList<StackPane>();
 
+		if(nextArrows!=null) {
 		for (StackPane arw : nextArrows) {
 
 			// get end states
@@ -967,7 +986,8 @@ public class TraceViewerInSystemController {
 			}
 
 		}
-
+		}
+		
 		// remove arrow head
 		statesOutgoingArrows.get(state).removeAll(arrowsToRemove);
 		tracePane.getChildren().removeAll(arrowsToRemove);
@@ -1047,7 +1067,7 @@ public class TraceViewerInSystemController {
 						actionName, NOT_A_TRACE);
 			}
 
-			if(node!=null && !tracePane.getChildren().contains(node)) {
+			if (node != null && !tracePane.getChildren().contains(node)) {
 				tracePane.getChildren().add(node);
 			}
 		}
@@ -1508,31 +1528,29 @@ public class TraceViewerInSystemController {
 
 	protected String getrandomColoredHighLightStyle() {
 
-		
 		Random rand = new Random();
-//		int bound = 1000000;
-		
-		String[] options = new String[]{"1", "2","3", "4", "5", "6","7","8","9","a","b","c","d","e","f"};
-		//get random color (has to be six figures
+		// int bound = 1000000;
+
+		String[] options = new String[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f" };
+		// get random color (has to be six figures
 		StringBuilder strBldr = new StringBuilder();
-		
+
 		strBldr.append("#");
-		
-		for(int i=0;i<6;i++) {
-			
-			if(i==0) {
-				//for the first it shouldn't be f just to avoid all f's (i.e. white)
-				strBldr.append(options[rand.nextInt(options.length-1)]);
-			} else{
+
+		for (int i = 0; i < 6; i++) {
+
+			if (i == 0) {
+				// for the first it shouldn't be f just to avoid all f's (i.e.
+				// white)
+				strBldr.append(options[rand.nextInt(options.length - 1)]);
+			} else {
 				strBldr.append(options[rand.nextInt(options.length)]);
 			}
 		}
-		
-//		int color = rand.nextInt(bound);
 
-//		String colr = "#" + color;
+		// int color = rand.nextInt(bound);
 
-		
+		// String colr = "#" + color;
 
 		return strBldr.toString();
 
@@ -1893,7 +1911,7 @@ public class TraceViewerInSystemController {
 				}
 			}
 		}
-		
+
 		setNodes();
 	}
 
@@ -1927,7 +1945,7 @@ public class TraceViewerInSystemController {
 				arrowLine.setStyle(TRACE_ARROW_HIGHLIGHT_STYLE);
 
 			} else {
-//				System.out.println(highLightStyle);
+				// System.out.println(highLightStyle);
 				arrowLine.setStyle(highLightStyle);
 			}
 
@@ -2411,23 +2429,22 @@ public class TraceViewerInSystemController {
 			hideActionsNames();
 		}
 
-		
 		for (Integer traceID : tracesIDs.keySet()) {
-		
+
 			String color = tracesIDs.get(traceID);
-			
-			if(color == null || color.isEmpty()) {
+
+			if (color == null || color.isEmpty()) {
 				color = getrandomColoredHighLightStyle();
 				tracesIDs.put(traceID, color);
-				
+
 			}
-			
+
 			String style = HIGHLIGHT_STYLE;
-			
-			if(style.contains(HIGHLIGHT_TRACE_ARROW_COLOUR)) {
+
+			if (style.contains(HIGHLIGHT_TRACE_ARROW_COLOUR)) {
 				style = style.replace(HIGHLIGHT_TRACE_ARROW_COLOUR, color);
 			}
-			
+
 			highlightTrace(traceID, HIGHLIGHT_STYLE, style);
 		}
 
@@ -2463,11 +2480,12 @@ public class TraceViewerInSystemController {
 		// just makes sure that all nodes are on top
 		setNodes();
 
-//		Integer traceID = comboBoxAddedTraces.getSelectionModel().getSelectedItem();
-//
-//		if (traceID != null) {
-//			highlightTrace(traceID, HIGHLIGHT_STYLE, HIGHLIGHT_STYLE);
-//		}
+		// Integer traceID =
+		// comboBoxAddedTraces.getSelectionModel().getSelectedItem();
+		//
+		// if (traceID != null) {
+		// highlightTrace(traceID, HIGHLIGHT_STYLE, HIGHLIGHT_STYLE);
+		// }
 
 	}
 
@@ -2565,68 +2583,70 @@ public class TraceViewerInSystemController {
 			index++;
 
 		}
-		
+
 		return strBldr.toString();
 	}
 
 	protected void addTraceIDToDisplay(Integer traceID) {
 
-		if(highLightedTracesIDs.containsKey(traceID)) {
+		if (highLightedTracesIDs.containsKey(traceID)) {
 			return;
 		}
-		
-		//create color
+
+		// create color
 		String color = getrandomColoredHighLightStyle();
-		
-		//label
+
+		// label
 		Label traceLabel = new Label(traceID + "");
-		traceLabel.setStyle("-fx-font-size:14;-fx-font-weight:bold;-fx-text-fill:"+color+";");
+		traceLabel.setStyle("-fx-font-size:14;-fx-font-weight:bold;-fx-text-fill:" + color + ";");
 		String traceDetails = getTraceInfo(traceID);
 		Tooltip tip = new Tooltip(traceDetails);
 		tip.setStyle("-fx-font-size:10;");
 		traceLabel.setTooltip(tip);
-		
-		//image
+
+		// image
 		InputStream imgDel = getClass().getResourceAsStream(imgDeletePath);
 		ImageView imgView = new ImageView(new Image(imgDel));
-		
-		
-		//container 
+
+		// container
 		HBox hbox = new HBox();
 		hbox.setAlignment(Pos.CENTER_LEFT);
-		hbox.setSpacing(3);
+		hbox.setSpacing(5);
+		
+		int padding = 2;
+		hbox.setPadding(new Insets(padding, padding, padding, padding));
+		
+		int corner = 5;
+		// set style
+		hbox.setStyle("-fx-border-color:grey;-fx-border-width:1;-fx-background-color:white;-fx-border-radius:" + corner
+				+ " " + corner + " " + corner + " " + corner + " " + ";fx-background-radius:"+corner+" "+corner+" "+corner+" "+corner+";");
 
-		
-		imgView.setOnMouseEntered(e->{
-		
+		imgView.setOnMouseEntered(e -> {
+
 			imgView.setCursor(Cursor.HAND);
 		});
-		
-		imgView.setOnMouseClicked(e->{
+
+		imgView.setOnMouseClicked(e -> {
 			flowPaneTraceDetails.getChildren().remove(hbox);
 			highLightedTracesIDs.remove(traceID);
-			if(checkboxShowOnlySelectedTrace.isSelected()) {
+			if (checkboxShowOnlySelectedTrace.isSelected()) {
 				showOnlyTraces(highLightedTracesIDs);
 			} else {
-//				for(Integer trID: highLightedTracesIDs.keySet()){
-					highlightTrace(traceID, NORMAL_HIGHLIGHT_STYLE, NORMAL_HIGHLIGHT_STYLE);	
-//				}
-				
+				// for(Integer trID: highLightedTracesIDs.keySet()){
+				highlightTrace(traceID, NORMAL_HIGHLIGHT_STYLE, NORMAL_HIGHLIGHT_STYLE);
+				// }
+
 			}
 		});
-		
+
 		hbox.getChildren().addAll(traceLabel, imgView);
 
-		//set style
-		hbox.setStyle("-fx-border-color:grey;-fx-border-width:1;-fx-background-color:white;");
-		
-		//add to the list of shown traces
+		// add to the list of shown traces
 		flowPaneTraceDetails.getChildren().add(hbox);
-		
-		
+
 		highLightedTracesIDs.put(traceID, color);
 	}
-	
+
 	protected void addComponentToTrace(int traceID, Node comp) {
 
 		if (NOT_A_TRACE == traceID) {

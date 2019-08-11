@@ -16,14 +16,18 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class InstantiationDetailsController {
 
 	// private ComboBox<Integer> comboBoxTopK;
+//	@FXML
+//	private HBox hboxEntities;
+	
 	@FXML
-	private HBox hboxEntities;
+	private FlowPane flowPaneEntities;
 
 	@FXML
 	private Spinner<Integer> spinnerTopK;
@@ -107,8 +111,8 @@ public class InstantiationDetailsController {
 //			miner.setBigraphERFile(bigFile);
 //		}
 
-		if(hboxEntities.getChildren().size()>0) {
-			hboxEntities.getChildren().clear();
+		if(flowPaneEntities.getChildren().size()>0) {
+			flowPaneEntities.getChildren().clear();
 		}
 		
 		StringBuilder bldrStyle = new StringBuilder();
@@ -143,7 +147,7 @@ public class InstantiationDetailsController {
 //		comboBoxTopK.getSelectionModel().select(topK - 1);
 		spinnerTopK.getValueFactory().setValue(topK);
 		// add labels to hbox
-		hboxEntities.getChildren().addAll(resLbls);
+		flowPaneEntities.getChildren().addAll(resLbls);
 
 
 	}
