@@ -189,10 +189,9 @@ public class TraceViewerInSystemController {
 	// key is trace id, value is arrows color
 	Map<Integer, String> highLightedTracesIDs;
 
-	//key is action name, value is list of trace ids that contain the action
+	// key is action name, value is list of trace ids that contain the action
 	Map<String, List<Integer>> mapActions;
-	
-	
+
 	// private ContextMenu nodeContextMenu;
 
 	private double sceneX, sceneY, layoutX, layoutY;
@@ -352,7 +351,7 @@ public class TraceViewerInSystemController {
 		tracesComponents = new HashMap<Integer, List<Node>>();
 
 		mapActions = new HashMap<String, List<Integer>>();
-		
+
 		// added traces ids
 		addedTracesIDs = new LinkedList<Integer>();
 		highLightedTracesIDs = new HashMap<Integer, String>();
@@ -393,9 +392,9 @@ public class TraceViewerInSystemController {
 				// clearHighlights();
 				addTraceIDToDisplay(selectedTraceID);
 
-				//update actions
+				// update actions
 				showActionsInList();
-				
+
 				if (checkboxShowOnlySelectedTrace.isSelected()) {
 					showOnlyTraces(highLightedTracesIDs);
 				} else {
@@ -505,8 +504,8 @@ public class TraceViewerInSystemController {
 					}
 
 					getAllTracesFromTo(sttt, lastState);
-					
-					//show actions related
+
+					// show actions related
 					showActionsInList();
 
 				default:
@@ -572,9 +571,9 @@ public class TraceViewerInSystemController {
 		int corner = 5;
 
 		// font: 14, color: black, weight: bold
-		bldrStyle.append("-fx-text-fill: black; -fx-font-size:12px;")
+		bldrStyle.append("-fx-text-fill: black; -fx-font-size:12px;-fx-font-weight:bold;")
 				// background
-				.append("-fx-background-color: white;")
+				.append("-fx-background-color: #e5fbff;")
 				// border
 				.append("-fx-border-color: grey;")
 				// border corner
@@ -600,9 +599,10 @@ public class TraceViewerInSystemController {
 		flowPaneEntities.getChildren().addAll(resLbls);
 
 	}
-	
+
 	/**
 	 * Shows actions contianed in the traces
+	 * 
 	 * @param e
 	 */
 
@@ -613,13 +613,13 @@ public class TraceViewerInSystemController {
 			return;
 		}
 
-//		if (!miner.isBigraphERFileSet()) {
-//			traceCell.selectBigraphERFile();
-//		}
+		// if (!miner.isBigraphERFileSet()) {
+		// traceCell.selectBigraphERFile();
+		// }
 
-//		if (!miner.isBigraphERFileSet()) {
-//			return;
-//		}
+		// if (!miner.isBigraphERFileSet()) {
+		// return;
+		// }
 
 		// get common entities
 		// traces are the added ones (including the original shown)
@@ -639,30 +639,30 @@ public class TraceViewerInSystemController {
 			traces.add(trace);
 		}
 
-		if(traces == null) {
+		if (traces == null) {
 			return;
 		}
 
-
-		//clear actions map
+		// clear actions map
 		mapActions.clear();
-		
-		for(GraphPath trace : traces) {
+
+		for (GraphPath trace : traces) {
 			List<String> traceActions = trace.getTraceActions();
-			
-			for(String action: traceActions) {
-				//if it contains the action, then add the trace id
-				if(mapActions.containsKey(action)) {
+
+			for (String action : traceActions) {
+				// if it contains the action, then add the trace id
+				if (mapActions.containsKey(action)) {
 					mapActions.get(action).add(trace.getInstanceID());
 				} else {
 					List<Integer> traceIDs = new LinkedList<Integer>();
 					traceIDs.add(trace.getInstanceID());
-					mapActions.put(action, traceIDs); 
+					mapActions.put(action, traceIDs);
 				}
 			}
 		}
-		
-//		topEntities = miner.findTopCommonEntities(traces, JSONTerms.BIG_IRRELEVANT_TERMS, topK);
+
+		// topEntities = miner.findTopCommonEntities(traces,
+		// JSONTerms.BIG_IRRELEVANT_TERMS, topK);
 
 		if (flowPaneActions.getChildren().size() > 0) {
 			flowPaneActions.getChildren().clear();
@@ -676,7 +676,7 @@ public class TraceViewerInSystemController {
 		// font: 14, color: black, weight: bold
 		bldrStyle.append("-fx-text-fill: black; -fx-font-size:12px; -fx-font-weight: bold;")
 				// background
-				.append("-fx-background-color: white;")
+				.append("-fx-background-color: #ffe5e7;")
 				// border
 				.append("-fx-border-color: grey;")
 				// border corner
@@ -697,12 +697,12 @@ public class TraceViewerInSystemController {
 
 		// set selected value
 		// comboBoxTopK.getSelectionModel().select(topK - 1);
-//		spinnerTopK.getValueFactory().setValue(topK);
+		// spinnerTopK.getValueFactory().setValue(topK);
 		// add labels to hbox
 		flowPaneActions.getChildren().addAll(resLbls);
 
 	}
-	
+
 	protected int getStateFromNode(StackPane node) {
 
 		int state = -1;
@@ -860,6 +860,12 @@ public class TraceViewerInSystemController {
 		comboBoxAddedTraces.getItems().clear();
 		flowPaneTraceDetails.getChildren().clear();
 
+		// reset entities
+		flowPaneEntities.getChildren().clear();
+
+		// reset actions
+		flowPaneActions.getChildren().clear();
+
 		tracePane.getChildren().clear();
 
 		// check if saved
@@ -872,9 +878,6 @@ public class TraceViewerInSystemController {
 		// toggleButtonActivity(btnSaveTrace, false);
 		// }
 		// }
-
-		// reset entities
-		flowPaneEntities.getChildren().clear();
 
 		showTrace(trace);
 	}
@@ -2812,6 +2815,11 @@ public class TraceViewerInSystemController {
 		return strBldr.toString();
 	}
 
+	/**
+	 * adds the given trace id to the list of shown traces.
+	 * 
+	 * @param traceID
+	 */
 	protected void addTraceIDToDisplay(Integer traceID) {
 
 		if (highLightedTracesIDs.containsKey(traceID)) {
@@ -2855,6 +2863,10 @@ public class TraceViewerInSystemController {
 		imgView.setOnMouseClicked(e -> {
 			flowPaneTraceDetails.getChildren().remove(hbox);
 			highLightedTracesIDs.remove(traceID);
+
+			// update shown actions
+			showActionsInList();
+
 			if (checkboxShowOnlySelectedTrace.isSelected()) {
 				showOnlyTraces(highLightedTracesIDs);
 			} else {
