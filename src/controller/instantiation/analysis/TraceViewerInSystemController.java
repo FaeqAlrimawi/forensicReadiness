@@ -1448,7 +1448,7 @@ public class TraceViewerInSystemController {
 
 		}
 
-		for (Integer traceID : highLightedTracesIDs.keySet()) {
+		for (Integer traceID : tracesToSave) {
 			GraphPath trace = miner.getTrace(traceID);
 			path = traceCell.saveTrace(trace);
 			
@@ -1460,10 +1460,10 @@ public class TraceViewerInSystemController {
 		}
 
 		if(tracesSaved.size() == tracesToSave.size()) {
-			setIndicator(false, "All saved: " +tracesSaved);
+			setIndicator(false, "All saved ("+tracesSaved.size()+"): " +tracesSaved);
 			toggleButtonActivity(btnSaveTrace, true);
 		} else {
-			setIndicator(false, "Failed to save: " + tracesFailed);
+			setIndicator(false, "Failed to save ("+tracesFailed.size()+": " + tracesFailed);
 		}
 		
 		Timer t=  new Timer();
