@@ -12,6 +12,7 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
@@ -103,15 +104,18 @@
       </VBox>
    </top>
    <bottom>
-      <HBox prefHeight="25.0" prefWidth="1445.0" spacing="2.0" BorderPane.alignment="CENTER">
+      <AnchorPane prefHeight="25.0" prefWidth="1461.0" BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets bottom="3.0" top="3.0" />
+         </BorderPane.margin>
          <children>
-            <HBox fx:id="hboxIndicator" prefHeight="25.0" prefWidth="462.0">
+            <HBox fx:id="hboxIndicator" layoutX="9.0" prefHeight="25.0" prefWidth="695.0" AnchorPane.leftAnchor="5.0">
                <children>
                   <ProgressIndicator fx:id="progressIndicator" prefHeight="6.0" prefWidth="41.0" visible="false" />
-                  <Label fx:id="lblProgressIndicator" prefHeight="25.0" prefWidth="448.0" />
+                  <Label fx:id="lblProgressIndicator" prefHeight="25.0" prefWidth="471.0" />
                </children>
             </HBox>
-            <HBox fx:id="hboxTraceNavigator" alignment="CENTER_RIGHT" prefHeight="25.0" prefWidth="1193.0" spacing="5.0">
+            <HBox fx:id="hboxTraceNavigator" alignment="CENTER_RIGHT" layoutX="358.0" prefHeight="25.0" prefWidth="261.0" spacing="5.0" AnchorPane.rightAnchor="5.0">
                <children>
                   <Button mnemonicParsing="false" onAction="#showPreviousTrace" text="&lt;">
                      <tooltip>
@@ -131,9 +135,6 @@
                </padding>
             </HBox>
          </children>
-         <BorderPane.margin>
-            <Insets bottom="3.0" top="3.0" />
-         </BorderPane.margin>
-      </HBox>
+      </AnchorPane>
    </bottom>
 </BorderPane>
