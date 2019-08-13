@@ -251,9 +251,10 @@ public class TraceViewerInSystemController {
 	private static final String MENU_ITEM_SHOW_PREVIOUS = "Show Previous";
 	private static final String MENU_ITEM_HIDE_PREVIOUS = "Hide Previous";
 	private static final String MENU_ITEM_SHOW_OTHERS = "Show other Paths";
+	private static final String MENU_ITEM_SHOW_TRACES = "Show Traces";
 
 	private static final String[] NODE_CONTEXT_MENU_ITEMS = new String[] { MENU_ITEM_SHOW_NEXT, MENU_ITEM_SHOW_PREVIOUS,
-			MENU_ITEM_HIDE_NEXT, MENU_ITEM_HIDE_PREVIOUS, MENU_ITEM_SHOW_OTHERS };
+			MENU_ITEM_HIDE_NEXT, MENU_ITEM_HIDE_PREVIOUS, MENU_ITEM_SHOW_OTHERS, MENU_ITEM_SHOW_TRACES };
 
 	private static final List<String> NODE_CONTEXT_MENU_IGNORE_ITEMS = new LinkedList<String>() {
 		{
@@ -460,7 +461,8 @@ public class TraceViewerInSystemController {
 
 		List<MenuItem> items = new LinkedList<MenuItem>();
 		// int state = -1;
-
+		ContextMenu conMenu = new ContextMenu();
+		
 		for (String item : NODE_CONTEXT_MENU_ITEMS) {
 
 			if (NODE_CONTEXT_MENU_IGNORE_ITEMS.contains(item)) {
@@ -514,8 +516,12 @@ public class TraceViewerInSystemController {
 
 					// show actions related
 					showActionsInList();
+					break;
 					
-					
+				//show traces that the state is part of
+				case MENU_ITEM_SHOW_TRACES:
+					showTracesIDsInContextMenu(conMenu, stateStack);
+					break;
 
 				default:
 					break;
@@ -524,12 +530,62 @@ public class TraceViewerInSystemController {
 
 		}
 
-		ContextMenu conMenu = new ContextMenu();
+		
 		conMenu.getItems().addAll(items);
 
 		return conMenu;
 	}
 	
+	/**
+	 * Shows all traces ids that are in the added traces (currently in the list of traces) which the given node is part of
+	 * @param node
+	 */
+	protected void showTracesIDsInContextMenu(ContextMenu e, StackPane node) {
+		
+		if(miner == null) {
+			return;
+		}
+		
+		int state = getStateFromNode(node);
+		
+		List<Integer> tracesIDsFound = new LinkedList<Integer>();
+		
+		if(state == -1) {
+			return;
+		}
+		
+		//find traces
+		for(Integer traceID : addedTracesIDs) {
+			GraphPath trace = miner.getTrace(traceID);
+			
+			if(trace!=null) {
+				List<Integer> states = trace.getStateTransitions();
+				
+				//a trace is found, add to the list
+				if(states!=null && states.contains(state)) {
+				tracesIDsFound.add(traceID);	
+				}
+			}
+		}
+		
+		//create context menu
+		ContextMenu conMenu = new ContextMenu();
+		
+		List<MenuItem> items = new LinkedList<MenuItem>();
+		
+		for(Integer traceID: tracesIDsFound) {
+			MenuItem item = new MenuItem(traceID+"");
+			items.add(item);
+		}
+		
+		
+		conMenu.getItems().addAll(items);
+		
+		conMenu.setX(e.getX());
+		conMenu.setY(e.getY());
+		conMenu.show(node.getScene().getWindow());
+		
+	}
 	@FXML
 	void showEntities(ActionEvent e) {
 
@@ -971,7 +1027,12 @@ public class TraceViewerInSystemController {
 			if (statesNodes.containsKey(outBoundState)) {
 				node = statesNodes.get(outBoundState);
 				// nextNodes.add(node);
-
+				
+				// if the node is hidden then show it
+				if (!tracePane.getChildren().contains(node)) {
+					tracePane.getChildren().add(node);
+				}
+				
 				// check if arrow is alread drawn
 				if (!areConnected(state, outBoundState)) {
 					String actionName = digraph.getLabel(state, outBoundState);
@@ -979,10 +1040,6 @@ public class TraceViewerInSystemController {
 					StackPane arrowHead = buildSingleDirectionalLine(stateNode, node, tracePane, true, false,
 							ADDED_NODES_ARROW_COLOUR, actionName, NOT_A_TRACE);
 
-					// if the node is hidden then hide the arrow
-					if (!tracePane.getChildren().contains(node)) {
-						hideArrow(arrowHead);
-					}
 				} else {
 					// show the arrow if the node is shown
 
@@ -1011,9 +1068,9 @@ public class TraceViewerInSystemController {
 						actionName, NOT_A_TRACE);
 			}
 
-			if (node != null && !tracePane.getChildren().contains(node)) {
-				tracePane.getChildren().add(node);
-			}
+//			if (node != null && !tracePane.getChildren().contains(node)) {
+//				tracePane.getChildren().add(node);
+//			}
 
 		}
 
@@ -2296,6 +2353,11 @@ public class TraceViewerInSystemController {
 			if (statesNodes.containsKey(state)) {
 				node = statesNodes.get(state);
 
+				// if the node is hidden then show it
+				if (!tracePane.getChildren().contains(node)) {
+					tracePane.getChildren().add(node);
+				}
+				
 				if (index > 0) {
 
 					int previousState = states.get(index - 1);
@@ -2305,6 +2367,20 @@ public class TraceViewerInSystemController {
 					if (!areConnected(previousState, state)) {
 						buildSingleDirectionalLine(stateNodes.get(index - 1), node, tracePane, true, false,
 								ADDED_NODES_ARROW_COLOUR, actions.get(index - 1), traceID);
+					}  else {
+						// show the arrow if the node is shown
+
+						// find the arrow
+						for (StackPane arw : statesOutgoingArrows.get(previousState)) {
+							int endState = getEndStateFromArrow(arw);
+							if (endState == state) {
+								// if (tracePane.getChildren().contains(node)) {
+								showArrow(arw);
+								// }
+							}
+
+						}
+
 					}
 				}
 
@@ -2368,6 +2444,11 @@ public class TraceViewerInSystemController {
 			if (statesNodes.containsKey(state)) {
 				node = statesNodes.get(state);
 
+				// if the node is hidden then show it
+				if (!tracePane.getChildren().contains(node)) {
+					tracePane.getChildren().add(node);
+				}
+				
 				if (index > 0) {
 
 					int previousState = traceStates.get(index - 1);
@@ -2378,6 +2459,20 @@ public class TraceViewerInSystemController {
 					if (!areConnected(previousState, state)) {
 						buildSingleDirectionalLine(stateNodes.get(index - 1), node, tracePane, true, false,
 								ADDED_NODES_ARROW_COLOUR, actionName, NOT_A_TRACE);
+					}else {
+						// show the arrow if the node is shown
+
+						// find the arrow
+						for (StackPane arw : statesOutgoingArrows.get(previousState)) {
+							int endState = getEndStateFromArrow(arw);
+							if (endState == state) {
+								// if (tracePane.getChildren().contains(node)) {
+								showArrow(arw);
+								// }
+							}
+
+						}
+
 					}
 				}
 
@@ -2935,15 +3030,6 @@ public class TraceViewerInSystemController {
 
 		highLightedTracesIDs.put(traceID, color);
 		
-		//update traces label
-		Platform.runLater(new Runnable() {
-			
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				lblNumOfAddedTraces.setText("[" + highLightedTracesIDs.size()+"]");
-			}
-		});
 	}
 
 	protected void addComponentToTrace(int traceID, Node comp) {
