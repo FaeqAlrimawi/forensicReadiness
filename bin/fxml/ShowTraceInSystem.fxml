@@ -29,11 +29,16 @@
                     <items>
                         <VBox prefHeight="223.0" prefWidth="207.0" spacing="5.0">
                            <children>
-                              <Label text="Traces">
-                                 <font>
-                                    <Font name="System Bold" size="14.0" />
-                                 </font>
-                              </Label>
+                              <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                 <children>
+                                    <Label text="Traces">
+                                       <font>
+                                          <Font name="System Bold" size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <Label fx:id="lblNumOfAddedTraces" />
+                                 </children>
+                              </HBox>
                               <VBox prefHeight="135.0" prefWidth="348.0" spacing="3.0">
                                  <children>
                                     <HBox alignment="CENTER_LEFT" spacing="3.0">
@@ -55,13 +60,13 @@
                               </VBox>
                               <VBox minWidth="10.0" prefHeight="51.0" prefWidth="317.0">
                                  <children>
-                                    <CheckBox fx:id="checkBoxHideActionsNames" mnemonicParsing="false" prefHeight="17.0" prefWidth="116.0" text="hide action name" />
                                     <CheckBox fx:id="checkboxShowOnlySelectedTrace" mnemonicParsing="false" text="Only selected trace" />
                                     <CheckBox fx:id="checkboxShowOccurrence" mnemonicParsing="false" text="Occurrence %">
                                        <tooltip>
                                           <Tooltip text="Shows the occurrence percentage of the states and actions" />
                                        </tooltip>
                                     </CheckBox>
+                                    <CheckBox fx:id="checkBoxHideActionsNames" mnemonicParsing="false" prefHeight="17.0" prefWidth="116.0" text="hide action name" />
                                  </children>
                               </VBox>
                            </children>

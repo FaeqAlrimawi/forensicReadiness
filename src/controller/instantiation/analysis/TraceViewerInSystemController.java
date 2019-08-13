@@ -62,6 +62,9 @@ import javafx.stage.Window;
 public class TraceViewerInSystemController {
 
 	@FXML
+	private Label lblNumOfAddedTraces;
+	
+	@FXML
 	private FlowPane flowPaneActions;
 
 	@FXML
@@ -230,8 +233,12 @@ public class TraceViewerInSystemController {
 			+ ";-fx-stroke-width:3px;-fx-stroke:black;";
 
 	// arrow styles
-	private static final String HIGHLIGHT_STYLE = "-fx-stroke-width:3px;-fx-stroke:" + HIGHLIGHT_TRACE_ARROW_COLOUR
+	private static final String HIGHLIGHT_STROKE_WIDTH = "-fx-stroke-width:3px;";
+	private static final String HOVER_HIGHLIGHT_STROKE_WIDTH = "-fx-stroke-width:5px;";
+	
+	private static final String HIGHLIGHT_STYLE = HIGHLIGHT_STROKE_WIDTH+ "-fx-stroke:" + HIGHLIGHT_TRACE_ARROW_COLOUR
 			+ ";-fx-opacity:1;";
+
 	private static final String NORMAL_HIGHLIGHT_STYLE = "-fx-stroke-width:2px;-fx-stroke:grey;-fx-opacity:1;";
 	private static final String ARROW_NORMAL_HIGHLIGHT_STYLE = "-fx-stroke-width:2px;-fx-stroke:grey;-fx-opacity:1;";
 	private static final String TRACE_ARROW_HIGHLIGHT_STYLE = "-fx-stroke-width:2px;-fx-stroke:red;-fx-opacity:1;";
@@ -507,6 +514,8 @@ public class TraceViewerInSystemController {
 
 					// show actions related
 					showActionsInList();
+					
+					
 
 				default:
 					break;
@@ -520,7 +529,7 @@ public class TraceViewerInSystemController {
 
 		return conMenu;
 	}
-
+	
 	@FXML
 	void showEntities(ActionEvent e) {
 
@@ -1676,6 +1685,7 @@ public class TraceViewerInSystemController {
 			addedTracesIDs.add(trace.getInstanceID());
 			updateAddedTracesIDsComboBox(addedTracesIDs);
 			comboBoxAddedTraces.getSelectionModel().selectFirst();
+			
 		}
 
 	}
@@ -1689,6 +1699,7 @@ public class TraceViewerInSystemController {
 				// TODO Auto-generated method stub
 				ObservableList<Integer> list = FXCollections.observableArrayList(tracesIDs);
 				comboBoxAddedTraces.setItems(list);
+				lblNumOfAddedTraces.setText("["+addedTracesIDs.size()+"]");
 			}
 		});
 	}
@@ -1703,6 +1714,7 @@ public class TraceViewerInSystemController {
 				// ObservableList<Integer> list =
 				// FXCollections.observableArrayList(tracesIDs);
 				comboBoxAddedTraces.getItems().add(traceID);
+				lblNumOfAddedTraces.setText("["+addedTracesIDs.size()+"]");
 			}
 		});
 	}
@@ -1761,7 +1773,7 @@ public class TraceViewerInSystemController {
 			LinkedList<Integer> traceStates = trace.getStateTransitions();
 
 			if (traceStates != null && traceStates.getLast() == endState) {
-				// a trace is identified then add
+				// a trace is identified then added
 				addTrace(trace);
 			}
 		}
@@ -2832,10 +2844,12 @@ public class TraceViewerInSystemController {
 		// label
 		Label traceLabel = new Label(traceID + "");
 		traceLabel.setStyle("-fx-font-size:14;-fx-font-weight:bold;-fx-text-fill:" + color + ";");
-		String traceDetails = getTraceInfo(traceID);
-		Tooltip tip = new Tooltip(traceDetails);
-		tip.setStyle("-fx-font-size:10;");
-		traceLabel.setTooltip(tip);
+		
+		//trace states and actions
+//		String traceDetails = getTraceInfo(traceID);
+//		Tooltip tip = new Tooltip(traceDetails);
+//		tip.setStyle("-fx-font-size:10;");
+//		traceLabel.setTooltip(tip);
 
 		// image
 		InputStream imgDel = getClass().getResourceAsStream(imgDeletePath);
@@ -2849,6 +2863,42 @@ public class TraceViewerInSystemController {
 		int padding = 2;
 		hbox.setPadding(new Insets(padding, padding, padding, padding));
 
+		// on mouse entered highlight trace
+		hbox.setOnMouseEntered(e -> {
+			String style = HIGHLIGHT_STYLE;
+
+			if (color != null) {
+				style = style.replace(HIGHLIGHT_TRACE_ARROW_COLOUR, color);
+			}
+			
+			//try to get the current stroke width from the style
+			if (style.contains(HIGHLIGHT_STROKE_WIDTH)) {
+				
+				style = style.replace(HIGHLIGHT_STROKE_WIDTH, HOVER_HIGHLIGHT_STROKE_WIDTH);
+
+			};
+			
+			highlightTrace(traceID, HIGHLIGHT_STYLE, style);
+		});
+
+		hbox.setOnMouseExited(e->{
+		
+			String style = HIGHLIGHT_STYLE;
+
+			if (color != null) {
+				style = style.replace(HIGHLIGHT_TRACE_ARROW_COLOUR, color);
+			}
+
+			//try to get the current stroke width from the style
+			if (style.contains(HOVER_HIGHLIGHT_STROKE_WIDTH)) {
+				
+				style = style.replace(HOVER_HIGHLIGHT_STROKE_WIDTH, HIGHLIGHT_STROKE_WIDTH);
+
+			}
+			
+			highlightTrace(traceID, HIGHLIGHT_STYLE, style);
+			
+		});
 		int corner = 5;
 		// set style
 		hbox.setStyle("-fx-border-color:grey;-fx-border-width:1;-fx-background-color:white;-fx-border-radius:" + corner
@@ -2860,6 +2910,7 @@ public class TraceViewerInSystemController {
 			imgView.setCursor(Cursor.HAND);
 		});
 
+		// on mous clicked remove the trace id label
 		imgView.setOnMouseClicked(e -> {
 			flowPaneTraceDetails.getChildren().remove(hbox);
 			highLightedTracesIDs.remove(traceID);
@@ -2883,6 +2934,16 @@ public class TraceViewerInSystemController {
 		flowPaneTraceDetails.getChildren().add(hbox);
 
 		highLightedTracesIDs.put(traceID, color);
+		
+		//update traces label
+		Platform.runLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				lblNumOfAddedTraces.setText("[" + highLightedTracesIDs.size()+"]");
+			}
+		});
 	}
 
 	protected void addComponentToTrace(int traceID, Node comp) {
