@@ -29,6 +29,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -40,6 +41,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Separator;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
@@ -66,7 +68,7 @@ public class TraceViewerInSystemController {
 
 	@FXML
 	private Label lblNumOfAddedTraces;
-	
+
 	@FXML
 	private FlowPane flowPaneActions;
 
@@ -238,8 +240,8 @@ public class TraceViewerInSystemController {
 	// arrow styles
 	private static final String HIGHLIGHT_STROKE_WIDTH = "-fx-stroke-width:3px;";
 	private static final String HOVER_HIGHLIGHT_STROKE_WIDTH = "-fx-stroke-width:5px;";
-	
-	private static final String HIGHLIGHT_STYLE = HIGHLIGHT_STROKE_WIDTH+ "-fx-stroke:" + HIGHLIGHT_TRACE_ARROW_COLOUR
+
+	private static final String HIGHLIGHT_STYLE = HIGHLIGHT_STROKE_WIDTH + "-fx-stroke:" + HIGHLIGHT_TRACE_ARROW_COLOUR
 			+ ";-fx-opacity:1;";
 
 	private static final String NORMAL_HIGHLIGHT_STYLE = "-fx-stroke-width:2px;-fx-stroke:grey;-fx-opacity:1;";
@@ -275,6 +277,12 @@ public class TraceViewerInSystemController {
 	// private static final int previousStateNum = 2;
 
 	private int currentNumberOfShownTraces = 0;
+
+	// used to indicate if a trace is temporarly added
+	private boolean isAdded = false;
+
+	// used to hold trace color
+	private String traceColor = null;
 
 	@FXML
 	public void initialize() {
@@ -465,7 +473,7 @@ public class TraceViewerInSystemController {
 		List<MenuItem> items = new LinkedList<MenuItem>();
 		// int state = -1;
 		ContextMenu conMenu = new ContextMenu();
-		
+
 		for (String item : NODE_CONTEXT_MENU_ITEMS) {
 
 			if (NODE_CONTEXT_MENU_IGNORE_ITEMS.contains(item)) {
@@ -520,8 +528,8 @@ public class TraceViewerInSystemController {
 					// show actions related
 					showActionsInList();
 					break;
-					
-				//show traces that the state is part of
+
+				// show traces that the state is part of
 				case MENU_ITEM_SHOW_TRACES:
 					showTracesIDsInContextMenu(conMenu, stateStack);
 					break;
@@ -533,82 +541,84 @@ public class TraceViewerInSystemController {
 
 		}
 
-		
 		conMenu.getItems().addAll(items);
 
 		return conMenu;
 	}
-	
+
 	/**
-	 * Shows all traces ids that are in the added traces (currently in the list of traces) which the given node is part of
+	 * Shows all traces ids that are in the added traces (currently in the list
+	 * of traces) which the given node is part of
+	 * 
 	 * @param node
 	 */
 	protected void showTracesIDsInContextMenu(ContextMenu mainContextMenu, StackPane node) {
-		
-		if(miner == null) {
+
+		if (miner == null) {
 			return;
 		}
-		
+
 		int state = getStateFromNode(node);
-		
+
 		List<Integer> tracesIDsFound = new LinkedList<Integer>();
-		
-		if(state == -1) {
+
+		if (state == -1) {
 			return;
 		}
-		
-		//find traces
-		for(Integer traceID : addedTracesIDs) {
+
+		// find traces
+		for (Integer traceID : addedTracesIDs) {
 			GraphPath trace = miner.getTrace(traceID);
-			
-			if(trace!=null) {
+
+			if (trace != null) {
 				List<Integer> states = trace.getStateTransitions();
-				
-				//a trace is found, add to the list
-				if(states!=null && states.contains(state)) {
-				tracesIDsFound.add(traceID);	
+
+				// a trace is found, add to the list
+				if (states != null && states.contains(state)) {
+					tracesIDsFound.add(traceID);
 				}
 			}
 		}
-		
+
 		FlowPane tracesPane = new FlowPane();
-		
+
 		tracesPane.setPrefWidth(150);
-		
-		//create context menu
+
+		// create context menu
 		ContextMenu conMenu = new ContextMenu();
-		
+
 		List<MenuItem> items = new LinkedList<MenuItem>();
-		
-		for(Integer traceID: tracesIDsFound) {
-			MenuItem item = new MenuItem(traceID+"");
-			Label lbl = new Label(traceID+"");
+
+		for (Integer traceID : tracesIDsFound) {
+			MenuItem item = new MenuItem(traceID + "");
+			Label lbl = new Label(traceID + "");
 			tracesPane.getChildren().add(lbl);
-			
+
 			items.add(item);
 		}
-		
-		StackPane menuPane = getRectangleMenu(NODE_COLOUR, state+"", 150, 200);
-		
+
+		StackPane menuPane = getRectangleMenu(tracesIDsFound, NODE_COLOUR, state + "", 200, 250);
+
 		tracePane.getChildren().add(menuPane);
-		
-		menuPane.setLayoutX(node.getLayoutX()+NODE_RADIUS*2+10);
-		menuPane.setLayoutY(node.getLayoutY()+NODE_RADIUS);
-		
-		//add flow pane to the trace pane
-//		tracePane.getChildren().add(tracesPane);
-//		
-//		//set pane location
-//		tracesPane.setLayoutX(node.getLayoutX()+NODE_RADIUS*2);
-//		tracesPane.setLayoutY(node.getLayoutY()+NODE_RADIUS);
-//		tracePane.setStyle("-fx-border-color:black;");
-//		conMenu.getItems().addAll(items);
-//		
-//		conMenu.setX(mainContextMenu.getX());
-//		conMenu.setY(mainContextMenu.getY());
-//		conMenu.show(node.getScene().getWindow());
-		
+
+		menuPane.setLayoutX(node.getLayoutX() + NODE_RADIUS * 2 + 10);
+		menuPane.setLayoutY(node.getLayoutY() + NODE_RADIUS);
+
+		// add flow pane to the trace pane
+		// tracePane.getChildren().add(tracesPane);
+		//
+		// //set pane location
+		// tracesPane.setLayoutX(node.getLayoutX()+NODE_RADIUS*2);
+		// tracesPane.setLayoutY(node.getLayoutY()+NODE_RADIUS);
+		// tracePane.setStyle("-fx-border-color:black;");
+		// conMenu.getItems().addAll(items);
+		//
+		// conMenu.setX(mainContextMenu.getX());
+		// conMenu.setY(mainContextMenu.getY());
+		// conMenu.show(node.getScene().getWindow());
+
 	}
+
 	@FXML
 	void showEntities(ActionEvent e) {
 
@@ -1050,12 +1060,12 @@ public class TraceViewerInSystemController {
 			if (statesNodes.containsKey(outBoundState)) {
 				node = statesNodes.get(outBoundState);
 				// nextNodes.add(node);
-				
+
 				// if the node is hidden then show it
-//				if (!tracePane.getChildren().contains(node)) {
-//					tracePane.getChildren().add(node);
-//				}
-				
+				// if (!tracePane.getChildren().contains(node)) {
+				// tracePane.getChildren().add(node);
+				// }
+
 				// check if arrow is alread drawn
 				if (!areConnected(state, outBoundState)) {
 					String actionName = digraph.getLabel(state, outBoundState);
@@ -1261,7 +1271,7 @@ public class TraceViewerInSystemController {
 
 					buildSingleDirectionalLine(node, stateNode, tracePane, true, false, ADDED_NODES_ARROW_COLOUR,
 							actionName, NOT_A_TRACE);
-				}else {
+				} else {
 					// show the arrow if the node is shown
 
 					// find the arrow
@@ -1779,7 +1789,7 @@ public class TraceViewerInSystemController {
 			addedTracesIDs.add(trace.getInstanceID());
 			updateAddedTracesIDsComboBox(addedTracesIDs);
 			comboBoxAddedTraces.getSelectionModel().selectFirst();
-			
+
 		}
 
 	}
@@ -1793,7 +1803,7 @@ public class TraceViewerInSystemController {
 				// TODO Auto-generated method stub
 				ObservableList<Integer> list = FXCollections.observableArrayList(tracesIDs);
 				comboBoxAddedTraces.setItems(list);
-				lblNumOfAddedTraces.setText("["+addedTracesIDs.size()+"]");
+				lblNumOfAddedTraces.setText("[" + addedTracesIDs.size() + "]");
 			}
 		});
 	}
@@ -1808,7 +1818,7 @@ public class TraceViewerInSystemController {
 				// ObservableList<Integer> list =
 				// FXCollections.observableArrayList(tracesIDs);
 				comboBoxAddedTraces.getItems().add(traceID);
-				lblNumOfAddedTraces.setText("["+addedTracesIDs.size()+"]");
+				lblNumOfAddedTraces.setText("[" + addedTracesIDs.size() + "]");
 			}
 		});
 	}
@@ -1874,7 +1884,6 @@ public class TraceViewerInSystemController {
 
 	}
 
-	
 	protected void showAddedTrace(int traceID) {
 		// shows only the given trace and the original trace
 
@@ -2064,8 +2073,6 @@ public class TraceViewerInSystemController {
 	 *            arrow style (i.e. line)
 	 */
 	protected void highlightTrace(int traceID, String nodeHighLightStyle, String arrowHighLightStyle) {
-
-		// removes the given trace
 
 		if (miner == null) {
 			return;
@@ -2334,7 +2341,6 @@ public class TraceViewerInSystemController {
 
 	}
 
-	
 	/**
 	 * add a partial-trace for the given trace states
 	 * 
@@ -2395,10 +2401,10 @@ public class TraceViewerInSystemController {
 				node = statesNodes.get(state);
 
 				// if the node is hidden then show it
-//				if (!tracePane.getChildren().contains(node)) {
-//					tracePane.getChildren().add(node);
-//				}
-				
+				// if (!tracePane.getChildren().contains(node)) {
+				// tracePane.getChildren().add(node);
+				// }
+
 				if (index > 0) {
 
 					int previousState = states.get(index - 1);
@@ -2408,7 +2414,7 @@ public class TraceViewerInSystemController {
 					if (!areConnected(previousState, state)) {
 						buildSingleDirectionalLine(stateNodes.get(index - 1), node, tracePane, true, false,
 								ADDED_NODES_ARROW_COLOUR, actions.get(index - 1), traceID);
-					}  else {
+					} else {
 						// show the arrow if the node is shown
 
 						// find the arrow
@@ -2428,7 +2434,8 @@ public class TraceViewerInSystemController {
 			} else {
 				node = getDot(NODE_COLOUR, "" + state, STATE_STYLE, NODE_RADIUS, traceID);
 				// a new node is created with the arrow
-//				node = getDot(NODE_COLOUR, "" + state, EXTRA_STATE_STYLE, NODE_RADIUS, traceID);
+				// node = getDot(NODE_COLOUR, "" + state, EXTRA_STATE_STYLE,
+				// NODE_RADIUS, traceID);
 
 				node.setId("" + state);
 
@@ -2439,10 +2446,10 @@ public class TraceViewerInSystemController {
 
 			}
 
-//			if (!tracePane.getChildren().contains(node)) {
-//				tracePane.getChildren().add(node);
-//			}
-			
+			// if (!tracePane.getChildren().contains(node)) {
+			// tracePane.getChildren().add(node);
+			// }
+
 			stateNodes.add(node);
 
 			index++;
@@ -2493,7 +2500,7 @@ public class TraceViewerInSystemController {
 				if (!tracePane.getChildren().contains(node)) {
 					tracePane.getChildren().add(node);
 				}
-				
+
 				if (index > 0) {
 
 					int previousState = traceStates.get(index - 1);
@@ -2504,7 +2511,7 @@ public class TraceViewerInSystemController {
 					if (!areConnected(previousState, state)) {
 						buildSingleDirectionalLine(stateNodes.get(index - 1), node, tracePane, true, false,
 								ADDED_NODES_ARROW_COLOUR, actionName, NOT_A_TRACE);
-					}else {
+					} else {
 						// show the arrow if the node is shown
 
 						// find the arrow
@@ -2979,17 +2986,18 @@ public class TraceViewerInSystemController {
 		}
 
 		// create color
+
 		String color = getrandomColoredHighLightStyle();
 
 		// label
 		Label traceLabel = new Label(traceID + "");
 		traceLabel.setStyle("-fx-font-size:14;-fx-font-weight:bold;-fx-text-fill:" + color + ";");
-		
-		//trace states and actions
-//		String traceDetails = getTraceInfo(traceID);
-//		Tooltip tip = new Tooltip(traceDetails);
-//		tip.setStyle("-fx-font-size:10;");
-//		traceLabel.setTooltip(tip);
+
+		// trace states and actions
+		// String traceDetails = getTraceInfo(traceID);
+		// Tooltip tip = new Tooltip(traceDetails);
+		// tip.setStyle("-fx-font-size:10;");
+		// traceLabel.setTooltip(tip);
 
 		// image
 		InputStream imgDel = getClass().getResourceAsStream(imgDeletePath);
@@ -3010,34 +3018,35 @@ public class TraceViewerInSystemController {
 			if (color != null) {
 				style = style.replace(HIGHLIGHT_TRACE_ARROW_COLOUR, color);
 			}
-			
-			//try to get the current stroke width from the style
+
+			// try to get the current stroke width from the style
 			if (style.contains(HIGHLIGHT_STROKE_WIDTH)) {
-				
+
 				style = style.replace(HIGHLIGHT_STROKE_WIDTH, HOVER_HIGHLIGHT_STROKE_WIDTH);
 
-			};
-			
+			}
+			;
+
 			highlightTrace(traceID, HIGHLIGHT_STYLE, style);
 		});
 
-		hbox.setOnMouseExited(e->{
-		
+		hbox.setOnMouseExited(e -> {
+
 			String style = HIGHLIGHT_STYLE;
 
 			if (color != null) {
 				style = style.replace(HIGHLIGHT_TRACE_ARROW_COLOUR, color);
 			}
 
-			//try to get the current stroke width from the style
+			// try to get the current stroke width from the style
 			if (style.contains(HOVER_HIGHLIGHT_STROKE_WIDTH)) {
-				
+
 				style = style.replace(HOVER_HIGHLIGHT_STROKE_WIDTH, HIGHLIGHT_STROKE_WIDTH);
 
 			}
-			
+
 			highlightTrace(traceID, HIGHLIGHT_STYLE, style);
-			
+
 		});
 		int corner = 5;
 		// set style
@@ -3074,7 +3083,7 @@ public class TraceViewerInSystemController {
 		flowPaneTraceDetails.getChildren().add(hbox);
 
 		highLightedTracesIDs.put(traceID, color);
-		
+
 	}
 
 	protected void addComponentToTrace(int traceID, Node comp) {
@@ -3093,95 +3102,190 @@ public class TraceViewerInSystemController {
 		}
 	}
 
-	private StackPane getRectangleMenu(String color, String state,  double width, double height) {
-		// double radius = 50;
-		double paneSize = width*height;
-		StackPane dotPane = new StackPane();
-		Rectangle dot = new Rectangle(width, height);
-//		dot.setWidth(width);
-//		dot.setHeight(height);
+	protected StackPane getRectangleMenu(List<Integer> tracesIDs, String color, String state, double width,
+			double height) {
 
-		dot.setStyle("-fx-fill:" + color + ";-fx-stroke-width:2px;-fx-stroke:black;");
+		StackPane dotPane = new StackPane();
+
+		int corner = 5;
+		int margin = 5;
+
+		
+		VBox mainVbox = new VBox();
+		mainVbox.setPrefWidth(width);
+		mainVbox.setMaxWidth(width);
+		mainVbox.setSpacing(5);
+		
+		mainVbox.setStyle("-fx-border-color:grey;-fx-border-width:1;-fx-background-color:white;-fx-border-radius:"
+				+ corner + " " + corner + " " + corner + " " + corner + " " + ";fx-background-radius:" + corner + " "
+				+ corner + " " + corner + " " + corner + ";");
+		mainVbox.setPadding(new Insets(3));
+
+		// close image
+		InputStream imgDel = getClass().getResourceAsStream(imgDeletePath);
+		ImageView imgView = new ImageView(new Image(imgDel));
+		HBox hboxImg = new HBox();
+		hboxImg.getChildren().add(imgView);
+		hboxImg.setAlignment(Pos.CENTER_RIGHT);
+
+		imgView.setOnMouseEntered(e -> {
+
+			imgView.setCursor(Cursor.HAND);
+		});
+
+		// on mous clicked remove the trace id label
+		imgView.setOnMouseClicked(e -> {
+			if (tracePane.getChildren().contains(dotPane)) {
+				tracePane.getChildren().remove(dotPane);
+			}
+		});
+
+		FlowPane flowPaneLabels = new FlowPane();
+		flowPaneLabels.setPrefWidth(width);
+		flowPaneLabels.setMaxWidth(width);
+		flowPaneLabels.setPrefHeight(height);
+		flowPaneLabels.setMaxHeight(height);
+		flowPaneLabels.setHgap(5);
+		flowPaneLabels.setVgap(5);
+		
+		ScrollPane scroller = new ScrollPane();
+		scroller.setPrefHeight(height+margin);
+		
+		scroller.setPrefWidth(width+margin);
+		scroller.setContent(flowPaneLabels);
+		scroller.setPannable(true);
+		scroller.setFitToWidth(true);
+		
+//		flowPaneLabels.getChildren().add(scroller);
+		
+		// labels for traces
+		for (Integer traceID : tracesIDs) {
+
+//			boolean isHighlighted = highLightedTracesIDs.containsKey(traceID);
+
+			String traceColor = getrandomColoredHighLightStyle();
+
+			// label
+			Label traceLabel = new Label(traceID + "");
+
+			if (highLightedTracesIDs.containsKey(traceID)) {
+				traceLabel.setStyle("-fx-font-size:12;-fx-font-weight:bold;-fx-text-fill:"
+						+ highLightedTracesIDs.get(traceID) + ";");
+			} else {
+				traceLabel.setStyle("-fx-font-size:12;-fx-font-weight:bold;-fx-text-fill:" + traceColor + ";");
+			}
+
+			// container
+			HBox hbox = new HBox();
+			hbox.setAlignment(Pos.CENTER_LEFT);
+			hbox.setSpacing(5);
+
+			int padding = 2;
+			hbox.setPadding(new Insets(padding, padding, padding, padding));
+
+			// int corner = 5;
+			// set style
+			if (highLightedTracesIDs.containsKey(traceID)) {
+				hbox.setStyle("-fx-background-color:#e7e7e7;");
+			} else {
+				hbox.setStyle("-fx-border-color:grey;-fx-border-width:1;-fx-background-color:white;-fx-border-radius:"
+						+ corner + " " + corner + " " + corner + " " + corner + " " + ";fx-background-radius:" + corner
+						+ " " + corner + " " + corner + " " + corner + ";");
+			}
+			
+			// on mouse entered highlight trace
+			hbox.setOnMouseEntered(e -> {
+
+				hbox.setCursor(Cursor.HAND);
+
+				String style = HIGHLIGHT_STYLE;
+
+				if (!highLightedTracesIDs.containsKey(traceID)) {
+					highLightedTracesIDs.put(traceID, traceColor);
+					isAdded = true;
+
+					if (traceColor != null) {
+						style = style.replace(HIGHLIGHT_TRACE_ARROW_COLOUR, traceColor);
+					}
+
+				} else {
+					isAdded = false;
+					style = style.replace(HIGHLIGHT_TRACE_ARROW_COLOUR, highLightedTracesIDs.get(traceID));
+
+				}
+
+				// try to get the current stroke width from the style
+				if (style.contains(HIGHLIGHT_STROKE_WIDTH)) {
+					style = style.replace(HIGHLIGHT_STROKE_WIDTH, HOVER_HIGHLIGHT_STROKE_WIDTH);
+				}
+
+				highlightTrace(traceID, HIGHLIGHT_STYLE, style);
+			});
+
+			// remove trace
+			hbox.setOnMouseExited(e -> {
+
+				if (isAdded) {
+					highLightedTracesIDs.remove(traceID);
+				}
+
+				// update shown actions
+				showActionsInList();
+
+				if (checkboxShowOnlySelectedTrace.isSelected()) {
+					showOnlyTraces(highLightedTracesIDs);
+				} else {
+					// for(Integer trID: highLightedTracesIDs.keySet()){
+					highlightTrace(traceID, NORMAL_HIGHLIGHT_STYLE, NORMAL_HIGHLIGHT_STYLE);
+					// }
+
+				}
+
+			});
+
+			// on mouse click add the trace id to the list of highlighted traces
+			hbox.setOnMouseClicked(e -> {
+				if (isAdded) {
+					highLightedTracesIDs.remove(traceID);
+					// added to highlighted traces
+					addTraceIDToDisplay(traceID);
+
+					// update label color
+					if (highLightedTracesIDs.containsKey(traceID)) {
+						traceLabel.setStyle("-fx-font-size:12;-fx-font-weight:bold;-fx-text-fill:"
+								+ highLightedTracesIDs.get(traceID) + ";");
+						hbox.setStyle("-fx-background-color:#e7e7e7;");
+					}
+					isAdded = false;
+				}
+			});
+
+			hbox.getChildren().addAll(traceLabel);
+
+			// add to the list of shown traces
+			flowPaneLabels.getChildren().add(hbox);
+		}
 
 		// state label
-		Label lblState = new Label(state);
-//		lblState.setStyle(stateLabelStyle);
-		lblState.setTooltip(new Tooltip(state));
+		Label lblState = new Label("Traces through [" + state + "]");
+		lblState.setStyle("-fx-font-size:12;-fx-font-weight:bold;");
 
-		// open state if it exists
-//		lblState.setOnMouseEntered(e -> {
-//			lblState.setCursor(Cursor.HAND);
-//		});
-//
-//		lblState.setOnMouseClicked(e -> {
-//			try {
-//				if(e.getButton() == MouseButton.PRIMARY) {
-//					if (!isDragging) {
-//						int stat = Integer.parseInt(state);
-//						if (traceCell != null && trace != null) {
-//							traceCell.showState(stat);
-//						}
-//					}
-//				}
-//			
-//			} catch (NumberFormatException excp) {
-//				// txt is not state
-//				// nothing happens
-//			}
-//
-//		});
-//
-//		lblState.setOnMouseDragged(e -> {
-//			isDragging = true;
-//		});
-//
-//		lblState.setOnMousePressed(e -> {
-//			isDragging = false;
-//		});
-//
-//		// state percentage
-//		Label lblStatePerc = new Label();
-//		lblStatePerc.setStyle(STATE_PERC_STYLE);
-//
-//		try {
-//			int stat = Integer.parseInt(state);
-//			// add to the map
-//			mapStatePerc.put(stat, lblStatePerc);
-//		} catch (NumberFormatException excp) {
-//			// txt is not state
-//			// nothing happens
-//		}
-//
-//		Pane p = new Pane();
-//		p.setPrefSize(3, 45);
-//
-//		VBox vboxLbl = new VBox();
-//
-//		vboxLbl.getChildren().add(p);
-//		vboxLbl.getChildren().add(lblStatePerc);
-//		vboxLbl.getChildren().add(lblState);
-//		vboxLbl.setAlignment(Pos.CENTER);
+		// add components to main
+		Separator sep = new Separator(Orientation.HORIZONTAL);
+		
+		mainVbox.getChildren().addAll(hboxImg, lblState, sep, scroller);
 
-		dotPane.getChildren().addAll(dot, lblState);
+		dotPane.getChildren().addAll(mainVbox);
 
-		dotPane.setPrefSize(paneSize, paneSize);
-		dotPane.setMaxSize(paneSize, paneSize);
-		dotPane.setMinSize(paneSize, paneSize);
+		dotPane.setPrefSize(width + margin, height + margin);
+		dotPane.setMaxSize(width + margin, height + margin);
+		dotPane.setMinSize(width + margin, height + margin);
 
 		dotPane.setOnMousePressed(e -> {
 			sceneX = e.getSceneX();
 			sceneY = e.getSceneY();
 			layoutX = dotPane.getLayoutX();
 			layoutY = dotPane.getLayoutY();
-		});
-
-		ContextMenu nodeContextMenu = createNodeContextMenu(dotPane);
-
-		// set context menu for the node
-		dotPane.setOnContextMenuRequested(e -> {
-			nodeContextMenu.setY(e.getScreenY());
-			nodeContextMenu.setX(e.getScreenX());
-			nodeContextMenu.show(dotPane.getScene().getWindow());
 		});
 
 		EventHandler<MouseEvent> dotOnMouseDraggedEventHandler = e -> {
@@ -3237,16 +3341,15 @@ public class TraceViewerInSystemController {
 		});
 
 		// add new node to current nodes
-//		int stat = Integer.parseInt(state);
-//		statesNodes.put(stat, dotPane);
+		// int stat = Integer.parseInt(state);
+		// statesNodes.put(stat, dotPane);
 
 		// also add to trace components
-//		addComponentToTrace(traceID, dotPane);
+		// addComponentToTrace(traceID, dotPane);
 
 		return dotPane;
 	}
 
-	
 	/**
 	 * Builds a pane consisting of circle with the provided specifications.
 	 *
@@ -3276,7 +3379,7 @@ public class TraceViewerInSystemController {
 
 		lblState.setOnMouseClicked(e -> {
 			try {
-				if(e.getButton() == MouseButton.PRIMARY) {
+				if (e.getButton() == MouseButton.PRIMARY) {
 					if (!isDragging) {
 						int stat = Integer.parseInt(state);
 						if (traceCell != null && trace != null) {
@@ -3284,7 +3387,7 @@ public class TraceViewerInSystemController {
 						}
 					}
 				}
-			
+
 			} catch (NumberFormatException excp) {
 				// txt is not state
 				// nothing happens

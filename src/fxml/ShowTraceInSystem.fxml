@@ -17,11 +17,12 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
 <BorderPane minHeight="650.0" minWidth="900.0" prefHeight="775.0" prefWidth="1453.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.analysis.TraceViewerInSystemController">
    <center>
-      <SplitPane dividerPositions="0.15024121295658166">
+      <SplitPane dividerPositions="0.17091660923501034">
          <items>
             <VBox minHeight="10.0" minWidth="10.0" prefHeight="709.0" prefWidth="322.0" spacing="5.0">
                <children>
@@ -41,7 +42,7 @@
                               </HBox>
                               <VBox prefHeight="135.0" prefWidth="348.0" spacing="3.0">
                                  <children>
-                                    <HBox alignment="CENTER_LEFT" spacing="3.0">
+                                    <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="414.0" spacing="3.0">
                                        <children>
                                           <Label text="Show">
                                              <font>
@@ -128,7 +129,10 @@
             </VBox>
             <ScrollPane fx:id="scrollPaneTraceViewer" fitToHeight="true" fitToWidth="true" prefHeight="550.0" prefWidth="1100.0">
                <content>
-                  <StackPane fx:id="mainStackPane" minHeight="-Infinity" minWidth="-Infinity" prefHeight="525.0" prefWidth="1060.0" style="-fx-background-color: white;" />
+                  <StackPane fx:id="mainStackPane" minHeight="-Infinity" minWidth="-Infinity" prefHeight="525.0" prefWidth="1060.0" style="-fx-background-color: white;">
+                     <children>
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
+                     </children></StackPane>
                </content>
             </ScrollPane>
          </items>

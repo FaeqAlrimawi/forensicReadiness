@@ -21,7 +21,7 @@
 
 <BorderPane minHeight="650.0" minWidth="900.0" prefHeight="775.0" prefWidth="1453.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.analysis.TraceViewerInSystemController">
    <center>
-      <SplitPane dividerPositions="0.15024121295658166">
+      <SplitPane dividerPositions="0.17091660923501034">
          <items>
             <VBox minHeight="10.0" minWidth="10.0" prefHeight="709.0" prefWidth="322.0" spacing="5.0">
                <children>
@@ -41,7 +41,7 @@
                               </HBox>
                               <VBox prefHeight="135.0" prefWidth="348.0" spacing="3.0">
                                  <children>
-                                    <HBox alignment="CENTER_LEFT" spacing="3.0">
+                                    <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="414.0" spacing="3.0">
                                        <children>
                                           <Label text="Show">
                                              <font>
