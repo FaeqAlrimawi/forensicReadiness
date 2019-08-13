@@ -47,7 +47,9 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -56,6 +58,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -540,7 +543,7 @@ public class TraceViewerInSystemController {
 	 * Shows all traces ids that are in the added traces (currently in the list of traces) which the given node is part of
 	 * @param node
 	 */
-	protected void showTracesIDsInContextMenu(ContextMenu e, StackPane node) {
+	protected void showTracesIDsInContextMenu(ContextMenu mainContextMenu, StackPane node) {
 		
 		if(miner == null) {
 			return;
@@ -568,6 +571,10 @@ public class TraceViewerInSystemController {
 			}
 		}
 		
+		FlowPane tracesPane = new FlowPane();
+		
+		tracesPane.setPrefWidth(150);
+		
 		//create context menu
 		ContextMenu conMenu = new ContextMenu();
 		
@@ -575,15 +582,31 @@ public class TraceViewerInSystemController {
 		
 		for(Integer traceID: tracesIDsFound) {
 			MenuItem item = new MenuItem(traceID+"");
+			Label lbl = new Label(traceID+"");
+			tracesPane.getChildren().add(lbl);
+			
 			items.add(item);
 		}
 		
+		StackPane menuPane = getRectangleMenu(NODE_COLOUR, state+"", 150, 200);
 		
-		conMenu.getItems().addAll(items);
+		tracePane.getChildren().add(menuPane);
 		
-		conMenu.setX(e.getX());
-		conMenu.setY(e.getY());
-		conMenu.show(node.getScene().getWindow());
+		menuPane.setLayoutX(node.getLayoutX()+NODE_RADIUS*2+10);
+		menuPane.setLayoutY(node.getLayoutY()+NODE_RADIUS);
+		
+		//add flow pane to the trace pane
+//		tracePane.getChildren().add(tracesPane);
+//		
+//		//set pane location
+//		tracesPane.setLayoutX(node.getLayoutX()+NODE_RADIUS*2);
+//		tracesPane.setLayoutY(node.getLayoutY()+NODE_RADIUS);
+//		tracePane.setStyle("-fx-border-color:black;");
+//		conMenu.getItems().addAll(items);
+//		
+//		conMenu.setX(mainContextMenu.getX());
+//		conMenu.setY(mainContextMenu.getY());
+//		conMenu.show(node.getScene().getWindow());
 		
 	}
 	@FXML
@@ -1029,9 +1052,9 @@ public class TraceViewerInSystemController {
 				// nextNodes.add(node);
 				
 				// if the node is hidden then show it
-				if (!tracePane.getChildren().contains(node)) {
-					tracePane.getChildren().add(node);
-				}
+//				if (!tracePane.getChildren().contains(node)) {
+//					tracePane.getChildren().add(node);
+//				}
 				
 				// check if arrow is alread drawn
 				if (!areConnected(state, outBoundState)) {
@@ -1068,9 +1091,9 @@ public class TraceViewerInSystemController {
 						actionName, NOT_A_TRACE);
 			}
 
-//			if (node != null && !tracePane.getChildren().contains(node)) {
-//				tracePane.getChildren().add(node);
-//			}
+			if (node != null && !tracePane.getChildren().contains(node)) {
+				tracePane.getChildren().add(node);
+			}
 
 		}
 
@@ -1238,6 +1261,20 @@ public class TraceViewerInSystemController {
 
 					buildSingleDirectionalLine(node, stateNode, tracePane, true, false, ADDED_NODES_ARROW_COLOUR,
 							actionName, NOT_A_TRACE);
+				}else {
+					// show the arrow if the node is shown
+
+					// find the arrow
+					for (StackPane arw : statesOutgoingArrows.get(inBoundState)) {
+						int endState = getEndStateFromArrow(arw);
+						if (endState == state) {
+							// if (tracePane.getChildren().contains(node)) {
+							showArrow(arw);
+							// }
+						}
+
+					}
+
 				}
 
 			} else {
@@ -1837,51 +1874,7 @@ public class TraceViewerInSystemController {
 
 	}
 
-	/**
-	 * adds the given trace to the trace view. IF new states and actions are
-	 * added then shown, if already exist then not changed
-	 * 
-	 * @param newTrace
-	 */
-	protected void addTrace(GraphPath newTrace) {
-
-		List<StackPane> statesNodes = createTraceNodes(newTrace);
-
-		if (statesNodes == null) {
-			return;
-		}
-
-		double xOffest = NODE_RADIUS * 2 + 50;
-		double yOffest = NODE_RADIUS * 2 + 50;
-
-		List<Node> nodes = tracePane.getChildren();
-		// add new nodes to the trace pane
-		for (StackPane stateNode : statesNodes) {
-
-			if (!nodes.contains(stateNode)) {
-				nodes.add(stateNode);
-				stateNode.setLayoutX(xOffest);
-				stateNode.setLayoutX(yOffest);
-				xOffest += stateNode.getLayoutX();
-				yOffest += stateNode.getLayoutY();
-			} else {
-				xOffest += stateNode.getLayoutX();
-				yOffest += stateNode.getLayoutY();
-			}
-
-		}
-
-		// used to put nodes on top
-		setNodes();
-
-		// add trace id
-		if (!addedTracesIDs.contains(newTrace.getInstanceID())) {
-			addedTracesIDs.add(newTrace.getInstanceID());
-			updateAddedTracesIDsComboBox(newTrace.getInstanceID());
-		}
-
-	}
-
+	
 	protected void showAddedTrace(int traceID) {
 		// shows only the given trace and the original trace
 
@@ -2297,11 +2290,57 @@ public class TraceViewerInSystemController {
 	}
 
 	/**
+	 * adds the given trace to the trace view. IF new states and actions are
+	 * added then shown, if already exist then not changed
+	 * 
+	 * @param newTrace
+	 */
+	protected void addTrace(GraphPath newTrace) {
+
+		List<StackPane> statesNodes = createTraceNodes(newTrace);
+
+		if (statesNodes == null) {
+			return;
+		}
+
+		double xOffest = NODE_RADIUS * 2 + 50;
+		double yOffest = NODE_RADIUS * 2 + 50;
+
+		List<Node> nodes = tracePane.getChildren();
+		// add new nodes to the trace pane
+		for (StackPane stateNode : statesNodes) {
+
+			if (!nodes.contains(stateNode)) {
+				nodes.add(stateNode);
+				stateNode.setLayoutX(xOffest);
+				stateNode.setLayoutX(yOffest);
+				xOffest += stateNode.getLayoutX();
+				yOffest += stateNode.getLayoutY();
+			} else {
+				xOffest += stateNode.getLayoutX();
+				yOffest += stateNode.getLayoutY();
+			}
+
+		}
+
+		// used to put nodes on top
+		setNodes();
+
+		// add trace id
+		if (!addedTracesIDs.contains(newTrace.getInstanceID())) {
+			addedTracesIDs.add(newTrace.getInstanceID());
+			updateAddedTracesIDsComboBox(newTrace.getInstanceID());
+		}
+
+	}
+
+	
+	/**
 	 * add a partial-trace for the given trace states
 	 * 
 	 * @param traceState
 	 */
-	protected void addTrace(List<Integer> traceState) {
+	protected void addTrace(List<Integer> traceState, StackPane relativeToNode) {
 
 		List<StackPane> statesNodes = createTraceNodes(traceState);
 
@@ -2320,6 +2359,8 @@ public class TraceViewerInSystemController {
 				nodes.add(stateNode);
 				stateNode.setLayoutX(xOffest);
 				stateNode.setLayoutX(yOffest);
+				xOffest += stateNode.getLayoutX();
+				yOffest += stateNode.getLayoutY();
 			} else {
 				xOffest += stateNode.getLayoutX();
 				yOffest += stateNode.getLayoutY();
@@ -2354,9 +2395,9 @@ public class TraceViewerInSystemController {
 				node = statesNodes.get(state);
 
 				// if the node is hidden then show it
-				if (!tracePane.getChildren().contains(node)) {
-					tracePane.getChildren().add(node);
-				}
+//				if (!tracePane.getChildren().contains(node)) {
+//					tracePane.getChildren().add(node);
+//				}
 				
 				if (index > 0) {
 
@@ -2387,7 +2428,7 @@ public class TraceViewerInSystemController {
 			} else {
 				node = getDot(NODE_COLOUR, "" + state, STATE_STYLE, NODE_RADIUS, traceID);
 				// a new node is created with the arrow
-				node = getDot(NODE_COLOUR, "" + state, EXTRA_STATE_STYLE, NODE_RADIUS, traceID);
+//				node = getDot(NODE_COLOUR, "" + state, EXTRA_STATE_STYLE, NODE_RADIUS, traceID);
 
 				node.setId("" + state);
 
@@ -2398,6 +2439,10 @@ public class TraceViewerInSystemController {
 
 			}
 
+//			if (!tracePane.getChildren().contains(node)) {
+//				tracePane.getChildren().add(node);
+//			}
+			
 			stateNodes.add(node);
 
 			index++;
@@ -3048,6 +3093,160 @@ public class TraceViewerInSystemController {
 		}
 	}
 
+	private StackPane getRectangleMenu(String color, String state,  double width, double height) {
+		// double radius = 50;
+		double paneSize = width*height;
+		StackPane dotPane = new StackPane();
+		Rectangle dot = new Rectangle(width, height);
+//		dot.setWidth(width);
+//		dot.setHeight(height);
+
+		dot.setStyle("-fx-fill:" + color + ";-fx-stroke-width:2px;-fx-stroke:black;");
+
+		// state label
+		Label lblState = new Label(state);
+//		lblState.setStyle(stateLabelStyle);
+		lblState.setTooltip(new Tooltip(state));
+
+		// open state if it exists
+//		lblState.setOnMouseEntered(e -> {
+//			lblState.setCursor(Cursor.HAND);
+//		});
+//
+//		lblState.setOnMouseClicked(e -> {
+//			try {
+//				if(e.getButton() == MouseButton.PRIMARY) {
+//					if (!isDragging) {
+//						int stat = Integer.parseInt(state);
+//						if (traceCell != null && trace != null) {
+//							traceCell.showState(stat);
+//						}
+//					}
+//				}
+//			
+//			} catch (NumberFormatException excp) {
+//				// txt is not state
+//				// nothing happens
+//			}
+//
+//		});
+//
+//		lblState.setOnMouseDragged(e -> {
+//			isDragging = true;
+//		});
+//
+//		lblState.setOnMousePressed(e -> {
+//			isDragging = false;
+//		});
+//
+//		// state percentage
+//		Label lblStatePerc = new Label();
+//		lblStatePerc.setStyle(STATE_PERC_STYLE);
+//
+//		try {
+//			int stat = Integer.parseInt(state);
+//			// add to the map
+//			mapStatePerc.put(stat, lblStatePerc);
+//		} catch (NumberFormatException excp) {
+//			// txt is not state
+//			// nothing happens
+//		}
+//
+//		Pane p = new Pane();
+//		p.setPrefSize(3, 45);
+//
+//		VBox vboxLbl = new VBox();
+//
+//		vboxLbl.getChildren().add(p);
+//		vboxLbl.getChildren().add(lblStatePerc);
+//		vboxLbl.getChildren().add(lblState);
+//		vboxLbl.setAlignment(Pos.CENTER);
+
+		dotPane.getChildren().addAll(dot, lblState);
+
+		dotPane.setPrefSize(paneSize, paneSize);
+		dotPane.setMaxSize(paneSize, paneSize);
+		dotPane.setMinSize(paneSize, paneSize);
+
+		dotPane.setOnMousePressed(e -> {
+			sceneX = e.getSceneX();
+			sceneY = e.getSceneY();
+			layoutX = dotPane.getLayoutX();
+			layoutY = dotPane.getLayoutY();
+		});
+
+		ContextMenu nodeContextMenu = createNodeContextMenu(dotPane);
+
+		// set context menu for the node
+		dotPane.setOnContextMenuRequested(e -> {
+			nodeContextMenu.setY(e.getScreenY());
+			nodeContextMenu.setX(e.getScreenX());
+			nodeContextMenu.show(dotPane.getScene().getWindow());
+		});
+
+		EventHandler<MouseEvent> dotOnMouseDraggedEventHandler = e -> {
+			// Offset of drag
+			double offsetX = e.getSceneX() - sceneX;
+			double offsetY = e.getSceneY() - sceneY;
+
+			// Taking parent bounds
+			Bounds parentBounds = dotPane.getParent().getLayoutBounds();
+
+			// Drag node bounds
+			double currPaneLayoutX = dotPane.getLayoutX();
+			double currPaneWidth = dotPane.getWidth();
+			double currPaneLayoutY = dotPane.getLayoutY();
+			double currPaneHeight = dotPane.getHeight();
+
+			if ((currPaneLayoutX + offsetX < parentBounds.getWidth() - currPaneWidth)
+					&& (currPaneLayoutX + offsetX > -1)) {
+				// If the dragNode bounds is within the parent bounds, then you
+				// can set the offset value.
+				dotPane.setTranslateX(offsetX);
+			} else if (currPaneLayoutX + offsetX < 0) {
+				// If the sum of your offset and current layout position is
+				// negative, then you ALWAYS update your translate to negative
+				// layout value
+				// which makes the final layout position to 0 in mouse released
+				// event.
+				dotPane.setTranslateX(-currPaneLayoutX);
+			} else {
+				// If your dragNode bounds are outside parent bounds,ALWAYS
+				// setting the translate value that fits your node at end.
+				dotPane.setTranslateX(parentBounds.getWidth() - currPaneLayoutX - currPaneWidth);
+			}
+
+			if ((currPaneLayoutY + offsetY < parentBounds.getHeight() - currPaneHeight)
+					&& (currPaneLayoutY + offsetY > -1)) {
+				dotPane.setTranslateY(offsetY);
+			} else if (currPaneLayoutY + offsetY < 0) {
+				dotPane.setTranslateY(-currPaneLayoutY);
+			} else {
+				dotPane.setTranslateY(parentBounds.getHeight() - currPaneLayoutY - currPaneHeight);
+			}
+		};
+		dotPane.setOnMouseDragged(dotOnMouseDraggedEventHandler);
+		dotPane.setOnMouseReleased(e -> {
+			// Updating the new layout positions
+			dotPane.setLayoutX(layoutX + dotPane.getTranslateX());
+			dotPane.setLayoutY(layoutY + dotPane.getTranslateY());
+
+			// Resetting the translate positions
+			dotPane.setTranslateX(0);
+			dotPane.setTranslateY(0);
+		});
+
+		// add new node to current nodes
+//		int stat = Integer.parseInt(state);
+//		statesNodes.put(stat, dotPane);
+
+		// also add to trace components
+//		addComponentToTrace(traceID, dotPane);
+
+		return dotPane;
+	}
+
+	
 	/**
 	 * Builds a pane consisting of circle with the provided specifications.
 	 *
@@ -3077,13 +3276,15 @@ public class TraceViewerInSystemController {
 
 		lblState.setOnMouseClicked(e -> {
 			try {
-				if (!isDragging) {
-					int stat = Integer.parseInt(state);
-					if (traceCell != null && trace != null) {
-						traceCell.showState(stat);
+				if(e.getButton() == MouseButton.PRIMARY) {
+					if (!isDragging) {
+						int stat = Integer.parseInt(state);
+						if (traceCell != null && trace != null) {
+							traceCell.showState(stat);
+						}
 					}
 				}
-
+			
 			} catch (NumberFormatException excp) {
 				// txt is not state
 				// nothing happens
