@@ -523,6 +523,17 @@ public class TraceViewerInSystemController {
 			return;
 		}
 
+//		if(checkboxShowOnlySelectedTrace.isSelected()) {
+//			clearHighlightedTraces(null);
+//		
+//		} else{
+//			clearHighlightedTraces(null);
+//		}
+		
+		clearHighlightedTraces(null);
+		
+		checkboxShowOnlySelectedTrace.setSelected(true);
+		
 		showTraceInViewer(result);
 
 	}
@@ -3173,6 +3184,8 @@ public class TraceViewerInSystemController {
 
 	protected void showTraceInViewer(List<Integer> tracesIDs) {
 
+		//reset counter
+		
 		if (tracesIDs == null || tracesIDs.isEmpty()) {
 			return;
 		}
