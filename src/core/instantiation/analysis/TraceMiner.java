@@ -4139,14 +4139,15 @@ public class TraceMiner {
 	}
 
 	/**
-	 * Finds all traces that contain the given states in the order given (not
-	 * necessarly consecutive)
+	 * Finds all traces that contain the given states (not necessarly
+	 * consecutive)
 	 * 
 	 * @param states
 	 * @param tracesIDsToSearch
 	 * @return
 	 */
-	public List<Integer> findTracesContainingStates(List<Integer> states, List<Integer> tracesIDsToSearch) {
+	public List<Integer> findTracesContainingStates(List<Integer> states, List<Integer> tracesIDsToSearch,
+			boolean isInOrder) {
 
 		// a trace should contain all states
 		// the order should be preserved e.g., state-1 index should be more than
@@ -4173,17 +4174,20 @@ public class TraceMiner {
 			// it should contain all given states
 			if (traceStates.containsAll(states)) {
 				// it should be in order
-				int index = -1;
-				for (int i = 0; i < states.size(); i++) {
-					int newIndex = traceStates.indexOf(states.get(i));
 
-					// if the current index of the state is less than or equal
-					// than the last one then skip
-					if (newIndex <= index) {
-						continue trace_loop;
+				if (isInOrder) {
+					int index = -1;
+					for (int i = 0; i < states.size(); i++) {
+						int newIndex = traceStates.indexOf(states.get(i));
+
+						// if the current index of the state is less than or
+						// equal
+						// than the last one then skip
+						if (newIndex <= index) {
+							continue trace_loop;
+						}
 					}
 				}
-
 				// if this point is reached then the trace matches the given
 				// states
 				result.add(traceEntry.getKey());
@@ -4207,10 +4211,10 @@ public class TraceMiner {
 			return null;
 		}
 
-		//to lower case
+		// to lower case
 		actionNames.replaceAll(String::trim);
 		actionNames.replaceAll(String::toLowerCase);
-	
+
 		List<Integer> result = new LinkedList<Integer>();
 
 		// get traces
@@ -4222,8 +4226,8 @@ public class TraceMiner {
 
 		trace_loop: for (Entry<Integer, GraphPath> traceEntry : tracesToSearch.entrySet()) {
 			List<String> traceActions = new LinkedList<String>(traceEntry.getValue().getTransitionActions());
-			
-			//to lower case
+
+			// to lower case
 			traceActions.replaceAll(String::toLowerCase);
 
 			// it should contain all given states
@@ -4234,6 +4238,67 @@ public class TraceMiner {
 					int index = -1;
 					for (int i = 0; i < actionNames.size(); i++) {
 						int newIndex = traceActions.indexOf(actionNames.get(i));
+
+						// if the current index of the state is less than or
+						// equal
+						// than the last one then skip
+						if (newIndex <= index) {
+							continue trace_loop;
+						}
+					}
+				}
+
+				// if this point is reached then the trace matches the given
+				// states
+				result.add(traceEntry.getKey());
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Finds all traces that contain the given entities (not necessarly in
+	 * order)
+	 * 
+	 * @param actions
+	 * @param tracesIDsToSearch
+	 * @return
+	 */
+	public List<Integer> findTracesContainingEntities(List<String> entityNames, List<Integer> tracesIDsToSearch,
+			boolean isInOrder) {
+
+		if (entityNames == null || tracesIDsToSearch == null) {
+			return null;
+		}
+
+		// to lower case
+		entityNames.replaceAll(String::trim);
+		entityNames.replaceAll(String::toLowerCase);
+
+		List<Integer> result = new LinkedList<Integer>();
+
+		// get traces
+		Map<Integer, GraphPath> tracesToSearch = getTraces(tracesIDsToSearch);
+
+		if (tracesToSearch == null || tracesToSearch.isEmpty()) {
+			return result;
+		}
+
+		trace_loop: for (Entry<Integer, GraphPath> traceEntry : tracesToSearch.entrySet()) {
+			List<String> traceEntities = convertToEntities(traceEntry.getValue(), JSONTerms.BIG_IRRELEVANT_TERMS);
+
+			// to lower case
+			traceEntities.replaceAll(String::toLowerCase);
+
+			// it should contain all given states
+			if (traceEntities.containsAll(entityNames)) {
+
+				// if should be in order
+				if (isInOrder) {
+					int index = -1;
+					for (int i = 0; i < entityNames.size(); i++) {
+						int newIndex = traceEntities.indexOf(entityNames.get(i));
 
 						// if the current index of the state is less than or
 						// equal

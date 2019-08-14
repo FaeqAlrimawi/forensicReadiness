@@ -66,6 +66,9 @@ import javafx.stage.Window;
 public class TraceViewerInSystemController {
 
 	@FXML
+	private Label lblNumOfHighlightedTraces;
+
+	@FXML
 	private ComboBox<String> comboBoxSearchField;
 
 	@FXML
@@ -485,19 +488,42 @@ public class TraceViewerInSystemController {
 
 		// split search entries
 		String[] searchEntries = searchQuery.split(SEARCH_SEPARATOR);
+		List<Integer> result = null;
 
 		switch (searchField) {
+
+		// search traces
 		case SEARCH_TRACES:
 			List<String> tracesIDs = Arrays.asList(searchEntries);
-			searchForTraces(tracesIDs);
+			result = searchForTraces(tracesIDs);
 			break;
 
+		// search actions
 		case SEARCH_ACTIONS:
 			List<String> actionNames = Arrays.asList(searchEntries);
-			searchForActions(actionNames);
+			result = searchForActions(actionNames);
+			break;
+
+		// search entities
+		case SEARCH_ENTITIES:
+			List<String> entityNames = Arrays.asList(searchEntries);
+			result = searchForEntities(entityNames);
+			break;
+
+		// search states
+		case SEARCH_STATES:
+			List<String> states = Arrays.asList(searchEntries);
+			result = searchForStates(states);
+
 		default:
 			break;
 		}
+
+		if (result == null) {
+			return;
+		}
+
+		showTraceInViewer(result);
 
 	}
 
@@ -506,7 +532,9 @@ public class TraceViewerInSystemController {
 	 * 
 	 * @param tracesIDs
 	 */
-	protected void searchForTraces(List<String> tracesIDs) {
+	protected List<Integer> searchForTraces(List<String> tracesIDs) {
+
+		List<Integer> tracesFound = new LinkedList<Integer>();
 
 		for (String traceID : tracesIDs) {
 
@@ -516,13 +544,16 @@ public class TraceViewerInSystemController {
 
 				if (addedTracesIDs.contains(id)) {
 
-					showTraceInViewer(id);
+					// showTraceInViewer(id);
+					tracesFound.add(id);
 				}
 
 			} catch (Exception e) {
 				// TODO: handle exception
 			}
 		}
+
+		return tracesFound;
 	}
 
 	/**
@@ -531,16 +562,99 @@ public class TraceViewerInSystemController {
 	 * @param actionNames
 	 *            actions to search for in a trace
 	 */
-	protected void searchForActions(List<String> actionNames) {
+	protected List<Integer> searchForActions(List<String> actionNames) {
 
 		if (actionNames == null || actionNames.isEmpty() || miner == null) {
-			return;
+			return null;
 		}
 
 		List<Integer> tracesIDs = miner.findTracesContainingActions(actionNames, addedTracesIDs, false);
 
-		showTraceInViewer(tracesIDs);
+		// showTraceInViewer(tracesIDs);
 
+		return tracesIDs;
+	}
+
+	/**
+	 * Finds all traces which contain all given entities
+	 * 
+	 * @param actionNames
+	 *            actions to search for in a trace
+	 */
+	protected List<Integer> searchForEntities(List<String> entityNames) {
+
+		if (entityNames == null || entityNames.isEmpty() || miner == null) {
+			return null;
+		}
+
+		if (!miner.isBigraphERFileSet()) {
+			showEntities(null);
+		}
+
+		if (!miner.isBigraphERFileSet()) {
+			return null;
+		}
+
+		List<Integer> tracesIDs = miner.findTracesContainingEntities(entityNames, addedTracesIDs, false);
+
+		// showTraceInViewer(tracesIDs);
+		return tracesIDs;
+
+	}
+
+	/**
+	 * Finds all traces which contain all given states
+	 * 
+	 * @param actionNames
+	 *            actions to search for in a trace
+	 */
+	protected List<Integer> searchForStates(List<String> states) {
+
+		if (states == null || states.isEmpty() || miner == null) {
+			return null;
+		}
+
+		List<Integer> statesInt = new LinkedList<Integer>();
+
+		for (String st : states) {
+			try {
+				st = st.trim();
+				int stInt = Integer.parseInt(st);
+				statesInt.add(stInt);
+				System.out.println(st+" st: " + stInt);
+			} catch (Exception e) {
+				// TODO: handle exception
+				return null;
+			}
+		}
+
+		List<Integer> tracesIDs = miner.findTracesContainingStates(statesInt, addedTracesIDs, false);
+
+		System.out.println("result: " + tracesIDs);
+		// showTraceInViewer(tracesIDs);
+
+		return tracesIDs;
+	}
+
+	@FXML
+	void clearHighlightedTraces(ActionEvent e) {
+
+		// remove all highlighted traces
+		for (Integer traceID : highLightedTracesIDs.keySet()) {
+			highlightTrace(traceID, NORMAL_HIGHLIGHT_STYLE, NORMAL_HIGHLIGHT_STYLE);
+
+		}
+
+		highLightedTracesIDs.clear();
+		flowPaneTraceDetails.getChildren().clear();
+		lblNumOfHighlightedTraces.setText(null);
+
+		if (checkboxShowOnlySelectedTrace.isSelected()) {
+			checkboxShowOnlySelectedTrace.setSelected(false);
+		}
+
+		showAllAddedTraces();
+		showActionsInList();
 	}
 
 	/**
@@ -1950,7 +2064,8 @@ public class TraceViewerInSystemController {
 		states.add(endState);
 
 		// get ids of all traces that contain the two given states
-		List<Integer> tracesIDs = miner.findTracesContainingStates(states, miner.getCurrentShownTraces());
+		boolean inOrder = true;
+		List<Integer> tracesIDs = miner.findTracesContainingStates(states, miner.getCurrentShownTraces(), inOrder);
 
 		Map<Integer, GraphPath> traces = miner.getTraces(tracesIDs);
 
@@ -3205,6 +3320,29 @@ public class TraceViewerInSystemController {
 
 		// add to the list of shown traces
 		flowPaneTraceDetails.getChildren().add(hbox);
+
+		// update number of highlighted traces
+		Platform.runLater(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				String numStr = lblNumOfHighlightedTraces.getText();
+
+				if (numStr != null && !numStr.isEmpty()) {
+
+					try {
+						int num = Integer.parseInt(numStr);
+						num++;
+						lblNumOfHighlightedTraces.setText(num + "");
+					} catch (Exception e) {
+						// TODO: handle exception
+					}
+				} else {
+					lblNumOfHighlightedTraces.setText("1");
+				}
+			}
+		});
 
 		highLightedTracesIDs.put(traceID, color);
 

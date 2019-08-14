@@ -25,7 +25,7 @@
          <items>
             <VBox minHeight="10.0" minWidth="10.0" prefHeight="709.0" prefWidth="322.0" spacing="5.0">
                <children>
-                  <SplitPane dividerPositions="0.38737446197991393, 0.6513629842180775" orientation="VERTICAL" prefHeight="699.0" prefWidth="209.0">
+                  <SplitPane dividerPositions="0.4031563845050215, 0.6513629842180775" orientation="VERTICAL" prefHeight="699.0" prefWidth="209.0">
                     <items>
                         <VBox prefHeight="266.0" prefWidth="237.0" spacing="5.0">
                            <children>
@@ -67,6 +67,15 @@
                                     </ScrollPane>
                                  </children>
                               </VBox>
+                              <HBox alignment="CENTER_RIGHT" spacing="3.0">
+                                 <children>
+                                    <Label fx:id="lblNumOfHighlightedTraces" alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="158.0" />
+                                    <Button mnemonicParsing="false" onAction="#clearHighlightedTraces" prefHeight="19.0" prefWidth="42.0" text="clear" />
+                                 </children>
+                                 <padding>
+                                    <Insets right="3.0" />
+                                 </padding>
+                              </HBox>
                               <VBox minWidth="10.0" prefHeight="51.0" prefWidth="317.0">
                                  <children>
                                     <CheckBox fx:id="checkboxShowOnlySelectedTrace" mnemonicParsing="false" text="Only selected trace" />
