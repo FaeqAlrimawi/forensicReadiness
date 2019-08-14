@@ -2,6 +2,7 @@ package controller.instantiation.analysis;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -51,7 +52,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -60,11 +60,16 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
 public class TraceViewerInSystemController {
+
+	@FXML
+	private ComboBox<String> comboBoxSearchField;
+
+	@FXML
+	private TextField textFieldSearchAddedTraces;
 
 	@FXML
 	private Label lblNumOfAddedTraces;
@@ -268,6 +273,16 @@ public class TraceViewerInSystemController {
 		}
 	};
 
+	// combo box for searching traces
+	private static final String SEARCH_TRACES = "Traces";
+	private static final String SEARCH_STATES = "States";
+	private static final String SEARCH_ACTIONS = "Actions";
+	private static final String SEARCH_ENTITIES = "Entities";
+	private static final String SEARCH_SEPARATOR = ",";
+
+	private static final String[] SEARCH_FIELDS = new String[] { SEARCH_TRACES, SEARCH_ACTIONS, SEARCH_STATES,
+			SEARCH_ENTITIES };
+
 	// key is state, value is the label for its percentage
 	private Map<Integer, Label> mapStatePerc;
 
@@ -408,28 +423,7 @@ public class TraceViewerInSystemController {
 					return;
 				}
 
-				// clearHighlights();
-				addTraceIDToDisplay(selectedTraceID);
-
-				// update actions
-				showActionsInList();
-
-				if (checkboxShowOnlySelectedTrace.isSelected()) {
-					showOnlyTraces(highLightedTracesIDs);
-				} else {
-					String color = null;
-					if (highLightedTracesIDs.containsKey(selectedTraceID)) {
-						color = highLightedTracesIDs.get(selectedTraceID);
-					}
-
-					String style = HIGHLIGHT_STYLE;
-
-					if (color != null) {
-						style = style.replace(HIGHLIGHT_TRACE_ARROW_COLOUR, color);
-					}
-					// System.out.println("showing in all: " + selectedTraceID);
-					highlightTrace(selectedTraceID, HIGHLIGHT_STYLE, style);
-				}
+				showTraceInViewer(selectedTraceID);
 			}
 		});
 
@@ -466,8 +460,96 @@ public class TraceViewerInSystemController {
 			}
 		});
 
+		// set up combo box for search fields
+		comboBoxSearchField.getItems().setAll(SEARCH_FIELDS);
+
+		textFieldSearchAddedTraces.setOnKeyPressed(e -> {
+
+			// if enter is hit then search
+			if (e.getCode() == KeyCode.ENTER) {
+				String searchField = comboBoxSearchField.getSelectionModel().getSelectedItem();
+				String searchQuery = textFieldSearchAddedTraces.getText();
+
+				searchAddedTraces(searchQuery, searchField);
+
+			}
+		});
+
 	}
 
+	protected void searchAddedTraces(String searchQuery, String searchField) {
+
+		if (searchField == null || searchQuery == null) {
+			return;
+		}
+
+		// split search entries
+		String[] searchEntries = searchQuery.split(SEARCH_SEPARATOR);
+
+		switch (searchField) {
+		case SEARCH_TRACES:
+			List<String> tracesIDs = Arrays.asList(searchEntries);
+			searchForTraces(tracesIDs);
+			break;
+
+		case SEARCH_ACTIONS:
+			List<String> actionNames = Arrays.asList(searchEntries);
+			searchForActions(actionNames);
+		default:
+			break;
+		}
+
+	}
+
+	/**
+	 * Searches added traces and shows the found ones
+	 * 
+	 * @param tracesIDs
+	 */
+	protected void searchForTraces(List<String> tracesIDs) {
+
+		for (String traceID : tracesIDs) {
+
+			try {
+				traceID = traceID.trim();
+				int id = Integer.parseInt(traceID);
+
+				if (addedTracesIDs.contains(id)) {
+
+					showTraceInViewer(id);
+				}
+
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+		}
+	}
+
+	/**
+	 * Finds all traces which contain all given actions
+	 * 
+	 * @param actionNames
+	 *            actions to search for in a trace
+	 */
+	protected void searchForActions(List<String> actionNames) {
+
+		if (actionNames == null || actionNames.isEmpty() || miner == null) {
+			return;
+		}
+
+		List<Integer> tracesIDs = miner.findTracesContainingActions(actionNames, addedTracesIDs, false);
+
+		showTraceInViewer(tracesIDs);
+
+	}
+
+	/**
+	 * Creates a context menu fo rthe commands that can be performed on a node
+	 * 
+	 * @param stateStack
+	 *            the node
+	 * @return
+	 */
 	protected ContextMenu createNodeContextMenu(StackPane stateStack) {
 
 		List<MenuItem> items = new LinkedList<MenuItem>();
@@ -2974,6 +3056,48 @@ public class TraceViewerInSystemController {
 		return strBldr.toString();
 	}
 
+	protected void showTraceInViewer(List<Integer> tracesIDs) {
+
+		if (tracesIDs == null || tracesIDs.isEmpty()) {
+			return;
+		}
+
+		for (Integer traceID : tracesIDs) {
+			showTraceInViewer(traceID);
+		}
+	}
+
+	/**
+	 * Shows the trace with the given id in the viewer (as a sequence and as in
+	 * the flowpane)
+	 * 
+	 * @param traceID
+	 */
+	protected void showTraceInViewer(int traceID) {
+		// clearHighlights();
+		addTraceIDToDisplay(traceID);
+
+		// update actions
+		showActionsInList();
+
+		if (checkboxShowOnlySelectedTrace.isSelected()) {
+			showOnlyTraces(highLightedTracesIDs);
+		} else {
+			String color = null;
+			if (highLightedTracesIDs.containsKey(traceID)) {
+				color = highLightedTracesIDs.get(traceID);
+			}
+
+			String style = HIGHLIGHT_STYLE;
+
+			if (color != null) {
+				style = style.replace(HIGHLIGHT_TRACE_ARROW_COLOUR, color);
+			}
+			// System.out.println("showing in all: " + selectedTraceID);
+			highlightTrace(traceID, HIGHLIGHT_STYLE, style);
+		}
+	}
+
 	/**
 	 * adds the given trace id to the list of shown traces.
 	 * 
@@ -3110,12 +3234,11 @@ public class TraceViewerInSystemController {
 		int corner = 5;
 		int margin = 5;
 
-		
 		VBox mainVbox = new VBox();
 		mainVbox.setPrefWidth(width);
 		mainVbox.setMaxWidth(width);
 		mainVbox.setSpacing(5);
-		
+
 		mainVbox.setStyle("-fx-border-color:grey;-fx-border-width:1;-fx-background-color:white;-fx-border-radius:"
 				+ corner + " " + corner + " " + corner + " " + corner + " " + ";fx-background-radius:" + corner + " "
 				+ corner + " " + corner + " " + corner + ";");
@@ -3147,21 +3270,22 @@ public class TraceViewerInSystemController {
 		flowPaneLabels.setMaxHeight(height);
 		flowPaneLabels.setHgap(5);
 		flowPaneLabels.setVgap(5);
-		
+
 		ScrollPane scroller = new ScrollPane();
-		scroller.setPrefHeight(height+margin);
-		
-		scroller.setPrefWidth(width+margin);
+		scroller.setPrefHeight(height + margin);
+
+		scroller.setPrefWidth(width + margin);
 		scroller.setContent(flowPaneLabels);
 		scroller.setPannable(true);
 		scroller.setFitToWidth(true);
-		
-//		flowPaneLabels.getChildren().add(scroller);
-		
+
+		// flowPaneLabels.getChildren().add(scroller);
+
 		// labels for traces
 		for (Integer traceID : tracesIDs) {
 
-//			boolean isHighlighted = highLightedTracesIDs.containsKey(traceID);
+			// boolean isHighlighted =
+			// highLightedTracesIDs.containsKey(traceID);
 
 			String traceColor = getrandomColoredHighLightStyle();
 
@@ -3192,7 +3316,7 @@ public class TraceViewerInSystemController {
 						+ corner + " " + corner + " " + corner + " " + corner + " " + ";fx-background-radius:" + corner
 						+ " " + corner + " " + corner + " " + corner + ";");
 			}
-			
+
 			// on mouse entered highlight trace
 			hbox.setOnMouseEntered(e -> {
 
@@ -3272,7 +3396,7 @@ public class TraceViewerInSystemController {
 
 		// add components to main
 		Separator sep = new Separator(Orientation.HORIZONTAL);
-		
+
 		mainVbox.getChildren().addAll(hboxImg, lblState, sep, scroller);
 
 		dotPane.getChildren().addAll(mainVbox);

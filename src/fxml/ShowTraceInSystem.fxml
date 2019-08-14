@@ -17,7 +17,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
 <BorderPane minHeight="650.0" minWidth="900.0" prefHeight="775.0" prefWidth="1453.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.analysis.TraceViewerInSystemController">
@@ -26,9 +25,9 @@
          <items>
             <VBox minHeight="10.0" minWidth="10.0" prefHeight="709.0" prefWidth="322.0" spacing="5.0">
                <children>
-                  <SplitPane dividerPositions="0.3113342898134864, 0.569583931133429" orientation="VERTICAL" prefHeight="699.0" prefWidth="209.0">
+                  <SplitPane dividerPositions="0.38737446197991393, 0.6513629842180775" orientation="VERTICAL" prefHeight="699.0" prefWidth="209.0">
                     <items>
-                        <VBox prefHeight="223.0" prefWidth="207.0" spacing="5.0">
+                        <VBox prefHeight="266.0" prefWidth="237.0" spacing="5.0">
                            <children>
                               <HBox alignment="CENTER_LEFT" spacing="5.0">
                                  <children>
@@ -40,7 +39,7 @@
                                     <Label fx:id="lblNumOfAddedTraces" />
                                  </children>
                               </HBox>
-                              <VBox prefHeight="135.0" prefWidth="348.0" spacing="3.0">
+                              <VBox prefHeight="167.0" prefWidth="234.0" spacing="3.0">
                                  <children>
                                     <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="414.0" spacing="3.0">
                                        <children>
@@ -52,7 +51,16 @@
                                           <ComboBox fx:id="comboBoxAddedTraces" prefHeight="25.0" prefWidth="112.0" />
                                        </children>
                                     </HBox>
-                                    <ScrollPane fitToWidth="true" prefHeight="101.0" prefWidth="348.0" style="-fx-background-color: white;">
+                                    <HBox spacing="2.0">
+                                       <children>
+                                          <TextField fx:id="textFieldSearchAddedTraces" promptText="Search" />
+                                          <ComboBox fx:id="comboBoxSearchField" prefHeight="25.0" prefWidth="84.0" />
+                                       </children>
+                                       <padding>
+                                          <Insets right="3.0" />
+                                       </padding>
+                                    </HBox>
+                                    <ScrollPane fitToWidth="true" prefHeight="107.0" prefWidth="234.0" style="-fx-background-color: white;">
                                        <content>
                                           <FlowPane fx:id="flowPaneTraceDetails" hgap="3.0" prefHeight="99.0" prefWidth="346.0" vgap="3.0" />
                                        </content>
@@ -129,10 +137,7 @@
             </VBox>
             <ScrollPane fx:id="scrollPaneTraceViewer" fitToHeight="true" fitToWidth="true" prefHeight="550.0" prefWidth="1100.0">
                <content>
-                  <StackPane fx:id="mainStackPane" minHeight="-Infinity" minWidth="-Infinity" prefHeight="525.0" prefWidth="1060.0" style="-fx-background-color: white;">
-                     <children>
-                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="200.0" stroke="BLACK" strokeType="INSIDE" width="200.0" />
-                     </children></StackPane>
+                  <StackPane fx:id="mainStackPane" minHeight="-Infinity" minWidth="-Infinity" prefHeight="525.0" prefWidth="1060.0" style="-fx-background-color: white;" />
                </content>
             </ScrollPane>
          </items>

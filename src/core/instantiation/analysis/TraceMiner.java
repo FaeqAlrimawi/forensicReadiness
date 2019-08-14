@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
@@ -4180,6 +4181,66 @@ public class TraceMiner {
 					// than the last one then skip
 					if (newIndex <= index) {
 						continue trace_loop;
+					}
+				}
+
+				// if this point is reached then the trace matches the given
+				// states
+				result.add(traceEntry.getKey());
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Finds all traces that contain the given actions (not necessarly in order)
+	 * 
+	 * @param actions
+	 * @param tracesIDsToSearch
+	 * @return
+	 */
+	public List<Integer> findTracesContainingActions(List<String> actionNames, List<Integer> tracesIDsToSearch,
+			boolean isInOrder) {
+
+		if (actionNames == null || tracesIDsToSearch == null) {
+			return null;
+		}
+
+		//to lower case
+		actionNames.replaceAll(String::trim);
+		actionNames.replaceAll(String::toLowerCase);
+	
+		List<Integer> result = new LinkedList<Integer>();
+
+		// get traces
+		Map<Integer, GraphPath> tracesToSearch = getTraces(tracesIDsToSearch);
+
+		if (tracesToSearch == null || tracesToSearch.isEmpty()) {
+			return result;
+		}
+
+		trace_loop: for (Entry<Integer, GraphPath> traceEntry : tracesToSearch.entrySet()) {
+			List<String> traceActions = new LinkedList<String>(traceEntry.getValue().getTransitionActions());
+			
+			//to lower case
+			traceActions.replaceAll(String::toLowerCase);
+
+			// it should contain all given states
+			if (traceActions.containsAll(actionNames)) {
+
+				// if should be in order
+				if (isInOrder) {
+					int index = -1;
+					for (int i = 0; i < actionNames.size(); i++) {
+						int newIndex = traceActions.indexOf(actionNames.get(i));
+
+						// if the current index of the state is less than or
+						// equal
+						// than the last one then skip
+						if (newIndex <= index) {
+							continue trace_loop;
+						}
 					}
 				}
 
