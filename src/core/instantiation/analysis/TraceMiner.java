@@ -4198,6 +4198,68 @@ public class TraceMiner {
 	}
 
 	/**
+	 * Finds all traces that have the given startState and contain the given
+	 * states (not necessarly consecutive) and ends with the endState
+	 * 
+	 * @param states
+	 * @param tracesIDsToSearch
+	 * @return
+	 */
+	public List<Integer> findTracesContainingStates(int startState, List<Integer> inBetweenStates, int endState,
+			List<Integer> tracesIDsToSearch, boolean isInOrder) {
+
+		// a trace should contain all states
+		// the order should be preserved e.g., state-1 index should be more than
+		// that of state-0
+
+		// if (states == null || tracesIDsToSearch == null) {
+		// return null;
+		// }
+
+		List<Integer> result = new LinkedList<Integer>();
+
+		// get traces
+		Map<Integer, GraphPath> tracesToSearch = getTraces(tracesIDsToSearch);
+
+		if (tracesToSearch == null || tracesToSearch.isEmpty()) {
+			return result;
+		}
+
+		trace_loop: for (Entry<Integer, GraphPath> traceEntry : tracesToSearch.entrySet()) {
+			LinkedList<Integer> traceStates = traceEntry.getValue().getStateTransitions();
+
+			// int subIndex = Collections.indexOfSubList(traceStates, states);
+
+			// it should start with the start state and end with the end state
+			// and contain all given states
+			if (traceStates != null && (startState == -1 || traceStates.getFirst() == startState)
+					&& (endState == -1 || traceStates.getLast() == endState)
+					&& (inBetweenStates == null || traceStates.containsAll(inBetweenStates))) {
+				// it should be in order
+
+				if (isInOrder && inBetweenStates != null) {
+					int index = -1;
+					for (int i = 0; i < inBetweenStates.size(); i++) {
+						int newIndex = traceStates.indexOf(inBetweenStates.get(i));
+
+						// if the current index of the state is less than or
+						// equal
+						// than the last one then skip
+						if (newIndex <= index) {
+							continue trace_loop;
+						}
+					}
+				}
+				// if this point is reached then the trace matches the given
+				// states
+				result.add(traceEntry.getKey());
+			}
+		}
+
+		return result;
+	}
+
+	/**
 	 * Finds all traces that contain the given actions (not necessarly in order)
 	 * 
 	 * @param actions

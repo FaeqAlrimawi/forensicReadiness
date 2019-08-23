@@ -15,6 +15,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -163,6 +164,18 @@
                   <Button fx:id="btnLoadTransitionSystem" mnemonicParsing="false" onAction="#loadTransitionSystem" text="Load transition System" />
                   <Button fx:id="btnClear" mnemonicParsing="false" onAction="#reset" text="reset" />
                   <Button fx:id="btnSaveTrace" mnemonicParsing="false" onAction="#saveTrace" text="save" />
+                  <Pane prefHeight="25.0" prefWidth="21.0" />
+                  <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="568.0" spacing="3.0">
+                     <children>
+                        <Label text="start state" />
+                        <TextField fx:id="textFieldStartStateSearch" prefHeight="25.0" prefWidth="60.0" />
+                        <Label text="end state" />
+                        <TextField fx:id="textFieldEndStateSearch" prefHeight="25.0" prefWidth="60.0" />
+                        <Label text="contains" />
+                        <TextField fx:id="textFieldContainsStateSearch" prefHeight="25.0" prefWidth="100.0" promptText="e.g., 1,2,3" />
+                        <Button fx:id="btnSearchTraces" mnemonicParsing="false" onAction="#searchTraces" text="search traces" />
+                     </children>
+                  </HBox>
                </children>
             </FlowPane>
          </children>

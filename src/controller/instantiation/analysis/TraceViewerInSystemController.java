@@ -66,6 +66,18 @@ import javafx.stage.Window;
 public class TraceViewerInSystemController {
 
 	@FXML
+	private TextField textFieldStartStateSearch;
+
+	@FXML
+	private TextField textFieldEndStateSearch;
+
+	@FXML
+	private TextField textFieldContainsStateSearch;
+
+	@FXML
+	private Button btnSearchTraces;
+
+	@FXML
 	private Label lblNumOfHighlightedTraces;
 
 	@FXML
@@ -480,6 +492,102 @@ public class TraceViewerInSystemController {
 
 	}
 
+	/**
+	 * Searchs for traces containing specific states
+	 * 
+	 * @param e
+	 */
+	@FXML
+	void searchTraces(ActionEvent e) {
+
+		if(miner == null) {
+			return;
+		}
+		
+		String txtStartState = textFieldStartStateSearch.getText();
+		String txtEndState = textFieldEndStateSearch.getText();
+		String txtContainsStates = textFieldContainsStateSearch.getText();
+
+		try {
+
+			//start state
+			int startState = -1;
+
+			if (txtStartState != null && !txtStartState.isEmpty()) {
+				txtStartState = txtStartState.trim();
+				startState = Integer.parseInt(txtStartState);
+			}
+
+			//end state
+			int endState = -1;
+
+			if (txtEndState != null && !txtEndState.isEmpty()) {
+				endState = Integer.parseInt(txtEndState);
+			}
+
+			//in between states
+			List<Integer> containsStates = null;
+
+			String[] txtStates = txtContainsStates.split(SEARCH_SEPARATOR);
+
+			if (txtContainsStates != null && !txtContainsStates.isEmpty()) {
+				containsStates = new LinkedList<Integer>();
+				
+				for (String txtState : txtStates) {
+					int state = Integer.parseInt(txtState);
+					containsStates.add(state);
+
+				}
+			}
+
+			//find traces
+			
+			if(startState == -1 && endState == -1 && (containsStates == null || containsStates.isEmpty())) {
+				return;
+			}
+			
+			boolean inOrder = true;
+			List<Integer> tracesIDs = miner.findTracesContainingStates(startState, containsStates, endState, miner.getCurrentShownTraces(), inOrder);
+//			List<Integer> tracesIDs = getAllTracesFromTo(startState, endState);
+
+			
+			if (tracesIDs == null || tracesIDs.isEmpty()) {
+				return;
+			}
+
+			System.out.println(tracesIDs);
+			
+			//show traces
+			// reset
+			reset(null);
+
+			// remove the original trace
+			tracePane.getChildren().clear();
+
+			// show all new traces
+			Map<Integer, GraphPath> traces = miner.getTraces(tracesIDs);
+
+			System.out.println("traces: " + traces.size());
+			
+			// filter to get the last state to be the end state
+			for (GraphPath trace : traces.values()) {
+//				LinkedList<Integer> traceStates = trace.getStateTransitions();
+
+//				if (traceStates != null && traceStates.getFirst() == startState
+//						&& traceStates.getLast() == endState & traceStates.containsAll(containsStates)) {
+					// a trace is identified then added
+					addTrace(trace);
+//				}
+			}
+
+		} catch (Exception exp) {
+			// TODO: handle exception
+			System.out.println("searchTraces:: not a number error");
+			exp.printStackTrace();
+		}
+
+	}
+
 	protected void searchAddedTraces(String searchQuery, String searchField) {
 
 		if (searchField == null || searchQuery == null) {
@@ -523,17 +631,17 @@ public class TraceViewerInSystemController {
 			return;
 		}
 
-//		if(checkboxShowOnlySelectedTrace.isSelected()) {
-//			clearHighlightedTraces(null);
-//		
-//		} else{
-//			clearHighlightedTraces(null);
-//		}
-		
+		// if(checkboxShowOnlySelectedTrace.isSelected()) {
+		// clearHighlightedTraces(null);
+		//
+		// } else{
+		// clearHighlightedTraces(null);
+		// }
+
 		clearHighlightedTraces(null);
-		
+
 		checkboxShowOnlySelectedTrace.setSelected(true);
-		
+
 		showTraceInViewer(result);
 
 	}
@@ -632,7 +740,7 @@ public class TraceViewerInSystemController {
 				st = st.trim();
 				int stInt = Integer.parseInt(st);
 				statesInt.add(stInt);
-				System.out.println(st+" st: " + stInt);
+				System.out.println(st + " st: " + stInt);
 			} catch (Exception e) {
 				// TODO: handle exception
 				return null;
@@ -730,7 +838,19 @@ public class TraceViewerInSystemController {
 						lastState = trace.getStateTransitions().get(trace.getStateTransitions().size() - 1);
 					}
 
-					getAllTracesFromTo(sttt, lastState);
+					List<Integer> tracesIDs = getAllTracesFromTo(sttt, lastState);
+
+					Map<Integer, GraphPath> traces = miner.getTraces(tracesIDs);
+
+					// filter to get the last state to be the end state
+					for (GraphPath trace : traces.values()) {
+						LinkedList<Integer> traceStates = trace.getStateTransitions();
+
+						if (traceStates != null && traceStates.getLast() == lastState) {
+							// a trace is identified then added
+							addTrace(trace);
+						}
+					}
 
 					// show actions related
 					showActionsInList();
@@ -2068,9 +2188,10 @@ public class TraceViewerInSystemController {
 	 * @param endState
 	 *            end state
 	 */
-	protected void getAllTracesFromTo(int fromState, int endState) {
+	protected List<Integer> getAllTracesFromTo(int fromState, int endState) {
 
 		List<Integer> states = new LinkedList<Integer>();
+		// List<Integer> tracesIDs = new LinkedList<Integer>();
 		states.add(fromState);
 		states.add(endState);
 
@@ -2078,17 +2199,18 @@ public class TraceViewerInSystemController {
 		boolean inOrder = true;
 		List<Integer> tracesIDs = miner.findTracesContainingStates(states, miner.getCurrentShownTraces(), inOrder);
 
-		Map<Integer, GraphPath> traces = miner.getTraces(tracesIDs);
-
-		// filter to get the last state to be the end state
-		for (GraphPath trace : traces.values()) {
-			LinkedList<Integer> traceStates = trace.getStateTransitions();
-
-			if (traceStates != null && traceStates.getLast() == endState) {
-				// a trace is identified then added
-				addTrace(trace);
-			}
-		}
+		return tracesIDs;
+		// Map<Integer, GraphPath> traces = miner.getTraces(tracesIDs);
+		//
+		// // filter to get the last state to be the end state
+		// for (GraphPath trace : traces.values()) {
+		// LinkedList<Integer> traceStates = trace.getStateTransitions();
+		//
+		// if (traceStates != null && traceStates.getLast() == endState) {
+		// // a trace is identified then added
+		// addTrace(trace);
+		// }
+		// }
 
 	}
 
@@ -3184,8 +3306,8 @@ public class TraceViewerInSystemController {
 
 	protected void showTraceInViewer(List<Integer> tracesIDs) {
 
-		//reset counter
-		
+		// reset counter
+
 		if (tracesIDs == null || tracesIDs.isEmpty()) {
 			return;
 		}
