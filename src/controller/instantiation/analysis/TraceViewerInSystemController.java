@@ -500,6 +500,7 @@ public class TraceViewerInSystemController {
 	@FXML
 	void searchTraces(ActionEvent e) {
 
+		System.out.println("Access!!");
 		if(miner == null) {
 			return;
 		}
@@ -549,13 +550,12 @@ public class TraceViewerInSystemController {
 			boolean inOrder = true;
 			List<Integer> tracesIDs = miner.findTracesContainingStates(startState, containsStates, endState, miner.getCurrentShownTraces(), inOrder);
 //			List<Integer> tracesIDs = getAllTracesFromTo(startState, endState);
-
 			
 			if (tracesIDs == null || tracesIDs.isEmpty()) {
 				return;
 			}
 
-			System.out.println(tracesIDs);
+//			System.out.println(tracesIDs);
 			
 			//show traces
 			// reset
@@ -563,21 +563,15 @@ public class TraceViewerInSystemController {
 
 			// remove the original trace
 			tracePane.getChildren().clear();
+			addedTracesIDs.clear();
 
 			// show all new traces
 			Map<Integer, GraphPath> traces = miner.getTraces(tracesIDs);
-
-			System.out.println("traces: " + traces.size());
 			
-			// filter to get the last state to be the end state
+			System.out.println(traces.keySet());
+			
 			for (GraphPath trace : traces.values()) {
-//				LinkedList<Integer> traceStates = trace.getStateTransitions();
-
-//				if (traceStates != null && traceStates.getFirst() == startState
-//						&& traceStates.getLast() == endState & traceStates.containsAll(containsStates)) {
-					// a trace is identified then added
 					addTrace(trace);
-//				}
 			}
 
 		} catch (Exception exp) {
@@ -2144,7 +2138,10 @@ public class TraceViewerInSystemController {
 				// TODO Auto-generated method stub
 				// ObservableList<Integer> list =
 				// FXCollections.observableArrayList(tracesIDs);
-				comboBoxAddedTraces.getItems().add(traceID);
+				if(!comboBoxAddedTraces.getItems().contains(traceID)) {
+					comboBoxAddedTraces.getItems().add(traceID);	
+				}
+				
 				lblNumOfAddedTraces.setText("[" + addedTracesIDs.size() + "]");
 			}
 		});
