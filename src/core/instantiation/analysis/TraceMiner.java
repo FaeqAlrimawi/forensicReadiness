@@ -220,9 +220,9 @@ public class TraceMiner {
 
 	private URL defaultOutputFolder = getClass().getResource("../../../resources/example");
 
-	//temp storage for loaded traces
+	// temp storage for loaded traces
 	Map<Integer, Bigraph> loadedStateBigraphs;
-	
+
 	public TraceMiner() {
 
 		tracesActions = new HashMap<String, Integer>();
@@ -241,7 +241,7 @@ public class TraceMiner {
 		customeFilteringTraceIDs = new LinkedList<Integer>();
 
 		loadedStateBigraphs = new HashMap<Integer, Bigraph>();
-		
+
 		tracesSaved = new HashMap<Integer, String>();
 
 		numberOfStates = 10000;
@@ -4453,7 +4453,6 @@ public class TraceMiner {
 			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
 		}
 
-		
 		// === get Bigraph representation of the precondition of action
 		Bigraph actionPre = actionWrapper.getPrecondition() != null
 				? actionWrapper.getPrecondition().getBigraphObject(false, brsWrapper.getSignature()) : null;
@@ -4476,15 +4475,17 @@ public class TraceMiner {
 			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
 		}
 
-		//add to temp storage
-//		addBigraphStateToTemp(preState, preStateBig);
-		
+		// add to temp storage
+		// addBigraphStateToTemp(preState, preStateBig);
+
 		// === match the action precondition to the state
 		Matcher matcher = new Matcher();
 
-//		System.out.println("+++++++++\nCondition: " + actionPre+"\n+++++++++\n");
-//		System.out.println("+++++++++\nState: " + preStateBig +"\n+++++++++\n");
-		
+		if (action.equalsIgnoreCase("connectbusdevice")) {
+			System.out.println("+++++++++\nCondition: " + actionPre + "\n+++++++++\n");
+			System.out.println("+++++++++\nState: " + preStateBig + "\n+++++++++\n");
+		}
+
 		if (matcher.match(preStateBig, actionPre).iterator().hasNext()) {
 			// a match means that there's no dependency
 			return ACTIONS_NOT_CAUSALLY_DEPENDENT;
@@ -4493,27 +4494,27 @@ public class TraceMiner {
 		return ACTIONS_CAUSALLY_DEPENDENT;
 	}
 
-//	protected void addBigraphStateToTemp(int state, Bigraph big) {
-//		
-//		if(loadedStateBigraphs.containsKey(state)) {
-//			return;
-//		}
-//		
-//		loadedStateBigraphs.put(state, big);
-//		
-//		//check size
-//		if(loadedStateBigraphs.size() > MAX_TEMP_STORAGE_SIZE) {
-//			//remove 4 states
-//			Random rand = new Random();
-//			int index = rand.nextInt(loadedStateBigraphs.size());
-//			
-//			for(int i =index;i<loadedStateBigraphs.size();i++) {
-//				if(i )
-//			}
-//			
-//		}
-//	}
-	
+	// protected void addBigraphStateToTemp(int state, Bigraph big) {
+	//
+	// if(loadedStateBigraphs.containsKey(state)) {
+	// return;
+	// }
+	//
+	// loadedStateBigraphs.put(state, big);
+	//
+	// //check size
+	// if(loadedStateBigraphs.size() > MAX_TEMP_STORAGE_SIZE) {
+	// //remove 4 states
+	// Random rand = new Random();
+	// int index = rand.nextInt(loadedStateBigraphs.size());
+	//
+	// for(int i =index;i<loadedStateBigraphs.size();i++) {
+	// if(i )
+	// }
+	//
+	// }
+	// }
+
 	public Bigraph loadState(int stateID) {
 
 		// get preAction's precondition State as Bigraph
@@ -4525,9 +4526,10 @@ public class TraceMiner {
 		JSONObject state;
 		JSONParser parser = new JSONParser();
 
+		String filePath = getStatesFolder() + "/" + stateID + ".json";
 		try {
 			// read state from file
-			FileReader r = new FileReader(getStatesFolder() + "/" + stateID + ".json");
+			FileReader r = new FileReader(filePath);
 			state = (JSONObject) parser.parse(r);
 			Bigraph bigraph = convertJSONtoBigraph(state);
 			r.close();
@@ -4536,7 +4538,8 @@ public class TraceMiner {
 
 		} catch (IOException | ParseException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// e.printStackTrace();
+			System.err.println("File [" + filePath + "] is missing.");
 		}
 
 		return null;

@@ -508,17 +508,6 @@ public class TraceViewerInSystemController {
 	@FXML
 	void searchTraces(ActionEvent e) {
 
-		// === for testing
-		findCausalDependency();
-
-		if (true)
-			return;
-
-		if (miner == null) {
-			return;
-		}
-		// ===
-
 		String txtStartState = textFieldStartStateSearch.getText();
 		String txtEndState = textFieldEndStateSearch.getText();
 		String txtContainsStates = textFieldContainsStateSearch.getText();
@@ -665,6 +654,13 @@ public class TraceViewerInSystemController {
 
 	}
 
+	@FXML
+	void showCausalityChain() {
+
+		// === for testing
+		findCausalDependency();
+		// ===
+	}
 	protected void searchAddedTraces(String searchQuery, String searchField) {
 
 		if (searchField == null || searchQuery == null) {
@@ -3614,36 +3610,49 @@ public class TraceViewerInSystemController {
 		if (trace == null) {
 			return;
 		}
-
-		List<String> actions = trace.getTransitionActions();
-		int preState = trace.getStateTransitions() != null ? trace.getStateTransitions().get(0) : -1;
-
-		if (preState == -1 || actions.size() < 2) {
-			return;
-		}
-
-		String action1 = actions.get(0);
-		String action2 = actions.get(1);
-
-		int dependentResult = miner.areActionsCausallyDependent(action2, action1, preState);
 		
-		switch (dependentResult) {
-		case TraceMiner.ACTIONS_CAUSAL_DEPENDENCY_ERROR:
-			System.err.println("There's an error");
-			break;
-
-		case TraceMiner.ACTIONS_CAUSALLY_DEPENDENT: //dependent
-			System.out.println("action-2 [" + action2 + "] is causally dependent on action-1 [" + action1 + "] with pre-state ["+preState+"]");
-			break;
-
-		case TraceMiner.ACTIONS_NOT_CAUSALLY_DEPENDENT: //independent
-			System.out.println("action-2 [" + action2 + "] is NOT causally dependent on action-1 [" + action1 + "] with pre-state ["+preState+"]");
-			break;
+		List<String> actions = trace.getTransitionActions();
+		
+		System.out.println("===========================");
+		for(int i=actions.size()-1;i>0;i--) {
 			
-		default:
-			break;
-		}
+			String action2 = actions.get(i);
+//			String action2 = actions.get(2);
+			
+			for(int j=i;j>0;j--) {
+				int preState = trace.getStateTransitions() != null ? trace.getStateTransitions().get(j-1) : -1;
+//			int preState = trace.getStateTransitions() != null ? trace.getStateTransitions().get(1) : -1;
+				
+				if (preState == -1 || actions.size() < 2) {
+					return;
+				}
+				
+				String action1 = actions.get(j-1);
+//				String action1 = actions.get(1);
+				
+				int dependentResult = miner.areActionsCausallyDependent(action2, action1, preState);
+				
+				switch (dependentResult) {
+				case TraceMiner.ACTIONS_CAUSAL_DEPENDENCY_ERROR:
+					System.err.println("There's an error");
+					break;
 
+				case TraceMiner.ACTIONS_CAUSALLY_DEPENDENT: //dependent
+					System.out.println("[" + action2 + "] causally depends on [" + action1 + "] with pre-state ["+preState+"]");
+					break;
+
+				case TraceMiner.ACTIONS_NOT_CAUSALLY_DEPENDENT: //independent
+					System.out.println("[" + action2 + "] does NOT causally depend on [" + action1 + "] with pre-state ["+preState+"]");
+					break;
+					
+				default:
+					break;
+				}
+			}
+			
+		}
+		
+		System.out.println("===========================\n");
 	}
 
 	protected StackPane getRectangleMenu(List<Integer> tracesIDs, String color, String state, double width,
