@@ -508,9 +508,16 @@ public class TraceViewerInSystemController {
 	@FXML
 	void searchTraces(ActionEvent e) {
 
+		// === for testing
+		findCausalDependency();
+
+		if (true)
+			return;
+
 		if (miner == null) {
 			return;
 		}
+		// ===
 
 		String txtStartState = textFieldStartStateSearch.getText();
 		String txtEndState = textFieldEndStateSearch.getText();
@@ -578,70 +585,71 @@ public class TraceViewerInSystemController {
 			// show all new traces
 			Map<Integer, GraphPath> traces = miner.getTraces(tracesIDs);
 
-			if(traces == null) {
+			if (traces == null) {
 				return;
 			}
-			
+
 			// show in thread if result is more than 300
 			int maxTraceNum = 1000000;
 
 			if (traces.size() > maxTraceNum) {
 
-				//used for multi-threading showing traces
-				
-//				int parts = traces.size() / maxTraceNum;
-//
-//				System.out.println("parts: " + parts);
-//				
-//				for (int i = 0; i < parts; i++) {
-//
-//					System.out.println("part["+i+"]: " + i*maxTraceNum +" -> " + (i*maxTraceNum+(maxTraceNum-1)));
-//					int index = i;
-//					progressIndicatorSearchTraces.setVisible(true);
-//					btnSearchTraces.setDisable(true);
-//
-//					executor.submit(new Runnable() {
-//						@Override
-//						public void run() {
-//							// TODO Auto-generated method stub
-//
-//							for (int j = 0; j < maxTraceNum; j++) {
-//								int jIndex = j;
-//								Platform.runLater(new Runnable() {
-//									
-//									@Override
-//									public void run() {
-//										// TODO Auto-generated method stub
-//										addTrace(traces.get(jIndex+ index * maxTraceNum));
-//									}
-//								});
-//								
-//								 try {
-//								 Thread.sleep(200);
-//								 } catch (InterruptedException e) {
-//								 // TODO Auto-generated catch block
-//								 e.printStackTrace();
-//								 }
-//							}
-//						}
-//					}).get();
-//
-//				}
-//				
-//
-//				// check remainder
-////				int index = parts;
-//				int remainder = traces.size() % maxTraceNum;
-//				System.out.println("remainder: " + remainder);
-//				
-//				if (remainder != 0) {
-//					for (int j = 0; j < remainder; j++) {
-//						addTrace(traces.get(j + parts * maxTraceNum));
-//					}
-//				}
-//
-//				progressIndicatorSearchTraces.setVisible(false);
-//				btnSearchTraces.setDisable(false);
+				// used for multi-threading showing traces
+
+				// int parts = traces.size() / maxTraceNum;
+				//
+				// System.out.println("parts: " + parts);
+				//
+				// for (int i = 0; i < parts; i++) {
+				//
+				// System.out.println("part["+i+"]: " + i*maxTraceNum +" -> " +
+				// (i*maxTraceNum+(maxTraceNum-1)));
+				// int index = i;
+				// progressIndicatorSearchTraces.setVisible(true);
+				// btnSearchTraces.setDisable(true);
+				//
+				// executor.submit(new Runnable() {
+				// @Override
+				// public void run() {
+				// // TODO Auto-generated method stub
+				//
+				// for (int j = 0; j < maxTraceNum; j++) {
+				// int jIndex = j;
+				// Platform.runLater(new Runnable() {
+				//
+				// @Override
+				// public void run() {
+				// // TODO Auto-generated method stub
+				// addTrace(traces.get(jIndex+ index * maxTraceNum));
+				// }
+				// });
+				//
+				// try {
+				// Thread.sleep(200);
+				// } catch (InterruptedException e) {
+				// // TODO Auto-generated catch block
+				// e.printStackTrace();
+				// }
+				// }
+				// }
+				// }).get();
+				//
+				// }
+				//
+				//
+				// // check remainder
+				//// int index = parts;
+				// int remainder = traces.size() % maxTraceNum;
+				// System.out.println("remainder: " + remainder);
+				//
+				// if (remainder != 0) {
+				// for (int j = 0; j < remainder; j++) {
+				// addTrace(traces.get(j + parts * maxTraceNum));
+				// }
+				// }
+				//
+				// progressIndicatorSearchTraces.setVisible(false);
+				// btnSearchTraces.setDisable(false);
 
 			} else {
 				for (GraphPath trace : traces.values()) {
@@ -903,7 +911,7 @@ public class TraceViewerInSystemController {
 				case MENU_ITEM_SHOW_OTHERS:
 					int sttt = getStateFromNode(stateStack);
 					int lastState = -1;
-					
+
 					if (trace != null) {
 						lastState = trace.getStateTransitions().get(trace.getStateTransitions().size() - 1);
 					}
@@ -3572,6 +3580,71 @@ public class TraceViewerInSystemController {
 		}
 	}
 
+	/**
+	 * Find if two actions are causally dependent
+	 */
+	protected void findCausalDependency() {
+
+		// it requires the bigrapher file (.big) and states folder to be first
+		// selected
+		if (miner == null || traceCell == null) {
+			return;
+		}
+
+		// ===check bigrapher file is loaded
+		if (miner.getBigraphERFile() == null) {
+			traceCell.selectBigraphERFile();
+		}
+
+		if (miner.getBigraphERFile() == null) {
+			return;
+		}
+
+		// === check states folder loaded
+		if (miner.getStatesFolder() == null) {
+			traceCell.selectStatesFolder();
+		}
+
+		if (miner.getStatesFolder() == null) {
+			return;
+		}
+
+		// == for testing: check that the 2nd action is dependent on the first
+		// action
+		if (trace == null) {
+			return;
+		}
+
+		List<String> actions = trace.getTransitionActions();
+		int preState = trace.getStateTransitions() != null ? trace.getStateTransitions().get(0) : -1;
+
+		if (preState == -1 || actions.size() < 2) {
+			return;
+		}
+
+		String action1 = actions.get(0);
+		String action2 = actions.get(0);
+
+		int dependentResult = miner.areActionsCausallyDependent(action2, action1, preState);
+
+		
+		switch (dependentResult) {
+		case TraceMiner.ACTIONS_CAUSAL_DEPENDENCY_ERROR:
+			System.err.println("There's an error");
+			break;
+
+		case TraceMiner.ACTIONS_CAUSALLY_DEPENDENT: //dependent
+			System.out.println("action-2 [" + action2 + "] is causally dependent on action-1 [" + action1 + "] with pre-state ["+preState+"]");
+			break;
+
+		case TraceMiner.ACTIONS_NOT_CAUSALLY_DEPENDENT: //independent
+			System.out.println("action-2 [" + action2 + "] is NOT causally dependent on action-1 [" + action1 + "] with pre-state ["+preState+"]");
+		default:
+			break;
+		}
+
+	}
+
 	protected StackPane getRectangleMenu(List<Integer> tracesIDs, String color, String state, double width,
 			double height) {
 
@@ -4183,7 +4256,7 @@ public class TraceViewerInSystemController {
 
 		Label lblAction = new Label(actionName);
 		lblAction.setStyle(ACTION_NAME_STYLE);
-		
+
 		lblAction.setOnMouseClicked(e -> {
 			if (traceCell != null && trace != null) {
 				traceCell.showReact(actionName);

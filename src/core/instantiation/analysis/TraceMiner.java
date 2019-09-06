@@ -4475,12 +4475,15 @@ public class TraceMiner {
 		// === match the action precondition to the state
 		Matcher matcher = new Matcher();
 
+		System.out.println("+++++++++\nCondition: " + actionPre+"\n+++++++++\n");
+		System.out.println("+++++++++\nState: " + preStateBig +"\n+++++++++\n");
+		
 		if (matcher.match(preStateBig, actionPre).iterator().hasNext()) {
-			// they match
-			return ACTIONS_CAUSALLY_DEPENDENT;
+			// a match means that there's no dependency
+			return ACTIONS_NOT_CAUSALLY_DEPENDENT;
 		}
 
-		return ACTIONS_NOT_CAUSALLY_DEPENDENT;
+		return ACTIONS_CAUSALLY_DEPENDENT;
 	}
 
 	public Bigraph loadState(int stateID) {
