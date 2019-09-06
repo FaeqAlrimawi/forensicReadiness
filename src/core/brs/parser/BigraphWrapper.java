@@ -29,16 +29,17 @@ import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
  * @author Faeq
  *
  */
-public class BigraphWrapper implements Serializable{
+public class BigraphWrapper implements Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 5880531546378390072L;
 
-	//determines if this Bigraph represents a condition (true) or a state (false)
+	// determines if this Bigraph represents a condition (true) or a state
+	// (false)
 	private boolean isCondition;
-	
+
 	// given bigraph expxression in BigraphER syntax
 	private String bigraphERString;
 
@@ -50,13 +51,13 @@ public class BigraphWrapper implements Serializable{
 	// generated BigraphExpression object
 	private BigraphExpression bigraphExpression;
 
-	//Bigraph object representation of this
+	// Bigraph object representation of this
 	private Bigraph bigraphObj;
 
-	//original state that this bigraphWrapper would refer to.
-	//used when a trace is applied to this
+	// original state that this bigraphWrapper would refer to.
+	// used when a trace is applied to this
 	private int OriginalState;
-	
+
 	// used to set the number of automatically created outernames for the
 	// signature of a Bigraph Object
 	protected int maxOuterNameNumber = 10;
@@ -94,11 +95,14 @@ public class BigraphWrapper implements Serializable{
 	// does not)
 	private Map<String, Boolean> entitySiteMap;
 
-	//number of root ids (sites) e.g., Actor || id || id
+	// number of root ids (sites) e.g., Actor || id || id
 	int numberOfRootSites = 0;
-	
+
 	int numOfRoots = 0;
-	
+
+	// signature
+	Signature signature;
+
 	public BigraphWrapper() {
 		entities = new LinkedList<String>();
 		connections = new LinkedList<String>();
@@ -112,26 +116,25 @@ public class BigraphWrapper implements Serializable{
 
 	}
 
-	
+	public void setSignature(Signature sig) {
+		signature = sig;
+	}
+
 	public int getOriginalState() {
 		return OriginalState;
 	}
-
 
 	public void setOriginalState(int originalState) {
 		OriginalState = originalState;
 	}
 
-
 	public boolean isCondition() {
 		return isCondition;
 	}
 
-
 	public void setCondition(boolean isCondition) {
 		this.isCondition = isCondition;
 	}
-
 
 	public BigraphExpression getBigraphExpression() {
 		return bigraphExpression;
@@ -229,7 +232,6 @@ public class BigraphWrapper implements Serializable{
 		this.entitySiteMap = entitySiteMap;
 	}
 
-	
 	public int getNumberOfRootSites() {
 		return numberOfRootSites;
 	}
@@ -239,16 +241,46 @@ public class BigraphWrapper implements Serializable{
 	}
 
 	public void incrementRootSites() {
-		
+
 		numberOfRootSites++;
 	}
-	
+
+	/**
+	 * returns a Bigraph representation of this object. If not created it will
+	 * create it and then return it
+	 * 
+	 * @param isGrounded
+	 *            If true then the representation contains no sites. If false it
+	 *            means it can contain sites
+	 * @param sig
+	 *            Signature
+	 * @return Bigraph object
+	 */
+	public Bigraph getBigraphObject(boolean isGrounded, Signature sig) {
+
+		if (bigraphObj == null) {
+			if (bigraphExpression != null) {
+				// bigraphObj = bigraphExpression.createBigraph(false);
+				bigraphObj = createBigraph(isGrounded, sig);
+			}
+		}
+
+		return bigraphObj;
+	}
+
+	/**
+	 * returns a Bigraph representation of this object. If not created it will
+	 * create it and then return it. By default the Bigraph is not grounded and
+	 * the default signature is used
+	 * 
+	 * @return Bigraph object
+	 */
 	public Bigraph getBigraphObject() {
 
 		if (bigraphObj == null) {
 			if (bigraphExpression != null) {
 				// bigraphObj = bigraphExpression.createBigraph(false);
-				bigraphObj = createBigraph(false, null);
+				bigraphObj = createBigraph(false, signature);
 			}
 		}
 
@@ -262,14 +294,16 @@ public class BigraphWrapper implements Serializable{
 
 	public Bigraph createBigraph(boolean isGround, Signature sig) {
 
+		signature = sig;
+
 		BigraphNode node;
 		Map<String, BigraphNode> nodes = new HashMap<String, BigraphNode>();
 		// SignatureBuilder sigBuilder = new SignatureBuilder();
 
-//		System.out.println(entities);
-//		System.out.println(roots);
-//		System.out.println(sig);
-//		System.out.println(containedEntitiesMap);
+		// System.out.println(entities);
+		// System.out.println(roots);
+		// System.out.println(sig);
+		// System.out.println(containedEntitiesMap);
 		for (Entity ent : controlMap.keySet()) {
 
 			String entityName = controlMap.get(ent);
@@ -292,10 +326,10 @@ public class BigraphWrapper implements Serializable{
 			numOfRoots++;
 
 			// add control (currently same as the name of the entity)
-//			System.out.println("-root: " + entityName);
+			// System.out.println("-root: " + entityName);
 			if (controlMap.containsKey(ent)) {
 				node.setControl(ent.getName());
-//				System.out.println("\tControl: " + ent.getName());
+				// System.out.println("\tControl: " + ent.getName());
 			} else {
 				// if the root is an extra one, then create BigraphRoot as an
 				// extra entity to represent it
@@ -316,28 +350,33 @@ public class BigraphWrapper implements Serializable{
 			// sigBuilder.add(ent.getName(), true, maxOuterNameNumber);
 
 			addChildrenNew(node, containedEntitiesMap.get(entityName), nodes, isGround);
+			
+			if (!isGround) {
+				// add site
+				// by defualt it has site
+				node.setSite(true);
+			}
 		}
 
-		//check roots
-		for(String root : roots) {
-			if(!entities.contains(root)) {
-				//if root, then add all contained entities with root parent
+		// check roots
+		for (String root : roots) {
+			if (!entities.contains(root)) {
+				// if root, then add all contained entities with root parent
 				addChildrenNew(null, containedEntitiesMap.get(root), nodes, isGround);
 				numOfRoots++;
 			}
 		}
-		
-//		System.out.println("-num of roots: " + numOfRoots);
-//		System.out.println("-actual num of roots: " + roots.size());
+
+		// System.out.println("-num of roots: " + numOfRoots);
+		// System.out.println("-actual num of roots: " + roots.size());
 		Signature signature;
-		
-		if(sig == null) {
-			signature = createBigraphSignature();	
+
+		if (sig == null) {
+			signature = createBigraphSignature();
 		} else {
 			signature = sig;
 		}
-		
-		
+
 		return BuildBigraph(nodes, signature);
 
 	}
@@ -550,7 +589,7 @@ public class BigraphWrapper implements Serializable{
 
 		// if the parent is a root
 		if (node.isParentRoot()) { // if the parent is a root
-//			System.out.println(node.getId());
+			// System.out.println(node.getId());
 			Node n = biBuilder.addNode(node.getControl(), libBigRoots.get(node.getParentRoot()), names);
 
 			nodes.put(node.getId(), n);
@@ -572,7 +611,8 @@ public class BigraphWrapper implements Serializable{
 		// the names variable
 		// if the number of outernames defined are less than in the signature,
 		// then the rest of outernames will be defined as links (i.e. XX:e)
-//		System.out.println("*node: " + node.getId() + " ctrl: " + node.getControl());
+		// System.out.println("*node: " + node.getId() + " ctrl: " +
+		// node.getControl());
 		Node n = biBuilder.addNode(node.getControl(),
 				createNode(node.getParent(), biBuilder, libBigRoots, outerNames, nodes), names);
 
@@ -581,38 +621,39 @@ public class BigraphWrapper implements Serializable{
 
 	}
 
-//	protected void addChildren(BigraphNode parent, EList<Entity> entities, Map<String, BigraphNode> nodes,
-//			boolean isGround) {
-//
-//		BigraphNode node;
-//
-//		for (Entity entity : entities) {
-//			node = new BigraphNode();
-//
-//			node.setId(entity.getName());
-//
-//			if (!isGround) {
-//				// add site
-//				node.setSite(entity.getSite() != null ? true : false);
-//			}
-//
-//			// add parent
-//			node.setParent(parent);
-//
-//			// add control (currently same as the name of the entity
-//			node.setControl(entity.getName());
-//
-//			// add connectivity (outernames)
-//			if (entityConnectivityMap.get(entity) != null) {
-//				for (Connectivity con : entity.getConnectivity()) {
-//					node.addOuterName(con.getName(), con.isIsClosed());
-//				}
-//			}
-//			nodes.put(node.getId(), node);
-//
-//			addChildren(node, entity.getEntity(), nodes, isGround);
-//		}
-//	}
+	// protected void addChildren(BigraphNode parent, EList<Entity> entities,
+	// Map<String, BigraphNode> nodes,
+	// boolean isGround) {
+	//
+	// BigraphNode node;
+	//
+	// for (Entity entity : entities) {
+	// node = new BigraphNode();
+	//
+	// node.setId(entity.getName());
+	//
+	// if (!isGround) {
+	// // add site
+	// node.setSite(entity.getSite() != null ? true : false);
+	// }
+	//
+	// // add parent
+	// node.setParent(parent);
+	//
+	// // add control (currently same as the name of the entity
+	// node.setControl(entity.getName());
+	//
+	// // add connectivity (outernames)
+	// if (entityConnectivityMap.get(entity) != null) {
+	// for (Connectivity con : entity.getConnectivity()) {
+	// node.addOuterName(con.getName(), con.isIsClosed());
+	// }
+	// }
+	// nodes.put(node.getId(), node);
+	//
+	// addChildren(node, entity.getEntity(), nodes, isGround);
+	// }
+	// }
 
 	protected void addChildrenNew(BigraphNode parent, List<String> entities, Map<String, BigraphNode> nodes,
 			boolean isGround) {
@@ -624,15 +665,15 @@ public class BigraphWrapper implements Serializable{
 		}
 
 		boolean isFound = false;
-//		int numRoots = numOfRoots;
-		
-//		if(parent== null) {
-//			numRoots++;
-//			numOfRoots++;
-//		}
-		
+		// int numRoots = numOfRoots;
+
+		// if(parent== null) {
+		// numRoots++;
+		// numOfRoots++;
+		// }
+
 		for (String entity : entities) {
-		
+
 			isFound = false;
 			node = new BigraphNode();
 
@@ -645,15 +686,14 @@ public class BigraphWrapper implements Serializable{
 			}
 
 			// add parent
-			if(parent!=null) {
-				node.setParent(parent);	
+			if (parent != null) {
+				node.setParent(parent);
 			} else {
 				node.setParentRoot(numOfRoots);
-//				numOfRoots++;
+				// numOfRoots++;
 			}
-			
 
-			// add control (currently same as the name of the entity			
+			// add control (currently same as the name of the entity
 			node.setControl(getControl(entity));
 
 			// add connectivity (outernames)
@@ -662,7 +702,7 @@ public class BigraphWrapper implements Serializable{
 					node.addOuterName(con, false);
 				}
 			}
-			
+
 			nodes.put(node.getId(), node);
 
 			addChildrenNew(node, containedEntitiesMap.get(entity), nodes, isGround);
@@ -710,7 +750,7 @@ public class BigraphWrapper implements Serializable{
 
 		if (modifiedBigraphERString == null || modifiedBigraphERString.isEmpty()) {
 			modifiedBigraphERString = generateModifiedBigraphERState();
-//			return;
+			// return;
 		}
 
 		// replace controls with equivlent entity names used
@@ -741,10 +781,10 @@ public class BigraphWrapper implements Serializable{
 		//
 		// if(t)
 		// }
-		
+
 		return bigrapher;
 	}
-	
+
 	protected String getControl(String entityName) {
 
 		for (Entry<Entity, String> entry : controlMap.entrySet()) {
@@ -831,9 +871,9 @@ public class BigraphWrapper implements Serializable{
 			}
 
 		}
-		
-		//add root sites
-		for(int i=0;i<numberOfRootSites;i++) {
+
+		// add root sites
+		for (int i = 0; i < numberOfRootSites; i++) {
 			bldr.append(" || id");
 		}
 
@@ -878,17 +918,17 @@ public class BigraphWrapper implements Serializable{
 			if (child != null && !child.isEmpty()) {
 
 				bldr.append(".(");
-				
-				//add contained entities
+
+				// add contained entities
 				addChildren(entity, child, bldr);
 
-				//add site as entity juxtaposition i.e. | id
+				// add site as entity juxtaposition i.e. | id
 				Boolean hasSite = entitySiteMap.get(entity);
 
 				if (hasSite != null && hasSite.booleanValue()) {
 					bldr.append(" | id");
 				}
-				
+
 				bldr.append(")");
 			}
 

@@ -240,20 +240,6 @@ hallway_general | Room{hallway}.(visitor | id) || connection_to_hallway || Rules
 hallway_visitor | Room{hallway}.id  || connection_to_hallway || RulesKeywords.(id)
 ;
 
-#employee enter room action
-react employee_enter_room_during_working_hours = 
-hallway_employee | room_general || connection_to_hallway || context_working_hours || RulesKeywords.(EnterRoom | id)
-->
-hallway_general | Room{hallway}.(employee | id) || connection_to_hallway || context_working_hours  || RulesKeywords.(id)
-;
-
-#exit room action
-react employee_exit_room = 
-hallway_general | Room{hallway}.(employee | id) || connection_to_hallway || RulesKeywords.(ExitRoom | id)
-->
-hallway_employee | Room{hallway}.id  || connection_to_hallway || RulesKeywords.(id)
-;
-
 #connect to desktop
 react connect_to_desktop = 
 visitor_laptop | Desktop{ipNet} || RulesKeywords.(ConnectIPDevice | id)
@@ -450,8 +436,7 @@ begin brs
   rules = 
   [ 
   {
-    enter_room_during_working_hours, exit_room
-  , employee_enter_room_during_working_hours, employee_exit_room    
+    enter_room_during_working_hours, exit_room  
   , connect_to_desktop, disconnect_from_desktop
   , connect_to_smartlight, disconnect_from_smartlight
   , connect_to_hvac, disconnect_from_hvac

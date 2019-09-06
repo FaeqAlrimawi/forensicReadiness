@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
@@ -66,19 +65,18 @@ import ie.lero.spare.franalyser.utility.TransitionSystem;
 //import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator;
+import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator.InstancesSaver;
 import ie.lero.spare.pattern_instantiation.LabelExtractor;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
 import it.uniud.mads.jlibbig.core.std.Handle;
 import it.uniud.mads.jlibbig.core.std.InnerName;
-import it.uniud.mads.jlibbig.core.std.Match;
 import it.uniud.mads.jlibbig.core.std.Matcher;
 import it.uniud.mads.jlibbig.core.std.Node;
 import it.uniud.mads.jlibbig.core.std.OuterName;
 import it.uniud.mads.jlibbig.core.std.Root;
 import it.uniud.mads.jlibbig.core.std.Signature;
 import it.uniud.mads.jlibbig.core.std.Site;
-import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator.InstancesSaver;
 
 public class TraceMiner {
 
@@ -222,6 +220,9 @@ public class TraceMiner {
 
 	private URL defaultOutputFolder = getClass().getResource("../../../resources/example");
 
+	//temp storage for loaded traces
+	Map<Integer, Bigraph> loadedStateBigraphs;
+	
 	public TraceMiner() {
 
 		tracesActions = new HashMap<String, Integer>();
@@ -239,6 +240,8 @@ public class TraceMiner {
 		claSPTraceIDs = new LinkedList<Integer>();
 		customeFilteringTraceIDs = new LinkedList<Integer>();
 
+		loadedStateBigraphs = new HashMap<Integer, Bigraph>();
+		
 		tracesSaved = new HashMap<Integer, String>();
 
 		numberOfStates = 10000;
@@ -4450,9 +4453,10 @@ public class TraceMiner {
 			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
 		}
 
+		
 		// === get Bigraph representation of the precondition of action
 		Bigraph actionPre = actionWrapper.getPrecondition() != null
-				? actionWrapper.getPrecondition().createBigraph(false, brsWrapper.getSignature()) : null;
+				? actionWrapper.getPrecondition().getBigraphObject(false, brsWrapper.getSignature()) : null;
 
 		if (actionPre == null) {
 			System.err.println("precondition of the given action [" + action + "] is NULL");
@@ -4472,11 +4476,14 @@ public class TraceMiner {
 			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
 		}
 
+		//add to temp storage
+//		addBigraphStateToTemp(preState, preStateBig);
+		
 		// === match the action precondition to the state
 		Matcher matcher = new Matcher();
 
-		System.out.println("+++++++++\nCondition: " + actionPre+"\n+++++++++\n");
-		System.out.println("+++++++++\nState: " + preStateBig +"\n+++++++++\n");
+//		System.out.println("+++++++++\nCondition: " + actionPre+"\n+++++++++\n");
+//		System.out.println("+++++++++\nState: " + preStateBig +"\n+++++++++\n");
 		
 		if (matcher.match(preStateBig, actionPre).iterator().hasNext()) {
 			// a match means that there's no dependency
@@ -4486,6 +4493,27 @@ public class TraceMiner {
 		return ACTIONS_CAUSALLY_DEPENDENT;
 	}
 
+//	protected void addBigraphStateToTemp(int state, Bigraph big) {
+//		
+//		if(loadedStateBigraphs.containsKey(state)) {
+//			return;
+//		}
+//		
+//		loadedStateBigraphs.put(state, big);
+//		
+//		//check size
+//		if(loadedStateBigraphs.size() > MAX_TEMP_STORAGE_SIZE) {
+//			//remove 4 states
+//			Random rand = new Random();
+//			int index = rand.nextInt(loadedStateBigraphs.size());
+//			
+//			for(int i =index;i<loadedStateBigraphs.size();i++) {
+//				if(i )
+//			}
+//			
+//		}
+//	}
+	
 	public Bigraph loadState(int stateID) {
 
 		// get preAction's precondition State as Bigraph

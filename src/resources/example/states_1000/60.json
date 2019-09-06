@@ -27,7 +27,7 @@
     {
       "node_id": 3,
       "control": {
-        "ctrl_name": "Employee",
+        "ctrl_name": "Visitor",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -35,7 +35,7 @@
     {
       "node_id": 4,
       "control": {
-        "ctrl_name": "Room",
+        "ctrl_name": "Laptop",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -43,7 +43,7 @@
     {
       "node_id": 5,
       "control": {
-        "ctrl_name": "PhysicalConnection",
+        "ctrl_name": "HVAC",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -51,7 +51,7 @@
     {
       "node_id": 6,
       "control": {
-        "ctrl_name": "NoCard",
+        "ctrl_name": "RulesKeywords",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -59,15 +59,15 @@
     {
       "node_id": 7,
       "control": {
-        "ctrl_name": "RulesKeywords",
+        "ctrl_name": "Room",
         "ctrl_params": [],
-        "ctrl_arity": 0
+        "ctrl_arity": 1
       }
     },
     {
       "node_id": 8,
       "control": {
-        "ctrl_name": "SmartTV",
+        "ctrl_name": "PhysicalConnection",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -75,7 +75,7 @@
     {
       "node_id": 9,
       "control": {
-        "ctrl_name": "Status_On",
+        "ctrl_name": "NoCard",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -531,7 +531,7 @@
     {
       "node_id": 66,
       "control": {
-        "ctrl_name": "SmartLight",
+        "ctrl_name": "Room",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -539,7 +539,7 @@
     {
       "node_id": 67,
       "control": {
-        "ctrl_name": "HVAC",
+        "ctrl_name": "SmartLight",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -547,23 +547,23 @@
     {
       "node_id": 68,
       "control": {
+        "ctrl_name": "HVAC",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 69,
+      "control": {
         "ctrl_name": "Status_On",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
     },
     {
-      "node_id": 69,
-      "control": {
-        "ctrl_name": "Laptop",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
       "node_id": 70,
       "control": {
-        "ctrl_name": "Camera",
+        "ctrl_name": "Employee",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -571,23 +571,23 @@
     {
       "node_id": 71,
       "control": {
-        "ctrl_name": "Status_Off",
+        "ctrl_name": "Laptop",
         "ctrl_params": [],
-        "ctrl_arity": 0
+        "ctrl_arity": 1
       }
     },
     {
       "node_id": 72,
       "control": {
-        "ctrl_name": "Microphone",
+        "ctrl_name": "SmartTV",
         "ctrl_params": [],
-        "ctrl_arity": 0
+        "ctrl_arity": 1
       }
     },
     {
       "node_id": 73,
       "control": {
-        "ctrl_name": "Status_Off",
+        "ctrl_name": "Camera",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -595,47 +595,47 @@
     {
       "node_id": 74,
       "control": {
+        "ctrl_name": "Status_Off",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 75,
+      "control": {
+        "ctrl_name": "Microphone",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 76,
+      "control": {
+        "ctrl_name": "Status_Off",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 77,
+      "control": {
+        "ctrl_name": "Status_Off",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 78,
+      "control": {
         "ctrl_name": "Server",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
     },
     {
-      "node_id": 75,
-      "control": {
-        "ctrl_name": "Room",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
-      "node_id": 76,
-      "control": {
-        "ctrl_name": "SmartLight",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
-      "node_id": 77,
-      "control": {
-        "ctrl_name": "HVAC",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
-      "node_id": 78,
-      "control": {
-        "ctrl_name": "Status_On",
-        "ctrl_params": [],
-        "ctrl_arity": 0
-      }
-    },
-    {
       "node_id": 79,
       "control": {
-        "ctrl_name": "Laptop",
+        "ctrl_name": "Room",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -643,7 +643,7 @@
     {
       "node_id": 80,
       "control": {
-        "ctrl_name": "Server",
+        "ctrl_name": "SmartLight",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -651,7 +651,7 @@
     {
       "node_id": 81,
       "control": {
-        "ctrl_name": "Room",
+        "ctrl_name": "HVAC",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -659,15 +659,15 @@
     {
       "node_id": 82,
       "control": {
-        "ctrl_name": "SmartLight",
+        "ctrl_name": "Status_On",
         "ctrl_params": [],
-        "ctrl_arity": 1
+        "ctrl_arity": 0
       }
     },
     {
       "node_id": 83,
       "control": {
-        "ctrl_name": "HVAC",
+        "ctrl_name": "Laptop",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -675,9 +675,9 @@
     {
       "node_id": 84,
       "control": {
-        "ctrl_name": "Status_On",
+        "ctrl_name": "Server",
         "ctrl_params": [],
-        "ctrl_arity": 0
+        "ctrl_arity": 1
       }
     },
     {
@@ -787,7 +787,7 @@
     {
       "node_id": 98,
       "control": {
-        "ctrl_name": "Elevator",
+        "ctrl_name": "SmartLight",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -795,7 +795,7 @@
     {
       "node_id": 99,
       "control": {
-        "ctrl_name": "CardReader",
+        "ctrl_name": "HVAC",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -803,7 +803,7 @@
     {
       "node_id": 100,
       "control": {
-        "ctrl_name": "Visitor",
+        "ctrl_name": "Status_On",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -811,7 +811,7 @@
     {
       "node_id": 101,
       "control": {
-        "ctrl_name": "Laptop",
+        "ctrl_name": "Elevator",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -819,23 +819,23 @@
     {
       "node_id": 102,
       "control": {
+        "ctrl_name": "CardReader",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 103,
+      "control": {
         "ctrl_name": "Malware",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
     },
     {
-      "node_id": 103,
-      "control": {
-        "ctrl_name": "Room",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
       "node_id": 104,
       "control": {
-        "ctrl_name": "SmartLight",
+        "ctrl_name": "Room",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -843,7 +843,7 @@
     {
       "node_id": 105,
       "control": {
-        "ctrl_name": "HVAC",
+        "ctrl_name": "SmartLight",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -851,13 +851,21 @@
     {
       "node_id": 106,
       "control": {
+        "ctrl_name": "HVAC",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 107,
+      "control": {
         "ctrl_name": "Status_On",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
     },
     {
-      "node_id": 107,
+      "node_id": 108,
       "control": {
         "ctrl_name": "Room",
         "ctrl_params": [],
@@ -865,17 +873,9 @@
       }
     },
     {
-      "node_id": 108,
-      "control": {
-        "ctrl_name": "SmartLight",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
       "node_id": 109,
       "control": {
-        "ctrl_name": "HVAC",
+        "ctrl_name": "SmartLight",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -883,13 +883,21 @@
     {
       "node_id": 110,
       "control": {
+        "ctrl_name": "HVAC",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 111,
+      "control": {
         "ctrl_name": "Status_On",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
     },
     {
-      "node_id": 111,
+      "node_id": 112,
       "control": {
         "ctrl_name": "CCTV",
         "ctrl_params": [],
@@ -897,17 +905,9 @@
       }
     },
     {
-      "node_id": 112,
-      "control": {
-        "ctrl_name": "SmartLight",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
       "node_id": 113,
       "control": {
-        "ctrl_name": "HVAC",
+        "ctrl_name": "SmartLight",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -1003,7 +1003,7 @@
     {
       "node_id": 125,
       "control": {
-        "ctrl_name": "ConnectBusDevice",
+        "ctrl_name": "DisconnectBusDevice",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1011,7 +1011,7 @@
     {
       "node_id": 126,
       "control": {
-        "ctrl_name": "DisconnectBusDevice",
+        "ctrl_name": "SendData",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1019,7 +1019,7 @@
     {
       "node_id": 127,
       "control": {
-        "ctrl_name": "SendData",
+        "ctrl_name": "SendMalware",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1027,7 +1027,7 @@
     {
       "node_id": 128,
       "control": {
-        "ctrl_name": "SendMalware",
+        "ctrl_name": "DisableHVAC",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1035,7 +1035,7 @@
     {
       "node_id": 129,
       "control": {
-        "ctrl_name": "DisableHVAC",
+        "ctrl_name": "EnterRoomWithoutCardReader",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1043,7 +1043,7 @@
     {
       "node_id": 130,
       "control": {
-        "ctrl_name": "EnterRoomWithoutCardReader",
+        "ctrl_name": "ChangeAccessToCardRequired",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1051,7 +1051,7 @@
     {
       "node_id": 131,
       "control": {
-        "ctrl_name": "ChangeAccessToCardRequired",
+        "ctrl_name": "ChangeAccessToCardNotRequired",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1059,7 +1059,7 @@
     {
       "node_id": 132,
       "control": {
-        "ctrl_name": "ChangeAccessToCardNotRequired",
+        "ctrl_name": "ChangeContextToOutSideWorkingHours",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1067,7 +1067,7 @@
     {
       "node_id": 133,
       "control": {
-        "ctrl_name": "ChangeContextToOutSideWorkingHours",
+        "ctrl_name": "ChangeContextToWorkingHours",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1075,7 +1075,7 @@
     {
       "node_id": 134,
       "control": {
-        "ctrl_name": "ChangeContextToWorkingHours",
+        "ctrl_name": "TurnOnHVAC",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1083,7 +1083,7 @@
     {
       "node_id": 135,
       "control": {
-        "ctrl_name": "TurnOnHVAC",
+        "ctrl_name": "TurnOffHVAC",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1091,7 +1091,7 @@
     {
       "node_id": 136,
       "control": {
-        "ctrl_name": "TurnOffHVAC",
+        "ctrl_name": "TurnOnSmartTV",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1164,7 +1164,7 @@
       },
       {
         "source": 1,
-        "target": 5
+        "target": 8
       },
       {
         "source": 1,
@@ -1176,7 +1176,7 @@
       },
       {
         "source": 3,
-        "target": 7
+        "target": 6
       }
     ],
     "rs": [],
@@ -1199,7 +1199,7 @@
       },
       {
         "source": 1,
-        "target": 4
+        "target": 7
       },
       {
         "source": 1,
@@ -1235,11 +1235,11 @@
       },
       {
         "source": 1,
-        "target": 75
+        "target": 66
       },
       {
         "source": 1,
-        "target": 81
+        "target": 79
       },
       {
         "source": 1,
@@ -1259,11 +1259,11 @@
       },
       {
         "source": 1,
-        "target": 103
+        "target": 104
       },
       {
         "source": 1,
-        "target": 107
+        "target": 108
       },
       {
         "source": 2,
@@ -1271,7 +1271,7 @@
       },
       {
         "source": 2,
-        "target": 111
+        "target": 5
       },
       {
         "source": 2,
@@ -1282,128 +1282,116 @@
         "target": 113
       },
       {
-        "source": 4,
-        "target": 8
+        "source": 3,
+        "target": 4
       },
       {
         "source": 4,
-        "target": 66
-      },
-      {
-        "source": 4,
-        "target": 67
-      },
-      {
-        "source": 4,
-        "target": 69
-      },
-      {
-        "source": 4,
-        "target": 74
+        "target": 103
       },
       {
         "source": 5,
-        "target": 6
+        "target": 114
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 122
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 123
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 124
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 125
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 126
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 127
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 128
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 129
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 130
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 131
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 132
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 133
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 134
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 135
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 136
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 137
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 138
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 139
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 140
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 141
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 142
       },
       {
-        "source": 7,
+        "source": 6,
         "target": 143
+      },
+      {
+        "source": 7,
+        "target": 101
+      },
+      {
+        "source": 7,
+        "target": 102
       },
       {
         "source": 8,
         "target": 9
-      },
-      {
-        "source": 8,
-        "target": 70
-      },
-      {
-        "source": 8,
-        "target": 72
       },
       {
         "source": 10,
@@ -1598,48 +1586,72 @@
         "target": 62
       },
       {
-        "source": 67,
+        "source": 66,
+        "target": 67
+      },
+      {
+        "source": 66,
         "target": 68
       },
       {
-        "source": 70,
+        "source": 66,
+        "target": 70
+      },
+      {
+        "source": 66,
         "target": 71
+      },
+      {
+        "source": 66,
+        "target": 72
+      },
+      {
+        "source": 66,
+        "target": 78
+      },
+      {
+        "source": 68,
+        "target": 69
       },
       {
         "source": 72,
         "target": 73
       },
       {
+        "source": 72,
+        "target": 75
+      },
+      {
+        "source": 72,
+        "target": 77
+      },
+      {
+        "source": 73,
+        "target": 74
+      },
+      {
         "source": 75,
         "target": 76
       },
       {
-        "source": 75,
-        "target": 77
-      },
-      {
-        "source": 75,
-        "target": 79
-      },
-      {
-        "source": 75,
+        "source": 79,
         "target": 80
       },
       {
-        "source": 77,
-        "target": 78
+        "source": 79,
+        "target": 81
+      },
+      {
+        "source": 79,
+        "target": 83
+      },
+      {
+        "source": 79,
+        "target": 84
       },
       {
         "source": 81,
         "target": 82
-      },
-      {
-        "source": 81,
-        "target": 83
-      },
-      {
-        "source": 83,
-        "target": 84
       },
       {
         "source": 85,
@@ -1686,44 +1698,32 @@
         "target": 99
       },
       {
-        "source": 97,
+        "source": 99,
         "target": 100
       },
       {
-        "source": 100,
-        "target": 101
-      },
-      {
-        "source": 101,
-        "target": 102
-      },
-      {
-        "source": 103,
-        "target": 104
-      },
-      {
-        "source": 103,
+        "source": 104,
         "target": 105
       },
       {
-        "source": 105,
+        "source": 104,
         "target": 106
       },
       {
-        "source": 107,
-        "target": 108
+        "source": 106,
+        "target": 107
       },
       {
-        "source": 107,
+        "source": 108,
         "target": 109
       },
       {
-        "source": 109,
+        "source": 108,
         "target": 110
       },
       {
-        "source": 113,
-        "target": 114
+        "source": 110,
+        "target": 111
       },
       {
         "source": 115,
@@ -1746,7 +1746,7 @@
       "outer": [],
       "ports": [
         {
-          "node_id": 101,
+          "node_id": 5,
           "port_arity": 1
         }
       ]
@@ -1759,6 +1759,10 @@
         }
       ],
       "ports": [
+        {
+          "node_id": 4,
+          "port_arity": 1
+        },
         {
           "node_id": 11,
           "port_arity": 1
@@ -1824,23 +1828,15 @@
           "port_arity": 1
         },
         {
-          "node_id": 66,
-          "port_arity": 1
-        },
-        {
           "node_id": 67,
           "port_arity": 1
         },
         {
-          "node_id": 74,
+          "node_id": 68,
           "port_arity": 1
         },
         {
-          "node_id": 76,
-          "port_arity": 1
-        },
-        {
-          "node_id": 77,
+          "node_id": 78,
           "port_arity": 1
         },
         {
@@ -1848,11 +1844,11 @@
           "port_arity": 1
         },
         {
-          "node_id": 82,
+          "node_id": 81,
           "port_arity": 1
         },
         {
-          "node_id": 83,
+          "node_id": 84,
           "port_arity": 1
         },
         {
@@ -1880,11 +1876,15 @@
           "port_arity": 1
         },
         {
+          "node_id": 98,
+          "port_arity": 1
+        },
+        {
           "node_id": 99,
           "port_arity": 1
         },
         {
-          "node_id": 104,
+          "node_id": 102,
           "port_arity": 1
         },
         {
@@ -1892,7 +1892,7 @@
           "port_arity": 1
         },
         {
-          "node_id": 108,
+          "node_id": 106,
           "port_arity": 1
         },
         {
@@ -1900,7 +1900,7 @@
           "port_arity": 1
         },
         {
-          "node_id": 111,
+          "node_id": 110,
           "port_arity": 1
         },
         {
@@ -1940,7 +1940,7 @@
       ],
       "ports": [
         {
-          "node_id": 98,
+          "node_id": 101,
           "port_arity": 1
         }
       ]
@@ -1958,11 +1958,11 @@
           "port_arity": 1
         },
         {
-          "node_id": 4,
+          "node_id": 7,
           "port_arity": 1
         },
         {
-          "node_id": 5,
+          "node_id": 8,
           "port_arity": 1
         },
         {
@@ -1998,11 +1998,11 @@
           "port_arity": 1
         },
         {
-          "node_id": 75,
+          "node_id": 66,
           "port_arity": 1
         },
         {
-          "node_id": 81,
+          "node_id": 79,
           "port_arity": 1
         },
         {
@@ -2022,11 +2022,11 @@
           "port_arity": 1
         },
         {
-          "node_id": 103,
+          "node_id": 104,
           "port_arity": 1
         },
         {
-          "node_id": 107,
+          "node_id": 108,
           "port_arity": 1
         },
         {
@@ -2043,10 +2043,6 @@
         }
       ],
       "ports": [
-        {
-          "node_id": 8,
-          "port_arity": 1
-        },
         {
           "node_id": 14,
           "port_arity": 1
@@ -2112,11 +2108,15 @@
           "port_arity": 1
         },
         {
-          "node_id": 69,
+          "node_id": 71,
           "port_arity": 1
         },
         {
-          "node_id": 79,
+          "node_id": 72,
+          "port_arity": 1
+        },
+        {
+          "node_id": 83,
           "port_arity": 1
         },
         {

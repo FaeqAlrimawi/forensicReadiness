@@ -19,7 +19,7 @@
     {
       "node_id": 2,
       "control": {
-        "ctrl_name": "Hallway",
+        "ctrl_name": "Room",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -27,7 +27,7 @@
     {
       "node_id": 3,
       "control": {
-        "ctrl_name": "Visitor",
+        "ctrl_name": "Employee",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -35,7 +35,7 @@
     {
       "node_id": 4,
       "control": {
-        "ctrl_name": "Laptop",
+        "ctrl_name": "SmartTV",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -43,9 +43,9 @@
     {
       "node_id": 5,
       "control": {
-        "ctrl_name": "HVAC",
+        "ctrl_name": "Status_On",
         "ctrl_params": [],
-        "ctrl_arity": 1
+        "ctrl_arity": 0
       }
     },
     {
@@ -67,7 +67,7 @@
     {
       "node_id": 8,
       "control": {
-        "ctrl_name": "PhysicalConnection",
+        "ctrl_name": "HVAC",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -75,7 +75,7 @@
     {
       "node_id": 9,
       "control": {
-        "ctrl_name": "NoCard",
+        "ctrl_name": "Status_Off",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -531,7 +531,7 @@
     {
       "node_id": 66,
       "control": {
-        "ctrl_name": "Room",
+        "ctrl_name": "SmartLight",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -539,7 +539,7 @@
     {
       "node_id": 67,
       "control": {
-        "ctrl_name": "SmartLight",
+        "ctrl_name": "HVAC",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -547,29 +547,13 @@
     {
       "node_id": 68,
       "control": {
-        "ctrl_name": "HVAC",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
-      "node_id": 69,
-      "control": {
         "ctrl_name": "Status_On",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
     },
     {
-      "node_id": 70,
-      "control": {
-        "ctrl_name": "Employee",
-        "ctrl_params": [],
-        "ctrl_arity": 0
-      }
-    },
-    {
-      "node_id": 71,
+      "node_id": 69,
       "control": {
         "ctrl_name": "Laptop",
         "ctrl_params": [],
@@ -577,15 +561,7 @@
       }
     },
     {
-      "node_id": 72,
-      "control": {
-        "ctrl_name": "SmartTV",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
-      "node_id": 73,
+      "node_id": 70,
       "control": {
         "ctrl_name": "Camera",
         "ctrl_params": [],
@@ -593,7 +569,7 @@
       }
     },
     {
-      "node_id": 74,
+      "node_id": 71,
       "control": {
         "ctrl_name": "Status_Off",
         "ctrl_params": [],
@@ -601,7 +577,7 @@
       }
     },
     {
-      "node_id": 75,
+      "node_id": 72,
       "control": {
         "ctrl_name": "Microphone",
         "ctrl_params": [],
@@ -609,7 +585,7 @@
       }
     },
     {
-      "node_id": 76,
+      "node_id": 73,
       "control": {
         "ctrl_name": "Status_Off",
         "ctrl_params": [],
@@ -617,15 +593,7 @@
       }
     },
     {
-      "node_id": 77,
-      "control": {
-        "ctrl_name": "Status_Off",
-        "ctrl_params": [],
-        "ctrl_arity": 0
-      }
-    },
-    {
-      "node_id": 78,
+      "node_id": 74,
       "control": {
         "ctrl_name": "Server",
         "ctrl_params": [],
@@ -633,7 +601,7 @@
       }
     },
     {
-      "node_id": 79,
+      "node_id": 75,
       "control": {
         "ctrl_name": "Room",
         "ctrl_params": [],
@@ -641,7 +609,7 @@
       }
     },
     {
-      "node_id": 80,
+      "node_id": 76,
       "control": {
         "ctrl_name": "SmartLight",
         "ctrl_params": [],
@@ -649,7 +617,7 @@
       }
     },
     {
-      "node_id": 81,
+      "node_id": 77,
       "control": {
         "ctrl_name": "HVAC",
         "ctrl_params": [],
@@ -657,7 +625,7 @@
       }
     },
     {
-      "node_id": 82,
+      "node_id": 78,
       "control": {
         "ctrl_name": "Status_On",
         "ctrl_params": [],
@@ -665,7 +633,7 @@
       }
     },
     {
-      "node_id": 83,
+      "node_id": 79,
       "control": {
         "ctrl_name": "Laptop",
         "ctrl_params": [],
@@ -673,11 +641,43 @@
       }
     },
     {
-      "node_id": 84,
+      "node_id": 80,
       "control": {
         "ctrl_name": "Server",
         "ctrl_params": [],
         "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 81,
+      "control": {
+        "ctrl_name": "Room",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 82,
+      "control": {
+        "ctrl_name": "SmartLight",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 83,
+      "control": {
+        "ctrl_name": "HVAC",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 84,
+      "control": {
+        "ctrl_name": "Status_On",
+        "ctrl_params": [],
+        "ctrl_arity": 0
       }
     },
     {
@@ -747,7 +747,7 @@
     {
       "node_id": 93,
       "control": {
-        "ctrl_name": "Room",
+        "ctrl_name": "SmartLight",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -755,7 +755,7 @@
     {
       "node_id": 94,
       "control": {
-        "ctrl_name": "SmartLight",
+        "ctrl_name": "Room",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -763,7 +763,7 @@
     {
       "node_id": 95,
       "control": {
-        "ctrl_name": "HVAC",
+        "ctrl_name": "Elevator",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -771,23 +771,23 @@
     {
       "node_id": 96,
       "control": {
-        "ctrl_name": "Status_On",
-        "ctrl_params": [],
-        "ctrl_arity": 0
-      }
-    },
-    {
-      "node_id": 97,
-      "control": {
-        "ctrl_name": "Room",
+        "ctrl_name": "CardReader",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
     },
     {
+      "node_id": 97,
+      "control": {
+        "ctrl_name": "Visitor",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
       "node_id": 98,
       "control": {
-        "ctrl_name": "SmartLight",
+        "ctrl_name": "Laptop",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -795,23 +795,23 @@
     {
       "node_id": 99,
       "control": {
-        "ctrl_name": "HVAC",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
-      "node_id": 100,
-      "control": {
-        "ctrl_name": "Status_On",
+        "ctrl_name": "Malware",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
     },
     {
+      "node_id": 100,
+      "control": {
+        "ctrl_name": "Room",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
       "node_id": 101,
       "control": {
-        "ctrl_name": "Elevator",
+        "ctrl_name": "SmartLight",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -819,7 +819,7 @@
     {
       "node_id": 102,
       "control": {
-        "ctrl_name": "CardReader",
+        "ctrl_name": "HVAC",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -827,7 +827,7 @@
     {
       "node_id": 103,
       "control": {
-        "ctrl_name": "Malware",
+        "ctrl_name": "Status_On",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -867,7 +867,7 @@
     {
       "node_id": 108,
       "control": {
-        "ctrl_name": "Room",
+        "ctrl_name": "Hallway",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -875,7 +875,7 @@
     {
       "node_id": 109,
       "control": {
-        "ctrl_name": "SmartLight",
+        "ctrl_name": "CCTV",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -883,7 +883,7 @@
     {
       "node_id": 110,
       "control": {
-        "ctrl_name": "HVAC",
+        "ctrl_name": "SmartLight",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -891,37 +891,21 @@
     {
       "node_id": 111,
       "control": {
-        "ctrl_name": "Status_On",
+        "ctrl_name": "HVAC",
         "ctrl_params": [],
-        "ctrl_arity": 0
+        "ctrl_arity": 1
       }
     },
     {
       "node_id": 112,
       "control": {
-        "ctrl_name": "CCTV",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
-      "node_id": 113,
-      "control": {
-        "ctrl_name": "SmartLight",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
-      "node_id": 114,
-      "control": {
         "ctrl_name": "Status_On",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
     },
     {
-      "node_id": 115,
+      "node_id": 113,
       "control": {
         "ctrl_name": "BusNetwork",
         "ctrl_params": [],
@@ -929,7 +913,7 @@
       }
     },
     {
-      "node_id": 116,
+      "node_id": 114,
       "control": {
         "ctrl_name": "Data",
         "ctrl_params": [],
@@ -937,11 +921,27 @@
       }
     },
     {
-      "node_id": 117,
+      "node_id": 115,
       "control": {
         "ctrl_name": "IPNetwork",
         "ctrl_params": [],
         "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 116,
+      "control": {
+        "ctrl_name": "PhysicalConnection",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 117,
+      "control": {
+        "ctrl_name": "NoCard",
+        "ctrl_params": [],
+        "ctrl_arity": 0
       }
     },
     {
@@ -987,7 +987,7 @@
     {
       "node_id": 123,
       "control": {
-        "ctrl_name": "ConnectIPDevice",
+        "ctrl_name": "ExitRoom",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -995,7 +995,7 @@
     {
       "node_id": 124,
       "control": {
-        "ctrl_name": "DisconnectIPDevice",
+        "ctrl_name": "ConnectIPDevice",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1003,7 +1003,7 @@
     {
       "node_id": 125,
       "control": {
-        "ctrl_name": "DisconnectBusDevice",
+        "ctrl_name": "DisconnectIPDevice",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1011,7 +1011,7 @@
     {
       "node_id": 126,
       "control": {
-        "ctrl_name": "SendData",
+        "ctrl_name": "ConnectBusDevice",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1019,7 +1019,7 @@
     {
       "node_id": 127,
       "control": {
-        "ctrl_name": "SendMalware",
+        "ctrl_name": "DisconnectBusDevice",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1027,7 +1027,7 @@
     {
       "node_id": 128,
       "control": {
-        "ctrl_name": "DisableHVAC",
+        "ctrl_name": "SendData",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1035,7 +1035,7 @@
     {
       "node_id": 129,
       "control": {
-        "ctrl_name": "EnterRoomWithoutCardReader",
+        "ctrl_name": "SendMalware",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1043,7 +1043,7 @@
     {
       "node_id": 130,
       "control": {
-        "ctrl_name": "ChangeAccessToCardRequired",
+        "ctrl_name": "DisableHVAC",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1051,7 +1051,7 @@
     {
       "node_id": 131,
       "control": {
-        "ctrl_name": "ChangeAccessToCardNotRequired",
+        "ctrl_name": "EnterRoomWithoutCardReader",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1059,7 +1059,7 @@
     {
       "node_id": 132,
       "control": {
-        "ctrl_name": "ChangeContextToOutSideWorkingHours",
+        "ctrl_name": "ChangeAccessToCardRequired",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1067,7 +1067,7 @@
     {
       "node_id": 133,
       "control": {
-        "ctrl_name": "ChangeContextToWorkingHours",
+        "ctrl_name": "ChangeAccessToCardNotRequired",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1075,7 +1075,7 @@
     {
       "node_id": 134,
       "control": {
-        "ctrl_name": "TurnOnHVAC",
+        "ctrl_name": "ChangeContextToOutSideWorkingHours",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1083,7 +1083,7 @@
     {
       "node_id": 135,
       "control": {
-        "ctrl_name": "TurnOffHVAC",
+        "ctrl_name": "ChangeContextToWorkingHours",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1091,7 +1091,7 @@
     {
       "node_id": 136,
       "control": {
-        "ctrl_name": "TurnOnSmartTV",
+        "ctrl_name": "TurnOnHVAC",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1164,7 +1164,7 @@
       },
       {
         "source": 1,
-        "target": 8
+        "target": 116
       },
       {
         "source": 1,
@@ -1187,11 +1187,11 @@
       },
       {
         "source": 0,
-        "target": 115
+        "target": 113
       },
       {
         "source": 0,
-        "target": 117
+        "target": 115
       },
       {
         "source": 1,
@@ -1235,11 +1235,11 @@
       },
       {
         "source": 1,
-        "target": 66
+        "target": 75
       },
       {
         "source": 1,
-        "target": 79
+        "target": 81
       },
       {
         "source": 1,
@@ -1251,11 +1251,11 @@
       },
       {
         "source": 1,
-        "target": 93
+        "target": 94
       },
       {
         "source": 1,
-        "target": 97
+        "target": 100
       },
       {
         "source": 1,
@@ -1271,27 +1271,35 @@
       },
       {
         "source": 2,
-        "target": 5
-      },
-      {
-        "source": 2,
-        "target": 112
-      },
-      {
-        "source": 2,
-        "target": 113
-      },
-      {
-        "source": 3,
         "target": 4
       },
       {
-        "source": 4,
-        "target": 103
+        "source": 2,
+        "target": 66
       },
       {
-        "source": 5,
-        "target": 114
+        "source": 2,
+        "target": 67
+      },
+      {
+        "source": 2,
+        "target": 69
+      },
+      {
+        "source": 2,
+        "target": 74
+      },
+      {
+        "source": 4,
+        "target": 5
+      },
+      {
+        "source": 4,
+        "target": 70
+      },
+      {
+        "source": 4,
+        "target": 72
       },
       {
         "source": 6,
@@ -1383,11 +1391,11 @@
       },
       {
         "source": 7,
-        "target": 101
+        "target": 8
       },
       {
         "source": 7,
-        "target": 102
+        "target": 93
       },
       {
         "source": 8,
@@ -1586,72 +1594,48 @@
         "target": 62
       },
       {
-        "source": 66,
-        "target": 67
-      },
-      {
-        "source": 66,
+        "source": 67,
         "target": 68
       },
       {
-        "source": 66,
-        "target": 70
-      },
-      {
-        "source": 66,
+        "source": 70,
         "target": 71
-      },
-      {
-        "source": 66,
-        "target": 72
-      },
-      {
-        "source": 66,
-        "target": 78
-      },
-      {
-        "source": 68,
-        "target": 69
       },
       {
         "source": 72,
         "target": 73
       },
       {
-        "source": 72,
-        "target": 75
-      },
-      {
-        "source": 72,
-        "target": 77
-      },
-      {
-        "source": 73,
-        "target": 74
-      },
-      {
         "source": 75,
         "target": 76
       },
       {
-        "source": 79,
+        "source": 75,
+        "target": 77
+      },
+      {
+        "source": 75,
+        "target": 79
+      },
+      {
+        "source": 75,
         "target": 80
       },
       {
-        "source": 79,
-        "target": 81
-      },
-      {
-        "source": 79,
-        "target": 83
-      },
-      {
-        "source": 79,
-        "target": 84
+        "source": 77,
+        "target": 78
       },
       {
         "source": 81,
         "target": 82
+      },
+      {
+        "source": 81,
+        "target": 83
+      },
+      {
+        "source": 83,
+        "target": 84
       },
       {
         "source": 85,
@@ -1678,28 +1662,36 @@
         "target": 92
       },
       {
-        "source": 93,
-        "target": 94
-      },
-      {
-        "source": 93,
+        "source": 94,
         "target": 95
       },
       {
-        "source": 95,
+        "source": 94,
         "target": 96
+      },
+      {
+        "source": 94,
+        "target": 97
       },
       {
         "source": 97,
         "target": 98
       },
       {
-        "source": 97,
+        "source": 98,
         "target": 99
       },
       {
-        "source": 99,
-        "target": 100
+        "source": 100,
+        "target": 101
+      },
+      {
+        "source": 100,
+        "target": 102
+      },
+      {
+        "source": 102,
+        "target": 103
       },
       {
         "source": 104,
@@ -1722,12 +1714,20 @@
         "target": 110
       },
       {
-        "source": 110,
+        "source": 108,
         "target": 111
       },
       {
-        "source": 115,
-        "target": 116
+        "source": 111,
+        "target": 112
+      },
+      {
+        "source": 113,
+        "target": 114
+      },
+      {
+        "source": 116,
+        "target": 117
       },
       {
         "source": 118,
@@ -1746,7 +1746,7 @@
       "outer": [],
       "ports": [
         {
-          "node_id": 5,
+          "node_id": 98,
           "port_arity": 1
         }
       ]
@@ -1760,7 +1760,7 @@
       ],
       "ports": [
         {
-          "node_id": 4,
+          "node_id": 8,
           "port_arity": 1
         },
         {
@@ -1828,15 +1828,23 @@
           "port_arity": 1
         },
         {
+          "node_id": 66,
+          "port_arity": 1
+        },
+        {
           "node_id": 67,
           "port_arity": 1
         },
         {
-          "node_id": 68,
+          "node_id": 74,
           "port_arity": 1
         },
         {
-          "node_id": 78,
+          "node_id": 76,
+          "port_arity": 1
+        },
+        {
+          "node_id": 77,
           "port_arity": 1
         },
         {
@@ -1844,11 +1852,11 @@
           "port_arity": 1
         },
         {
-          "node_id": 81,
+          "node_id": 82,
           "port_arity": 1
         },
         {
-          "node_id": 84,
+          "node_id": 83,
           "port_arity": 1
         },
         {
@@ -1868,19 +1876,15 @@
           "port_arity": 1
         },
         {
-          "node_id": 94,
+          "node_id": 93,
           "port_arity": 1
         },
         {
-          "node_id": 95,
+          "node_id": 96,
           "port_arity": 1
         },
         {
-          "node_id": 98,
-          "port_arity": 1
-        },
-        {
-          "node_id": 99,
+          "node_id": 101,
           "port_arity": 1
         },
         {
@@ -1904,15 +1908,11 @@
           "port_arity": 1
         },
         {
-          "node_id": 112,
+          "node_id": 111,
           "port_arity": 1
         },
         {
           "node_id": 113,
-          "port_arity": 1
-        },
-        {
-          "node_id": 115,
           "port_arity": 1
         }
       ]
@@ -1940,7 +1940,7 @@
       ],
       "ports": [
         {
-          "node_id": 101,
+          "node_id": 95,
           "port_arity": 1
         }
       ]
@@ -1959,10 +1959,6 @@
         },
         {
           "node_id": 7,
-          "port_arity": 1
-        },
-        {
-          "node_id": 8,
           "port_arity": 1
         },
         {
@@ -1998,11 +1994,11 @@
           "port_arity": 1
         },
         {
-          "node_id": 66,
+          "node_id": 75,
           "port_arity": 1
         },
         {
-          "node_id": 79,
+          "node_id": 81,
           "port_arity": 1
         },
         {
@@ -2014,11 +2010,11 @@
           "port_arity": 1
         },
         {
-          "node_id": 93,
+          "node_id": 94,
           "port_arity": 1
         },
         {
-          "node_id": 97,
+          "node_id": 100,
           "port_arity": 1
         },
         {
@@ -2027,6 +2023,10 @@
         },
         {
           "node_id": 108,
+          "port_arity": 1
+        },
+        {
+          "node_id": 116,
           "port_arity": 1
         },
         {
@@ -2043,6 +2043,10 @@
         }
       ],
       "ports": [
+        {
+          "node_id": 4,
+          "port_arity": 1
+        },
         {
           "node_id": 14,
           "port_arity": 1
@@ -2108,19 +2112,15 @@
           "port_arity": 1
         },
         {
-          "node_id": 71,
+          "node_id": 69,
           "port_arity": 1
         },
         {
-          "node_id": 72,
+          "node_id": 79,
           "port_arity": 1
         },
         {
-          "node_id": 83,
-          "port_arity": 1
-        },
-        {
-          "node_id": 117,
+          "node_id": 115,
           "port_arity": 1
         }
       ]

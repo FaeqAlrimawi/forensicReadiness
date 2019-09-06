@@ -3623,10 +3623,9 @@ public class TraceViewerInSystemController {
 		}
 
 		String action1 = actions.get(0);
-		String action2 = actions.get(0);
+		String action2 = actions.get(1);
 
 		int dependentResult = miner.areActionsCausallyDependent(action2, action1, preState);
-
 		
 		switch (dependentResult) {
 		case TraceMiner.ACTIONS_CAUSAL_DEPENDENCY_ERROR:
@@ -3639,6 +3638,8 @@ public class TraceViewerInSystemController {
 
 		case TraceMiner.ACTIONS_NOT_CAUSALLY_DEPENDENT: //independent
 			System.out.println("action-2 [" + action2 + "] is NOT causally dependent on action-1 [" + action1 + "] with pre-state ["+preState+"]");
+			break;
+			
 		default:
 			break;
 		}
