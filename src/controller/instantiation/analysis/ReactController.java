@@ -5,7 +5,6 @@ import java.net.URL;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 
-import controller.ActionEditorController;
 import controller.utlities.ConditionAreaHandler;
 import core.brs.parser.ActionWrapper;
 import core.brs.parser.BigraphWrapper;
@@ -133,7 +132,7 @@ public class ReactController {
 		}
 
 		// get post
-		BigraphWrapper post = act.getPrecondition();
+		BigraphWrapper post = act.getPostcondition();
 
 		if (post != null) {
 			strBldr.append(JSONTerms.BIG_COMMENT).append("Postcondition").append(newLine);

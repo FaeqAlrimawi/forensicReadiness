@@ -12,6 +12,8 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import core.brs.parser.utilities.JSONTerms;
 import core.instantiation.analysis.TraceMiner;
@@ -64,6 +66,9 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 
 public class TraceViewerInSystemController {
+
+	@FXML
+	private ProgressIndicator progressIndicatorSearchTraces;
 
 	@FXML
 	private TextField textFieldStartStateSearch;
@@ -314,6 +319,9 @@ public class TraceViewerInSystemController {
 	// used to hold trace color
 	private String traceColor = null;
 
+	// an executor to handle threads
+	ExecutorService executor = Executors.newFixedThreadPool(4);
+
 	@FXML
 	public void initialize() {
 
@@ -500,18 +508,17 @@ public class TraceViewerInSystemController {
 	@FXML
 	void searchTraces(ActionEvent e) {
 
-		System.out.println("Access!!");
-		if(miner == null) {
+		if (miner == null) {
 			return;
 		}
-		
+
 		String txtStartState = textFieldStartStateSearch.getText();
 		String txtEndState = textFieldEndStateSearch.getText();
 		String txtContainsStates = textFieldContainsStateSearch.getText();
 
 		try {
 
-			//start state
+			// start state
 			int startState = -1;
 
 			if (txtStartState != null && !txtStartState.isEmpty()) {
@@ -519,45 +526,48 @@ public class TraceViewerInSystemController {
 				startState = Integer.parseInt(txtStartState);
 			}
 
-			//end state
+			// end state
 			int endState = -1;
 
 			if (txtEndState != null && !txtEndState.isEmpty()) {
 				endState = Integer.parseInt(txtEndState);
 			}
 
-			//in between states
+			// in between states
 			List<Integer> containsStates = null;
 
 			String[] txtStates = txtContainsStates.split(SEARCH_SEPARATOR);
 
 			if (txtContainsStates != null && !txtContainsStates.isEmpty()) {
 				containsStates = new LinkedList<Integer>();
-				
+
 				for (String txtState : txtStates) {
 					int state = Integer.parseInt(txtState);
 					containsStates.add(state);
 
 				}
+
 			}
 
-			//find traces
-			
-			if(startState == -1 && endState == -1 && (containsStates == null || containsStates.isEmpty())) {
+			// find traces
+
+			if (startState == -1 && endState == -1 && (containsStates == null || containsStates.isEmpty())) {
 				return;
 			}
-			
+
 			boolean inOrder = true;
-			List<Integer> tracesIDs = miner.findTracesContainingStates(startState, containsStates, endState, miner.getCurrentShownTraces(), inOrder);
-//			List<Integer> tracesIDs = getAllTracesFromTo(startState, endState);
-			
+			List<Integer> tracesIDs = miner.findTracesContainingStates(startState, containsStates, endState,
+					miner.getCurrentShownTraces(), inOrder);
+			// List<Integer> tracesIDs = getAllTracesFromTo(startState,
+			// endState);
+
 			if (tracesIDs == null || tracesIDs.isEmpty()) {
 				return;
 			}
 
-//			System.out.println(tracesIDs);
-			
-			//show traces
+			// System.out.println(tracesIDs);
+
+			// show traces
 			// reset
 			reset(null);
 
@@ -567,11 +577,76 @@ public class TraceViewerInSystemController {
 
 			// show all new traces
 			Map<Integer, GraphPath> traces = miner.getTraces(tracesIDs);
+
+			if(traces == null) {
+				return;
+			}
 			
-			System.out.println(traces.keySet());
-			
-			for (GraphPath trace : traces.values()) {
+			// show in thread if result is more than 300
+			int maxTraceNum = 1000000;
+
+			if (traces.size() > maxTraceNum) {
+
+				//used for multi-threading showing traces
+				
+//				int parts = traces.size() / maxTraceNum;
+//
+//				System.out.println("parts: " + parts);
+//				
+//				for (int i = 0; i < parts; i++) {
+//
+//					System.out.println("part["+i+"]: " + i*maxTraceNum +" -> " + (i*maxTraceNum+(maxTraceNum-1)));
+//					int index = i;
+//					progressIndicatorSearchTraces.setVisible(true);
+//					btnSearchTraces.setDisable(true);
+//
+//					executor.submit(new Runnable() {
+//						@Override
+//						public void run() {
+//							// TODO Auto-generated method stub
+//
+//							for (int j = 0; j < maxTraceNum; j++) {
+//								int jIndex = j;
+//								Platform.runLater(new Runnable() {
+//									
+//									@Override
+//									public void run() {
+//										// TODO Auto-generated method stub
+//										addTrace(traces.get(jIndex+ index * maxTraceNum));
+//									}
+//								});
+//								
+//								 try {
+//								 Thread.sleep(200);
+//								 } catch (InterruptedException e) {
+//								 // TODO Auto-generated catch block
+//								 e.printStackTrace();
+//								 }
+//							}
+//						}
+//					}).get();
+//
+//				}
+//				
+//
+//				// check remainder
+////				int index = parts;
+//				int remainder = traces.size() % maxTraceNum;
+//				System.out.println("remainder: " + remainder);
+//				
+//				if (remainder != 0) {
+//					for (int j = 0; j < remainder; j++) {
+//						addTrace(traces.get(j + parts * maxTraceNum));
+//					}
+//				}
+//
+//				progressIndicatorSearchTraces.setVisible(false);
+//				btnSearchTraces.setDisable(false);
+
+			} else {
+				for (GraphPath trace : traces.values()) {
 					addTrace(trace);
+				}
 			}
 
 		} catch (Exception exp) {
@@ -828,6 +903,7 @@ public class TraceViewerInSystemController {
 				case MENU_ITEM_SHOW_OTHERS:
 					int sttt = getStateFromNode(stateStack);
 					int lastState = -1;
+					
 					if (trace != null) {
 						lastState = trace.getStateTransitions().get(trace.getStateTransitions().size() - 1);
 					}
@@ -2138,10 +2214,10 @@ public class TraceViewerInSystemController {
 				// TODO Auto-generated method stub
 				// ObservableList<Integer> list =
 				// FXCollections.observableArrayList(tracesIDs);
-				if(!comboBoxAddedTraces.getItems().contains(traceID)) {
-					comboBoxAddedTraces.getItems().add(traceID);	
+				if (!comboBoxAddedTraces.getItems().contains(traceID)) {
+					comboBoxAddedTraces.getItems().add(traceID);
 				}
-				
+
 				lblNumOfAddedTraces.setText("[" + addedTracesIDs.size() + "]");
 			}
 		});
@@ -2629,7 +2705,7 @@ public class TraceViewerInSystemController {
 	 * 
 	 * @param newTrace
 	 */
-	protected void addTrace(GraphPath newTrace) {
+	protected synchronized void addTrace(GraphPath newTrace) {
 
 		List<StackPane> statesNodes = createTraceNodes(newTrace);
 
@@ -4107,6 +4183,7 @@ public class TraceViewerInSystemController {
 
 		Label lblAction = new Label(actionName);
 		lblAction.setStyle(ACTION_NAME_STYLE);
+		
 		lblAction.setOnMouseClicked(e -> {
 			if (traceCell != null && trace != null) {
 				traceCell.showReact(actionName);

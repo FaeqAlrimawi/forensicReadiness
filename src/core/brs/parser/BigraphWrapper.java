@@ -53,7 +53,7 @@ public class BigraphWrapper implements Serializable{
 	//Bigraph object representation of this
 	private Bigraph bigraphObj;
 
-	//original state that this bigraphWrapper would refer to
+	//original state that this bigraphWrapper would refer to.
 	//used when a trace is applied to this
 	private int OriginalState;
 	

@@ -803,10 +803,11 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		reactController.showReact(actionName);
 
-		reactViewerStage.setTitle("Action " + actionName);
+		reactViewerStage.setTitle("Action Viewer");
 
 		if (!reactViewerStage.isShowing()) {
 			reactViewerStage.show();
+			reactViewerStage.setAlwaysOnTop(true);
 		}
 	}
 

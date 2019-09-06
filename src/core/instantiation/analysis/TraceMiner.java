@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -59,12 +60,24 @@ import core.brs.parser.BigraphWrapper;
 import core.brs.parser.utilities.JSONTerms;
 import core.utilities.Query;
 import cyberPhysical_Incident.Entity;
+import ie.lero.spare.franalyser.utility.BigraphNode;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 //import ie.lero.spare.franalyser.utility.FileManipulator;
 //import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator;
 import ie.lero.spare.pattern_instantiation.LabelExtractor;
+import it.uniud.mads.jlibbig.core.std.Bigraph;
+import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
+import it.uniud.mads.jlibbig.core.std.Handle;
+import it.uniud.mads.jlibbig.core.std.InnerName;
+import it.uniud.mads.jlibbig.core.std.Match;
+import it.uniud.mads.jlibbig.core.std.Matcher;
+import it.uniud.mads.jlibbig.core.std.Node;
+import it.uniud.mads.jlibbig.core.std.OuterName;
+import it.uniud.mads.jlibbig.core.std.Root;
+import it.uniud.mads.jlibbig.core.std.Signature;
+import it.uniud.mads.jlibbig.core.std.Site;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator.InstancesSaver;
 
 public class TraceMiner {
@@ -90,12 +103,15 @@ public class TraceMiner {
 	// difference
 	public final static int ACTION_PERFORMED = 1;
 	public final static int ACTION_NOT_PERFORMED = 0;
+	public final static int ACTIONS_CAUSALLY_DEPENDENT = 1;
+	public final static int ACTIONS_NOT_CAUSALLY_DEPENDENT = 2;
 	public final static String ATTRIBUTE_STATE_NAME = "state-";
 	public final static String ATTRIBUTE_ACTION_NAME = "action-";
 
 	// errors
 	public final static int TRACES_NOT_LOADED = -1;
 	public final static int SHORTEST_FILE_NOT_SAVED = -2;
+	public final static int ACTIONS_CAUSAL_DEPENDENCY_ERROR = -1;
 
 	// constants for mining operators
 	public final static int SHORTEST = 0;
@@ -4378,6 +4394,371 @@ public class TraceMiner {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Finds the causal dependency chain between actions in the given incident
+	 * trace
+	 * 
+	 * @param incidentTrace
+	 *            a GraphPath object representing the potential incident
+	 * @return A map of the causal dependency between actions in the given
+	 *         potential incident. Key is the action name, value is a boolean
+	 *         whether the action depends on the previous action or not
+	 */
+	public Map<String, Boolean> findCausalDependency(GraphPath incidentTrace) {
+
+		if (incidentTrace == null) {
+			return null;
+		}
+
+		Map<String, Boolean> causalDependencyMap = new HashMap<String, Boolean>();
+
+		return causalDependencyMap;
+	}
+
+	/**
+	 * Determines if the action is causally dependent on the preAction Causally
+	 * dependence means that the action would not have happened if the preAction
+	 * had not happened.
+	 * 
+	 * @param preAction
+	 *            the previous action
+	 * @param action
+	 *            the action that we want to determine if it is causally
+	 *            dependent on preAction
+	 * @return True if action is causally dependent on the preAction. False
+	 *         otherwise
+	 */
+	public int areActionsCausallyDependent(String action, String preAction, int preState) {
+
+		/**
+		 * Causally dependence is implemented by checking if the pre-condition
+		 * of the given action is matches to the state that the preAction's
+		 * pre-condition matches to. If it matches then the action is NOT
+		 * causally dependent. Otherwise, it is causally dependent
+		 **/
+
+		if (action == null || preAction == null || brsWrapper == null) {
+			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
+		}
+
+		ActionWrapper actionWrapper = bigraphERActions.get(action);
+		ActionWrapper preActionWrapper = bigraphERActions.get(preAction);
+
+		if (actionWrapper == null || preActionWrapper == null) {
+			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
+		}
+
+		// === get Bigraph representation of the precondition of action
+		Bigraph actionPre = actionWrapper.getPrecondition() != null
+				? actionWrapper.getPrecondition().createBigraph(false, brsWrapper.getSignature()) : null;
+
+		if (actionPre == null) {
+			System.err.println("precondition of the given action [" + action + "] is NULL");
+			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
+		}
+
+		// === get preAction's precondition State as Bigraph
+		if (getStatesFolder() == null) {
+			System.err.println("States folder is missing");
+			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
+		}
+
+		Bigraph preStateBig = loadState(preState);
+
+		if (preStateBig == null) {
+			System.err.println("preState Bigraph object is NULL");
+			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
+		}
+
+		// === match the action precondition to the state
+		Matcher matcher = new Matcher();
+
+		if (matcher.match(preStateBig, actionPre).iterator().hasNext()) {
+			// they match
+			return ACTIONS_CAUSALLY_DEPENDENT;
+		}
+
+		return ACTIONS_NOT_CAUSALLY_DEPENDENT;
+	}
+
+	public Bigraph loadState(int stateID) {
+
+		// get preAction's precondition State as Bigraph
+		if (getStatesFolder() == null) {
+			System.err.println("States folder is missing");
+			return null;
+		}
+
+		JSONObject state;
+		JSONParser parser = new JSONParser();
+
+		try {
+			// read state from file
+			FileReader r = new FileReader(getStatesFolder() + "/" + stateID + ".json");
+			state = (JSONObject) parser.parse(r);
+			Bigraph bigraph = convertJSONtoBigraph(state);
+			r.close();
+
+			return bigraph;
+
+		} catch (IOException | ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	public Bigraph convertJSONtoBigraph(JSONObject state) {
+
+		String tmp;
+		String tmpArity;
+		JSONObject tmpObj;
+		JSONObject tmpCtrl;
+		HashMap<String, BigraphNode> nodes = new HashMap<String, BigraphNode>();
+		BigraphNode node;
+		JSONArray ary;
+		JSONArray innerAry;
+		JSONArray outerAry;
+		JSONArray portAry;
+		Iterator<JSONObject> it;
+		Iterator<JSONObject> itInner;
+		Iterator<JSONObject> itOuter;
+		Iterator<JSONObject> itPort;
+		int src, target;
+		LinkedList<String> outerNames = new LinkedList<String>();
+		LinkedList<String> innerNames = new LinkedList<String>();
+		LinkedList<String> outerNamesFull = new LinkedList<String>();
+		LinkedList<String> innerNamesFull = new LinkedList<String>();
+
+		HashMap<String, OuterName> libBigOuterNames = new HashMap<String, OuterName>();
+		HashMap<String, InnerName> libBigInnerNames = new HashMap<String, InnerName>();
+		HashMap<String, Node> libBigNodes = new HashMap<String, Node>();
+		LinkedList<Root> libBigRoots = new LinkedList<Root>();
+		LinkedList<Site> libBigSites = new LinkedList<Site>();
+
+		// number of roots, sites, and nodes respectively
+		int numOfRoots = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH))
+				.get(JSONTerms.BIGRAPHER_NUM_REGIONS).toString());
+		int numOfSites = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH))
+				.get(JSONTerms.BIGRAPHER_NUM_SITES).toString());
+		int numOfNodes = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH))
+				.get(JSONTerms.BIGRAPHER_NUM_NODES).toString());
+		int edgeNumber = 0;
+
+		// get controls & their arity [defines signature]. Controls are
+		// assumed
+		// to be active (i.e. true)
+		ary = (JSONArray) state.get(JSONTerms.BIGRAPHER_NODES);
+		it = ary.iterator();
+		while (it.hasNext()) {
+			node = new BigraphNode();
+			tmpObj = (JSONObject) it.next(); // gets hold of node info
+
+			tmpCtrl = (JSONObject) tmpObj.get(JSONTerms.BIGRAPHER_CONTROL);
+			tmp = tmpCtrl.get(JSONTerms.BIGRAPHER_CNTRL_NAME).toString();
+			tmpArity = tmpCtrl.get(JSONTerms.BIGRAPHER_CNTRL_ARITY).toString();
+
+			// set node id
+			node.setId(tmpObj.get(JSONTerms.BIGRAPHER_NODE_ID).toString());
+			// set node control
+			node.setControl(tmp);
+			nodes.put(node.getId(), node);
+		}
+
+		// get parents for nodes from the place_graph=>
+		// roots and sites numbers
+		ary = (JSONArray) ((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_ROOT_NODE);
+		it = ary.iterator();
+		while (it.hasNext()) {
+			tmpObj = (JSONObject) it.next(); // gets hold of node info
+			src = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_SOURCE).toString());
+			target = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_TARGET).toString());
+			nodes.get(Integer.toString(target)).setParentRoot(src);
+		}
+
+		ary = (JSONArray) ((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_ROOT_SITE);
+		it = ary.iterator();
+		while (it.hasNext()) {
+			tmpObj = (JSONObject) it.next(); // gets hold of node info
+			src = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_SOURCE).toString());
+			target = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_TARGET).toString());
+			nodes.get(Integer.toString(target)).setParentRoot(src);
+		}
+
+		ary = (JSONArray) ((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_NODE_NODE);
+		it = ary.iterator();
+		while (it.hasNext()) {
+			tmpObj = (JSONObject) it.next(); // gets hold of node info
+			src = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_SOURCE).toString());
+			target = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_TARGET).toString());
+
+			// set parent node in the target node
+			nodes.get(Integer.toString(target)).setParent(nodes.get(Integer.toString(src)));
+			// add child node to source node
+			nodes.get(Integer.toString(src)).addChildNode(nodes.get(Integer.toString(target)));
+
+		}
+
+		// get outer names and inner names for the nodes. Currently, focus
+		// on
+		// outer names
+		// while inner names are extracted they are not updated in the nodes
+		ary = (JSONArray) (state.get(JSONTerms.BIGRAPHER_LINK_GRAPH));
+		it = ary.iterator();
+		while (it.hasNext()) {
+			tmpObj = (JSONObject) it.next(); // gets hold of node info
+			outerNames.clear();
+			innerNames.clear();
+
+			// get outer names
+			outerAry = (JSONArray) (tmpObj.get(JSONTerms.BIGRAPHER_OUTER));
+			innerAry = (JSONArray) (tmpObj.get(JSONTerms.BIGRAPHER_INNER));
+			portAry = (JSONArray) (tmpObj.get(JSONTerms.BIGRAPHER_PORTS));
+
+			// get outernames
+			for (int i = 0; i < outerAry.size(); i++) {
+				JSONObject tmpOuter = (JSONObject) outerAry.get(i);
+
+				outerNames.add(tmpOuter.get(JSONTerms.BIGRAPHER_NAME).toString());
+			}
+
+			// get inner names
+			for (int i = 0; i < innerAry.size(); i++) {
+				JSONObject tmpInner = (JSONObject) innerAry.get(i);
+
+				innerNames.add(tmpInner.get(JSONTerms.BIGRAPHER_NAME).toString());
+			}
+
+			// get nodes connected to outer names. Inner names should be
+			// considered
+			if (outerNames.size() > 0) {
+				for (int i = 0; i < portAry.size(); i++) {
+					JSONObject tmpPort = (JSONObject) portAry.get(i);
+					node = nodes.get(tmpPort.get(JSONTerms.BIGRAPHER_NODE_ID).toString());
+
+					node.addOuterNames(outerNames);
+					node.addInnerNames(innerNames);
+				}
+			} else { // if there are no outer names, then create edges by
+						// creating outernames, adding them to the nodes,
+						// then closing the outername
+
+				for (int i = 0; i < portAry.size(); i++) {
+					JSONObject tmpPort = (JSONObject) portAry.get(i);
+					node = nodes.get(tmpPort.get(JSONTerms.BIGRAPHER_NODE_ID).toString());
+
+					node.addOuterName("edge" + edgeNumber, true);
+				}
+				edgeNumber++;
+			}
+
+			// add inner names to nodes
+			if (innerNames.size() > 0) {
+				for (int i = 0; i < portAry.size(); i++) {
+					JSONObject tmpPort = (JSONObject) portAry.get(i);
+					node = nodes.get(tmpPort.get(JSONTerms.BIGRAPHER_NODE_ID).toString());
+					;
+					node.addInnerNames(innerNames);
+				}
+			}
+		}
+
+		outerNamesFull.addAll(outerNames);
+		innerNamesFull.addAll(innerNames);
+
+		//// Create Bigraph Object \\\\\
+
+		Signature tmpSig = brsWrapper.getSignature();// getBigraphSignature();
+
+		if (tmpSig == null) {
+			return null;
+		}
+
+		BigraphBuilder biBuilder = new BigraphBuilder(tmpSig);
+
+		// create roots for the bigraph
+		for (int i = 0; i < numOfRoots; i++) {
+			libBigRoots.add(biBuilder.addRoot(i));
+		}
+
+		// create outer names
+		OuterName tmpNm;
+		HashMap<String, Boolean> isClosedMap = new HashMap<String, Boolean>();
+
+		for (BigraphNode nd : nodes.values()) {
+			for (BigraphNode.OuterName nm : nd.getOuterNamesObjects()) {
+				if (libBigOuterNames.get(nm.getName()) == null) {
+					tmpNm = biBuilder.addOuterName(nm.getName());
+					libBigOuterNames.put(nm.getName(), tmpNm);
+					isClosedMap.put(nm.getName(), nm.isClosed());
+				}
+			}
+		}
+
+		// create inner names
+		// consider closing iner names also (future work)
+		for (String inner : innerNamesFull) {
+			libBigInnerNames.put(inner, biBuilder.addInnerName(inner));
+		}
+
+		// initial creation of nodes
+		for (BigraphNode nd : nodes.values()) {
+			if (libBigNodes.containsKey(nd.getId())) {
+				continue;
+			}
+			createNode(nd, biBuilder, libBigRoots, libBigOuterNames, libBigNodes);
+		}
+
+		// close outernames
+		for (OuterName nm : libBigOuterNames.values()) {
+			if (isClosedMap.get(nm.getName())) {
+				biBuilder.closeOuterName(nm);
+			}
+		}
+
+		// add sites to bigraph (probably for states they don't have sites)
+		for (BigraphNode n : nodes.values()) {
+			if (n.hasSite()) {
+				biBuilder.addSite(libBigNodes.get(n.getId()));
+			}
+		}
+
+		return biBuilder.makeBigraph();
+	}
+
+	private Node createNode(BigraphNode node, BigraphBuilder biBuilder, LinkedList<Root> libBigRoots,
+			HashMap<String, OuterName> outerNames, HashMap<String, Node> nodes) {
+
+		LinkedList<Handle> names = new LinkedList<Handle>();
+
+		for (String n : node.getOuterNames()) {
+			names.add(outerNames.get(n));
+		}
+
+		// if the parent is a root
+		if (node.isParentRoot()) { // if the parent is a root
+
+			Node n = biBuilder.addNode(node.getControl(), libBigRoots.get(node.getParentRoot()), names);
+			nodes.put(node.getId(), n);
+			return n;
+		}
+
+		// if the parent is already created as a node in the bigraph
+		if (nodes.containsKey(node.getParent().getId())) {
+
+			Node n = biBuilder.addNode(node.getControl(), nodes.get(node.getParent().getId()), names);
+			nodes.put(node.getId(), n);
+			return n;
+		}
+
+		Node n = biBuilder.addNode(node.getControl(),
+				createNode(node.getParent(), biBuilder, libBigRoots, outerNames, nodes), names);
+		nodes.put(node.getId(), n);
+		return n;
+
 	}
 
 	// public static void main(String[] args) {
