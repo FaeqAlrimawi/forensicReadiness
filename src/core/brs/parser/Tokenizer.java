@@ -55,6 +55,7 @@ public class Tokenizer
     tokens.clear();
     while (!s.equals(""))
     {
+//    	System.out.println(s);
       boolean match = false;
       for (TokenInfo info : tokenInfos)
       {
@@ -62,8 +63,10 @@ public class Tokenizer
         if (m.find())
         {
           match = true;
-          String tok = m.group().trim();
-          s = m.replaceFirst("").trim();
+//          String tok = m.group().trim();
+          String tok = m.group();
+//          s = m.replaceFirst("").trim();
+          s = m.replaceFirst("");
           tokens.add(new Token(info.token, tok));
           break;
         }

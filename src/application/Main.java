@@ -10,6 +10,7 @@ import core.brs.parser.BRSParser;
 import core.brs.parser.BRSWrapper;
 import core.brs.parser.BigraphWrapper;
 import core.brs.parser.utilities.BigraphNode;
+import core.instantiation.analysis.TraceMiner;
 import it.uniud.mads.jlibbig.core.Node;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Matcher;
@@ -67,11 +68,61 @@ public class Main extends Application {
 		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor  id) || Room ";
 		String action = "react enter_room = " + exprs + "->" + exprs2 + "@ [1,2,3];";
 		String jsonState = "D:/Bigrapher data/lero/lero1/0.json";
-		String bigFile = "D:/Bigrapher data/lero/example/lero.big";
-
+		
+		URL bigFileURL = Main.class.getResource("../resources/example/systemBigraphER.big");
+		URL statesFolderURL = Main.class.getResource("../resources/example/states_1000");
+		
+		String bigFile = null;
+		String statesFolder = null;
+		
+//		if(bigFileURL!=null && statesFolderURL!=null) {
+//		bigFile = bigFileURL.getPath();
+////		BRSParser parser = new BRSParser();
+////		BRSWrapper brsWrapper = parser.parseBigraphERFile(bigFile);
+////		ActionWrapper act = brsWrapper.getActions().get("EnterRoom");
+////		BigraphWrapper pre = act.getPrecondition();
+//		TraceMiner miner = new TraceMiner();
+//		
+//		//set bigrapher file. Does parsing at the same time
+//		miner.setBigraphERFile(bigFile); 
+//		
+//		//set states folder
+//		statesFolder = statesFolderURL.getPath();
+//		miner.setStatesFolder(statesFolder);
+//		
+//		String action2 = "ConnectBusDevice";
+//		String action1 = "EnterRoom";
+//		int preState = 1;
+//		
+//		int res = miner.areActionsCausallyDependent(action2, action1, preState);
+//		
+//		switch (res) {
+//		case TraceMiner.ACTIONS_CAUSAL_DEPENDENCY_ERROR:
+//			System.err.println("There's an error");
+//			break;
+//
+//		case TraceMiner.ACTIONS_CAUSALLY_DEPENDENT: //dependent
+//			System.out.println("[" + action2 + "] causally depends on [" + action1 + "] with pre-state ["+preState+"]");
+//			break;
+//
+//		case TraceMiner.ACTIONS_NOT_CAUSALLY_DEPENDENT: //independent
+//			System.out.println("[" + action2 + "] does NOT causally depend on [" + action1 + "] with pre-state ["+preState+"]");
+//			break;
+//			
+//		default:
+//			break;
+//		}
+////		ActionWrapper act = miner.getActionWrapper("EnterRoom");
+////		BigraphWrapper pre = act.getPrecondition();
+////		System.out.println(pre.getBigraphERString());
+//		} else {
+//			System.out.println("file not found");
+//		}
+		
+		
 		// String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor | Actor)";
 		//// System.out.println("expression: "+exprs+"\n\n");
-		BRSParser parser = new BRSParser();
+//		BRSParser parser = new BRSParser();
 		//
 //		 BRSWrapper brsWrapper = parser.parseBigraphERFile(bigFile);
 		 

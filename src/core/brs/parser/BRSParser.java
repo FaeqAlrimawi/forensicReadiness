@@ -259,9 +259,10 @@ public class BRSParser {
 
 			} else {
 
-				// if (t.token == BigraphERTokens.SMALL_SPACE) {
-				// System.out.println("Spaaaaaaaaaaaaace");
-				// }
+//				 if (t.token == BigraphERTokens.SMALL_SPACE) {
+//				 System.out.println("t"+t.sequence+"d");
+//					 
+//				 }
 
 				if (t.token == BigraphERTokens.OPEN_BRACKET_CONNECTIVITY) {
 					isConnection = true;
@@ -275,6 +276,7 @@ public class BRSParser {
 
 		stmt = newStmt.toString();
 
+		
 		// System.out.println("Newwww:::" + bigTitle + ":" + stmt);
 		bigStmts.put(bigTitle, stmt);
 
@@ -804,6 +806,7 @@ public class BRSParser {
 				// if closed connectivity token appeared, then the word is a
 				// connectivity name that
 				if (isClosedConnectivity) {
+//					System.out.println(tok.sequence);
 					closedConnectivities.add(tok.sequence);
 					isClosedConnectivity = false;
 				}

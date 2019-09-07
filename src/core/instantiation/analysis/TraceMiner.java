@@ -4443,19 +4443,25 @@ public class TraceMiner {
 		 **/
 
 		if (action == null || preAction == null || brsWrapper == null) {
+			System.err.println("Error. there's a null");
 			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
 		}
 
 		ActionWrapper actionWrapper = bigraphERActions.get(action);
-		ActionWrapper preActionWrapper = bigraphERActions.get(preAction);
+		
+//		ActionWrapper preActionWrapper = bigraphERActions.get(preAction);
 
-		if (actionWrapper == null || preActionWrapper == null) {
+		if (actionWrapper == null) {
+			System.err.println("Error. there's a null of wrappers");
 			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
 		}
 
+		BigraphWrapper preWrapper = actionWrapper.getPrecondition();
+		
+//		System.out.println(preWrapper.getContainedEntitiesMap());
 		// === get Bigraph representation of the precondition of action
-		Bigraph actionPre = actionWrapper.getPrecondition() != null
-				? actionWrapper.getPrecondition().getBigraphObject(false, brsWrapper.getSignature()) : null;
+		Bigraph actionPre = preWrapper != null
+				? preWrapper.getBigraphObject(false, brsWrapper.getSignature()) : null;
 
 		if (actionPre == null) {
 			System.err.println("precondition of the given action [" + action + "] is NULL");
@@ -4481,10 +4487,12 @@ public class TraceMiner {
 		// === match the action precondition to the state
 		Matcher matcher = new Matcher();
 
-		if (action.equalsIgnoreCase("connectbusdevice")) {
-			System.out.println("+++++++++\nCondition: " + actionPre + "\n+++++++++\n");
-			System.out.println("+++++++++\nState: " + preStateBig + "\n+++++++++\n");
-		}
+		// if (action.equalsIgnoreCase("connectbusdevice")) {
+//		System.out.println("+++++++++ Condition +++++++++");
+//		System.out.println("-stmt: " + actionWrapper.getPrecondition().getBigraphERString()+"\n");
+//		System.out.println("-Bigraph:\n"+actionPre);
+//		System.out.println("+++++++++\nState: " + preStateBig + "\n+++++++++\n");
+		// }
 
 		if (matcher.match(preStateBig, actionPre).iterator().hasNext()) {
 			// a match means that there's no dependency
