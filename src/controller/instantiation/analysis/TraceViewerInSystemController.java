@@ -661,6 +661,7 @@ public class TraceViewerInSystemController {
 		findCausalDependency();
 		// ===
 	}
+
 	protected void searchAddedTraces(String searchQuery, String searchField) {
 
 		if (searchField == null || searchQuery == null) {
@@ -3610,48 +3611,66 @@ public class TraceViewerInSystemController {
 		if (trace == null) {
 			return;
 		}
-		
+
 		List<String> actions = trace.getTransitionActions();
-		
+
 		System.out.println("===========================");
-		for(int i=actions.size()-1;i>0;i--) {
-			
+		for (int i = actions.size() - 1; i > 0; i--) {
+
 			String action2 = actions.get(i);
-//			String action2 = actions.get(2);
-			
-			for(int j=i;j>0;j--) {
-				int preState = trace.getStateTransitions() != null ? trace.getStateTransitions().get(j-1) : -1;
-//			int preState = trace.getStateTransitions() != null ? trace.getStateTransitions().get(1) : -1;
-				
+			// String action2 = actions.get(2);
+
+			for (int j = i; j > 0; j--) {
+				int preState = trace.getStateTransitions() != null ? trace.getStateTransitions().get(j - 1) : -1;
+				int actionState = trace.getStateTransitions() != null ? trace.getStateTransitions().get(j) : -1;
+				// int preState = trace.getStateTransitions() != null ?
+				// trace.getStateTransitions().get(1) : -1;
+
 				if (preState == -1 || actions.size() < 2) {
 					return;
 				}
-				
-				String action1 = actions.get(j-1);
-//				String action1 = actions.get(1);
-				
-				int dependentResult = miner.areActionsCausallyDependent(action2, action1, preState);
-				
+
+				String action1 = actions.get(j - 1);
+				// String action1 = actions.get(1);
+
+				int dependentResult = miner.areActionsCausallyDependent(action2, action1, actionState, preState);
+
 				switch (dependentResult) {
+
+				// there's an error
 				case TraceMiner.ACTIONS_CAUSAL_DEPENDENCY_ERROR:
 					System.err.println("There's an error");
 					break;
 
-				case TraceMiner.ACTIONS_CAUSALLY_DEPENDENT: //dependent
-					System.out.println("[" + action2 + "] causally depends on [" + action1 + "] with pre-state ["+preState+"]");
+				// action2 has causal dependence on action1
+				case TraceMiner.ACTIONS_CAUSALLY_DEPENDENT: // dependent
+					System.out.println("[" + action2 + "] causally depends on [" + action1 + "] with pre-state ["
+							+ preState + "]");
 					break;
 
-				case TraceMiner.ACTIONS_NOT_CAUSALLY_DEPENDENT: //independent
-					System.out.println("[" + action2 + "] does NOT causally depend on [" + action1 + "] with pre-state ["+preState+"]");
+				// action2 has NO causal depenedence on action1 i.e. action2 can
+				// happend without action1
+				case TraceMiner.ACTIONS_NOT_CAUSALLY_DEPENDENT: // independent
+					System.out.println("[" + action2 + "] does NOT causally depend on [" + action1
+							+ "] with pre-state [" + preState + "]");
 					break;
+
+				// action2 has no necessary causal dependence on action1, i.e.
+				// action2 can happen with and without action1
+				case TraceMiner.ACTIONS_NOT_NECESSARILY_CAUSALLY_DEPENDENT:
+					System.out.println("[" + action2 + "] does NOT NECESSARILY causally depend on [" + action1
+							+ "] with pre-state [" + preState + "]");
 					
-				default:
+				default: // # of matches found
+					// System.out.println("[" + action2 + "] does NOT causally
+					// depend on [" + action1 + "] with pre-state
+					// ["+preState+"]" + " # of matches: " + dependentResult);
 					break;
 				}
 			}
-			
+
 		}
-		
+
 		System.out.println("===========================\n");
 	}
 

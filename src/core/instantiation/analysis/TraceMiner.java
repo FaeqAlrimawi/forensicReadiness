@@ -101,8 +101,12 @@ public class TraceMiner {
 	// difference
 	public final static int ACTION_PERFORMED = 1;
 	public final static int ACTION_NOT_PERFORMED = 0;
+
+	// used for as a result for assessing causality between two actions
 	public final static int ACTIONS_CAUSALLY_DEPENDENT = 1;
 	public final static int ACTIONS_NOT_CAUSALLY_DEPENDENT = 2;
+	public final static int ACTIONS_NOT_NECESSARILY_CAUSALLY_DEPENDENT = 3;
+
 	public final static String ATTRIBUTE_STATE_NAME = "state-";
 	public final static String ATTRIBUTE_ACTION_NAME = "action-";
 
@@ -4433,7 +4437,7 @@ public class TraceMiner {
 	 * @return True if action is causally dependent on the preAction. False
 	 *         otherwise
 	 */
-	public int areActionsCausallyDependent(String action, String preAction, int preState) {
+	public int areActionsCausallyDependent(String action, String preAction, int actionPreState, int preActionPreState) {
 
 		/**
 		 * Causally dependence is implemented by checking if the pre-condition
@@ -4448,8 +4452,8 @@ public class TraceMiner {
 		}
 
 		ActionWrapper actionWrapper = bigraphERActions.get(action);
-		
-//		ActionWrapper preActionWrapper = bigraphERActions.get(preAction);
+
+		// ActionWrapper preActionWrapper = bigraphERActions.get(preAction);
 
 		if (actionWrapper == null) {
 			System.err.println("Error. there's a null of wrappers");
@@ -4457,11 +4461,10 @@ public class TraceMiner {
 		}
 
 		BigraphWrapper preWrapper = actionWrapper.getPrecondition();
-		
-//		System.out.println(preWrapper.getContainedEntitiesMap());
+
+		// System.out.println(preWrapper.getContainedEntitiesMap());
 		// === get Bigraph representation of the precondition of action
-		Bigraph actionPre = preWrapper != null
-				? preWrapper.getBigraphObject(false, brsWrapper.getSignature()) : null;
+		Bigraph actionPre = preWrapper != null ? preWrapper.getBigraphObject(false, brsWrapper.getSignature()) : null;
 
 		if (actionPre == null) {
 			System.err.println("precondition of the given action [" + action + "] is NULL");
@@ -4474,7 +4477,11 @@ public class TraceMiner {
 			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
 		}
 
-		Bigraph preStateBig = loadState(preState);
+		// load the previous action pre state
+		Bigraph preStateBig = loadState(preActionPreState);
+
+		// load action pre state
+		Bigraph actionPreStateBig = loadState(actionPreState);
 
 		if (preStateBig == null) {
 			System.err.println("preState Bigraph object is NULL");
@@ -4488,15 +4495,40 @@ public class TraceMiner {
 		Matcher matcher = new Matcher();
 
 		// if (action.equalsIgnoreCase("connectbusdevice")) {
-//		System.out.println("+++++++++ Condition +++++++++");
-//		System.out.println("-stmt: " + actionWrapper.getPrecondition().getBigraphERString()+"\n");
-//		System.out.println("-Bigraph:\n"+actionPre);
-//		System.out.println("+++++++++\nState: " + preStateBig + "\n+++++++++\n");
+		// System.out.println("+++++++++ Condition +++++++++");
+		// System.out.println("-stmt: " +
+		// actionWrapper.getPrecondition().getBigraphERString()+"\n");
+		// System.out.println("-Bigraph:\n"+actionPre);
+		// System.out.println("+++++++++\nState: " + preStateBig +
+		// "\n+++++++++\n");
 		// }
 
-		if (matcher.match(preStateBig, actionPre).iterator().hasNext()) {
+		int countPreAction = 0;
+		int countAction = 0;
+
+		Iterator it = matcher.match(preStateBig, actionPre).iterator();
+		Iterator itAction = matcher.match(actionPreStateBig, actionPre).iterator();
+
+		while (it.hasNext()) {
 			// a match means that there's no dependency
-			return ACTIONS_NOT_CAUSALLY_DEPENDENT;
+			// return ACTIONS_NOT_CAUSALLY_DEPENDENT;
+			it.next();
+			countPreAction++;
+		}
+
+		while (itAction.hasNext()) {
+			// a match means that there's no dependency
+			// return ACTIONS_NOT_CAUSALLY_DEPENDENT;
+			itAction.next();
+			countAction++;
+		}
+
+		if (countPreAction > 0) {
+			if (countPreAction == countAction) {
+				return ACTIONS_NOT_CAUSALLY_DEPENDENT;
+			}
+
+			return ACTIONS_NOT_NECESSARILY_CAUSALLY_DEPENDENT;
 		}
 
 		return ACTIONS_CAUSALLY_DEPENDENT;
