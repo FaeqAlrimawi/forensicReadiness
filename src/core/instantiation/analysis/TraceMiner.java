@@ -60,6 +60,7 @@ import core.brs.parser.utilities.JSONTerms;
 import core.utilities.Query;
 import cyberPhysical_Incident.Entity;
 import ie.lero.spare.franalyser.utility.BigraphNode;
+import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 //import ie.lero.spare.franalyser.utility.FileManipulator;
 //import ie.lero.spare.franalyser.utility.JSONTerms;
@@ -103,9 +104,25 @@ public class TraceMiner {
 	public final static int ACTION_NOT_PERFORMED = 0;
 
 	// used for as a result for assessing causality between two actions
-	public final static int ACTIONS_CAUSALLY_DEPENDENT = 1;
-	public final static int ACTIONS_NOT_CAUSALLY_DEPENDENT = 2;
-	public final static int ACTIONS_NOT_NECESSARILY_CAUSALLY_DEPENDENT = 3;
+	public final static int CAUSALLY_DEPENDENT = 1;
+
+	// this means that action (b) is not causally dependent on action (a) as
+	// determined by the LTS and Bigraph matching
+	public final static int NOT_CAUSALLY_DEPENDENT = 2;
+	// this means that action (b) is not causally dependent on action (a) as
+	// determined by Bigraph matching (not the LTS)
+	public final static int POTENTIALLY_NOT_CAUSALLY_DEPENDENT = 3;
+	// this means that action (b) [maybe] is not causally dependent on action
+	// (a) as determined by Bigraph matching and the the LTS. It's maybe because
+	// by Bigraph matching, it shows that applying action (a) would increase the
+	// number of matches for action(b) i.e. triggering action (a) gives more
+	// ways that action (b) can be triggered in the system
+	public final static int NOT_CAUSALLY_DEPENDENT_BY_LTS = 4;
+
+	public final static int NOT_NECESSARILY_CAUSALLY_DEPENDENT = 5;
+	// same as previous, however, causality depended solely on Bigraph matching
+	// as LTS did not determine causality
+	public final static int POTENTIALLY_NOT_NECESSARILY_CAUSALLY_DEPENDENT = 6;
 
 	public final static String ATTRIBUTE_STATE_NAME = "state-";
 	public final static String ATTRIBUTE_ACTION_NAME = "action-";
@@ -4505,7 +4522,41 @@ public class TraceMiner {
 
 		int countPreAction = 0;
 		int countAction = 0;
+		boolean isNotCausallyDependentByLTS = false;
 
+		// alternative way is to check if the action is triggered by the
+		// preActionPreState in the transition system
+		if (transitionSystem != null) {
+			Digraph<Integer> graph = transitionSystem.getDigraph();
+
+			if (graph != null) {
+				List<Integer> outgoingNeighbors = graph.outboundNeighbors(preActionPreState);
+
+				for (Integer node : outgoingNeighbors) {
+					String nodeAction = graph.getLabel(preActionPreState, node);
+
+					// the action is found to be triggered by the pre state of
+					// the previous action
+					if (nodeAction.equalsIgnoreCase(action)) {
+						// System.out.println("traceMiner:: [" + action + "] is
+						// NOT causally dependent on [" + preAction
+						// + "] with pre-state [" + preActionPreState + "]");
+						isNotCausallyDependentByLTS = true;
+						break;
+					}
+				}
+
+				// if this point is reached then the action is causally
+				// dependent
+//				if (!isNotCausallyDependentByLTS) {
+//					System.out.println("traceMiner:: [" + action + "] is causally dependent on [" + preAction
+//							+ "] with pre-state [" + preActionPreState + "]");
+//				}
+			}
+		}
+
+		// finding causality by matching bigraphs
+		// if (!isCausallyDependent) {
 		Iterator it = matcher.match(preStateBig, actionPre).iterator();
 		Iterator itAction = matcher.match(actionPreStateBig, actionPre).iterator();
 
@@ -4522,16 +4573,35 @@ public class TraceMiner {
 			itAction.next();
 			countAction++;
 		}
+		// }
 
 		if (countPreAction > 0) {
 			if (countPreAction == countAction) {
-				return ACTIONS_NOT_CAUSALLY_DEPENDENT;
+				if (isNotCausallyDependentByLTS) {
+					// not causally dependent by LTS and Bigraph matching
+					return NOT_CAUSALLY_DEPENDENT;
+				} else {
+					// not causally dependent only by Bigraph matching
+					return POTENTIALLY_NOT_CAUSALLY_DEPENDENT;
+				}
 			}
 
-			return ACTIONS_NOT_NECESSARILY_CAUSALLY_DEPENDENT;
+			if (isNotCausallyDependentByLTS) {
+				// not necessarily causally dependent by LTS and Bigraph
+				// matching
+				return NOT_NECESSARILY_CAUSALLY_DEPENDENT;
+			} else {
+				// not necessarily causally dependent only by Bigraph matching
+				return POTENTIALLY_NOT_NECESSARILY_CAUSALLY_DEPENDENT;
+			}
+
+		} else if (isNotCausallyDependentByLTS) {
+			// not causally dependent by LTS only
+			return NOT_CAUSALLY_DEPENDENT_BY_LTS;
 		}
 
-		return ACTIONS_CAUSALLY_DEPENDENT;
+		// action is dependent on the previous action
+		return CAUSALLY_DEPENDENT;
 	}
 
 	// protected void addBigraphStateToTemp(int state, Bigraph big) {

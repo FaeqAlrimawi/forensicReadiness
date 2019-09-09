@@ -3643,24 +3643,39 @@ public class TraceViewerInSystemController {
 					break;
 
 				// action2 has causal dependence on action1
-				case TraceMiner.ACTIONS_CAUSALLY_DEPENDENT: // dependent
+				case TraceMiner.CAUSALLY_DEPENDENT: // dependent
 					System.out.println("[" + action2 + "] causally depends on [" + action1 + "] with pre-state ["
 							+ preState + "]");
 					break;
 
 				// action2 has NO causal depenedence on action1 i.e. action2 can
 				// happend without action1
-				case TraceMiner.ACTIONS_NOT_CAUSALLY_DEPENDENT: // independent
-					System.out.println("[" + action2 + "] does NOT causally depend on [" + action1
-							+ "] with pre-state [" + preState + "]");
+				case TraceMiner.NOT_CAUSALLY_DEPENDENT: // independent
+					System.out.println("[" + action2 + "] NOT causally dependent on [" + action1 + "] with pre-state ["
+							+ preState + "]. Determined by LTS & Bigraph Matching");
+					break;
+
+				case TraceMiner.NOT_CAUSALLY_DEPENDENT_BY_LTS:
+					System.out.println("[" + action2 + "] NOT causally dependent on [" + action1 + "] with pre-state ["
+							+ preState + "]. Determined by LTS only");
+					break;
+
+				case TraceMiner.POTENTIALLY_NOT_CAUSALLY_DEPENDENT:
+					System.out.println("[" + action2 + "] NOT causally dependent on [" + action1 + "] with pre-state ["
+							+ preState + "]. Determined by Bigraph Matching only");
 					break;
 
 				// action2 has no necessary causal dependence on action1, i.e.
 				// action2 can happen with and without action1
-				case TraceMiner.ACTIONS_NOT_NECESSARILY_CAUSALLY_DEPENDENT:
-					System.out.println("[" + action2 + "] does NOT NECESSARILY causally depend on [" + action1
-							+ "] with pre-state [" + preState + "]");
-					
+				case TraceMiner.NOT_NECESSARILY_CAUSALLY_DEPENDENT:
+					System.out.println("[" + action2 + "] NOT NECESSARILY causally dependent on [" + action1
+							+ "] with pre-state [" + preState + "]. Determined by LTS & Bigraph Matching");
+
+				case TraceMiner.POTENTIALLY_NOT_NECESSARILY_CAUSALLY_DEPENDENT:
+					System.out.println("[" + action2 + "] NOT NECESSARILY causally dependent on [" + action1
+							+ "] with pre-state [" + preState + "]. Determined by Bigraph Matching only");
+					break;
+
 				default: // # of matches found
 					// System.out.println("[" + action2 + "] does NOT causally
 					// depend on [" + action1 + "] with pre-state
