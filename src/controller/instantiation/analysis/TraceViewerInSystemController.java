@@ -61,6 +61,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -658,7 +659,7 @@ public class TraceViewerInSystemController {
 	void showCausalityChain() {
 
 		// === for testing
-		findCausalDependency();
+		findCausalDependency(trace);
 		// ===
 	}
 
@@ -3580,11 +3581,11 @@ public class TraceViewerInSystemController {
 	/**
 	 * Find if two actions are causally dependent
 	 */
-	protected void findCausalDependency() {
+	protected void findCausalDependency(GraphPath trace) {
 
 		// it requires the bigrapher file (.big) and states folder to be first
 		// selected
-		if (miner == null || traceCell == null) {
+		if (trace == null || miner == null || traceCell == null) {
 			return;
 		}
 
@@ -3606,13 +3607,14 @@ public class TraceViewerInSystemController {
 			return;
 		}
 
-		// == for testing: check that the 2nd action is dependent on the first
-		// action
-		if (trace == null) {
-			return;
-		}
-
 		List<String> actions = trace.getTransitionActions();
+		List<Integer> states = trace.getStateTransitions();
+
+		StackPane node1 = statesNodes.get(states.get(0));
+		StackPane node2 = statesNodes.get(states.get(1));
+		CubicCurve curve = getCurveLine(node1, node2, Color.GREEN);
+		
+		tracePane.getChildren().add(curve);
 
 		System.out.println("===========================");
 		for (int i = actions.size() - 1; i > 0; i--) {
@@ -4116,7 +4118,7 @@ public class TraceViewerInSystemController {
 
 		// line
 		Line line = getLine(startDot, endDot, color);
-
+		// c line = getCurveLine(startDot, endDot, color);
 		// label
 		StackPane weightAB = getWeight(line, actionName);
 
@@ -4195,6 +4197,78 @@ public class TraceViewerInSystemController {
 				startDot.layoutXProperty().add(startDot.translateXProperty()).add(startDot.widthProperty().divide(2)));
 		line.startYProperty().bind(
 				startDot.layoutYProperty().add(startDot.translateYProperty()).add(startDot.heightProperty().divide(2)));
+		line.endXProperty()
+				.bind(endDot.layoutXProperty().add(endDot.translateXProperty()).add(endDot.widthProperty().divide(2)));
+		line.endYProperty()
+				.bind(endDot.layoutYProperty().add(endDot.translateYProperty()).add(endDot.heightProperty().divide(2)));
+		return line;
+	}
+
+	/**
+	 * Builds a curved line between the provided start and end panes center
+	 * point.
+	 *
+	 * @param startDot
+	 *            Pane for considering start point
+	 * @param endDot
+	 *            Pane for considering end point
+	 * @return CurvedCube joining the layout center points of the provided
+	 *         panes.
+	 */
+	private CubicCurve getCurveLine(StackPane startDot, StackPane endDot, Color color) {
+		CubicCurve line = new CubicCurve();
+		line.setStroke(color);
+		line.setStrokeWidth(2);
+		line.setFill(null);
+
+		line.setControlX1(20);
+		line.setControlY1(0);
+		line.setControlX2(70);
+		line.setControlY2(100);
+
+		line.startXProperty().bind(
+				startDot.layoutXProperty().add(startDot.translateXProperty()).add(startDot.widthProperty().divide(2)));
+		line.startYProperty().bind(
+				startDot.layoutYProperty().add(startDot.translateYProperty()).add(startDot.heightProperty().divide(2)));
+
+		// if start dot position is greater than the end dot then assign the
+		// control points to be mid using the sstart dot location
+		if (startDot.translateXProperty().greaterThan(endDot.getTranslateX()).get()) {
+			line.controlX1Property().bind(endDot.layoutXProperty().add(endDot.translateXProperty()).add(startDot.layoutXProperty().add(startDot.translateXProperty())
+					.subtract(endDot.layoutXProperty().add(endDot.translateXProperty()))));
+			line.controlX2Property().bind(endDot.layoutXProperty().add(endDot.translateXProperty()).add(startDot.layoutXProperty().add(startDot.translateXProperty())
+					.subtract(endDot.layoutXProperty().add(endDot.translateXProperty()))));
+		} else {
+			line.controlX1Property().bind(startDot.layoutXProperty().add(startDot.translateXProperty()).add(endDot.layoutXProperty().add(endDot.translateXProperty())
+					.subtract(startDot.layoutXProperty().add(startDot.translateXProperty()))));
+			line.controlX2Property().bind(startDot.layoutXProperty().add(startDot.translateXProperty()).add(endDot.layoutXProperty().add(endDot.translateXProperty())
+					.subtract(startDot.layoutXProperty().add(startDot.translateXProperty()))));
+		}
+		
+		if (startDot.translateYProperty().greaterThan(endDot.getTranslateY()).get()) {
+			line.controlY1Property().bind(endDot.layoutYProperty().add(endDot.translateYProperty()).add(startDot.layoutYProperty().add(startDot.translateYProperty())
+					.subtract(endDot.layoutYProperty().add(endDot.translateYProperty()))));
+			line.controlY2Property().bind(endDot.layoutYProperty().add(endDot.translateYProperty()).add(startDot.layoutYProperty().add(startDot.translateYProperty())
+					.subtract(endDot.layoutYProperty().add(endDot.translateYProperty()))));
+		} else {
+			line.controlY1Property().bind(startDot.layoutYProperty().add(startDot.translateYProperty()).add(endDot.layoutYProperty().add(endDot.translateYProperty())
+					.subtract(startDot.layoutYProperty().add(startDot.translateYProperty()))));
+			line.controlY2Property().bind(startDot.layoutYProperty().add(startDot.translateYProperty()).add(endDot.layoutYProperty().add(endDot.translateYProperty())
+					.subtract(startDot.layoutYProperty().add(startDot.translateYProperty()))));
+		}
+		
+		
+//		line.controlY1Property().bind(startDot.layoutYProperty().add(startDot.translateYProperty())
+//				.add(startDot.heightProperty().divide(2).add(NODE_RADIUS * 2)));
+		// line.controlX1Property().bind(startDot.layoutXProperty().add(startDot.translateXProperty()).add(startDot.widthProperty().divide(2).add(NODE_RADIUS*2)));
+		// line.controlY1Property().bind(
+		// startDot.layoutYProperty().add(startDot.translateYProperty()).add(startDot.heightProperty().divide(2).add(NODE_RADIUS*2)));
+
+//		line.controlX2Property().bind(startDot.layoutXProperty().add(startDot.translateXProperty())
+//				.add(startDot.widthProperty().divide(2).subtract(NODE_RADIUS * 2)));
+//		line.controlY2Property().bind(startDot.layoutYProperty().add(startDot.translateYProperty())
+//				.add(startDot.heightProperty().divide(2).add(NODE_RADIUS * 2)));
+
 		line.endXProperty()
 				.bind(endDot.layoutXProperty().add(endDot.translateXProperty()).add(endDot.widthProperty().divide(2)));
 		line.endYProperty()
