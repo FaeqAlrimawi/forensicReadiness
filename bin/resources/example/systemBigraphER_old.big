@@ -240,20 +240,6 @@ hallway_general | Room{hallway}.(visitor | id) || connection_to_hallway || Rules
 hallway_visitor | Room{hallway}.id  || connection_to_hallway || RulesKeywords.(id)
 ;
 
-#employee enter room action
-react employee_enter_room_during_working_hours = 
-hallway_employee | room_general || connection_to_hallway || context_working_hours || RulesKeywords.(EnterRoom | id)
-->
-hallway_general | Room{hallway}.(employee | id) || connection_to_hallway || context_working_hours  || RulesKeywords.(id)
-;
-
-#exit room action
-react employee_exit_room = 
-hallway_general | Room{hallway}.(employee | id) || connection_to_hallway || RulesKeywords.(ExitRoom | id)
-->
-hallway_employee | Room{hallway}.id  || connection_to_hallway || RulesKeywords.(id)
-;
-
 #connect to desktop
 react connect_to_desktop = 
 visitor_laptop | Desktop{ipNet} || RulesKeywords.(ConnectIPDevice | id)
@@ -313,11 +299,11 @@ visitor_laptop | SmartTV{ipNet} || RulesKeywords.(id)
 ;
 
 #connect to fire alarm
-react connect_to_firealarm = 
-visitor_laptop | FireAlarm{busNet} || RulesKeywords.(ConnectBusDevice | id)
-->
-visitor_connected_to_bus | /busNet FireAlarm{busNet} || RulesKeywords.(id)
-;
+#react connect_to_firealarm = 
+#visitor_laptop | FireAlarm{busNet} || RulesKeywords.(ConnectBusDevice | id)
+#->
+#visitor_connected_to_bus | /busNet FireAlarm{busNet} || RulesKeywords.(id)
+#;
 
 #disconnect from fire alarm
 react disconnect_from_firealarm = 
@@ -327,11 +313,11 @@ visitor_laptop | FireAlarm{busNet} || RulesKeywords.(id)
 ;
 
 #connect to computing device
-react connect_to_computingdevice = 
-visitor_laptop | ComputingDevice{busNet} || RulesKeywords.(ConnectBusDevice | id)
-->
-visitor_connected_to_bus | /busNet ComputingDevice{busNet} || RulesKeywords.(id)
-;
+#react connect_to_computingdevice = 
+#visitor_laptop | ComputingDevice{busNet} || RulesKeywords.(ConnectBusDevice | id)
+#->
+#visitor_connected_to_bus | /busNet ComputingDevice{busNet} || RulesKeywords.(id)
+#;
 
 #disconnect from computing device
 react disconnect_from_computingdevice = 
@@ -450,14 +436,13 @@ begin brs
   rules = 
   [ 
   {
-    enter_room_during_working_hours, exit_room
-  , employee_enter_room_during_working_hours, employee_exit_room    
+    enter_room_during_working_hours, exit_room  
   , connect_to_desktop, disconnect_from_desktop
-  , connect_to_smartlight, disconnect_from_smartlight
+  , disconnect_from_smartlight
   , connect_to_hvac, disconnect_from_hvac
   , connect_to_smartTV, disconnect_from_smartTV
-  , connect_to_firealarm, disconnect_from_firealarm
-  , connect_to_computingdevice, disconnect_from_computingdevice
+  , disconnect_from_firealarm
+  , disconnect_from_computingdevice
   , employee_generate_data
   , employee_send_data
   , visitor_send_malware
