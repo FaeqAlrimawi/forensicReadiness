@@ -250,8 +250,8 @@ public class TraceViewerInSystemController {
 	private static final String STATE_STYLE = "-fx-font-size:18px;-fx-font-weight:bold;";
 	private static final String EXTRA_STATE_STYLE = "-fx-font-size:18px;-fx-font-weight:bold; -fx-text-fill:black";
 	private static final String STATE_PERC_STYLE = "-fx-font-size:10px;-fx-text-fill:red;";
-	private static final String ACTION_NAME_STYLE = "-fx-font-size:13px;";
-	private static final String ACTION_PERC_STYLE = "-fx-font-size:10px;-fx-text-fill:red;";
+	private static final String ACTION_NAME_STYLE = "-fx-font-size:13px;-fx-background-color:white";
+	private static final String ACTION_PERC_STYLE = "-fx-font-size:10px;-fx-text-fill:red;-fx-background-color:white";
 	private static final String NOT_FOUND = "---";
 	private static final String ARROW_ID_SEPARATOR = "-";
 
@@ -2537,6 +2537,11 @@ public class TraceViewerInSystemController {
 				if (nd instanceof Circle) {
 					nd.setStyle(START_NODE_HIGHLIGHT_STYLE);
 				}
+				
+				if(nd instanceof Label) {
+					Label lbl = (Label) nd;
+					lbl.setTooltip(new Tooltip("Initial state"));
+				}
 			}
 		}
 
@@ -2549,6 +2554,11 @@ public class TraceViewerInSystemController {
 			for (Node nd : finalNode.getChildren()) {
 				if (nd instanceof Circle) {
 					nd.setStyle(END_NODE_HIGHLIGHT_STYLE);
+				}
+				
+				if(nd instanceof Label) {
+					Label lbl = (Label) nd;
+					lbl.setTooltip(new Tooltip("Final state"));
 				}
 			}
 		}
@@ -4418,7 +4428,7 @@ public class TraceViewerInSystemController {
 		vboxAction.getChildren().addAll(lblAction, lblActionPerc);
 
 		StackPane weight = new StackPane();
-		weight.setStyle("-fx-background-color:white");
+//		weight.setStyle("-fx-background-color:white");
 		weight.getChildren().add(vboxAction);
 		DoubleBinding wgtSqrHalfWidth = weight.widthProperty().divide(2);
 		DoubleBinding wgtSqrHalfHeight = weight.heightProperty().divide(2);

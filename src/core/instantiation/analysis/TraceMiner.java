@@ -488,6 +488,8 @@ public class TraceMiner {
 
 		// reset
 		tracesActionsOccurence.clear();
+		statesOccurrences.clear();
+		
 		minimumTraceLength = 100000;
 		maximumTraceLength = -1;
 
