@@ -2562,6 +2562,7 @@ public class TraceViewerInSystemController {
 				}
 			}
 		}
+		
 		// highLightedTracesIDs.add(traceID);
 		// remove states
 
