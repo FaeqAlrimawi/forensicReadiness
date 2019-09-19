@@ -65,7 +65,7 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-//		 launch(args) ;
+		 launch(args) ;
 		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor | id) | id || Room.Device.id || id";
 		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor  id) || Room ";
 		String action = "react enter_room = " + exprs + "->" + exprs2 + "@ [1,2,3];";
@@ -77,25 +77,26 @@ public class Main extends Application {
 		String bigFile = null;
 		String statesFolder = null;
 		
-		if(bigFileURL!=null && statesFolderURL!=null) {
-			bigFile = bigFileURL.getPath();
-		BRSParser parser = new BRSParser();
-		BRSWrapper brsWrapper = parser.parseBigraphERFile(bigFile);
-		ActionWrapper act = brsWrapper.getActions().get("VisitorEnterRoom");
+//		if(bigFileURL!=null && statesFolderURL!=null) {
+//			bigFile = bigFileURL.getPath();
+//		BRSParser parser = new BRSParser();
+//		BRSWrapper brsWrapper = parser.parseBigraphERFile(bigFile);
+//		ActionWrapper act = brsWrapper.getActions().get("VisitorEnterRoom");
+//		
+//		Map<String, List<ActionChangeHolder>> changes = act.findChanges();
+//		
+//		for(Entry<String, List<ActionChangeHolder>> entry : changes.entrySet()) {
+//			
+//			System.out.println("Entity: " + entry.getKey());
+//			System.out.println("Changes in containment:");
+//			for(ActionChangeHolder change : entry.getValue()) {
+//				System.out.println("\t"+change.toString());
+//			}
+//			
+//			System.out.println("=============================\n");
+//		}
+//		}
 		
-		Map<String, List<ActionChangeHolder>> changes = act.findChanges();
-		
-		for(Entry<String, List<ActionChangeHolder>> entry : changes.entrySet()) {
-			
-			System.out.println("Entity: " + entry.getKey());
-			System.out.println("Changes in containment:");
-			for(ActionChangeHolder change : entry.getValue()) {
-				System.out.println("\t"+change.toString());
-			}
-			
-			System.out.println("=============================\n");
-		}
-		}
 //		bigFile = bigFileURL.getPath();
 ////		BRSParser parser = new BRSParser();
 ////		BRSWrapper brsWrapper = parser.parseBigraphERFile(bigFile);

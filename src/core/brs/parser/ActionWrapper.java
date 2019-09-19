@@ -237,24 +237,29 @@ public class ActionWrapper implements Serializable {
 
 		List<String> allEntities = new LinkedList<String>();
 		List<String> addedEntities = new LinkedList<String>();
+
+		/// ==== NEEDS FIXING.... entities used are modified (numbered)
+		// == need to track entities from pre to post
+		//== not easy
 		
-		//add all pre entities
+		// add all pre entities
+		// precondition.getControl(entityName)
 		allEntities.addAll(precondition.getEntities());
-		
-		//add all post entities which are not added
-		for(String postEntity  :postcondition.getEntities()) {
-			if(!allEntities.contains(postEntity)) {
+
+		// add all post entities which are not added
+		for (String postEntity : postcondition.getEntities()) {
+			if (!allEntities.contains(postEntity)) {
 				allEntities.add(postEntity);
 				addedEntities.add(postEntity);
 			}
 		}
-		
+
 		// for each entity in the precondition find what changes (containment or
 		// connectivity) it had in the post
 		for (String entity : allEntities) {
 			List<ActionChangeHolder> changesInContainment = findContainmentChanges(entity);
-			
-			if(changes.containsKey(entity)) {
+
+			if (changes.containsKey(entity)) {
 				changes.get(entity).addAll(changesInContainment);
 			} else {
 				changes.put(entity, changesInContainment);
@@ -327,39 +332,38 @@ public class ActionWrapper implements Serializable {
 			}
 		}
 
-		//if both pre and post have contained entities, then check each
-		
-		//check pre
+		// if both pre and post have contained entities, then check each
+
+		// check pre
 		for (String preEntity : preContainedEntities) {
-			
-			//if not contained in the post then there's a remove
-			if(!postContainedEntities.contains(preEntity)) {
+
+			// if not contained in the post then there's a remove
+			if (!postContainedEntities.contains(preEntity)) {
 				ActionChangeHolder remove = new ActionChangeHolder();
-				
+
 				remove.setChangeType(BigraphChangeType.CONTAINMENT);
 				remove.setChangeOperation(BigraphChangeOperation.REMOVE);
 				List<String> change = new LinkedList<String>();
 				change.add(preEntity);
 				remove.setChangedEntities(change);
-				
+
 				containmentChanges.add(remove);
 			}
 		}
-		
 
-		//check post
+		// check post
 		for (String postEntity : postContainedEntities) {
-			
-			//if not contained in the post then there's a remove
-			if(!preContainedEntities.contains(postEntity)) {
+
+			// if not contained in the post then there's a remove
+			if (!preContainedEntities.contains(postEntity)) {
 				ActionChangeHolder addition = new ActionChangeHolder();
-				
+
 				addition.setChangeType(BigraphChangeType.CONTAINMENT);
 				addition.setChangeOperation(BigraphChangeOperation.ADD);
 				List<String> change = new LinkedList<String>();
 				change.add(postEntity);
 				addition.setChangedEntities(change);
-				
+
 				containmentChanges.add(addition);
 			}
 		}
