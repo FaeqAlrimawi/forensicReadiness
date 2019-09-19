@@ -67,7 +67,7 @@ public class TraceViewerController implements TraceMinerListener {
 	private TextField textFieldSystemFile;
 
 	@FXML
-	private ImageView imgSelectSystemFile;
+	private Button btnSelectSystemFile;
 
 	@FXML
 	private ImageView imgOpentracesFileEmpty;
@@ -260,7 +260,7 @@ public class TraceViewerController implements TraceMinerListener {
 
 	StateViewerController stateViewerController;
 
-	private String traceExampleFile = "resources/example/instantiations_10000.json";
+	private String traceExampleFile = "resources/example/traces_10K.json";
 
 	@FXML
 	public void initialize() {
@@ -511,7 +511,7 @@ public class TraceViewerController implements TraceMinerListener {
 	}
 
 	@FXML
-	void selectTracesFile(MouseEvent event) {
+	void selectTracesFile(ActionEvent event) {
 
 		FileChooser fileChooser = new FileChooser();
 

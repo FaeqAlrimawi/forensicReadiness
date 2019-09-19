@@ -3701,9 +3701,11 @@ public class TraceViewerInSystemController {
 
 	protected Node addCausalCurve(int startState, int endState) {
 	
+		
 		StackPane node1 = statesNodes.get(startState);
 		StackPane node2 = statesNodes.get(endState);
 		
+//		arrowsLabels
 		if(node1 == null || node2 ==null) {
 			return null;
 		}

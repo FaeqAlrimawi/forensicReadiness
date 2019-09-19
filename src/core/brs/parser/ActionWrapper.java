@@ -2,6 +2,7 @@ package core.brs.parser;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +12,7 @@ import java.util.stream.Collectors;
 import cyberPhysical_Incident.Entity;
 import it.uniud.mads.jlibbig.core.std.Signature;
 
-public class ActionWrapper implements Serializable{
+public class ActionWrapper implements Serializable {
 
 	/**
 	 * 
@@ -69,9 +70,10 @@ public class ActionWrapper implements Serializable{
 		return preEntities;
 	}
 
-
 	/**
-	 * Finds all entities in the action with their occurrences(count) with the action
+	 * Finds all entities in the action with their occurrences(count) with the
+	 * action
+	 * 
 	 * @param excluding
 	 * @param topK
 	 * @param isAscending
@@ -79,11 +81,11 @@ public class ActionWrapper implements Serializable{
 	 */
 	public List<Map.Entry<String, Long>> findAllEntities(List<String> excluding, int topK, boolean isAscending) {
 
-		List<Map.Entry<String, Long>> allEntities = new LinkedList<Map.Entry<String,Long>>();
-		
+		List<Map.Entry<String, Long>> allEntities = new LinkedList<Map.Entry<String, Long>>();
+
 		allEntities.addAll(findPreEntities(excluding, topK, isAscending));
 		allEntities.addAll(findPostEntities(excluding, topK, isAscending));
-		
+
 		return allEntities;
 
 	}
@@ -223,5 +225,145 @@ public class ActionWrapper implements Serializable{
 
 		return postEntities;
 
+	}
+
+	public Map<String, List<ActionChangeHolder>> findChanges() {
+
+		Map<String, List<ActionChangeHolder>> changes = new HashMap<String, List<ActionChangeHolder>>();
+
+		if (precondition == null || postcondition == null) {
+			return changes;
+		}
+
+		List<String> allEntities = new LinkedList<String>();
+		List<String> addedEntities = new LinkedList<String>();
+		
+		//add all pre entities
+		allEntities.addAll(precondition.getEntities());
+		
+		//add all post entities which are not added
+		for(String postEntity  :postcondition.getEntities()) {
+			if(!allEntities.contains(postEntity)) {
+				allEntities.add(postEntity);
+				addedEntities.add(postEntity);
+			}
+		}
+		
+		// for each entity in the precondition find what changes (containment or
+		// connectivity) it had in the post
+		for (String entity : allEntities) {
+			List<ActionChangeHolder> changesInContainment = findContainmentChanges(entity);
+			
+			if(changes.containsKey(entity)) {
+				changes.get(entity).addAll(changesInContainment);
+			} else {
+				changes.put(entity, changesInContainment);
+			}
+		}
+
+		return changes;
+	}
+
+	public List<ActionChangeHolder> findContainmentChanges(String entity) {
+		// finds containment changes for the given entity
+		// looks in the pre and post for changes of contained entities for that
+		// entity
+
+		List<ActionChangeHolder> containmentChanges = new LinkedList<ActionChangeHolder>();
+
+		if (precondition == null || postcondition == null) {
+			return containmentChanges;
+		}
+
+		List<String> preContainedEntities = precondition.getContainedEntitiesMap().get(entity);
+		List<String> postContainedEntities = postcondition.getContainedEntitiesMap().get(entity);
+
+		// if no change
+		if (preContainedEntities == null || preContainedEntities.isEmpty()) {
+			if (postContainedEntities == null || postContainedEntities.isEmpty()) {
+				return containmentChanges;
+			}
+		}
+
+		// if the entity didn't have any in the pre then in the post they are
+		// added
+		if (preContainedEntities == null || preContainedEntities.isEmpty()) {
+			if (postContainedEntities != null && !postContainedEntities.isEmpty()) {
+				ActionChangeHolder addedContainmentChange = new ActionChangeHolder();
+
+				// set change to containment
+				addedContainmentChange.setChangeType(BigraphChangeType.CONTAINMENT);
+
+				// set operation to add
+				addedContainmentChange.setChangeOperation(BigraphChangeOperation.ADD);
+
+				// set changed entities to post contained entities
+				addedContainmentChange.setChangedEntities(new LinkedList<String>(postContainedEntities));
+
+				containmentChanges.add(addedContainmentChange);
+
+				return containmentChanges;
+			}
+		}
+
+		// if the entity did have any in the pre then in the post they are
+		// removed
+		if (postContainedEntities == null || postContainedEntities.isEmpty()) {
+			if (preContainedEntities != null && !preContainedEntities.isEmpty()) {
+				ActionChangeHolder removedContainmentChange = new ActionChangeHolder();
+
+				// set change to containment
+				removedContainmentChange.setChangeType(BigraphChangeType.CONTAINMENT);
+
+				// set operation to add
+				removedContainmentChange.setChangeOperation(BigraphChangeOperation.REMOVE);
+
+				// set changed entities to post contained entities
+				removedContainmentChange.setChangedEntities(new LinkedList<String>(preContainedEntities));
+
+				containmentChanges.add(removedContainmentChange);
+
+				return containmentChanges;
+			}
+		}
+
+		//if both pre and post have contained entities, then check each
+		
+		//check pre
+		for (String preEntity : preContainedEntities) {
+			
+			//if not contained in the post then there's a remove
+			if(!postContainedEntities.contains(preEntity)) {
+				ActionChangeHolder remove = new ActionChangeHolder();
+				
+				remove.setChangeType(BigraphChangeType.CONTAINMENT);
+				remove.setChangeOperation(BigraphChangeOperation.REMOVE);
+				List<String> change = new LinkedList<String>();
+				change.add(preEntity);
+				remove.setChangedEntities(change);
+				
+				containmentChanges.add(remove);
+			}
+		}
+		
+
+		//check post
+		for (String postEntity : postContainedEntities) {
+			
+			//if not contained in the post then there's a remove
+			if(!preContainedEntities.contains(postEntity)) {
+				ActionChangeHolder addition = new ActionChangeHolder();
+				
+				addition.setChangeType(BigraphChangeType.CONTAINMENT);
+				addition.setChangeOperation(BigraphChangeOperation.ADD);
+				List<String> change = new LinkedList<String>();
+				change.add(postEntity);
+				addition.setChangedEntities(change);
+				
+				containmentChanges.add(addition);
+			}
+		}
+
+		return containmentChanges;
 	}
 }
