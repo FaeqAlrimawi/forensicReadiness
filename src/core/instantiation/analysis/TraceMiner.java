@@ -4907,6 +4907,14 @@ public class TraceMiner {
 
 	}
 
+	public Signature getSignature() {
+		
+		if(brsWrapper!=null) {
+			return brsWrapper.getSignature();
+		}
+		
+		return null;
+	}
 	// public static void main(String[] args) {
 	//
 	// TraceMiner m = new TraceMiner();
