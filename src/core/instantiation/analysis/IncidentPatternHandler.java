@@ -1,11 +1,12 @@
 package core.instantiation.analysis;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -18,18 +19,18 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import core.brs.parser.BigraphWrapper;
 import core.instantiation.analysis.utilities.IncidentModelHandler;
 import core.instantiation.analysis.utilities.SystemModelHandler;
 import cyberPhysical_Incident.Activity;
 import cyberPhysical_Incident.BigraphExpression;
 import cyberPhysical_Incident.Condition;
-import cyberPhysical_Incident.Entity;
 import cyberPhysical_Incident.IncidentDiagram;
 import cyberPhysical_Incident.Precondition;
 import environment.Asset;
 import environment.EnvironmentDiagram;
+import ie.lero.spare.franalyser.utility.FileNames;
 import ie.lero.spare.pattern_instantiation.GraphPath;
+import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Matcher;
 
@@ -48,6 +49,10 @@ public class IncidentPatternHandler {
 
 	// key is asset name, value is the Asset object from system model
 	private Map<String, Asset> nameToAssetMap;
+
+	// key is asset class name, value is a list of controls in the bigrapher
+	// file with the first as the main
+	private Map<String, List<String>> assetControlMap;
 
 	private final static String ENTITY_NAME = "incident_entity_name";
 	private final static String ASSET_NAME = "system_asset_name";
@@ -168,6 +173,14 @@ public class IncidentPatternHandler {
 			}
 		}
 
+		// load asset to control map
+		assetControlMap = loadAssetControlMap();
+
+		if (assetControlMap == null) {
+			System.err.println("asset control map is null");
+			return;
+		}
+
 		JSONParser parser = new JSONParser();
 
 		FileReader reader;
@@ -212,19 +225,30 @@ public class IncidentPatternHandler {
 						Asset ast = systemModel.getAsset(entry.getValue());
 
 						if (ast == null) {
-							System.out.println("asset : " + assetName + " is not in the system model.");
+							System.err.println("asset : " + assetName + " is not in the system model.");
 							continue;
 						}
 
 						String className = ast.getClass().getSimpleName();
-
+						String control = "";
+						
 						// remove Impl if exists
 						if (className.contains("Impl")) {
 							className = className.replace("Impl", "");
 						}
 
+						//find control
+						List<String> controls = assetControlMap.get(className);
+						
+						if(controls!=null && controls.size()>0) {
+							control = controls.get(0);
+						} else {
+							System.err.println("system class ["+className+"] has no control in the bigrapher file");
+							continue;
+						}
+						
 						// replace the entity name with a class name
-						replaceEntityNameToAssetClass(cond, entityName, className);
+						replaceEntityNameToAssetClass(cond, entityName, control);
 					}
 				}
 
@@ -244,7 +268,7 @@ public class IncidentPatternHandler {
 
 	}
 
-	public void replaceEntityNameToAssetClass(Condition condition, String entityName, String assetClass) {
+	public void replaceEntityNameToAssetClass(Condition condition, String entityName, String control) {
 
 		if (condition == null) {
 			return;
@@ -252,7 +276,7 @@ public class IncidentPatternHandler {
 
 		BigraphExpression bigExp = (BigraphExpression) condition.getExpression();
 
-		bigExp.replaceEntityName(entityName, assetClass);
+		bigExp.replaceEntityName(entityName, control);
 
 		// System.out.println(bigExp.getEntity());
 		//
@@ -310,6 +334,73 @@ public class IncidentPatternHandler {
 		}
 
 		// System.out.println("Map:\n" + entityAssetMap);
+	}
+
+	protected Map<String, List<String>> loadAssetControlMap() {
+
+		// key is asset class name, value is the list of controls from the big
+		// file
+		Map<String, List<String>> assetControlMap = new HashMap<String, List<String>>();
+
+		// List<String> unMatchedControls = new LinkedList<String>();
+		// Signature signature = systemHandler.getGlobalBigraphSignature();
+
+		InputStream systemControlMapFileName = IncidentPatternInstantiator.class.getClassLoader()
+				.getResourceAsStream("resources/asset-control_map.txt");
+		// .getResource("ie/lero/spare/resources/" +
+		// FileNames.ASSET_CONTROL_MAP);
+
+		if (systemControlMapFileName == null) {
+			System.err.println("System to Control map file [" + FileNames.ASSET_CONTROL_MAP + "] is not found");
+			return null;
+		}
+
+		BufferedReader reader = new BufferedReader(new InputStreamReader(systemControlMapFileName));
+
+		// String path = systemControlMapFileName.getPath();
+		// String[] lines = FileManipulator.readFileNewLine(path);
+
+		String assetClass = null;
+		String[] controlNames = null;
+		String[] tmp;
+		String line = null;
+
+		try {
+			while ((line = reader.readLine()) != null) {
+				tmp = line.split(FileNames.ASSET_CONTROL_SEPARATOR);
+
+				if (tmp.length < 2) {
+					continue;
+				}
+
+				assetClass = tmp[0]; // system class
+				controlNames = tmp[1] != null ? tmp[1].split(FileNames.CONTROLS_SEPARATOR) : null; // bigrapher
+																									// controls
+//				String primariyControl = controlNames.length > 0 ? controlNames[0] : null;
+
+				// if (signature != null && signature.getByName(primariyControl)
+				// == null) {
+				// unMatchedControls.add(primariyControl);
+				// }
+
+				assetControlMap.put(assetClass, Arrays.asList(controlNames));
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES +
+		// "SystemClass<->Control map is created.");
+		// if (!unMatchedControls.isEmpty()) {
+		// logger.putMessage(
+		// Logger.SEPARATOR_BTW_INSTANCES + "Some Primariy Controls in the map
+		// have no equivalent in ("
+		// + systemFileName + "):" +
+		// Arrays.toString(unMatchedControls.toArray()));
+		// }
+
+		return assetControlMap;
 	}
 
 	public Map<String, Integer> findMatchingStates(GraphPath trace) {
@@ -380,15 +471,18 @@ public class IncidentPatternHandler {
 					// match state to condition
 					Matcher matcher = new Matcher();
 
+//					System.out.println("Matching state ["+stateID+"] to condition [" + cond.getName()+"]");
 					// if it matches then add to the result
 					if (matcher.match(stateBig, condBig).iterator().hasNext()) {
 						matchingStates.put(cond.getName(), stateID);
-
+						System.out.println("Matching state ["+stateID+"] to condition [" + cond.getName()+"] succeeded");
 						// increment index if the condition is pre
 						if (cond instanceof Precondition) {
 							currentIndex++;
 							break;
 						}
+					}else {
+						System.out.println("Matching state ["+stateID+"] to condition [" + cond.getName()+"] Failed");
 					}
 
 				}
@@ -405,6 +499,7 @@ public class IncidentPatternHandler {
 
 		IncidentPatternHandler inc = new IncidentPatternHandler(miner);
 
+		String statesFolder = "D:/Bigrapher data/lero/big with unique action names/states10K/states";
 		String traceExampleFile = "resources/example/traces_10K.json";
 		String sysModelFilePath = "D:/Bigrapher data/lero/big with unique action names/lero.cps";
 		String bigrapherFilePath = "D:/Bigrapher data/lero/big with unique action names/lero.big";
@@ -415,13 +510,16 @@ public class IncidentPatternHandler {
 		if (url != null) {
 			String filePath = url.getPath();
 
+			//set states folder in miner
+			miner.setStatesFolder(statesFolder);
+			
 			// set incident and system model files
 			inc.setIncidentPatternFilePath(incidentPatternModelFilePath);
 			inc.setSystemModelFilePath(sysModelFilePath);
 
-			//set traces file
+			// set traces file
 			inc.setTracesFilePath(filePath);
-			
+
 			// set bigrapher file if not set by the miner
 			if (miner.getBigraphERFile() == null || miner.getBigraphERFile().isEmpty()) {
 				inc.setBigraphFilePath(bigrapherFilePath);
@@ -435,15 +533,15 @@ public class IncidentPatternHandler {
 			states.add(396);
 			states.add(1699);
 			states.add(6689);
-			
+
 			testTrace.setInstanceID(100);
 			testTrace.setStateTransitions(states);
-			
+
 			Map<String, Integer> res = inc.findMatchingStates(testTrace);
-			
-			System.out.println(res);
+
+			System.out.println("result::\n"+res);
 			// replaces entity names with asset class names
-//			inc.createConcreteConditions(filePath);
+			// inc.createConcreteConditions(filePath);
 
 		} else {
 			System.out.println("url is null");
