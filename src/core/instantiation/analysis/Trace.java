@@ -9,8 +9,6 @@ import java.util.Map;
 
 import core.brs.parser.ActionWrapper;
 import core.brs.parser.BigraphWrapper;
-import ie.lero.spare.pattern_instantiation.GraphPath;
-import it.uniud.mads.jlibbig.core.std.Bigraph;
 
 public class Trace implements Serializable {
 
