@@ -3961,7 +3961,10 @@ public class TraceViewerInSystemController {
 
 		// shows the given map in the viewer
 		// use the state perc map to do so
+		boolean isAdded = false;
+		
 		for (Entry<String, Integer> entry : conditionsMatchingStatesMap.entrySet()) {
+			isAdded = false;
 			String conditionName = entry.getKey();
 			int state = entry.getValue();
 
@@ -3972,10 +3975,26 @@ public class TraceViewerInSystemController {
 
 				if (currentText != null && !currentText.isEmpty()) {
 					// if there's already two conditions written
-					if (currentText.split(",").length > 2) {
-						currentText = conditionName;
+					if (currentText.contains(",")) {
+						String[] conds = currentText.split(",");
+						
+						for(String cond : conds) {
+							cond = cond.trim();
+							if(conditionName.equalsIgnoreCase(cond)) {
+								isAdded = true;
+								break;
+							}
+						}
+						
+						if(!isAdded) {
+							currentText += ", " + conditionName;
+						}
+						
 					} else {
-						currentText += ", " + conditionName;
+						if(!currentText.equalsIgnoreCase(conditionName)) {
+							currentText += ", " + conditionName;	
+						}
+						
 					}
 
 				} else {
