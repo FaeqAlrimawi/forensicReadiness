@@ -2671,6 +2671,9 @@ public class TraceMiner {
 
 		instanceFileName = filePath;
 
+		//set it for the incident pattern handler
+		incidentPatternHandler.setTracesFilePath(instanceFileName);
+		
 		if (instanceFileName == null) {
 			return;
 		}
@@ -5073,6 +5076,7 @@ public class TraceMiner {
 		incidentPatternHandler.setSystemModelFilePath(systemModelFilePath);
 	}
 
+	
 	// public static void main(String[] args) {
 	//
 	// TraceMiner m = new TraceMiner();

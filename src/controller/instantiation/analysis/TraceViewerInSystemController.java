@@ -414,6 +414,8 @@ public class TraceViewerInSystemController {
 
 		mapActions = new HashMap<String, List<Integer>>();
 
+		traceStatesMatchingConditions = new HashMap<Integer, Map<String,Integer>>();
+		
 		// added traces ids
 		addedTracesIDs = new LinkedList<Integer>();
 		highLightedTracesIDs = new HashMap<Integer, String>();
@@ -663,7 +665,8 @@ public class TraceViewerInSystemController {
 	void showCausalityChain() {
 
 		// === for testing
-		findCausalDependency(trace);
+//		findCausalDependency(trace);
+		findStatesMatchingIncidentPatternConditions(trace);
 		// ===
 	}
 
@@ -3710,7 +3713,7 @@ public class TraceViewerInSystemController {
 	 */
 	protected void findStatesMatchingIncidentPatternConditions(GraphPath trace) {
 
-		if (trace == null || miner == null) {
+		if (trace == null || miner == null || traceCell == null) {
 			return;
 		}
 
@@ -3726,6 +3729,10 @@ public class TraceViewerInSystemController {
 
 		if (incidentPatternFile == null || incidentPatternFile.isEmpty()) {
 			// load incident pattern file
+
+			traceCell.selectIncidentPatternFile();
+			
+			incidentPatternFile = miner.getIncidentPatternFilePath();
 			
 			if (incidentPatternFile == null || incidentPatternFile.isEmpty()) {
 				// if stil null then return
@@ -3739,6 +3746,10 @@ public class TraceViewerInSystemController {
 		if (systemModelFile == null || systemModelFile.isEmpty()) {
 			// load system model
 
+			traceCell.selectSystemModelFile();
+			
+			systemModelFile = miner.getSystemModelFilePath();
+			
 			if (systemModelFile == null || systemModelFile.isEmpty()) {
 				// if still null then return
 				return;
@@ -3751,6 +3762,10 @@ public class TraceViewerInSystemController {
 		if (statesFolder == null || statesFolder.isEmpty()) {
 			// load system model
 
+			traceCell.selectStatesFolder();
+			
+			statesFolder = miner.getStatesFolder();
+			
 			if (statesFolder == null || statesFolder.isEmpty()) {
 				// if still null then return
 				return;
@@ -3758,14 +3773,30 @@ public class TraceViewerInSystemController {
 
 		}
 		
-		Map<String, Integer> result = miner.getStatesMatchingIncidentPatternConditions(trace);
+		//set bigraphER file
+		String bigraphERFile = miner.getBigraphERFile();
 		
-		if(result!=null) {
+		if(bigraphERFile==null || bigraphERFile.isEmpty()) {
+			
+			traceCell.selectBigraphERFile();
+			
+			bigraphERFile = miner.getBigraphERFile();
+			
+			if (bigraphERFile == null || bigraphERFile.isEmpty()) {
+				// if still null then return
+				return;
+			}
+			
+		}
+
+		Map<String, Integer> result = miner.getStatesMatchingIncidentPatternConditions(trace);
+
+		if (result != null) {
 			traceStatesMatchingConditions.put(traceID, result);
 			showConditionsMatchingStates(result);
 		}
-		
-		System.out.println("result for trace-"+traceID+"\n"+result+"\n");
+
+		System.out.println("result for trace-" + traceID + "\n" + result + "\n");
 	}
 
 	protected void showConditionsMatchingStates(Map<String, Integer> conditionsMatchingStatesMap) {

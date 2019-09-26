@@ -96,6 +96,8 @@ public class TaskCell extends ListCell<GraphPath> {
 	private final URL defaultBigraphERFile = getClass().getResource("../../../resources/example/systemBigraphER.big");
 
 	private final URL defaultIncidentPatternFile = null;
+	private final URL defaultSystemModelFile = null;
+	
 	private TraceMiner traceMiner;
 
 	// holds the file path for saved trace
@@ -359,7 +361,66 @@ public class TaskCell extends ListCell<GraphPath> {
 	}
 
 	/**
-	 * Select BigraphER file (*.big)
+	 * Select system model file (*.cps)
+	 */
+	public void selectSystemModelFile() {
+		
+		FileChooser fileChooser = new FileChooser();
+
+		// if a file already chosen
+		if (traceMiner != null) {
+			String systemModelFile = traceMiner.getSystemModelFilePath();
+			if(systemModelFile!=null && !systemModelFile.isEmpty()) {
+				
+				File selectedSystemModelFileFile = new File(systemModelFile);
+				
+				fileChooser.setInitialFileName(selectedSystemModelFileFile.getName());
+
+				String folder = selectedSystemModelFileFile.getAbsolutePath().substring(0,
+						selectedSystemModelFileFile.getAbsolutePath().lastIndexOf(File.separator));
+				File folderF = new File(folder);
+
+				if (folderF.isDirectory()) {
+					fileChooser.setInitialDirectory(folderF);
+				}
+			}
+			
+		} else if (defaultSystemModelFile != null) {
+			File selectedBigraphERFile = new File(defaultSystemModelFile.getPath());
+			fileChooser.setInitialFileName(selectedBigraphERFile.getName());
+
+			String folder = selectedBigraphERFile.getAbsolutePath().substring(0,
+					selectedBigraphERFile.getAbsolutePath().lastIndexOf(File.separator));
+			File folderF = new File(folder);
+
+			if (folderF.isDirectory()) {
+				fileChooser.setInitialDirectory(folderF);
+			}
+		}
+
+		// if first time
+		if (traceMiner != null && (traceMiner.getSystemModelFilePath()==null || traceMiner.getSystemModelFilePath().isEmpty())) {
+			ButtonType result = showDialog("Select System Model File", "System Model file is needed",
+					"Please select [system model file] (*.cps)", AlertType.CONFIRMATION, true);
+
+			if (result == ButtonType.CANCEL) {
+				return;
+			}
+		}
+
+		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("System Model (*.cps)", "*.cps");
+
+		fileChooser.getExtensionFilters().add(extFilter);
+
+		File selectedTracesFile = fileChooser.showOpenDialog(null);
+
+		if (selectedTracesFile != null) {
+			traceMiner.setSystemModelFilePath(selectedTracesFile.getAbsolutePath());
+		}
+	}
+	
+	/**
+	 * Select incident pattern file (*.cpi)
 	 */
 	public void selectIncidentPatternFile() {
 		FileChooser fileChooser = new FileChooser();
@@ -382,8 +443,8 @@ public class TaskCell extends ListCell<GraphPath> {
 				}
 			}
 			
-		} else if (defaultBigraphERFile != null) {
-			File selectedBigraphERFile = new File(defaultBigraphERFile.getPath());
+		} else if (defaultIncidentPatternFile != null) {
+			File selectedBigraphERFile = new File(defaultIncidentPatternFile.getPath());
 			fileChooser.setInitialFileName(selectedBigraphERFile.getName());
 
 			String folder = selectedBigraphERFile.getAbsolutePath().substring(0,
@@ -396,23 +457,23 @@ public class TaskCell extends ListCell<GraphPath> {
 		}
 
 		// if first time
-		if (traceMiner != null && !traceMiner.isBigraphERFileSet()) {
-			ButtonType result = showDialog("Select BigraphER File", "BigraphER file needed",
-					"Please select BigraphER file (*.big)", AlertType.CONFIRMATION, true);
+		if (traceMiner != null && (traceMiner.getIncidentPatternFilePath()==null || traceMiner.getIncidentPatternFilePath().isEmpty())) {
+			ButtonType result = showDialog("Select Incident Pattern File", "Incident Pattern file is needed",
+					"Please select [incident pattern file] (*.cpi)", AlertType.CONFIRMATION, true);
 
 			if (result == ButtonType.CANCEL) {
 				return;
 			}
 		}
 
-		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("BigraphER files (*.big)", "*.big");
+		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("Incident Pattern (*.cpi)", "*.cpi");
 
 		fileChooser.getExtensionFilters().add(extFilter);
 
 		File selectedTracesFile = fileChooser.showOpenDialog(null);
 
 		if (selectedTracesFile != null) {
-			traceMiner.setBigraphERFile(selectedTracesFile.getAbsolutePath());
+			traceMiner.setIncidentPatternFilePath(selectedTracesFile.getAbsolutePath());
 		}
 	}
 	
@@ -451,7 +512,7 @@ public class TaskCell extends ListCell<GraphPath> {
 		// if first time
 		if (traceMiner != null && !traceMiner.isBigraphERFileSet()) {
 			ButtonType result = showDialog("Select BigraphER File", "BigraphER file needed",
-					"Please select BigraphER file (*.big)", AlertType.CONFIRMATION, true);
+					"Please select [BigraphER file] (*.big)", AlertType.CONFIRMATION, true);
 
 			if (result == ButtonType.CANCEL) {
 				return;
