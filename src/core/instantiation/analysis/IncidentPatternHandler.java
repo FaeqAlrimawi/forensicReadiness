@@ -448,7 +448,7 @@ public class IncidentPatternHandler {
 		List<Integer> traceStates = trace.getStateTransitions();
 
 		Activity act = incidentPattern.getInitialActivity();
-		main_loop: while (act!= null) {
+		main_loop: while (act != null) {
 
 			List<Condition> conditions = new LinkedList<Condition>();
 			conditions.add(act.getPrecondition());
@@ -504,24 +504,29 @@ public class IncidentPatternHandler {
 					// if it matches then add to the result
 					if (matcher.match(stateBig, condBig).iterator().hasNext()) {
 						matchingStates.put(cond.getName(), stateID);
-//						System.out.println(
-//								"Matching state [" + stateID + "] to activity ["+act.getName()+"] condition [" + cond.getName() + "] succeeded");
+						// System.out.println(
+						// "Matching state [" + stateID + "] to activity
+						// ["+act.getName()+"] condition [" + cond.getName() +
+						// "] succeeded");
 						// increment index if the condition is pre
 						if (cond instanceof Precondition) {
 							currentIndex++;
 						}
 						break;
 					}
-//					else {
-//						System.out.println(
-//								"Matching state [" + stateID + "] to activity ["+act.getName()+"] condition [" + cond.getName() + "] Failed");
-//					}
+					// else {
+					// System.out.println(
+					// "Matching state [" + stateID + "] to activity
+					// ["+act.getName()+"] condition [" + cond.getName() + "]
+					// Failed");
+					// }
 
 				}
 			}
 
-			//next act
-			act = (act.getNextActivities()!=null && act.getNextActivities().size()>0)?act.getNextActivities().get(0):null;
+			// next act
+			act = (act.getNextActivities() != null && act.getNextActivities().size() > 0)
+					? act.getNextActivities().get(0) : null;
 		}
 
 		return matchingStates;
@@ -536,25 +541,25 @@ public class IncidentPatternHandler {
 		Bigraph condBig = null;
 
 		PredicateType type = PredicateType.Precondition;
-		
-		if(cond instanceof Precondition) {
+
+		if (cond instanceof Precondition) {
 			type = PredicateType.Precondition;
-		} else if(cond instanceof Postcondition) {
+		} else if (cond instanceof Postcondition) {
 			type = PredicateType.Postcondition;
-		} 
+		}
 		// condBig = bigExp.createBigraph(false, miner.getSignature());
 
 		// generate big by predicate
 
 		try {
-//			System.out.println(incidentPatternFilePath);
-			org.json.JSONObject condJson = XqueryExecuter.getBigraphConditions(act.getName(),
-					type, incidentPatternFilePath);
+			// System.out.println(incidentPatternFilePath);
+			org.json.JSONObject condJson = XqueryExecuter.getBigraphConditions(act.getName(), type,
+					incidentPatternFilePath);
 
 			if (condJson != null) {
 				Predicate pred = new Predicate();
 
-//				System.out.println(assetNameToControlMap);
+				// System.out.println(assetNameToControlMap);
 
 				pred.setAssetControlMap(assetNameToControlMap);
 				pred.setEntityAssetMap(entityAssetMap);
@@ -563,7 +568,7 @@ public class IncidentPatternHandler {
 				pred.convertToMatchedAssets(condJson, cond.getName());
 
 				condBig = pred.convertJSONtoBigraph(condJson, miner.getSignature());
-				
+
 			} else {
 				System.err.println("condition json object is null");
 			}
@@ -576,9 +581,49 @@ public class IncidentPatternHandler {
 		if (condBig == null) {
 			System.err.println("Bigraph object of condition [" + cond.getName() + "] is null");
 			return null;
-		} 
-		
+		}
+
 		return condBig;
+	}
+
+	/**
+	 * Returns the activity name for the given condition
+	 * @param condition condition name
+	 * @return Activity name
+	 */
+	public String getActivityName(String condition) {
+
+		if (condition == null || condition.isEmpty()) {
+			return null;
+		}
+
+		if (incidentPattern == null) {
+			return null;
+		}
+
+		Activity act = incidentPattern.getInitialActivity();
+
+		while (act != null) {
+
+			//check pre
+			Precondition pre = act.getPrecondition();
+
+			if (pre != null && pre.getName().equalsIgnoreCase(condition)) {
+				return act.getName();
+			}
+
+			//check post
+			Postcondition post = act.getPostcondition();
+
+			if (post != null && post.getName().equalsIgnoreCase(condition)) {
+				return act.getName();
+			}
+			
+			//next act
+			act = (act.getNextActivities()!= null && act.getNextActivities().size()>0)?act.getNextActivities().get(0):null;
+		}
+		
+		return null;
 	}
 
 	public static void main(String[] args) {

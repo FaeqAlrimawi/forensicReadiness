@@ -89,14 +89,14 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	// private Trace newTrace;
 
-	private final URL defaultStatesFolder = getClass().getResource("../../../resources/example/states_1000");
+	private static final URL defaultStatesFolder = TaskCell.class.getClassLoader().getResource("resources/example/states");
 
 	// private String statesFolder;
 
-	private final URL defaultBigraphERFile = getClass().getResource("../../../resources/example/systemBigraphER.big");
+	private static final URL defaultBigraphERFile = TaskCell.class.getClassLoader().getResource("resources/example/systemBigraphER.big");
 
-	private final URL defaultIncidentPatternFile = null;
-	private final URL defaultSystemModelFile = null;
+	private static  final URL defaultIncidentPatternFile = TaskCell.class.getClassLoader().getResource("resources/example/incidentPattern.cpi");
+	private static  final URL defaultSystemModelFile = TaskCell.class.getClassLoader().getResource("resources/example/systemModel.cps");
 	
 	private TraceMiner traceMiner;
 

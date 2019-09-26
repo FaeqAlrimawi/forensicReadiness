@@ -3799,9 +3799,38 @@ public class TraceViewerInSystemController {
 		System.out.println("result for trace-" + traceID + "\n" + result + "\n");
 	}
 
+	/**
+	 * Shows the result of states matching incident pattern conditions in the viewer
+	 * @param conditionsMatchingStatesMap
+	 */
 	protected void showConditionsMatchingStates(Map<String, Integer> conditionsMatchingStatesMap) {
 
 		// shows the given map in the viewer
+		//use the state perc map to do so
+		for(Entry<String, Integer> entry : conditionsMatchingStatesMap.entrySet()) {
+			String conditionName = entry.getKey();
+			int state = entry.getValue();
+			
+			Label lbl = mapStatePerc.get(state);
+			
+			if(lbl!=null) {
+				String currentText = lbl.getText();
+				
+				if(currentText!=null && !currentText.isEmpty()) {
+					currentText += ", "+conditionName;
+				} else{
+					currentText = conditionName;
+				}
+				
+				lbl.setText(currentText);
+				
+				String tiptext = "State-"+state+" matches to pattern condition(s) ["+currentText+"]";
+				
+				Tooltip tip = new Tooltip(tiptext);
+				tip.setStyle("-fx-font-size:14px;");
+				lbl.setTooltip(tip);
+			}
+		}
 	}
 
 	protected Node addCausalCurve(int startState, int endState) {
