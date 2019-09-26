@@ -95,6 +95,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	private final URL defaultBigraphERFile = getClass().getResource("../../../resources/example/systemBigraphER.big");
 
+	private final URL defaultIncidentPatternFile = null;
 	private TraceMiner traceMiner;
 
 	// holds the file path for saved trace
@@ -360,6 +361,64 @@ public class TaskCell extends ListCell<GraphPath> {
 	/**
 	 * Select BigraphER file (*.big)
 	 */
+	public void selectIncidentPatternFile() {
+		FileChooser fileChooser = new FileChooser();
+
+		// if a file already chosen
+		if (traceMiner != null) {
+			String incidentPatternFile = traceMiner.getIncidentPatternFilePath();
+			if(incidentPatternFile!=null && !incidentPatternFile.isEmpty()) {
+				
+				File selectedincidentPatternFile = new File(incidentPatternFile);
+				
+				fileChooser.setInitialFileName(selectedincidentPatternFile.getName());
+
+				String folder = selectedincidentPatternFile.getAbsolutePath().substring(0,
+						selectedincidentPatternFile.getAbsolutePath().lastIndexOf(File.separator));
+				File folderF = new File(folder);
+
+				if (folderF.isDirectory()) {
+					fileChooser.setInitialDirectory(folderF);
+				}
+			}
+			
+		} else if (defaultBigraphERFile != null) {
+			File selectedBigraphERFile = new File(defaultBigraphERFile.getPath());
+			fileChooser.setInitialFileName(selectedBigraphERFile.getName());
+
+			String folder = selectedBigraphERFile.getAbsolutePath().substring(0,
+					selectedBigraphERFile.getAbsolutePath().lastIndexOf(File.separator));
+			File folderF = new File(folder);
+
+			if (folderF.isDirectory()) {
+				fileChooser.setInitialDirectory(folderF);
+			}
+		}
+
+		// if first time
+		if (traceMiner != null && !traceMiner.isBigraphERFileSet()) {
+			ButtonType result = showDialog("Select BigraphER File", "BigraphER file needed",
+					"Please select BigraphER file (*.big)", AlertType.CONFIRMATION, true);
+
+			if (result == ButtonType.CANCEL) {
+				return;
+			}
+		}
+
+		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("BigraphER files (*.big)", "*.big");
+
+		fileChooser.getExtensionFilters().add(extFilter);
+
+		File selectedTracesFile = fileChooser.showOpenDialog(null);
+
+		if (selectedTracesFile != null) {
+			traceMiner.setBigraphERFile(selectedTracesFile.getAbsolutePath());
+		}
+	}
+	
+	/**
+	 * Select BigraphER file (*.big)
+	 */
 	public void selectBigraphERFile() {
 		FileChooser fileChooser = new FileChooser();
 
@@ -454,6 +513,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	}
 
+	
 	public void selectTraceFolder() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 

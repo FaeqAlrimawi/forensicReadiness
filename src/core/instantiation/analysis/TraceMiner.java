@@ -244,6 +244,10 @@ public class TraceMiner {
 	// temp storage for loaded traces
 	Map<Integer, Bigraph> loadedStateBigraphs;
 
+	// incident pattern handler
+	// provides functionalities such as finding states matching the condition
+	private IncidentPatternHandler incidentPatternHandler;
+
 	public TraceMiner() {
 
 		tracesActions = new HashMap<String, Integer>();
@@ -262,6 +266,8 @@ public class TraceMiner {
 		customeFilteringTraceIDs = new LinkedList<Integer>();
 
 		loadedStateBigraphs = new HashMap<Integer, Bigraph>();
+
+		incidentPatternHandler = new IncidentPatternHandler(this);
 
 		tracesSaved = new HashMap<Integer, String>();
 
@@ -489,7 +495,7 @@ public class TraceMiner {
 		// reset
 		tracesActionsOccurence.clear();
 		statesOccurrences.clear();
-		
+
 		minimumTraceLength = 100000;
 		maximumTraceLength = -1;
 
@@ -3331,10 +3337,10 @@ public class TraceMiner {
 		return result;
 	}
 
-	public GraphPath getTrace(int tracesID) {
+	public GraphPath getTrace(int traceID) {
 
-		if (traces.containsKey(tracesID)) {
-			return traces.get(tracesID);
+		if (traces.containsKey(traceID)) {
+			return traces.get(traceID);
 		}
 
 		return null;
@@ -4550,10 +4556,11 @@ public class TraceMiner {
 
 				// if this point is reached then the action is causally
 				// dependent
-//				if (!isNotCausallyDependentByLTS) {
-//					System.out.println("traceMiner:: [" + action + "] is causally dependent on [" + preAction
-//							+ "] with pre-state [" + preActionPreState + "]");
-//				}
+				// if (!isNotCausallyDependentByLTS) {
+				// System.out.println("traceMiner:: [" + action + "] is causally
+				// dependent on [" + preAction
+				// + "] with pre-state [" + preActionPreState + "]");
+				// }
 			}
 		}
 
@@ -4908,13 +4915,164 @@ public class TraceMiner {
 	}
 
 	public Signature getSignature() {
-		
-		if(brsWrapper!=null) {
+
+		if (brsWrapper != null) {
 			return brsWrapper.getSignature();
 		}
-		
+
 		return null;
 	}
+
+	/**
+	 * Returns a map showing the states of the given trace that match to the
+	 * incident pattern conditions
+	 * 
+	 * @param traceID
+	 *            The trace ID to look in
+	 * @return A map in which the key is the condition name in the incident
+	 *         pattern, while the value is a state in the given traces
+	 */
+	public Map<String, Integer> getStatesMatchingIncidentPatternConditions(int traceID) {
+
+		if (incidentPatternHandler == null) {
+			System.err.println("TraceMiner:: IncidentPatternHandler is null");
+			return null;
+		}
+
+		GraphPath trace = getTrace(traceID);
+
+		return incidentPatternHandler.findMatchingStates(trace);
+
+	}
+
+	/**
+	 * Returns a map showing the states of the given trace that match to the
+	 * incident pattern conditions
+	 * 
+	 * @param trace
+	 *            The trace to look in
+	 * @return A map in which the key is the condition name in the incident
+	 *         pattern, while the value is a state in the given traces
+	 */
+	public Map<String, Integer> getStatesMatchingIncidentPatternConditions(GraphPath trace) {
+
+		if (incidentPatternHandler == null) {
+			System.err.println("TraceMiner:: IncidentPatternHandler is null");
+			return null;
+		}
+
+		return incidentPatternHandler.findMatchingStates(trace);
+
+	}
+
+	/**
+	 * Returns a map showing the states of the given trace that match to the
+	 * incident pattern conditions
+	 * 
+	 * @param traceID
+	 *            The trace ID to look in
+	 * @param incidentPatternFilePath
+	 *            the incident pattern file path
+	 * @param systemModelFilePath
+	 *            the system model file path
+	 * @return A map in which the key is the condition name in the incident
+	 *         pattern, while the value is a state in the given traces
+	 */
+	public Map<String, Integer> getStatesMatchingIncidentPatternConditions(int traceID, String incidentPatternFilePath,
+			String systemModelFilePath) {
+
+		GraphPath trace = getTrace(traceID);
+
+		return getStatesMatchingIncidentPatternConditions(trace, incidentPatternFilePath, systemModelFilePath);
+	}
+
+	/**
+	 * Returns a map showing the states of the given trace that match to the
+	 * incident pattern conditions
+	 * 
+	 * @param trace
+	 *            The trace to look in
+	 * @param incidentPatternFilePath
+	 *            the incident pattern file path
+	 * @param systemModelFilePath
+	 *            the system model file path
+	 * @return A map in which the key is the condition name in the incident
+	 *         pattern, while the value is a state in the given traces
+	 */
+	public Map<String, Integer> getStatesMatchingIncidentPatternConditions(GraphPath trace,
+			String incidentPatternFilePath, String systemModelFilePath) {
+
+		Map<String, Integer> result = null;
+
+		if (incidentPatternHandler == null) {
+			incidentPatternHandler = new IncidentPatternHandler(this);
+		}
+
+		// set incident pattern file (.cpi)
+		if (incidentPatternFilePath == null || incidentPatternFilePath.isEmpty()) {
+			System.err.println("TraceMiner:: incident pattern file (*.cpi) is null or empty");
+			return null;
+		}
+
+		incidentPatternHandler.setIncidentPatternFilePath(incidentPatternFilePath);
+
+		// set system model file (.cps)
+		if (systemModelFilePath == null || systemModelFilePath.isEmpty()) {
+			System.err.println("TraceMiner:: system model file (*.cps) is null or empty");
+			return null;
+		}
+		incidentPatternHandler.setSystemModelFilePath(systemModelFilePath);
+
+		// set states folder
+		if (getStatesFolder() == null || getStatesFolder().isEmpty()) {
+			System.err.println("TraceMiner:: states folder is null or empty");
+			return null;
+		}
+
+		// set traces file (.json)
+		if (instanceFileName == null || instanceFileName.isEmpty()) {
+			System.err.println("TraceMiner:: traces file (*.json) is null or empty");
+			return null;
+		}
+
+		incidentPatternHandler.setTracesFilePath(instanceFileName);
+
+		result = incidentPatternHandler.findMatchingStates(trace);
+
+		return result;
+
+	}
+
+	public String getIncidentPatternFilePath() {
+
+		if (incidentPatternHandler.getIncidentPatternFilePath() == null
+				|| incidentPatternHandler.getIncidentPatternFilePath().isEmpty()) {
+			return null;
+		}
+
+		return incidentPatternHandler.getIncidentPatternFilePath();
+	}
+
+	public void setIncidentPatternFilePath(String incidentPatternFilePath) {
+
+		incidentPatternHandler.setIncidentPatternFilePath(incidentPatternFilePath);
+	}
+
+	public String getSystemModelFilePath() {
+
+		if (incidentPatternHandler.getSystemModelFilePath() == null
+				|| incidentPatternHandler.getSystemModelFilePath().isEmpty()) {
+			return null;
+		}
+
+		return incidentPatternHandler.getSystemModelFilePath();
+	}
+
+	public void setSystemModelFilePath(String systemModelFilePath) {
+
+		incidentPatternHandler.setSystemModelFilePath(systemModelFilePath);
+	}
+
 	// public static void main(String[] args) {
 	//
 	// TraceMiner m = new TraceMiner();

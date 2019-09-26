@@ -504,17 +504,18 @@ public class IncidentPatternHandler {
 					// if it matches then add to the result
 					if (matcher.match(stateBig, condBig).iterator().hasNext()) {
 						matchingStates.put(cond.getName(), stateID);
-						System.out.println(
-								"Matching state [" + stateID + "] to activity ["+act.getName()+"] condition [" + cond.getName() + "] succeeded");
+//						System.out.println(
+//								"Matching state [" + stateID + "] to activity ["+act.getName()+"] condition [" + cond.getName() + "] succeeded");
 						// increment index if the condition is pre
 						if (cond instanceof Precondition) {
 							currentIndex++;
 						}
 						break;
-					} else {
-						System.out.println(
-								"Matching state [" + stateID + "] to activity ["+act.getName()+"] condition [" + cond.getName() + "] Failed");
 					}
+//					else {
+//						System.out.println(
+//								"Matching state [" + stateID + "] to activity ["+act.getName()+"] condition [" + cond.getName() + "] Failed");
+//					}
 
 				}
 			}

@@ -226,6 +226,10 @@ public class TraceViewerInSystemController {
 	// key is action name, value is list of trace ids that contain the action
 	Map<String, List<Integer>> mapActions;
 
+	// key is trace id, value is a map in which the key is condition name, and
+	// value is state matching the condition
+	Map<Integer, Map<String, Integer>> traceStatesMatchingConditions;
+
 	// private ContextMenu nodeContextMenu;
 
 	private double sceneX, sceneY, layoutX, layoutY;
@@ -2537,8 +2541,8 @@ public class TraceViewerInSystemController {
 				if (nd instanceof Circle) {
 					nd.setStyle(START_NODE_HIGHLIGHT_STYLE);
 				}
-				
-				if(nd instanceof Label) {
+
+				if (nd instanceof Label) {
 					Label lbl = (Label) nd;
 					lbl.setTooltip(new Tooltip("Initial state"));
 				}
@@ -2555,14 +2559,14 @@ public class TraceViewerInSystemController {
 				if (nd instanceof Circle) {
 					nd.setStyle(END_NODE_HIGHLIGHT_STYLE);
 				}
-				
-				if(nd instanceof Label) {
+
+				if (nd instanceof Label) {
 					Label lbl = (Label) nd;
 					lbl.setTooltip(new Tooltip("Final state"));
 				}
 			}
 		}
-		
+
 		// highLightedTracesIDs.add(traceID);
 		// remove states
 
@@ -3621,12 +3625,11 @@ public class TraceViewerInSystemController {
 		List<String> actions = trace.getTransitionActions();
 		List<Integer> states = trace.getStateTransitions();
 
-		
 		System.out.println("===========================");
 		for (int i = actions.size() - 1; i > 0; i--) {
 
 			String action2 = actions.get(i);
-	
+
 			// String action2 = actions.get(2);
 
 			for (int j = i; j > 0; j--) {
@@ -3655,7 +3658,7 @@ public class TraceViewerInSystemController {
 				case TraceMiner.CAUSALLY_DEPENDENT: // dependent
 					System.out.println("[" + action2 + "] causally depends on [" + action1 + "] with pre-state ["
 							+ preState + "]");
-//					addCausalCurve(actionState, preState);					
+					// addCausalCurve(actionState, preState);
 					break;
 
 				// action2 has NO causal depenedence on action1 i.e. action2 can
@@ -3699,26 +3702,96 @@ public class TraceViewerInSystemController {
 		System.out.println("===========================\n");
 	}
 
-	protected Node addCausalCurve(int startState, int endState) {
-	
-		
-		StackPane node1 = statesNodes.get(startState);
-		StackPane node2 = statesNodes.get(endState);
-		
-//		arrowsLabels
-		if(node1 == null || node2 ==null) {
-			return null;
+	/**
+	 * Finds the states in the given trace that match the incident pattern
+	 * conditions
+	 * 
+	 * @param trace
+	 */
+	protected void findStatesMatchingIncidentPatternConditions(GraphPath trace) {
+
+		if (trace == null || miner == null) {
+			return;
+		}
+
+		int traceID = trace.getInstanceID();
+
+		if (traceStatesMatchingConditions.containsKey(traceID)) {
+			showConditionsMatchingStates(traceStatesMatchingConditions.get(traceID));
+			return;
+		}
+
+		// set incident pattern file
+		String incidentPatternFile = miner.getIncidentPatternFilePath();
+
+		if (incidentPatternFile == null || incidentPatternFile.isEmpty()) {
+			// load incident pattern file
+			
+			if (incidentPatternFile == null || incidentPatternFile.isEmpty()) {
+				// if stil null then return
+				return;
+			}
+		}
+
+		// set system model file
+		String systemModelFile = miner.getSystemModelFilePath();
+
+		if (systemModelFile == null || systemModelFile.isEmpty()) {
+			// load system model
+
+			if (systemModelFile == null || systemModelFile.isEmpty()) {
+				// if still null then return
+				return;
+			}
+		}
+
+		// set states folder
+		String statesFolder = miner.getStatesFolder();
+
+		if (statesFolder == null || statesFolder.isEmpty()) {
+			// load system model
+
+			if (statesFolder == null || statesFolder.isEmpty()) {
+				// if still null then return
+				return;
+			}
+
 		}
 		
-		CubicCurve curve = getCurveLine(node1, node2, Color.GREEN);
+		Map<String, Integer> result = miner.getStatesMatchingIncidentPatternConditions(trace);
 		
+		if(result!=null) {
+			traceStatesMatchingConditions.put(traceID, result);
+			showConditionsMatchingStates(result);
+		}
+		
+		System.out.println("result for trace-"+traceID+"\n"+result+"\n");
+	}
+
+	protected void showConditionsMatchingStates(Map<String, Integer> conditionsMatchingStatesMap) {
+
+		// shows the given map in the viewer
+	}
+
+	protected Node addCausalCurve(int startState, int endState) {
+
+		StackPane node1 = statesNodes.get(startState);
+		StackPane node2 = statesNodes.get(endState);
+
+		// arrowsLabels
+		if (node1 == null || node2 == null) {
+			return null;
+		}
+
+		CubicCurve curve = getCurveLine(node1, node2, Color.GREEN);
+
 		tracePane.getChildren().add(curve);
 
 		setNodes();
-		
+
 		return curve;
 	}
-	
+
 	protected StackPane getRectangleMenu(List<Integer> tracesIDs, String color, String state, double width,
 			double height) {
 
@@ -4261,41 +4334,64 @@ public class TraceViewerInSystemController {
 
 		// if start dot position is greater than the end dot then assign the
 		// control points to be mid using the sstart dot location
-		if (startDot.layoutXProperty().add(startDot.translateXProperty()).greaterThan(startDot.layoutXProperty().add(endDot.getTranslateX())).get()) {
-			line.controlX1Property().bind(endDot.layoutXProperty().add(endDot.translateXProperty()).add(startDot.layoutXProperty().add(startDot.translateXProperty())
-					.subtract(endDot.layoutXProperty().add(endDot.translateXProperty())).divide(2)));
-			line.controlX2Property().bind(endDot.layoutXProperty().add(endDot.translateXProperty()).add(startDot.layoutXProperty().add(startDot.translateXProperty())
-					.subtract(endDot.layoutXProperty().add(endDot.translateXProperty())).divide(2)));
+		if (startDot.layoutXProperty().add(startDot.translateXProperty())
+				.greaterThan(startDot.layoutXProperty().add(endDot.getTranslateX())).get()) {
+			line.controlX1Property()
+					.bind(endDot.layoutXProperty().add(endDot.translateXProperty())
+							.add(startDot.layoutXProperty().add(startDot.translateXProperty())
+									.subtract(endDot.layoutXProperty().add(endDot.translateXProperty())).divide(2)));
+			line.controlX2Property()
+					.bind(endDot.layoutXProperty().add(endDot.translateXProperty())
+							.add(startDot.layoutXProperty().add(startDot.translateXProperty())
+									.subtract(endDot.layoutXProperty().add(endDot.translateXProperty())).divide(2)));
 		} else {
-			line.controlX1Property().bind(startDot.layoutXProperty().add(startDot.translateXProperty()).add(endDot.layoutXProperty().add(endDot.translateXProperty())
-					.subtract(startDot.layoutXProperty().add(startDot.translateXProperty())).divide(2)));
-			line.controlX2Property().bind(startDot.layoutXProperty().add(startDot.translateXProperty()).add(endDot.layoutXProperty().add(endDot.translateXProperty())
-					.subtract(startDot.layoutXProperty().add(startDot.translateXProperty())).divide(2)));
+			line.controlX1Property()
+					.bind(startDot.layoutXProperty().add(startDot.translateXProperty())
+							.add(endDot.layoutXProperty().add(endDot.translateXProperty())
+									.subtract(startDot.layoutXProperty().add(startDot.translateXProperty()))
+									.divide(2)));
+			line.controlX2Property()
+					.bind(startDot.layoutXProperty().add(startDot.translateXProperty())
+							.add(endDot.layoutXProperty().add(endDot.translateXProperty())
+									.subtract(startDot.layoutXProperty().add(startDot.translateXProperty()))
+									.divide(2)));
 		}
-		
-		if (startDot.layoutYProperty().add(startDot.translateYProperty()).greaterThan(startDot.layoutYProperty().add(endDot.getTranslateY())).get()) {
-			line.controlY1Property().bind(endDot.layoutYProperty().add(endDot.translateYProperty()).add(startDot.layoutYProperty().add(startDot.translateYProperty())
-					.subtract(endDot.layoutYProperty().add(endDot.translateYProperty())).add(NODE_RADIUS*2)));
-			line.controlY2Property().bind(endDot.layoutYProperty().add(endDot.translateYProperty()).add(startDot.layoutYProperty().add(startDot.translateYProperty())
-					.subtract(endDot.layoutYProperty().add(endDot.translateYProperty())).add(NODE_RADIUS*2)));
+
+		if (startDot.layoutYProperty().add(startDot.translateYProperty())
+				.greaterThan(startDot.layoutYProperty().add(endDot.getTranslateY())).get()) {
+			line.controlY1Property()
+					.bind(endDot.layoutYProperty().add(endDot.translateYProperty())
+							.add(startDot.layoutYProperty().add(startDot.translateYProperty())
+									.subtract(endDot.layoutYProperty().add(endDot.translateYProperty()))
+									.add(NODE_RADIUS * 2)));
+			line.controlY2Property()
+					.bind(endDot.layoutYProperty().add(endDot.translateYProperty())
+							.add(startDot.layoutYProperty().add(startDot.translateYProperty())
+									.subtract(endDot.layoutYProperty().add(endDot.translateYProperty()))
+									.add(NODE_RADIUS * 2)));
 		} else {
-			line.controlY1Property().bind(startDot.layoutYProperty().add(startDot.translateYProperty()).add(endDot.layoutYProperty().add(endDot.translateYProperty())
-					.subtract(startDot.layoutYProperty().add(startDot.translateYProperty())).add(NODE_RADIUS*2)));
-			line.controlY2Property().bind(startDot.layoutYProperty().add(startDot.translateYProperty()).add(endDot.layoutYProperty().add(endDot.translateYProperty())
-					.subtract(startDot.layoutYProperty().add(startDot.translateYProperty())).add(NODE_RADIUS*2)));
+			line.controlY1Property()
+					.bind(startDot.layoutYProperty().add(startDot.translateYProperty())
+							.add(endDot.layoutYProperty().add(endDot.translateYProperty())
+									.subtract(startDot.layoutYProperty().add(startDot.translateYProperty()))
+									.add(NODE_RADIUS * 2)));
+			line.controlY2Property()
+					.bind(startDot.layoutYProperty().add(startDot.translateYProperty())
+							.add(endDot.layoutYProperty().add(endDot.translateYProperty())
+									.subtract(startDot.layoutYProperty().add(startDot.translateYProperty()))
+									.add(NODE_RADIUS * 2)));
 		}
-		
-		
-//		line.controlY1Property().bind(startDot.layoutYProperty().add(startDot.translateYProperty())
-//				.add(startDot.heightProperty().divide(2).add(NODE_RADIUS * 2)));
+
+		// line.controlY1Property().bind(startDot.layoutYProperty().add(startDot.translateYProperty())
+		// .add(startDot.heightProperty().divide(2).add(NODE_RADIUS * 2)));
 		// line.controlX1Property().bind(startDot.layoutXProperty().add(startDot.translateXProperty()).add(startDot.widthProperty().divide(2).add(NODE_RADIUS*2)));
 		// line.controlY1Property().bind(
 		// startDot.layoutYProperty().add(startDot.translateYProperty()).add(startDot.heightProperty().divide(2).add(NODE_RADIUS*2)));
 
-//		line.controlX2Property().bind(startDot.layoutXProperty().add(startDot.translateXProperty())
-//				.add(startDot.widthProperty().divide(2).subtract(NODE_RADIUS * 2)));
-//		line.controlY2Property().bind(startDot.layoutYProperty().add(startDot.translateYProperty())
-//				.add(startDot.heightProperty().divide(2).add(NODE_RADIUS * 2)));
+		// line.controlX2Property().bind(startDot.layoutXProperty().add(startDot.translateXProperty())
+		// .add(startDot.widthProperty().divide(2).subtract(NODE_RADIUS * 2)));
+		// line.controlY2Property().bind(startDot.layoutYProperty().add(startDot.translateYProperty())
+		// .add(startDot.heightProperty().divide(2).add(NODE_RADIUS * 2)));
 
 		line.endXProperty()
 				.bind(endDot.layoutXProperty().add(endDot.translateXProperty()).add(endDot.widthProperty().divide(2)));
@@ -4431,7 +4527,7 @@ public class TraceViewerInSystemController {
 		vboxAction.getChildren().addAll(lblAction, lblActionPerc);
 
 		StackPane weight = new StackPane();
-//		weight.setStyle("-fx-background-color:white");
+		// weight.setStyle("-fx-background-color:white");
 		weight.getChildren().add(vboxAction);
 		DoubleBinding wgtSqrHalfWidth = weight.widthProperty().divide(2);
 		DoubleBinding wgtSqrHalfHeight = weight.heightProperty().divide(2);
