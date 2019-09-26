@@ -280,6 +280,11 @@ public class TraceViewerInSystemController {
 
 	private static final int NOT_A_TRACE = -1;
 
+	// for denedency level
+	private static final String DEPENDENT_NECESSARILY = "Necessarily";
+	private static final String NOT_DEPENDENT_NECESSARILY = "Necessarily Not";
+	private static final String NOT_NECESSARILY_DEPENDENT = "Not Necessarily";
+
 	// node context menu items
 	private static final String MENU_ITEM_SHOW_NEXT = "Show Next";
 	private static final String MENU_ITEM_HIDE_NEXT = "Hide Next";
@@ -414,8 +419,8 @@ public class TraceViewerInSystemController {
 
 		mapActions = new HashMap<String, List<Integer>>();
 
-		traceStatesMatchingConditions = new HashMap<Integer, Map<String,Integer>>();
-		
+		traceStatesMatchingConditions = new HashMap<Integer, Map<String, Integer>>();
+
 		// added traces ids
 		addedTracesIDs = new LinkedList<Integer>();
 		highLightedTracesIDs = new HashMap<Integer, String>();
@@ -665,7 +670,7 @@ public class TraceViewerInSystemController {
 	void showCausalityChain() {
 
 		// === for testing
-//		findCausalDependency(trace);
+		findCausalDependency(trace);
 		findStatesMatchingIncidentPatternConditions(trace);
 		// ===
 	}
@@ -1916,6 +1921,8 @@ public class TraceViewerInSystemController {
 		// show states perc
 		for (Entry<Integer, Label> entry : mapStatePerc.entrySet()) {
 			Label lbl = entry.getValue();
+			lbl.setTextFill(Color.RED);
+
 			double perc = miner.getStatePercentage(entry.getKey(), TraceMiner.ALL);
 			int stateOccur = miner.getStateOccurrence(entry.getKey(), TraceMiner.ALL);
 
@@ -1962,6 +1969,7 @@ public class TraceViewerInSystemController {
 
 			// set label
 			for (Label lbl : lbls) {
+				lbl.setTextFill(Color.RED);
 				lbl.setText(percDbl + "%");
 				lbl.setTooltip(new Tooltip("Occurrence: " + actionOccur + "/" + numOfTraces));
 			}
@@ -3625,19 +3633,39 @@ public class TraceViewerInSystemController {
 			return;
 		}
 
+		// key is action name that we need to find causal dependency on the
+		// action before
+		// value is a list in which at index zero is the action before, and at
+		// index 1 is by what (LTS and/or states)
+		Map<String, List<String>> actionsCausality = new HashMap<String, List<String>>();
+
 		List<String> actions = trace.getTransitionActions();
 		List<Integer> states = trace.getStateTransitions();
+
+		if (actions == null || actions.isEmpty() || states == null || states.isEmpty()) {
+			return;
+		}
 
 		System.out.println("===========================");
 		for (int i = actions.size() - 1; i > 0; i--) {
 
 			String action2 = actions.get(i);
 
+			int originalPreState = states.get(i);
+			int originalPostState = states.get(i + 1);
 			// String action2 = actions.get(2);
 
 			for (int j = i; j > 0; j--) {
-				int preState = trace.getStateTransitions() != null ? trace.getStateTransitions().get(j - 1) : -1;
-				int actionState = trace.getStateTransitions() != null ? trace.getStateTransitions().get(j) : -1;
+
+				// if already found causality then break
+				if (actionsCausality.containsKey(action2)) {
+
+					break;
+				}
+
+				int preState = states.get(j - 1);
+				int actionPreState = states.get(j);
+				// int actionPostState = states.get(j + 1);
 				// int preState = trace.getStateTransitions() != null ?
 				// trace.getStateTransitions().get(1) : -1;
 
@@ -3648,7 +3676,7 @@ public class TraceViewerInSystemController {
 				String action1 = actions.get(j - 1);
 				// String action1 = actions.get(1);
 
-				int dependentResult = miner.areActionsCausallyDependent(action2, action1, actionState, preState);
+				int dependentResult = miner.areActionsCausallyDependent(action2, action1, actionPreState, preState);
 
 				switch (dependentResult) {
 
@@ -3662,6 +3690,13 @@ public class TraceViewerInSystemController {
 					System.out.println("[" + action2 + "] causally depends on [" + action1 + "] with pre-state ["
 							+ preState + "]");
 					// addCausalCurve(actionState, preState);
+					List<String> res = new LinkedList<String>();
+					res.add(action1);
+					res.add(DEPENDENT_NECESSARILY);
+					actionsCausality.put(action2, res);
+
+					showCausality(action2, action1, DEPENDENT_NECESSARILY, originalPreState, originalPostState);
+
 					break;
 
 				// action2 has NO causal depenedence on action1 i.e. action2 can
@@ -3702,7 +3737,124 @@ public class TraceViewerInSystemController {
 
 		}
 
+		// if the action is not in the result then it is not causly dependent on
+		// any
+		for (int i = actions.size() - 1; i > 0; i--) {
+			String actionName = actions.get(i);
+
+			if (!actionsCausality.containsKey(actionName)) {
+				int originalPreState = states.get(i);
+				int originalPostState = states.get(i + 1);
+
+				showCausality(actionName, null, NOT_DEPENDENT_NECESSARILY, originalPreState, originalPostState);
+			}
+		}
+
 		System.out.println("===========================\n");
+	}
+
+	protected void showCausality(String action, String previousAction, String dependencyLevel, int actionPreState,
+			int actionPostState) {
+
+		// key is action name
+		// value is a list where: 0: previous action, 1: a key (currently
+		// necessarily), which represents the dependecy level
+
+		// actionprestate is the state that the precondition of the action
+		// satisfies
+		// find the line representing the action between the two states
+		StackPane actionArrowLabels = null;
+
+		List<StackPane> arrowHeads = statesOutgoingArrows.get(actionPreState);
+
+		if (arrowHeads != null) {
+			for (StackPane arw : arrowHeads) {
+				List<Integer> states = getStatesFromArrow(arw);
+
+				if (states != null && states.size() > 1) {
+					int startState = states.get(0);
+					int endState = states.get(1);
+
+					// if the arrow is found then get the line
+					if (startState == actionPreState && endState == actionPostState) {
+						// actionLbl = arrowsLines.get
+						actionArrowLabels = arrowsLabels.get(arw);
+						break;
+					}
+				}
+			}
+		} else {
+			System.err.println("outgoing arrow heads are null");
+		}
+
+		if (actionArrowLabels == null) {
+			System.err.println("action arrow labels is null");
+			return;
+		}
+
+		// get the container of the arrow label
+		Node container = actionArrowLabels.getChildren() != null && actionArrowLabels.getChildren().size() > 0
+				? actionArrowLabels.getChildren().get(0) : null;
+
+		// childern contain the label for the perc
+		List<Node> children = null;
+
+		if (container instanceof VBox) {
+			children = ((VBox) container).getChildren();
+		}
+
+		if (children == null) {
+			System.err.println("children are null");
+			return;
+		}
+
+		// find the perc action label
+		List<Label> actionLbls = mapActionPerc.get(action);
+
+		Label actionLbl = null;
+
+		for (Label lbl : actionLbls) {
+
+			if (children.contains(lbl)) {
+				actionLbl = lbl;
+				break;
+			}
+		}
+
+		if (actionLbl == null) {
+			return;
+		}
+
+		// update text
+		switch (dependencyLevel) {
+		case DEPENDENT_NECESSARILY:
+			actionLbl.setText(dependencyLevel);
+
+			Tooltip tip = new Tooltip();
+			tip.setStyle("-fx-font-size:12px");
+			tip.setText(
+					"Action is " + dependencyLevel + " causally dependent on previous action [" + previousAction + "]");
+
+			actionLbl.setTooltip(tip);
+
+			break;
+
+		case NOT_DEPENDENT_NECESSARILY:
+			// String style = actionLbl.getStyle();
+			// actionLbl.setStyle("-fx-text-fill:green;");
+			actionLbl.setTextFill(Color.GREEN);
+			actionLbl.setText(dependencyLevel);
+
+			Tooltip tip2 = new Tooltip();
+			tip2.setStyle("-fx-font-size:12px");
+			tip2.setText("Action is " + dependencyLevel + " causally dependent on any action in the trace");
+
+			actionLbl.setTooltip(tip2);
+
+			// actionLbl.setStyle(style);
+		default:
+			break;
+		}
 	}
 
 	/**
@@ -3731,9 +3883,9 @@ public class TraceViewerInSystemController {
 			// load incident pattern file
 
 			traceCell.selectIncidentPatternFile();
-			
+
 			incidentPatternFile = miner.getIncidentPatternFilePath();
-			
+
 			if (incidentPatternFile == null || incidentPatternFile.isEmpty()) {
 				// if stil null then return
 				return;
@@ -3747,9 +3899,9 @@ public class TraceViewerInSystemController {
 			// load system model
 
 			traceCell.selectSystemModelFile();
-			
+
 			systemModelFile = miner.getSystemModelFilePath();
-			
+
 			if (systemModelFile == null || systemModelFile.isEmpty()) {
 				// if still null then return
 				return;
@@ -3763,30 +3915,30 @@ public class TraceViewerInSystemController {
 			// load system model
 
 			traceCell.selectStatesFolder();
-			
+
 			statesFolder = miner.getStatesFolder();
-			
+
 			if (statesFolder == null || statesFolder.isEmpty()) {
 				// if still null then return
 				return;
 			}
 
 		}
-		
-		//set bigraphER file
+
+		// set bigraphER file
 		String bigraphERFile = miner.getBigraphERFile();
-		
-		if(bigraphERFile==null || bigraphERFile.isEmpty()) {
-			
+
+		if (bigraphERFile == null || bigraphERFile.isEmpty()) {
+
 			traceCell.selectBigraphERFile();
-			
+
 			bigraphERFile = miner.getBigraphERFile();
-			
+
 			if (bigraphERFile == null || bigraphERFile.isEmpty()) {
 				// if still null then return
 				return;
 			}
-			
+
 		}
 
 		Map<String, Integer> result = miner.getStatesMatchingIncidentPatternConditions(trace);
@@ -3800,32 +3952,40 @@ public class TraceViewerInSystemController {
 	}
 
 	/**
-	 * Shows the result of states matching incident pattern conditions in the viewer
+	 * Shows the result of states matching incident pattern conditions in the
+	 * viewer
+	 * 
 	 * @param conditionsMatchingStatesMap
 	 */
 	protected void showConditionsMatchingStates(Map<String, Integer> conditionsMatchingStatesMap) {
 
 		// shows the given map in the viewer
-		//use the state perc map to do so
-		for(Entry<String, Integer> entry : conditionsMatchingStatesMap.entrySet()) {
+		// use the state perc map to do so
+		for (Entry<String, Integer> entry : conditionsMatchingStatesMap.entrySet()) {
 			String conditionName = entry.getKey();
 			int state = entry.getValue();
-			
+
 			Label lbl = mapStatePerc.get(state);
-			
-			if(lbl!=null) {
+
+			if (lbl != null) {
 				String currentText = lbl.getText();
-				
-				if(currentText!=null && !currentText.isEmpty()) {
-					currentText += ", "+conditionName;
-				} else{
+
+				if (currentText != null && !currentText.isEmpty()) {
+					// if there's already two conditions written
+					if (currentText.split(",").length > 2) {
+						currentText = conditionName;
+					} else {
+						currentText += ", " + conditionName;
+					}
+
+				} else {
 					currentText = conditionName;
 				}
-				
+
 				lbl.setText(currentText);
-				
-				String tiptext = "State-"+state+" matches to pattern condition(s) ["+currentText+"]";
-				
+
+				String tiptext = "State-" + state + " matches to pattern condition(s) [" + currentText + "]";
+
 				Tooltip tip = new Tooltip(tiptext);
 				tip.setStyle("-fx-font-size:14px;");
 				lbl.setTooltip(tip);
