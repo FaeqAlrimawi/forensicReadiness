@@ -55,7 +55,7 @@ public class IncidentPatternHandler {
 	private Map<String, String> entityAssetMap;
 
 	// key is asset name, value is the Asset object from system model
-	private Map<String, Asset> nameToAssetMap;
+//	private Map<String, Asset> nameToAssetMap;
 
 	// key is asset name, value is control
 	private Map<String, String> assetNameToControlMap;
@@ -74,7 +74,7 @@ public class IncidentPatternHandler {
 
 	public IncidentPatternHandler(TraceMiner traceMiner) {
 		entityAssetMap = new HashMap<String, String>();
-		nameToAssetMap = new HashMap<String, Asset>();
+//		nameToAssetMap = new HashMap<String, Asset>();
 		assetNameToControlMap = new HashMap<String, String>();
 
 		miner = traceMiner;

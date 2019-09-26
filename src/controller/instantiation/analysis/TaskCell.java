@@ -89,15 +89,18 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	// private Trace newTrace;
 
-	private static final URL defaultStatesFolder = TaskCell.class.getClassLoader().getResource("resources/example/states");
+	private static final URL defaultStatesFolder = TaskCell.class.getClassLoader()
+			.getResource("resources/example/states");
 
-	// private String statesFolder;
+	private static final URL defaultBigraphERFile = TaskCell.class.getClassLoader()
+			.getResource("resources/example/systemBigraphER.big");
 
-	private static final URL defaultBigraphERFile = TaskCell.class.getClassLoader().getResource("resources/example/systemBigraphER.big");
+	private static final URL defaultIncidentPatternFile = TaskCell.class.getClassLoader()
+			.getResource("resources/example/incidentPattern.cpi");
 
-	private static  final URL defaultIncidentPatternFile = TaskCell.class.getClassLoader().getResource("resources/example/incidentPattern.cpi");
-	private static  final URL defaultSystemModelFile = TaskCell.class.getClassLoader().getResource("resources/example/systemModel.cps");
-	
+	private static final URL defaultSystemModelFile = TaskCell.class.getClassLoader()
+			.getResource("resources/example/systemModel.cps");
+
 	private TraceMiner traceMiner;
 
 	// holds the file path for saved trace
@@ -221,7 +224,7 @@ public class TaskCell extends ListCell<GraphPath> {
 			traceViewerController = fxmlLoader.<TraceViewerInSystemController>getController();
 
 			if (traceViewerController != null) {
-				
+
 				traceViewerController.setTraceMiner(traceMiner, trace);
 				traceViewerController.setTaskCell(this);
 			}
@@ -267,7 +270,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		case SHOW_ENTITIES:
 			showDetails();
-			
+
 		default:
 			break;
 		}
@@ -364,27 +367,25 @@ public class TaskCell extends ListCell<GraphPath> {
 	 * Select system model file (*.cps)
 	 */
 	public void selectSystemModelFile() {
-		
+
 		FileChooser fileChooser = new FileChooser();
 
 		// if a file already chosen
-		if (traceMiner != null) {
+		if (traceMiner != null
+				&& (traceMiner.getSystemModelFilePath() != null && !traceMiner.getSystemModelFilePath().isEmpty())) {
 			String systemModelFile = traceMiner.getSystemModelFilePath();
-			if(systemModelFile!=null && !systemModelFile.isEmpty()) {
-				
-				File selectedSystemModelFileFile = new File(systemModelFile);
-				
-				fileChooser.setInitialFileName(selectedSystemModelFileFile.getName());
+			File selectedSystemModelFileFile = new File(systemModelFile);
 
-				String folder = selectedSystemModelFileFile.getAbsolutePath().substring(0,
-						selectedSystemModelFileFile.getAbsolutePath().lastIndexOf(File.separator));
-				File folderF = new File(folder);
+			fileChooser.setInitialFileName(selectedSystemModelFileFile.getName());
 
-				if (folderF.isDirectory()) {
-					fileChooser.setInitialDirectory(folderF);
-				}
+			String folder = selectedSystemModelFileFile.getAbsolutePath().substring(0,
+					selectedSystemModelFileFile.getAbsolutePath().lastIndexOf(File.separator));
+			File folderF = new File(folder);
+
+			if (folderF.isDirectory()) {
+				fileChooser.setInitialDirectory(folderF);
 			}
-			
+
 		} else if (defaultSystemModelFile != null) {
 			File selectedBigraphERFile = new File(defaultSystemModelFile.getPath());
 			fileChooser.setInitialFileName(selectedBigraphERFile.getName());
@@ -399,7 +400,8 @@ public class TaskCell extends ListCell<GraphPath> {
 		}
 
 		// if first time
-		if (traceMiner != null && (traceMiner.getSystemModelFilePath()==null || traceMiner.getSystemModelFilePath().isEmpty())) {
+		if (traceMiner != null
+				&& (traceMiner.getSystemModelFilePath() == null || traceMiner.getSystemModelFilePath().isEmpty())) {
 			ButtonType result = showDialog("Select System Model File", "System Model file is needed",
 					"Please select [system model file] (*.cps)", AlertType.CONFIRMATION, true);
 
@@ -418,32 +420,34 @@ public class TaskCell extends ListCell<GraphPath> {
 			traceMiner.setSystemModelFilePath(selectedTracesFile.getAbsolutePath());
 		}
 	}
-	
+
 	/**
 	 * Select incident pattern file (*.cpi)
 	 */
 	public void selectIncidentPatternFile() {
 		FileChooser fileChooser = new FileChooser();
 
+		System.out.println("selecting pattern file");
 		// if a file already chosen
-		if (traceMiner != null) {
+		if (traceMiner != null && (traceMiner.getIncidentPatternFilePath() != null
+				&& !traceMiner.getIncidentPatternFilePath().isEmpty())) {
 			String incidentPatternFile = traceMiner.getIncidentPatternFilePath();
-			if(incidentPatternFile!=null && !incidentPatternFile.isEmpty()) {
-				
-				File selectedincidentPatternFile = new File(incidentPatternFile);
-				
-				fileChooser.setInitialFileName(selectedincidentPatternFile.getName());
 
-				String folder = selectedincidentPatternFile.getAbsolutePath().substring(0,
-						selectedincidentPatternFile.getAbsolutePath().lastIndexOf(File.separator));
-				File folderF = new File(folder);
+			System.out.println("there's exisitng pattern file: " + incidentPatternFile);
+			File selectedincidentPatternFile = new File(incidentPatternFile);
 
-				if (folderF.isDirectory()) {
-					fileChooser.setInitialDirectory(folderF);
-				}
+			fileChooser.setInitialFileName(selectedincidentPatternFile.getName());
+
+			String folder = selectedincidentPatternFile.getAbsolutePath().substring(0,
+					selectedincidentPatternFile.getAbsolutePath().lastIndexOf(File.separator));
+			File folderF = new File(folder);
+
+			if (folderF.isDirectory()) {
+				fileChooser.setInitialDirectory(folderF);
 			}
-			
+
 		} else if (defaultIncidentPatternFile != null) {
+			System.out.println("trying default: " + defaultIncidentPatternFile.getPath());
 			File selectedBigraphERFile = new File(defaultIncidentPatternFile.getPath());
 			fileChooser.setInitialFileName(selectedBigraphERFile.getName());
 
@@ -454,10 +458,13 @@ public class TaskCell extends ListCell<GraphPath> {
 			if (folderF.isDirectory()) {
 				fileChooser.setInitialDirectory(folderF);
 			}
+		} else {
+			System.out.println("incident pattern default is null");
 		}
 
 		// if first time
-		if (traceMiner != null && (traceMiner.getIncidentPatternFilePath()==null || traceMiner.getIncidentPatternFilePath().isEmpty())) {
+		if (traceMiner != null && (traceMiner.getIncidentPatternFilePath() == null
+				|| traceMiner.getIncidentPatternFilePath().isEmpty())) {
 			ButtonType result = showDialog("Select Incident Pattern File", "Incident Pattern file is needed",
 					"Please select [incident pattern file] (*.cpi)", AlertType.CONFIRMATION, true);
 
@@ -476,7 +483,7 @@ public class TaskCell extends ListCell<GraphPath> {
 			traceMiner.setIncidentPatternFilePath(selectedTracesFile.getAbsolutePath());
 		}
 	}
-	
+
 	/**
 	 * Select BigraphER file (*.big)
 	 */
@@ -574,7 +581,6 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	}
 
-	
 	public void selectTraceFolder() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
 
@@ -942,12 +948,11 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		alert.setContentText(msg);
 
-		if(showAndWait) {
-			alert.showAndWait();	
+		if (showAndWait) {
+			alert.showAndWait();
 		} else {
 			alert.show();
 		}
-		
 
 		return alert.getResult();
 	}
