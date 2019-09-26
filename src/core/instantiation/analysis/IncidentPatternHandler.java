@@ -1,6 +1,7 @@
 package core.instantiation.analysis;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,17 +15,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.xml.xquery.XQException;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import core.instantiation.analysis.utilities.IncidentModelHandler;
+import core.instantiation.analysis.utilities.Predicate;
+import core.instantiation.analysis.utilities.PredicateType;
 import core.instantiation.analysis.utilities.SystemModelHandler;
+import core.instantiation.analysis.utilities.XqueryExecuter;
 import cyberPhysical_Incident.Activity;
 import cyberPhysical_Incident.BigraphExpression;
 import cyberPhysical_Incident.Condition;
 import cyberPhysical_Incident.IncidentDiagram;
+import cyberPhysical_Incident.Postcondition;
 import cyberPhysical_Incident.Precondition;
 import environment.Asset;
 import environment.EnvironmentDiagram;
@@ -50,6 +57,9 @@ public class IncidentPatternHandler {
 	// key is asset name, value is the Asset object from system model
 	private Map<String, Asset> nameToAssetMap;
 
+	// key is asset name, value is control
+	private Map<String, String> assetNameToControlMap;
+
 	// key is asset class name, value is a list of controls in the bigrapher
 	// file with the first as the main
 	private Map<String, List<String>> assetControlMap;
@@ -60,9 +70,13 @@ public class IncidentPatternHandler {
 
 	private TraceMiner miner;
 
+	private boolean isConcreteCreated = false;
+
 	public IncidentPatternHandler(TraceMiner traceMiner) {
 		entityAssetMap = new HashMap<String, String>();
 		nameToAssetMap = new HashMap<String, Asset>();
+		assetNameToControlMap = new HashMap<String, String>();
+
 		miner = traceMiner;
 
 	}
@@ -231,22 +245,25 @@ public class IncidentPatternHandler {
 
 						String className = ast.getClass().getSimpleName();
 						String control = "";
-						
+
 						// remove Impl if exists
 						if (className.contains("Impl")) {
 							className = className.replace("Impl", "");
 						}
 
-						//find control
+						// find control
 						List<String> controls = assetControlMap.get(className);
-						
-						if(controls!=null && controls.size()>0) {
+
+						if (controls != null && controls.size() > 0) {
 							control = controls.get(0);
 						} else {
-							System.err.println("system class ["+className+"] has no control in the bigrapher file");
+							System.err.println("system class [" + className + "] has no control in the bigrapher file");
 							continue;
 						}
-						
+
+						// add to asset name to control map
+						assetNameToControlMap.put(assetName, control);
+
 						// replace the entity name with a class name
 						replaceEntityNameToAssetClass(cond, entityName, control);
 					}
@@ -265,6 +282,8 @@ public class IncidentPatternHandler {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		isConcreteCreated = true;
 
 	}
 
@@ -376,7 +395,8 @@ public class IncidentPatternHandler {
 				assetClass = tmp[0]; // system class
 				controlNames = tmp[1] != null ? tmp[1].split(FileNames.CONTROLS_SEPARATOR) : null; // bigrapher
 																									// controls
-//				String primariyControl = controlNames.length > 0 ? controlNames[0] : null;
+				// String primariyControl = controlNames.length > 0 ?
+				// controlNames[0] : null;
 
 				// if (signature != null && signature.getByName(primariyControl)
 				// == null) {
@@ -413,7 +433,9 @@ public class IncidentPatternHandler {
 		}
 
 		// ===create concrete conditions
-		createConcreteConditions(tracesFilePath);
+		if (!isConcreteCreated) {
+			createConcreteConditions(tracesFilePath);
+		}
 
 		if (incidentPattern == null) {
 			return null;
@@ -425,7 +447,8 @@ public class IncidentPatternHandler {
 		int currentIndex = 0;
 		List<Integer> traceStates = trace.getStateTransitions();
 
-		for (Activity act : incidentPattern.getActivity()) {
+		Activity act = incidentPattern.getInitialActivity();
+		main_loop: while (act!= null) {
 
 			List<Condition> conditions = new LinkedList<Condition>();
 			conditions.add(act.getPrecondition());
@@ -437,6 +460,12 @@ public class IncidentPatternHandler {
 					continue;
 				}
 
+				// if current index reached the end of the trace then exit
+				if (currentIndex >= traceStates.size()) {
+					System.out.println("Trace end reached.");
+					break main_loop;
+				}
+
 				// get bigraph object of condition
 				BigraphExpression bigExp = (BigraphExpression) cond.getExpression();
 
@@ -445,15 +474,11 @@ public class IncidentPatternHandler {
 					continue;
 				}
 
+				Bigraph condBig = createConditionBigraph(cond, act);
+
 				// BigraphWrapper wrapper = new BigraphWrapper();
 				// wrapper.setBigraphExpression(bigExp);
 				// wrapper.createBigraph(false, miner.gets)
-				Bigraph condBig = bigExp.createBigraph(false, miner.getSignature());
-
-				if (condBig == null) {
-					System.err.println("Bigraph object of condition [" + cond.getName() + "] is null");
-					continue;
-				}
 
 				// match condition to a state
 				for (; currentIndex < traceStates.size(); currentIndex++) {
@@ -467,30 +492,92 @@ public class IncidentPatternHandler {
 						System.err.println("System state [" + stateID + "] is null");
 						continue;
 					}
+					// else {
+					// System.out.println("\nState-"+stateID+"\n"+stateBig);
+					// }
 
 					// match state to condition
 					Matcher matcher = new Matcher();
 
-//					System.out.println("Matching state ["+stateID+"] to condition [" + cond.getName()+"]");
+					// System.out.println("Matching state ["+stateID+"] to
+					// condition [" + cond.getName()+"]");
 					// if it matches then add to the result
 					if (matcher.match(stateBig, condBig).iterator().hasNext()) {
 						matchingStates.put(cond.getName(), stateID);
-						System.out.println("Matching state ["+stateID+"] to condition [" + cond.getName()+"] succeeded");
+						System.out.println(
+								"Matching state [" + stateID + "] to activity ["+act.getName()+"] condition [" + cond.getName() + "] succeeded");
 						// increment index if the condition is pre
 						if (cond instanceof Precondition) {
 							currentIndex++;
-							break;
 						}
-					}else {
-						System.out.println("Matching state ["+stateID+"] to condition [" + cond.getName()+"] Failed");
+						break;
+					} else {
+						System.out.println(
+								"Matching state [" + stateID + "] to activity ["+act.getName()+"] condition [" + cond.getName() + "] Failed");
 					}
 
 				}
 			}
 
+			//next act
+			act = (act.getNextActivities()!=null && act.getNextActivities().size()>0)?act.getNextActivities().get(0):null;
 		}
 
 		return matchingStates;
+	}
+
+	protected Bigraph createConditionBigraph(Condition cond, Activity act) {
+
+		if (cond == null || act == null) {
+			return null;
+		}
+
+		Bigraph condBig = null;
+
+		PredicateType type = PredicateType.Precondition;
+		
+		if(cond instanceof Precondition) {
+			type = PredicateType.Precondition;
+		} else if(cond instanceof Postcondition) {
+			type = PredicateType.Postcondition;
+		} 
+		// condBig = bigExp.createBigraph(false, miner.getSignature());
+
+		// generate big by predicate
+
+		try {
+//			System.out.println(incidentPatternFilePath);
+			org.json.JSONObject condJson = XqueryExecuter.getBigraphConditions(act.getName(),
+					type, incidentPatternFilePath);
+
+			if (condJson != null) {
+				Predicate pred = new Predicate();
+
+//				System.out.println(assetNameToControlMap);
+
+				pred.setAssetControlMap(assetNameToControlMap);
+				pred.setEntityAssetMap(entityAssetMap);
+				pred.setIncidentDocument(incidentPatternFilePath);
+
+				pred.convertToMatchedAssets(condJson, cond.getName());
+
+				condBig = pred.convertJSONtoBigraph(condJson, miner.getSignature());
+				
+			} else {
+				System.err.println("condition json object is null");
+			}
+
+		} catch (FileNotFoundException | XQException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		if (condBig == null) {
+			System.err.println("Bigraph object of condition [" + cond.getName() + "] is null");
+			return null;
+		} 
+		
+		return condBig;
 	}
 
 	public static void main(String[] args) {
@@ -510,9 +597,9 @@ public class IncidentPatternHandler {
 		if (url != null) {
 			String filePath = url.getPath();
 
-			//set states folder in miner
+			// set states folder in miner
 			miner.setStatesFolder(statesFolder);
-			
+
 			// set incident and system model files
 			inc.setIncidentPatternFilePath(incidentPatternModelFilePath);
 			inc.setSystemModelFilePath(sysModelFilePath);
@@ -539,7 +626,7 @@ public class IncidentPatternHandler {
 
 			Map<String, Integer> res = inc.findMatchingStates(testTrace);
 
-			System.out.println("result::\n"+res);
+			System.out.println("result::\n" + res);
 			// replaces entity names with asset class names
 			// inc.createConcreteConditions(filePath);
 

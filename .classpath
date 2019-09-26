@@ -15,5 +15,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/FR_Analyser"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/SweetHome3D-6.1.2-src"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/actionsCatalogueEditor"/>
+	<classpathentry kind="lib" path="lib/Saxon9/saxon9-xqj.jar"/>
+	<classpathentry kind="lib" path="lib/Saxon9/saxon9he.jar"/>
+	<classpathentry kind="lib" path="lib/json-20140107.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
