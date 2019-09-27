@@ -691,7 +691,6 @@ public class TraceViewerInSystemController {
 				trace);
 
 		showIrrelevantStatesAndActions(irrelevantStatesAndActions, trace);
-		
 
 	}
 
@@ -4173,74 +4172,83 @@ public class TraceViewerInSystemController {
 	}
 
 	protected void showIrrelevantStatesAndActions(Map<Integer, String> irrelevantStatesAndActions, GraphPath trace) {
-		
-		if(irrelevantStatesAndActions==null || trace==null) {
+
+		if (irrelevantStatesAndActions == null || trace == null) {
 			return;
 		}
-		
+
 		double opacity = 0.3;
-		
+
 		List<Integer> traceStates = trace.getStateTransitions();
-		
-		//make states grey nad update tooltip text
-		for(Entry<Integer, String> entry : irrelevantStatesAndActions.entrySet()) {
+
+		// make states grey nad update tooltip text
+		for (Entry<Integer, String> entry : irrelevantStatesAndActions.entrySet()) {
 			int state = entry.getKey();
-//			String action = entry.getValue();
-			
-			//get state representation
-			if(statesNodes.containsKey(state)) {
+			// String action = entry.getValue();
+
+			// get state representation
+			if (statesNodes.containsKey(state)) {
 				StackPane stateNode = statesNodes.get(state);
-				
-				stateNode.setOpacity(opacity);
+
+				// stateNode.setOpacity(opacity);
+				for (Node child : stateNode.getChildren()) {
+					child.setOpacity(opacity);
+				}
 			}
-			
-			//get arrows
+
+			// get arrows
 			int stateIndex = traceStates.indexOf(state);
-			int preState = stateIndex!=-1&&stateIndex>0?traceStates.get(stateIndex-1):-1;
-			
-			if(preState!=-1) {
+			int preState = stateIndex != -1 && stateIndex > 0 ? traceStates.get(stateIndex - 1) : -1;
+
+			if (preState != -1) {
 				StackPane arrowHead = getArrowHead(preState, state);
-				
-				if(arrowHead!=null) {
-					arrowHead.setOpacity(opacity);
-					
-					//get label
+
+				if (arrowHead != null) {
+					arrowHead.setOpacity(0);
+
+					for (Node child : arrowHead.getChildren())
+						child.setOpacity(opacity);
+
+					// get label
 					StackPane arrowLabel = arrowsLabels.get(arrowHead);
-					
-					if(arrowLabel!=null) {
-						arrowLabel.setOpacity(opacity);	
+
+					if (arrowLabel != null) {
+						arrowLabel.setOpacity(opacity);
+
+						for (Node child : arrowLabel.getChildren())
+							child.setOpacity(opacity);
 					}
-					
-					//get line
+
+					// get line
 					Line arrowLine = arrowsLines.get(arrowHead);
-					
-					if(arrowLine!=null) {
+
+					if (arrowLine != null) {
 						arrowLine.setOpacity(opacity);
 					}
 				}
 			}
 		}
-		
+
 		System.out.println("irrelevant states and actions:\n" + irrelevantStatesAndActions);
 	}
-	
+
 	protected StackPane getArrowHead(int startState, int endState) {
-		
+
 		List<StackPane> arrowHeads = statesOutgoingArrows.get(startState);
-		
-		if(arrowHeads!=null) {
-			for(StackPane arrowH : arrowHeads) {
+
+		if (arrowHeads != null) {
+			for (StackPane arrowH : arrowHeads) {
 				List<Integer> states = getStatesFromArrow(arrowH);
-				
-				if(states!=null && states.size()>1 && states.get(0) == startState && states.get(1) == endState) {
+
+				if (states != null && states.size() > 1 && states.get(0) == startState && states.get(1) == endState) {
 					return arrowH;
 				}
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	// protected boolean hasCausalLinksToFinalState(String action, String
 	// finalAction, GraphPath trace,
 	// Map<String, List<String>> actionsCausality) {
