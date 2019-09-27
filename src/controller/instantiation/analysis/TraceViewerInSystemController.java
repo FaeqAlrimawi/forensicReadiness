@@ -228,7 +228,7 @@ public class TraceViewerInSystemController {
 
 	// key is trace id, value is a map in which the key is condition name, and
 	// value is state matching the condition
-	Map<Integer, Map<String, Integer>> traceStatesMatchingConditions;
+	Map<Integer, Map<Integer, String>> traceStatesMatchingConditions;
 
 	// private ContextMenu nodeContextMenu;
 
@@ -419,7 +419,7 @@ public class TraceViewerInSystemController {
 
 		mapActions = new HashMap<String, List<Integer>>();
 
-		traceStatesMatchingConditions = new HashMap<Integer, Map<String, Integer>>();
+		traceStatesMatchingConditions = new HashMap<Integer, Map<Integer, String>>();
 
 		// added traces ids
 		addedTracesIDs = new LinkedList<Integer>();
@@ -669,10 +669,9 @@ public class TraceViewerInSystemController {
 	@FXML
 	void showCausalityChain() {
 
-		// === for testing
 		hideStatesAndActionsOccurrences();
 
-		// get selected trace from the dropdown list
+		// get selected trace from the combobox
 		Integer traceID = comboBoxAddedTraces.getSelectionModel().getSelectedItem();
 		GraphPath trace = null;
 
@@ -682,9 +681,17 @@ public class TraceViewerInSystemController {
 			trace = this.trace;
 		}
 
-		findCausalDependency(trace);
-		findStatesMatchingIncidentPatternConditions(trace);
-		// ===
+		// find calusa links
+		Map<String, List<String>> causality = findCausalDependency(trace);
+
+		// find states matching conditions of the incident pattern
+		Map<Integer, String> stateMathcing = findStatesMatchingIncidentPatternConditions(trace);
+
+		Map<Integer, String> irrelevantStatesAndActions = identifyIrrelevantStatesAndActions(causality, stateMathcing,
+				trace);
+
+		System.out.println("irrelevant states and actions:\n" + irrelevantStatesAndActions);
+
 	}
 
 	protected void searchAddedTraces(String searchQuery, String searchField) {
@@ -3882,18 +3889,20 @@ public class TraceViewerInSystemController {
 	 * conditions
 	 * 
 	 * @param trace
+	 * @return A map in which the key is a incident pattern condition name, and
+	 *         the value is the state in the trace that matches it
 	 */
-	protected void findStatesMatchingIncidentPatternConditions(GraphPath trace) {
+	protected Map<Integer, String> findStatesMatchingIncidentPatternConditions(GraphPath trace) {
 
 		if (trace == null || miner == null || traceCell == null) {
-			return;
+			return null;
 		}
 
 		int traceID = trace.getInstanceID();
 
 		if (traceStatesMatchingConditions.containsKey(traceID)) {
 			showConditionsMatchingStates(traceStatesMatchingConditions.get(traceID));
-			return;
+			return null;
 		}
 
 		// set incident pattern file
@@ -3908,7 +3917,7 @@ public class TraceViewerInSystemController {
 
 			if (incidentPatternFile == null || incidentPatternFile.isEmpty()) {
 				// if stil null then return
-				return;
+				return null;
 			}
 		}
 
@@ -3924,7 +3933,7 @@ public class TraceViewerInSystemController {
 
 			if (systemModelFile == null || systemModelFile.isEmpty()) {
 				// if still null then return
-				return;
+				return null;
 			}
 		}
 
@@ -3940,7 +3949,7 @@ public class TraceViewerInSystemController {
 
 			if (statesFolder == null || statesFolder.isEmpty()) {
 				// if still null then return
-				return;
+				return null;
 			}
 
 		}
@@ -3956,12 +3965,12 @@ public class TraceViewerInSystemController {
 
 			if (bigraphERFile == null || bigraphERFile.isEmpty()) {
 				// if still null then return
-				return;
+				return null;
 			}
 
 		}
 
-		Map<String, Integer> result = miner.getStatesMatchingIncidentPatternConditions(trace);
+		Map<Integer, String> result = miner.getStatesMatchingIncidentPatternConditions(trace);
 
 		if (result != null) {
 			traceStatesMatchingConditions.put(traceID, result);
@@ -3969,6 +3978,8 @@ public class TraceViewerInSystemController {
 		}
 
 		System.out.println("result for trace-" + traceID + "\n" + result + "\n");
+
+		return result;
 	}
 
 	/**
@@ -3977,16 +3988,16 @@ public class TraceViewerInSystemController {
 	 * 
 	 * @param conditionsMatchingStatesMap
 	 */
-	protected void showConditionsMatchingStates(Map<String, Integer> conditionsMatchingStatesMap) {
+	protected void showConditionsMatchingStates(Map<Integer, String> conditionsMatchingStatesMap) {
 
 		// shows the given map in the viewer
 		// use the state perc map to do so
 		boolean isAdded = false;
 
-		for (Entry<String, Integer> entry : conditionsMatchingStatesMap.entrySet()) {
+		for (Entry<Integer, String> entry : conditionsMatchingStatesMap.entrySet()) {
 			isAdded = false;
-			String conditionName = entry.getKey();
-			int state = entry.getValue();
+			String conditionName = entry.getValue();
+			int state = entry.getKey();
 
 			Label lbl = mapStatePerc.get(state);
 
@@ -4030,6 +4041,199 @@ public class TraceViewerInSystemController {
 				lbl.setTooltip(tip);
 			}
 		}
+	}
+
+	/**
+	 * Identifies irrelevant states and actions in the given trace using the
+	 * actions causality and state matching to conditions
+	 * 
+	 * @param actionsCausality
+	 *            A map showing the causality between actions, in which the key
+	 *            is action name, and value is the action on which the
+	 *            action-key has causal dependency (index-0), index-1 contains
+	 *            level of dependency
+	 * @param statesMatchingToConditions
+	 *            A map that shows the states of the trace that match the
+	 *            conditions of the incident pattern. key is state, value is
+	 *            condition name
+	 * @param trace
+	 * @return A map which defines the state and its causing action (an action
+	 *         that the state is its post-state). key is state, value is action
+	 *         name
+	 */
+	protected Map<Integer, String> identifyIrrelevantStatesAndActions(Map<String, List<String>> actionsCausality,
+			Map<Integer, String> statesMatchingToConditions, GraphPath trace) {
+
+		// identfies the irrelevant states and actions of a trace based on the
+		// given inputs
+
+		// actionsCausality: key is the action, value contains in index-0 the
+		// previous action that the key-action is causaly dependent on it, and
+		// index-1 is the level of dependency
+
+		// conditionsMatchingToStates: key is incident pattern condition name,
+		// and value is state in the trace that matches the condition
+
+		/**
+		 * Irrelevant State is defined as: a state which satisfites two
+		 * conditions: (1) Does not match any of the incident pattern
+		 * conditions, (2) no next action in the trace, which has causal link to
+		 * the final state, is causally dependent on the causing-action of the
+		 * state
+		 * 
+		 * Irrelevant Action: is an action in which its post-state satifies the
+		 * previous conditions
+		 */
+
+		if (miner == null || actionsCausality == null || statesMatchingToConditions == null || trace == null) {
+			return null;
+		}
+
+		List<Integer> traceStates = trace.getStateTransitions();
+		List<String> traceActions = trace.getTraceActions();
+
+		// key is state in trace, value is causing action for the key-state
+		// (i.e. action which the state is its post-state)
+		Map<Integer, String> irrelevantActionsAndStates = new HashMap<Integer, String>();
+
+		// ===find final state: state that matches the last condition in the
+		// incident pattern
+		String finalCond = miner.getLastIncidentPatternCondition();
+
+		if (finalCond == null) {
+			System.err.println("final condition not found");
+			return null;
+		}
+
+		int finalState = -1;
+		String finalAction = null;
+
+		// find final state
+		for (Entry<Integer, String> entry : statesMatchingToConditions.entrySet()) {
+			if (entry.getValue().equalsIgnoreCase(finalCond)) {
+				finalState = entry.getKey();
+				break;
+			}
+		}
+
+		if (finalState == -1) {
+			System.err.println("final state not found");
+			return null;
+		}
+
+		int finalStateIndex = traceStates.indexOf(finalState);
+		finalAction = traceActions.get(finalStateIndex - 1);
+		// if the finalState from matching conditions is not the same as the
+		// last in the trace, then any state after the final state is not
+		// relevant. Follows this their causing actions
+
+		int traceFinalState = traceStates.get(traceStates.size() - 1);
+
+		if (finalState != traceFinalState) {
+			// all states before final state are irrelevant
+			for (int i = traceStates.size() - 1; i > 0 && traceStates.get(i) != finalState; i--) {
+				int irrelevantState = traceStates.get(i);
+				String irrelevantAction = traceActions.get(i - 1);
+
+				irrelevantActionsAndStates.put(irrelevantState, irrelevantAction);
+			}
+		}
+
+		// ===find irrelevant states and actions by backward tracking of
+		// causality
+
+		// get causal chain from final state
+		List<String> causalChain = getCausalChain(actionsCausality, finalAction, trace);
+
+		for (int i = finalStateIndex; i > 0; i--) {
+
+			int postState = traceStates.get(i);
+			int preState = traceStates.get(i - 1);
+			String action = traceActions.get(i - 1);
+
+			// if both the pre and post states of an action match conditions,
+			// then all are relevant
+			if (statesMatchingToConditions.containsKey(preState) && statesMatchingToConditions.containsKey(postState)) {
+				continue;
+			}
+
+			// if the postState is not matching any conditions and the causing
+			// action has no causal links that trace back to the final state,
+			// then the postState and action are irrelevant
+			if (!statesMatchingToConditions.containsKey(postState)) {
+				if (causalChain != null && !causalChain.contains(action)) {
+					// irrelevant state and action
+					irrelevantActionsAndStates.put(postState, action);
+				}
+			}
+		}
+
+		return irrelevantActionsAndStates;
+	}
+
+	// protected boolean hasCausalLinksToFinalState(String action, String
+	// finalAction, GraphPath trace,
+	// Map<String, List<String>> actionsCausality) {
+	//
+	// // determines if the given action has a causal link to some other action
+	// // (next action) that is causally dependent on the final action
+	//
+	// if (trace == null) {
+	// return false;
+	// }
+	//
+	// boolean hasCausalLink = false;
+	// List<String> traceActions = trace.getTraceActions();
+	// List<Integer> traceStates = trace.getStateTransitions();
+	//
+	// if (traceActions == null || traceStates == null) {
+	// return false;
+	// }
+	//
+	// int finalActionIndex = traceActions.indexOf(finalAction);
+	//
+	// String initalAction = (traceActions.size() > 0) ? traceActions.get(0) :
+	// null;
+	//
+	// for (int i = finalActionIndex; i > 0; i--) {
+	//
+	// String currentAction = traceActions.get(finalActionIndex);
+	//
+	// if (actionsCausality.containsKey(currentAction)) {
+	// String causalAction = actionsCausality.get(currentAction).get(0);
+	//
+	// if (causalAction.equalsIgnoreCase(action)) {
+	// return true;
+	// }
+	// }
+	// }
+	// return hasCausalLink;
+	// }
+
+	protected List<String> getCausalChain(Map<String, List<String>> actionsCausality, String finalAction,
+			GraphPath trace) {
+
+		// returns a list representing the causal chain of the given map
+		// the elements of the list start from the first action causing the
+		// chain to the final action
+		List<String> causalChain = new LinkedList<String>();
+
+		String causalAction = finalAction;
+		int tries = 1000000;
+		while (causalAction != null && tries > 0) {
+
+			causalChain.add(0, causalAction);
+
+			if (actionsCausality.containsKey(causalAction)) {
+				causalAction = actionsCausality.get(causalAction).get(0);
+			} else {
+				causalAction = null;
+			}
+
+			tries--;
+		}
+
+		return causalChain;
 	}
 
 	protected Node addCausalCurve(int startState, int endState) {

@@ -42,7 +42,7 @@
                               </HBox>
                               <VBox prefHeight="167.0" prefWidth="234.0" spacing="3.0">
                                  <children>
-                                    <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="414.0" spacing="3.0">
+                                    <HBox alignment="CENTER_LEFT" prefHeight="25.0" prefWidth="217.0" spacing="3.0">
                                        <children>
                                           <Label text="Show">
                                              <font>
@@ -50,6 +50,11 @@
                                              </font>
                                           </Label>
                                           <ComboBox fx:id="comboBoxAddedTraces" prefHeight="25.0" prefWidth="112.0" />
+                                          <Button mnemonicParsing="false" onAction="#showCausalityChain" prefHeight="25.0" prefWidth="81.0" text="analyse">
+                                             <tooltip>
+                                                <Tooltip text="Finds states matching incident pattern conditions, and also finds causal dependency. Shows causal dependency between actions. Causal dependency is defined in terms of counterfactual account, i.e.  act1 is causally dependent on act2 iff if act2 were not to occur, then act1 would not had occurred" />
+                                             </tooltip>
+                                          </Button>
                                        </children>
                                     </HBox>
                                     <HBox spacing="2.0">
@@ -175,11 +180,6 @@
                         <TextField fx:id="textFieldContainsStateSearch" prefHeight="25.0" prefWidth="100.0" promptText="e.g., 1,2,3" />
                         <Button fx:id="btnSearchTraces" mnemonicParsing="false" onAction="#searchTraces" text="search traces" />
                         <ProgressIndicator fx:id="progressIndicatorSearchTraces" prefHeight="6.0" prefWidth="41.0" visible="false" />
-                        <Button mnemonicParsing="false" onAction="#showCausalityChain" text="show causal chain(s)">
-                           <tooltip>
-                              <Tooltip text="Shows causal dependency between actions. Causal dependency is defined in terms of counterfactual account, i.e.  act1 is causally dependent on act2 iff if act2 were not to occur, then act1 would not had occurred" />
-                           </tooltip>
-                        </Button>
                      </children>
                   </HBox>
                </children>

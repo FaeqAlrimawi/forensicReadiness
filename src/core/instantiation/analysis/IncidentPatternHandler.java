@@ -55,7 +55,7 @@ public class IncidentPatternHandler {
 	private Map<String, String> entityAssetMap;
 
 	// key is asset name, value is the Asset object from system model
-//	private Map<String, Asset> nameToAssetMap;
+	// private Map<String, Asset> nameToAssetMap;
 
 	// key is asset name, value is control
 	private Map<String, String> assetNameToControlMap;
@@ -74,7 +74,7 @@ public class IncidentPatternHandler {
 
 	public IncidentPatternHandler(TraceMiner traceMiner) {
 		entityAssetMap = new HashMap<String, String>();
-//		nameToAssetMap = new HashMap<String, Asset>();
+		// nameToAssetMap = new HashMap<String, Asset>();
 		assetNameToControlMap = new HashMap<String, String>();
 
 		miner = traceMiner;
@@ -423,7 +423,7 @@ public class IncidentPatternHandler {
 		return assetControlMap;
 	}
 
-	public Map<String, Integer> findMatchingStates(GraphPath trace) {
+	public Map<Integer, String> findMatchingStates(GraphPath trace) {
 
 		// ==== finds the sequence of states from the given trace that match to
 		// the conditions of the incident pattern activities
@@ -441,8 +441,8 @@ public class IncidentPatternHandler {
 			return null;
 		}
 
-		// key is condition name, value is state id it matches to
-		Map<String, Integer> matchingStates = new HashMap<String, Integer>();
+		// key is state, value is condition name that it matches
+		Map<Integer, String> matchingStates = new HashMap<Integer, String>();
 
 		int currentIndex = 0;
 		List<Integer> traceStates = trace.getStateTransitions();
@@ -503,7 +503,7 @@ public class IncidentPatternHandler {
 					// condition [" + cond.getName()+"]");
 					// if it matches then add to the result
 					if (matcher.match(stateBig, condBig).iterator().hasNext()) {
-						matchingStates.put(cond.getName(), stateID);
+						matchingStates.put(stateID, cond.getName());
 						// System.out.println(
 						// "Matching state [" + stateID + "] to activity
 						// ["+act.getName()+"] condition [" + cond.getName() +
@@ -588,7 +588,9 @@ public class IncidentPatternHandler {
 
 	/**
 	 * Returns the activity name for the given condition
-	 * @param condition condition name
+	 * 
+	 * @param condition
+	 *            condition name
 	 * @return Activity name
 	 */
 	public String getActivityName(String condition) {
@@ -605,25 +607,57 @@ public class IncidentPatternHandler {
 
 		while (act != null) {
 
-			//check pre
+			// check pre
 			Precondition pre = act.getPrecondition();
 
 			if (pre != null && pre.getName().equalsIgnoreCase(condition)) {
 				return act.getName();
 			}
 
-			//check post
+			// check post
 			Postcondition post = act.getPostcondition();
 
 			if (post != null && post.getName().equalsIgnoreCase(condition)) {
 				return act.getName();
 			}
-			
-			//next act
-			act = (act.getNextActivities()!= null && act.getNextActivities().size()>0)?act.getNextActivities().get(0):null;
+
+			// next act
+			act = (act.getNextActivities() != null && act.getNextActivities().size() > 0)
+					? act.getNextActivities().get(0) : null;
 		}
-		
+
 		return null;
+	}
+
+	public String getLastIncidentPatternCondition() {
+
+		if (incidentPattern == null) {
+			System.err.println("IncidentPatternHandler:: incidnet pattern model is null");
+			return null;
+		}
+
+		Activity act = incidentPattern.getInitialActivity();
+		String lastCond = null;
+
+		int tries = 100000;
+
+		while (act != null && tries > 0) {
+
+			lastCond = act.getPostcondition() != null ? act.getPostcondition().getName() : null;
+			
+			act = (act.getNextActivities() != null && act.getNextActivities().size() > 0)
+					? act.getNextActivities().get(0) : null;
+
+			tries--;
+		}
+
+		// if(preAct!=null) {
+		// Postcondition post = preAct.getPostcondition();
+		//
+		// return post.getName();
+		// }
+
+		return lastCond;
 	}
 
 	public static void main(String[] args) {
@@ -670,7 +704,7 @@ public class IncidentPatternHandler {
 			testTrace.setInstanceID(100);
 			testTrace.setStateTransitions(states);
 
-			Map<String, Integer> res = inc.findMatchingStates(testTrace);
+			Map<Integer, String> res = inc.findMatchingStates(testTrace);
 
 			System.out.println("result::\n" + res);
 			// replaces entity names with asset class names

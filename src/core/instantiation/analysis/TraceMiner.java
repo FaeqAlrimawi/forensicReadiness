@@ -2671,9 +2671,9 @@ public class TraceMiner {
 
 		instanceFileName = filePath;
 
-		//set it for the incident pattern handler
+		// set it for the incident pattern handler
 		incidentPatternHandler.setTracesFilePath(instanceFileName);
-		
+
 		if (instanceFileName == null) {
 			return;
 		}
@@ -4935,7 +4935,7 @@ public class TraceMiner {
 	 * @return A map in which the key is the condition name in the incident
 	 *         pattern, while the value is a state in the given traces
 	 */
-	public Map<String, Integer> getStatesMatchingIncidentPatternConditions(int traceID) {
+	public Map<Integer, String> getStatesMatchingIncidentPatternConditions(int traceID) {
 
 		if (incidentPatternHandler == null) {
 			System.err.println("TraceMiner:: IncidentPatternHandler is null");
@@ -4957,7 +4957,7 @@ public class TraceMiner {
 	 * @return A map in which the key is the condition name in the incident
 	 *         pattern, while the value is a state in the given traces
 	 */
-	public Map<String, Integer> getStatesMatchingIncidentPatternConditions(GraphPath trace) {
+	public Map<Integer,String> getStatesMatchingIncidentPatternConditions(GraphPath trace) {
 
 		if (incidentPatternHandler == null) {
 			System.err.println("TraceMiner:: IncidentPatternHandler is null");
@@ -4981,7 +4981,7 @@ public class TraceMiner {
 	 * @return A map in which the key is the condition name in the incident
 	 *         pattern, while the value is a state in the given traces
 	 */
-	public Map<String, Integer> getStatesMatchingIncidentPatternConditions(int traceID, String incidentPatternFilePath,
+	public Map<Integer, String> getStatesMatchingIncidentPatternConditions(int traceID, String incidentPatternFilePath,
 			String systemModelFilePath) {
 
 		GraphPath trace = getTrace(traceID);
@@ -5002,10 +5002,10 @@ public class TraceMiner {
 	 * @return A map in which the key is the condition name in the incident
 	 *         pattern, while the value is a state in the given traces
 	 */
-	public Map<String, Integer> getStatesMatchingIncidentPatternConditions(GraphPath trace,
+	public Map<Integer, String> getStatesMatchingIncidentPatternConditions(GraphPath trace,
 			String incidentPatternFilePath, String systemModelFilePath) {
 
-		Map<String, Integer> result = null;
+		Map<Integer, String> result = null;
 
 		if (incidentPatternHandler == null) {
 			incidentPatternHandler = new IncidentPatternHandler(this);
@@ -5076,7 +5076,14 @@ public class TraceMiner {
 		incidentPatternHandler.setSystemModelFilePath(systemModelFilePath);
 	}
 
-	
+	public String getLastIncidentPatternCondition() {
+
+		if (incidentPatternHandler != null) {
+			return incidentPatternHandler.getLastIncidentPatternCondition();
+		}
+
+		return null;
+	}
 	// public static void main(String[] args) {
 	//
 	// TraceMiner m = new TraceMiner();
