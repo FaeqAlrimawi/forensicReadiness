@@ -427,13 +427,13 @@ public class TaskCell extends ListCell<GraphPath> {
 	public void selectIncidentPatternFile() {
 		FileChooser fileChooser = new FileChooser();
 
-		System.out.println("selecting pattern file");
+//		System.out.println("selecting pattern file");
 		// if a file already chosen
 		if (traceMiner != null && (traceMiner.getIncidentPatternFilePath() != null
 				&& !traceMiner.getIncidentPatternFilePath().isEmpty())) {
 			String incidentPatternFile = traceMiner.getIncidentPatternFilePath();
 
-			System.out.println("there's exisitng pattern file: " + incidentPatternFile);
+//			System.out.println("there's exisitng pattern file: " + incidentPatternFile);
 			File selectedincidentPatternFile = new File(incidentPatternFile);
 
 			fileChooser.setInitialFileName(selectedincidentPatternFile.getName());
@@ -447,7 +447,7 @@ public class TaskCell extends ListCell<GraphPath> {
 			}
 
 		} else if (defaultIncidentPatternFile != null) {
-			System.out.println("trying default: " + defaultIncidentPatternFile.getPath());
+//			System.out.println("trying default: " + defaultIncidentPatternFile.getPath());
 			File selectedBigraphERFile = new File(defaultIncidentPatternFile.getPath());
 			fileChooser.setInitialFileName(selectedBigraphERFile.getName());
 
@@ -458,9 +458,7 @@ public class TaskCell extends ListCell<GraphPath> {
 			if (folderF.isDirectory()) {
 				fileChooser.setInitialDirectory(folderF);
 			}
-		} else {
-			System.out.println("incident pattern default is null");
-		}
+		} 
 
 		// if first time
 		if (traceMiner != null && (traceMiner.getIncidentPatternFilePath() == null
