@@ -670,6 +670,18 @@ public class TraceViewerInSystemController {
 	void showCausalityChain() {
 
 		// === for testing
+		hideStatesAndActionsOccurrences();
+
+		// get selected trace from the dropdown list
+		Integer traceID = comboBoxAddedTraces.getSelectionModel().getSelectedItem();
+		GraphPath trace = null;
+
+		if (traceID != null) {
+			trace = miner.getTrace(traceID);
+		} else {
+			trace = this.trace;
+		}
+
 		findCausalDependency(trace);
 		findStatesMatchingIncidentPatternConditions(trace);
 		// ===
