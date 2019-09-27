@@ -281,9 +281,9 @@ public class TraceViewerInSystemController {
 	private static final int NOT_A_TRACE = -1;
 
 	// for denedency level
-	private static final String DEPENDENT_NECESSARILY = "Necessarily";
-	private static final String NOT_DEPENDENT_NECESSARILY = "Necessarily Not";
-	private static final String NOT_NECESSARILY_DEPENDENT = "Not Necessarily";
+	private static final int DEPENDENT_NECESSARILY = 0;
+	private static final int NOT_DEPENDENT_NECESSARILY = 1;
+	private static final int NOT_NECESSARILY_DEPENDENT = 2;
 
 	// node context menu items
 	private static final String MENU_ITEM_SHOW_NEXT = "Show Next";
@@ -3606,13 +3606,19 @@ public class TraceViewerInSystemController {
 
 	/**
 	 * Find if two actions are causally dependent
+	 * 
+	 * @return A map in which the key is the action name, and the value is a
+	 *         list of strings where index [0] holds the previous action in the
+	 *         trace that the key-action has a causal dependency on, and index
+	 *         [1] holds the level of dependency (i.e. necessarily dependent or
+	 *         not)
 	 */
-	protected void findCausalDependency(GraphPath trace) {
+	protected Map<String, List<String>> findCausalDependency(GraphPath trace) {
 
 		// it requires the bigrapher file (.big) and states folder to be first
 		// selected
 		if (trace == null || miner == null || traceCell == null) {
-			return;
+			return null;
 		}
 
 		// ===check bigrapher file is loaded
@@ -3621,7 +3627,7 @@ public class TraceViewerInSystemController {
 		}
 
 		if (miner.getBigraphERFile() == null) {
-			return;
+			return null;
 		}
 
 		// === check states folder loaded
@@ -3630,12 +3636,13 @@ public class TraceViewerInSystemController {
 		}
 
 		if (miner.getStatesFolder() == null) {
-			return;
+			return null;
 		}
 
 		// key is action name that we need to find causal dependency on the
 		// action before
-		// value is a list in which at index zero is the action before, and at
+		// value is a list in which at index zero is the action before (not
+		// necessarily immediately before), and at
 		// index 1 is by what (LTS and/or states)
 		Map<String, List<String>> actionsCausality = new HashMap<String, List<String>>();
 
@@ -3643,7 +3650,7 @@ public class TraceViewerInSystemController {
 		List<Integer> states = trace.getStateTransitions();
 
 		if (actions == null || actions.isEmpty() || states == null || states.isEmpty()) {
-			return;
+			return null;
 		}
 
 		System.out.println("===========================");
@@ -3670,7 +3677,7 @@ public class TraceViewerInSystemController {
 				// trace.getStateTransitions().get(1) : -1;
 
 				if (preState == -1 || actions.size() < 2) {
-					return;
+					return null;
 				}
 
 				String action1 = actions.get(j - 1);
@@ -3692,10 +3699,10 @@ public class TraceViewerInSystemController {
 					// addCausalCurve(actionState, preState);
 					List<String> res = new LinkedList<String>();
 					res.add(action1);
-					res.add(DEPENDENT_NECESSARILY);
+					res.add(DEPENDENT_NECESSARILY + "");
 					actionsCausality.put(action2, res);
 
-					showCausality(action2, action1, DEPENDENT_NECESSARILY, originalPreState, originalPostState);
+					showCausality(action2, action1, originalPreState, originalPostState, DEPENDENT_NECESSARILY);
 
 					break;
 
@@ -3746,15 +3753,17 @@ public class TraceViewerInSystemController {
 				int originalPreState = states.get(i);
 				int originalPostState = states.get(i + 1);
 
-				showCausality(actionName, null, NOT_DEPENDENT_NECESSARILY, originalPreState, originalPostState);
+				showCausality(actionName, null, originalPreState, originalPostState, NOT_DEPENDENT_NECESSARILY);
 			}
 		}
 
 		System.out.println("===========================\n");
+
+		return actionsCausality;
 	}
 
-	protected void showCausality(String action, String previousAction, String dependencyLevel, int actionPreState,
-			int actionPostState) {
+	protected void showCausality(String action, String previousAction, int actionPreState, int actionPostState,
+			int dependencyLevel) {
 
 		// key is action name
 		// value is a list where: 0: previous action, 1: a key (currently
@@ -3828,12 +3837,11 @@ public class TraceViewerInSystemController {
 		// update text
 		switch (dependencyLevel) {
 		case DEPENDENT_NECESSARILY:
-			actionLbl.setText(dependencyLevel);
+			actionLbl.setText("Causally-Dependent");
 
 			Tooltip tip = new Tooltip();
 			tip.setStyle("-fx-font-size:12px");
-			tip.setText(
-					"Action is " + dependencyLevel + " causally dependent on previous action [" + previousAction + "]");
+			tip.setText("Action [" + action + "] has causal dependency on previous action [" + previousAction + "]");
 
 			actionLbl.setTooltip(tip);
 
@@ -3843,11 +3851,11 @@ public class TraceViewerInSystemController {
 			// String style = actionLbl.getStyle();
 			// actionLbl.setStyle("-fx-text-fill:green;");
 			actionLbl.setTextFill(Color.GREEN);
-			actionLbl.setText(dependencyLevel);
+			actionLbl.setText("Not Causally-Depend.");
 
 			Tooltip tip2 = new Tooltip();
 			tip2.setStyle("-fx-font-size:12px");
-			tip2.setText("Action is " + dependencyLevel + " causally dependent on any action in the trace");
+			tip2.setText("Action [" + action + "] has NO causal dependency on any previous actions in the trace");
 
 			actionLbl.setTooltip(tip2);
 
@@ -3962,7 +3970,7 @@ public class TraceViewerInSystemController {
 		// shows the given map in the viewer
 		// use the state perc map to do so
 		boolean isAdded = false;
-		
+
 		for (Entry<String, Integer> entry : conditionsMatchingStatesMap.entrySet()) {
 			isAdded = false;
 			String conditionName = entry.getKey();
@@ -3977,24 +3985,24 @@ public class TraceViewerInSystemController {
 					// if there's already two conditions written
 					if (currentText.contains(",")) {
 						String[] conds = currentText.split(",");
-						
-						for(String cond : conds) {
+
+						for (String cond : conds) {
 							cond = cond.trim();
-							if(conditionName.equalsIgnoreCase(cond)) {
+							if (conditionName.equalsIgnoreCase(cond)) {
 								isAdded = true;
 								break;
 							}
 						}
-						
-						if(!isAdded) {
+
+						if (!isAdded) {
 							currentText += ", " + conditionName;
 						}
-						
+
 					} else {
-						if(!currentText.equalsIgnoreCase(conditionName)) {
-							currentText += ", " + conditionName;	
+						if (!currentText.equalsIgnoreCase(conditionName)) {
+							currentText += ", " + conditionName;
 						}
-						
+
 					}
 
 				} else {
