@@ -65,6 +65,7 @@ import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import net.sf.saxon.regex.Operation.OpCapture;
 
 public class TraceViewerInSystemController {
 
@@ -2147,7 +2148,40 @@ public class TraceViewerInSystemController {
 	 */
 	protected void setNodes() {
 
-		for (StackPane node : statesNodes.values()) {
+		for (Entry<Integer, StackPane> nodeEntry : statesNodes.entrySet()) {
+			
+			//set style
+			StackPane node = nodeEntry.getValue();
+			int state = nodeEntry.getKey();
+			
+//			//set normal style for state
+//			node.setOpacity(1);
+////			highlightState(state, "-fx-opacity:1;");
+//			
+//			//set normal style for outgoing arrows
+//			if(statesOutgoingArrows.containsKey(state)) {
+//				for(StackPane arrowHead : statesOutgoingArrows.get(state)) {
+////					highlightArrow(arrowHead, "-fx-opacity:1;");
+//					arrowHead.setOpacity(1);
+//					//line
+//					Line line = arrowsLines.get(arrowHead);
+//					
+//					if(line!=null){
+//						line.setOpacity(1);
+//					}
+//					
+//					//label
+//					StackPane label = arrowsLabels.get(arrowHead);
+//					
+//					if(label!=null) {
+//						label.setOpacity(1);
+//						for(Node n : label.getChildren()) {
+//							n.setOpacity(1);
+//						}
+//					}
+//				}
+//			}
+			
 			if (tracePane.getChildren().contains(node)) {
 				tracePane.getChildren().remove(node);
 				tracePane.getChildren().add(node);
@@ -3901,8 +3935,9 @@ public class TraceViewerInSystemController {
 		int traceID = trace.getInstanceID();
 
 		if (traceStatesMatchingConditions.containsKey(traceID)) {
+			Map<Integer, String> res = traceStatesMatchingConditions.get(traceID);
 			showConditionsMatchingStates(traceStatesMatchingConditions.get(traceID));
-			return null;
+			return res;
 		}
 
 		// set incident pattern file
@@ -4178,23 +4213,26 @@ public class TraceViewerInSystemController {
 		}
 
 		double opacity = 0.3;
-
+		String highLightStyle = "-fx-opacity:"+opacity+";";
+		
 		List<Integer> traceStates = trace.getStateTransitions();
 
 		// make states grey nad update tooltip text
 		for (Entry<Integer, String> entry : irrelevantStatesAndActions.entrySet()) {
+			
 			int state = entry.getKey();
 			// String action = entry.getValue();
 
+			highlightState(state, highLightStyle);
 			// get state representation
-			if (statesNodes.containsKey(state)) {
-				StackPane stateNode = statesNodes.get(state);
-
-				// stateNode.setOpacity(opacity);
-				for (Node child : stateNode.getChildren()) {
-					child.setOpacity(opacity);
-				}
-			}
+//			if (statesNodes.containsKey(state)) {
+//				StackPane stateNode = statesNodes.get(state);
+//
+//				// stateNode.setOpacity(opacity);
+//				for (Node child : stateNode.getChildren()) {
+//					child.setOpacity(opacity);
+//				}
+//			}
 
 			// get arrows
 			int stateIndex = traceStates.indexOf(state);
@@ -4202,30 +4240,34 @@ public class TraceViewerInSystemController {
 
 			if (preState != -1) {
 				StackPane arrowHead = getArrowHead(preState, state);
-
 				if (arrowHead != null) {
-					arrowHead.setOpacity(0);
-
-					for (Node child : arrowHead.getChildren())
-						child.setOpacity(opacity);
-
-					// get label
-					StackPane arrowLabel = arrowsLabels.get(arrowHead);
-
-					if (arrowLabel != null) {
-						arrowLabel.setOpacity(opacity);
-
-						for (Node child : arrowLabel.getChildren())
-							child.setOpacity(opacity);
-					}
-
-					// get line
-					Line arrowLine = arrowsLines.get(arrowHead);
-
-					if (arrowLine != null) {
-						arrowLine.setOpacity(opacity);
-					}
+					highlightArrow(arrowHead, highLightStyle);
+					arrowHead.setOpacity(opacity);
 				}
+				
+//				if (arrowHead != null) {
+//					arrowHead.setOpacity(0);
+//
+//					for (Node child : arrowHead.getChildren())
+//						child.setOpacity(opacity);
+//
+//					// get label
+//					StackPane arrowLabel = arrowsLabels.get(arrowHead);
+//
+//					if (arrowLabel != null) {
+//						arrowLabel.setOpacity(opacity);
+//
+//						for (Node child : arrowLabel.getChildren())
+//							child.setOpacity(opacity);
+//					}
+//
+//					// get line
+//					Line arrowLine = arrowsLines.get(arrowHead);
+//
+//					if (arrowLine != null) {
+//						arrowLine.setOpacity(opacity);
+//					}
+//				}
 			}
 		}
 
