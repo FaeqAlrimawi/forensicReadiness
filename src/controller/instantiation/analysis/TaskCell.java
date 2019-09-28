@@ -19,8 +19,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
@@ -50,6 +52,10 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	@FXML
 	private SplitPane splitPaneTrace;
+	
+	@FXML
+	private HBox hboxTrace;
+	
 
 	@FXML
 	private HBox hboxOptions;
@@ -87,6 +93,7 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	private GraphPath trace;
 
+	
 	// private Trace newTrace;
 
 	private static final URL defaultStatesFolder = TaskCell.class.getClassLoader()
@@ -123,22 +130,22 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	private static final String[] OPTIONS = new String[] { DETAILS, SHOW_ENTITIES, SAVE };
 
-	public TaskCell(TraceMiner miner) {
-		this();
+	public TaskCell(TraceMiner miner, ListView<GraphPath> list) {
+		this(list);
 		// loadFXML();
 
 		traceMiner = miner;
 	}
 
-	public TaskCell() {
+	public TaskCell(ListView<GraphPath> list) {
 
 		// loadStateController();
-		loadFXML();
+		loadFXML(list);
 		// loadTraceDetailsController();
 		traceMiner = null;
 	}
 
-	private void loadFXML() {
+	private void loadFXML(ListView<GraphPath> list) {
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("../../../fxml/task_cell.fxml"));
 			loader.setController(this);
@@ -167,6 +174,19 @@ public class TaskCell extends ListCell<GraphPath> {
 					menuButtonOptions.getItems().add(item);
 				}
 			}
+			
+			
+			
+			if(list!=null) {
+				rootPane.prefWidthProperty().bind(list.widthProperty().subtract(30));
+				rootPane.setMaxWidth(Control.USE_PREF_SIZE);
+			}
+			
+			scrollPaneTrace.prefWidthProperty().bind(rootPane.widthProperty().subtract(5));
+			hbox.prefHeightProperty().bind(scrollPaneTrace.heightProperty());
+			
+			lblTraceID.prefHeightProperty().bind(scrollPaneTrace.heightProperty());
+			
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -677,7 +697,8 @@ public class TaskCell extends ListCell<GraphPath> {
 		rootPane.getChildren().clear();
 
 		// re-add
-		vboxMain.getChildren().add(splitPaneTrace);
+//		vboxMain.getChildren().add(splitPaneTrace);
+		vboxMain.getChildren().add(hboxTrace);
 		rootPane.getChildren().add(vboxMain);
 		rootPane.getChildren().add(hboxOptions);
 	}

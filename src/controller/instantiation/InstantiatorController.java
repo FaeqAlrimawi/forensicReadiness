@@ -1076,7 +1076,7 @@ public class InstantiatorController
 
 		tracesObservableList.addAll(traces);
 
-		listViewTraces.setCellFactory(tracesListView -> new TaskCell());
+		listViewTraces.setCellFactory(tracesListView -> new TaskCell(listViewTraces));
 		listViewTraces.setItems(tracesObservableList);
 
 		lblListViewTracesEmpty.setVisible(false);

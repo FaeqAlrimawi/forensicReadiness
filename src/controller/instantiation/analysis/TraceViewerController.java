@@ -447,7 +447,7 @@ public class TraceViewerController implements TraceMinerListener {
 			}
 		});
 		// set list view
-		listViewTraces.setCellFactory(tracesListView -> new TaskCell(tracesMiner));
+		listViewTraces.setCellFactory(tracesListView -> new TaskCell(tracesMiner, listViewTraces));
 
 	}
 
