@@ -28,7 +28,7 @@
 
 <AnchorPane prefHeight="890.0" prefWidth="1345.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.analysis.TraceViewerController">
    <children>
-      <SplitPane dividerPositions="0.26433358153387937" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <SplitPane dividerPositions="0.26209977661950856" prefHeight="160.0" prefWidth="200.0" stylesheets="@../resources/styles/splitpane.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
           <AnchorPane minHeight="500.0" minWidth="100.0" prefHeight="888.0" prefWidth="200.0">
                <children>
@@ -206,14 +206,13 @@
             </AnchorPane>
           <AnchorPane minHeight="500.0" minWidth="500.0" prefHeight="160.0" prefWidth="100.0">
                <children>
-                  <Separator layoutX="15.0" layoutY="527.0" prefWidth="200.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" />
-                  <SplitPane dividerPositions="0.6118047673098751" layoutX="33.0" layoutY="411.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                  <SplitPane dividerPositions="0.6118047673098751" layoutX="33.0" layoutY="411.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <items>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                            <children>
-                              <VBox prefHeight="94.0" prefWidth="913.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                              <VBox prefHeight="74.0" prefWidth="977.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                  <children>
-                                    <VBox prefHeight="473.0" prefWidth="893.0">
+                                    <VBox prefHeight="76.0" prefWidth="977.0">
                                        <children>
                                           <Label alignment="TOP_LEFT" prefHeight="27.0" prefWidth="320.0" text="Filtered Traces">
                                              <font>
@@ -246,7 +245,7 @@
                                                 <Separator orientation="VERTICAL" prefHeight="18.0" prefWidth="11.0" />
                                                 <Label prefHeight="27.0" prefWidth="424.0" text="State-number =[action name]=&gt; State-number =[action name]=&gt; ..." textFill="#8a8686" />
                                                 <Pane prefHeight="25.0" prefWidth="280.0" />
-                                                <TextField fx:id="textFieldSearchFiltered" prefHeight="25.0" prefWidth="183.0" promptText="Search">
+                                                <TextField fx:id="textFieldSearchFiltered" prefHeight="25.0" prefWidth="197.0" promptText="Search">
                                                    <tooltip>
                                                       <Tooltip text="Search states in filtered traces (e.g., 1, 4, 6)" />
                                                    </tooltip>
@@ -260,7 +259,7 @@
                                     </VBox>
                                  </children>
                               </VBox>
-                              <AnchorPane prefHeight="400.0" prefWidth="886.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="100.0">
+                              <AnchorPane prefHeight="400.0" prefWidth="886.0" AnchorPane.bottomAnchor="42.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="85.0">
                                  <children>
                                     <ListView fx:id="listViewTraces" prefHeight="330.0" prefWidth="907.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                     <Label fx:id="lblListViewTracesEmpty" alignment="CENTER" layoutY="-38.0" prefHeight="240.0" prefWidth="893.0" text="Filtered Traces" textFill="#a19494" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
