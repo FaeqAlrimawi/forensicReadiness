@@ -50,21 +50,20 @@ public class TaskCell extends ListCell<GraphPath> {
 	@FXML
 	private ScrollPane scrollPaneTrace;
 
-//	@FXML
-//	private SplitPane splitPaneTrace;
-	
+	// @FXML
+	// private SplitPane splitPaneTrace;
+
 	@FXML
 	private HBox hboxTrace;
-	
 
-//	@FXML
-//	private HBox hboxOptions;
+	// @FXML
+	// private HBox hboxOptions;
 
 	// @FXML
 	// private HBox hboxEntities;
 
-//	@FXML
-//	private VBox vboxMain;
+	// @FXML
+	// private VBox vboxMain;
 
 	@FXML
 	private MenuButton menuButtonOptions;
@@ -93,7 +92,6 @@ public class TaskCell extends ListCell<GraphPath> {
 
 	private GraphPath trace;
 
-	
 	// private Trace newTrace;
 
 	private static final URL defaultStatesFolder = TaskCell.class.getClassLoader()
@@ -154,10 +152,10 @@ public class TaskCell extends ListCell<GraphPath> {
 
 			if (rootPane != null) {
 				rootPane.setOnMouseEntered(e -> {
-//					hboxOptions.setVisible(true);
-//					if (!menuButtonOptions.isShowing()) {
-//						menuButtonOptions.show();
-//					}
+					// hboxOptions.setVisible(true);
+					// if (!menuButtonOptions.isShowing()) {
+					// menuButtonOptions.show();
+					// }
 					menuButtonOptions.setVisible(true);
 				});
 
@@ -177,24 +175,22 @@ public class TaskCell extends ListCell<GraphPath> {
 					});
 					menuButtonOptions.getItems().add(item);
 				}
-				
-				if(list!=null) {
+
+				if (list != null) {
 					rootPane.prefWidthProperty().bind(list.widthProperty().subtract(30));
 					rootPane.setMaxWidth(Control.USE_PREF_SIZE);
 				}
-				
-//				if(traceDetailsMainPane!=null){
-//					rootPane.prefHeightProperty().bind(vboxMain.heightProperty().add(15));
-//				}
-				
+
+				// if(traceDetailsMainPane!=null){
+				// rootPane.prefHeightProperty().bind(vboxMain.heightProperty().add(15));
+				// }
+
 				scrollPaneTrace.prefWidthProperty().bind(rootPane.widthProperty());
 				hbox.prefHeightProperty().bind(scrollPaneTrace.heightProperty());
-				
+
 				lblTraceID.prefHeightProperty().bind(scrollPaneTrace.heightProperty());
 			}
-			
-			
-			
+
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -388,8 +384,8 @@ public class TaskCell extends ListCell<GraphPath> {
 			rootPane.getChildren().add(traceDetailsMainPane);
 			// updateItem(trace, false);
 		}
-		
-//		rootPane.setPrefHeight(vboxMain.getPrefHeight()+10);
+
+		// rootPane.setPrefHeight(vboxMain.getPrefHeight()+10);
 
 	}
 
@@ -457,13 +453,14 @@ public class TaskCell extends ListCell<GraphPath> {
 	public void selectIncidentPatternFile() {
 		FileChooser fileChooser = new FileChooser();
 
-//		System.out.println("selecting pattern file");
+		// System.out.println("selecting pattern file");
 		// if a file already chosen
 		if (traceMiner != null && (traceMiner.getIncidentPatternFilePath() != null
 				&& !traceMiner.getIncidentPatternFilePath().isEmpty())) {
 			String incidentPatternFile = traceMiner.getIncidentPatternFilePath();
 
-//			System.out.println("there's exisitng pattern file: " + incidentPatternFile);
+			// System.out.println("there's exisitng pattern file: " +
+			// incidentPatternFile);
 			File selectedincidentPatternFile = new File(incidentPatternFile);
 
 			fileChooser.setInitialFileName(selectedincidentPatternFile.getName());
@@ -477,7 +474,8 @@ public class TaskCell extends ListCell<GraphPath> {
 			}
 
 		} else if (defaultIncidentPatternFile != null) {
-//			System.out.println("trying default: " + defaultIncidentPatternFile.getPath());
+			// System.out.println("trying default: " +
+			// defaultIncidentPatternFile.getPath());
 			File selectedBigraphERFile = new File(defaultIncidentPatternFile.getPath());
 			fileChooser.setInitialFileName(selectedBigraphERFile.getName());
 
@@ -488,7 +486,7 @@ public class TaskCell extends ListCell<GraphPath> {
 			if (folderF.isDirectory()) {
 				fileChooser.setInitialDirectory(folderF);
 			}
-		} 
+		}
 
 		// if first time
 		if (traceMiner != null && (traceMiner.getIncidentPatternFilePath() == null
@@ -703,17 +701,17 @@ public class TaskCell extends ListCell<GraphPath> {
 		lblTraceID.setStyle(normalStyle);
 
 		hbox.getChildren().clear();
-//		vboxMain.getChildren().clear();
+		// vboxMain.getChildren().clear();
 		rootPane.getChildren().clear();
 
 		// re-add
-//		vboxMain.getChildren().add(splitPaneTrace);
+		// vboxMain.getChildren().add(splitPaneTrace);
 		rootPane.getChildren().add(hboxTrace);
-		if(traceDetailsMainPane!=null) {
+		if (traceDetailsMainPane != null) {
 			rootPane.getChildren().add(traceDetailsMainPane);
 		}
-//		rootPane.getChildren().add(vboxMain);
-//		rootPane.getChildren().add(hboxOptions);
+		// rootPane.getChildren().add(vboxMain);
+		// rootPane.getChildren().add(hboxOptions);
 	}
 
 	protected void populateCell(GraphPath trace) {
@@ -726,24 +724,6 @@ public class TaskCell extends ListCell<GraphPath> {
 		}
 
 		this.trace = trace;
-		// id
-		Platform.runLater(new Runnable() {
-
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				lblTraceID.setText(trace.getInstanceID() + "");
-				if (traceMiner != null && traceMiner.isTraceSaved(trace.getInstanceID())) {
-					lblTraceID.setStyle(boldStyle);
-				}
-
-				// hbox.getChildren().clear();
-				Pane pane = new Pane();
-				pane.setPrefWidth(10);
-				hbox.getChildren().add(pane);
-
-			}
-		});
 
 		int index = 0;
 		int size = trace.getStateTransitions().size() - 1;
@@ -755,6 +735,10 @@ public class TaskCell extends ListCell<GraphPath> {
 		// System.out.println("actions: "+actions);
 		// set states
 
+		//trace id
+		strBldr.append("Trace ["+trace.getInstanceID()+"]: ");
+		
+		
 		for (Integer state : states) {
 			// Circle circle = new Circle(hbox.getHeight()-2);
 			Label lblState;
@@ -829,20 +813,44 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		}
 
-		// tooltip that holds the whole trace states and actions
+		// id
 		Platform.runLater(new Runnable() {
 
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				// add tooltip
+				lblTraceID.setText(trace.getInstanceID() + "");
+				
+//				tooltip
+				 Tooltip tip = new Tooltip(strBldr.toString());
+				 lblTraceID.setTooltip(tip);
+				 
+				if (traceMiner != null && traceMiner.isTraceSaved(trace.getInstanceID())) {
+					lblTraceID.setStyle(boldStyle);
+				}
 
-				// set the location of the option box
-				// hboxOptions.set
-				Tooltip tip = new Tooltip(strBldr.toString());
-				lblTraceID.setTooltip(tip);
+				// hbox.getChildren().clear();
+				Pane pane = new Pane();
+				pane.setPrefWidth(10);
+				hbox.getChildren().add(pane);
+
 			}
 		});
+
+		// tooltip that holds the whole trace states and actions
+		// Platform.runLater(new Runnable() {
+		//
+		// @Override
+		// public void run() {
+		// // TODO Auto-generated method stub
+		// // add tooltip
+		//
+		// // set the location of the option box
+		// // hboxOptions.set
+		// Tooltip tip = new Tooltip(strBldr.toString());
+		// lblTraceID.setTooltip(tip);
+		// }
+		// });
 
 	}
 
