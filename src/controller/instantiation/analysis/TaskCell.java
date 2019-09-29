@@ -50,21 +50,21 @@ public class TaskCell extends ListCell<GraphPath> {
 	@FXML
 	private ScrollPane scrollPaneTrace;
 
-	@FXML
-	private SplitPane splitPaneTrace;
+//	@FXML
+//	private SplitPane splitPaneTrace;
 	
 	@FXML
 	private HBox hboxTrace;
 	
 
-	@FXML
-	private HBox hboxOptions;
+//	@FXML
+//	private HBox hboxOptions;
 
 	// @FXML
 	// private HBox hboxEntities;
 
-	@FXML
-	private VBox vboxMain;
+//	@FXML
+//	private VBox vboxMain;
 
 	@FXML
 	private MenuButton menuButtonOptions;
@@ -154,12 +154,16 @@ public class TaskCell extends ListCell<GraphPath> {
 
 			if (rootPane != null) {
 				rootPane.setOnMouseEntered(e -> {
-					hboxOptions.setVisible(true);
+//					hboxOptions.setVisible(true);
+//					if (!menuButtonOptions.isShowing()) {
+//						menuButtonOptions.show();
+//					}
+					menuButtonOptions.setVisible(true);
 				});
 
 				rootPane.setOnMouseExited(e -> {
 					if (!menuButtonOptions.isShowing()) {
-						hboxOptions.setVisible(false);
+						menuButtonOptions.setVisible(false);
 					}
 
 				});
@@ -173,19 +177,23 @@ public class TaskCell extends ListCell<GraphPath> {
 					});
 					menuButtonOptions.getItems().add(item);
 				}
+				
+				if(list!=null) {
+					rootPane.prefWidthProperty().bind(list.widthProperty().subtract(30));
+					rootPane.setMaxWidth(Control.USE_PREF_SIZE);
+				}
+				
+//				if(traceDetailsMainPane!=null){
+//					rootPane.prefHeightProperty().bind(vboxMain.heightProperty().add(15));
+//				}
+				
+				scrollPaneTrace.prefWidthProperty().bind(rootPane.widthProperty());
+				hbox.prefHeightProperty().bind(scrollPaneTrace.heightProperty());
+				
+				lblTraceID.prefHeightProperty().bind(scrollPaneTrace.heightProperty());
 			}
 			
 			
-			
-			if(list!=null) {
-				rootPane.prefWidthProperty().bind(list.widthProperty().subtract(30));
-				rootPane.setMaxWidth(Control.USE_PREF_SIZE);
-			}
-			
-			scrollPaneTrace.prefWidthProperty().bind(rootPane.widthProperty().subtract(5));
-			hbox.prefHeightProperty().bind(scrollPaneTrace.heightProperty());
-			
-			lblTraceID.prefHeightProperty().bind(scrollPaneTrace.heightProperty());
 			
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -364,22 +372,24 @@ public class TaskCell extends ListCell<GraphPath> {
 			loadTraceDetailsController();
 
 			traceDetailController.setTraceMiner(traceMiner);
-			traceDetailController.setVBox(vboxMain);
+			traceDetailController.setVBox(rootPane);
 			// //show default value for entities
 			traceDetailController.showEntities(trace);
 		}
 
 		// add hbox to the vboxmain
-		if (vboxMain.getChildren().size() == 2) {
+		if (rootPane.getChildren().size() == 2) {
 			// if hbox is already added
 			// System.out.println("Renew");
-			vboxMain.getChildren().remove(vboxMain.getChildren().size() - 1);
-			vboxMain.getChildren().add(traceDetailsMainPane);
+			rootPane.getChildren().remove(rootPane.getChildren().size() - 1);
+			rootPane.getChildren().add(traceDetailsMainPane);
 		} else {
 			// System.out.println("Add new");
-			vboxMain.getChildren().add(traceDetailsMainPane);
+			rootPane.getChildren().add(traceDetailsMainPane);
 			// updateItem(trace, false);
 		}
+		
+//		rootPane.setPrefHeight(vboxMain.getPrefHeight()+10);
 
 	}
 
@@ -693,14 +703,17 @@ public class TaskCell extends ListCell<GraphPath> {
 		lblTraceID.setStyle(normalStyle);
 
 		hbox.getChildren().clear();
-		vboxMain.getChildren().clear();
+//		vboxMain.getChildren().clear();
 		rootPane.getChildren().clear();
 
 		// re-add
 //		vboxMain.getChildren().add(splitPaneTrace);
-		vboxMain.getChildren().add(hboxTrace);
-		rootPane.getChildren().add(vboxMain);
-		rootPane.getChildren().add(hboxOptions);
+		rootPane.getChildren().add(hboxTrace);
+		if(traceDetailsMainPane!=null) {
+			rootPane.getChildren().add(traceDetailsMainPane);
+		}
+//		rootPane.getChildren().add(vboxMain);
+//		rootPane.getChildren().add(hboxOptions);
 	}
 
 	protected void populateCell(GraphPath trace) {

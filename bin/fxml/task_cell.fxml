@@ -5,40 +5,38 @@
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane fx:id="rootPane" prefHeight="68.0" prefWidth="862.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1">
+
+<VBox fx:id="rootPane" prefWidth="852.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <VBox fx:id="vboxMain" prefWidth="852.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+      <HBox fx:id="hboxTrace" alignment="CENTER_LEFT" prefHeight="60.0">
          <children>
-            <HBox fx:id="hboxTrace" prefHeight="60.0">
+            <VBox alignment="TOP_CENTER" prefHeight="60.0" prefWidth="66.0">
                <children>
-                  <Label fx:id="lblTraceID" alignment="CENTER" prefHeight="17.0" prefWidth="109.0">
+                  <MenuButton fx:id="menuButtonOptions" alignment="TOP_LEFT" mnemonicParsing="false" text="Options" visible="false">
+                    <items>
+                      <MenuItem mnemonicParsing="false" text="Action 1" />
+                      <MenuItem mnemonicParsing="false" text="Action 2" />
+                    </items>
+                  </MenuButton>
+                  <Label fx:id="lblTraceID" alignment="CENTER" minWidth="80.0" prefHeight="23.0" prefWidth="80.0">
                      <padding>
                         <Insets left="2.0" />
                      </padding>
                   </Label>
-                  <ScrollPane fx:id="scrollPaneTrace" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" opacity="0.55" prefHeight="58.0" prefWidth="849.0" vbarPolicy="NEVER">
-                     <content>
-                        <HBox fx:id="hbox" alignment="CENTER_LEFT" />
-                     </content>
-                  </ScrollPane>
                </children>
-            </HBox>
-         </children>
-      </VBox>
-      <HBox fx:id="hboxOptions" alignment="CENTER_RIGHT" layoutX="566.0" layoutY="8.0" prefHeight="30.0" prefWidth="86.0" spacing="5.0" visible="false" AnchorPane.rightAnchor="8.0" AnchorPane.topAnchor="10.0">
-         <children>
-            <MenuButton fx:id="menuButtonOptions" alignment="TOP_LEFT" mnemonicParsing="false" text="Options">
-              <items>
-                <MenuItem mnemonicParsing="false" text="Action 1" />
-                <MenuItem mnemonicParsing="false" text="Action 2" />
-              </items>
-            </MenuButton>
-            <Label />
+               <padding>
+                  <Insets top="2.0" />
+               </padding>
+            </VBox>
+            <ScrollPane fx:id="scrollPaneTrace" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" opacity="0.55" prefHeight="58.0" prefWidth="849.0" vbarPolicy="NEVER">
+               <content>
+                  <HBox fx:id="hbox" alignment="CENTER_LEFT" />
+               </content>
+            </ScrollPane>
          </children>
       </HBox>
    </children>
-</AnchorPane>
+</VBox>

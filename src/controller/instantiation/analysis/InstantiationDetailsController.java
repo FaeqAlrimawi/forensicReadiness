@@ -18,6 +18,7 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
 public class InstantiationDetailsController {
@@ -57,7 +58,7 @@ public class InstantiationDetailsController {
 	private int topK = 3;
 //	private int topKMax = 10;
 
-	private VBox vboxMain;
+	private Pane vboxMain;
 
 	private int minEntityNum = 1;
 	private int maxEntityNum = 100;
@@ -91,7 +92,7 @@ public class InstantiationDetailsController {
 //		
 //	}
 	
-	public void setVBox(VBox main) {
+	public void setVBox(Pane main) {
 		vboxMain = main;
 	}
 
