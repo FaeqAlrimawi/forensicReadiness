@@ -7,34 +7,43 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-
+<?import javafx.scene.text.Font?>
 
 <VBox fx:id="rootPane" prefWidth="852.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <HBox fx:id="hboxTrace" alignment="CENTER_LEFT" prefHeight="60.0">
          <children>
-            <VBox alignment="TOP_CENTER" prefHeight="60.0" prefWidth="66.0">
+            <HBox alignment="CENTER" prefHeight="60.0" prefWidth="83.0">
                <children>
-                  <MenuButton fx:id="menuButtonOptions" alignment="TOP_LEFT" mnemonicParsing="false" text="Options" visible="false">
+                  <Label fx:id="lblTraceID" alignment="CENTER" minWidth="67.0" prefHeight="23.0" prefWidth="67.0">
+                     <padding>
+                        <Insets left="2.0" />
+                     </padding>
+                     <font>
+                        <Font size="13.0" />
+                     </font>
+                  </Label>
+                  <MenuButton fx:id="menuButtonOptions" alignment="TOP_LEFT" mnemonicParsing="false" visible="false">
                     <items>
                       <MenuItem mnemonicParsing="false" text="Action 1" />
                       <MenuItem mnemonicParsing="false" text="Action 2" />
                     </items>
                   </MenuButton>
-                  <Label fx:id="lblTraceID" alignment="CENTER" minWidth="80.0" prefHeight="23.0" prefWidth="80.0">
-                     <padding>
-                        <Insets left="2.0" />
-                     </padding>
-                  </Label>
                </children>
-               <padding>
-                  <Insets top="2.0" />
-               </padding>
-            </VBox>
+               <HBox.margin>
+                  <Insets right="2.0" />
+               </HBox.margin>
+            </HBox>
             <ScrollPane fx:id="scrollPaneTrace" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" opacity="0.55" prefHeight="58.0" prefWidth="849.0" vbarPolicy="NEVER">
                <content>
-                  <HBox fx:id="hbox" alignment="CENTER_LEFT" />
+                  <HBox fx:id="hbox" alignment="CENTER_LEFT">
+                     <padding>
+                        <Insets left="2.0" />
+                     </padding></HBox>
                </content>
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
             </ScrollPane>
          </children>
       </HBox>

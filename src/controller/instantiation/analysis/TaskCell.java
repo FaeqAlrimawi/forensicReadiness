@@ -735,10 +735,9 @@ public class TaskCell extends ListCell<GraphPath> {
 		// System.out.println("actions: "+actions);
 		// set states
 
-		//trace id
-		strBldr.append("Trace ["+trace.getInstanceID()+"]: ");
-		
-		
+		// trace id
+		strBldr.append("Trace [" + trace.getInstanceID() + "]: ");
+
 		for (Integer state : states) {
 			// Circle circle = new Circle(hbox.getHeight()-2);
 			Label lblState;
@@ -813,6 +812,18 @@ public class TaskCell extends ListCell<GraphPath> {
 
 		}
 
+		lblTraceID.setOnMouseEntered(e -> {
+			lblTraceID.setStyle(mouseEnteredStyle);
+			lblTraceID.setCursor(Cursor.HAND);
+		});
+
+		lblTraceID.setOnMouseExited(e -> {
+			lblTraceID.setStyle(normalStyle);
+		});
+
+		lblTraceID.setOnMouseClicked(e -> {
+			showTrace();
+		});
 		// id
 		Platform.runLater(new Runnable() {
 
@@ -820,11 +831,11 @@ public class TaskCell extends ListCell<GraphPath> {
 			public void run() {
 				// TODO Auto-generated method stub
 				lblTraceID.setText(trace.getInstanceID() + "");
-				
-//				tooltip
-				 Tooltip tip = new Tooltip(strBldr.toString());
-				 lblTraceID.setTooltip(tip);
-				 
+
+				// tooltip
+				Tooltip tip = new Tooltip(strBldr.toString());
+				lblTraceID.setTooltip(tip);
+
 				if (traceMiner != null && traceMiner.isTraceSaved(trace.getInstanceID())) {
 					lblTraceID.setStyle(boldStyle);
 				}

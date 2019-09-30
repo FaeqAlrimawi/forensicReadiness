@@ -116,6 +116,10 @@ public class BigraphWrapper implements Serializable {
 
 	}
 
+	public Signature getSignature() {
+		return signature;
+	}
+	
 	public void setSignature(Signature sig) {
 		signature = sig;
 	}

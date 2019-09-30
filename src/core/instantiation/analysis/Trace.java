@@ -81,6 +81,8 @@ public class Trace implements Serializable {
 
 		FileOutputStream fileOut;
 		try {
+			//remove any Bigaph objects from the actions
+			removeBigraphObjsFromActions();
 			fileOut = new FileOutputStream(filePath);
 			ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
 			objectOut.writeObject(this);
@@ -96,6 +98,44 @@ public class Trace implements Serializable {
 
 	}
 
+	protected void removeBigraphObjsFromActions(){
+		
+		if(actions == null) {
+			return;
+		}
+		
+		for(ActionWrapper act : actions.values()) {
+			
+			//precondition
+			BigraphWrapper pre = act.getPrecondition();
+			
+			if(pre!=null ) {
+				//set bigraph object to null
+//				if(pre.getBigraphObject()!=null){
+//					pre.setBigraphObject(null);	
+//				}
+				
+				pre.setBigraphObject(null);
+				pre.setSignature(null);
+				//set signature to null
+//				if(pre.getSignature()!=null) {
+//					pre.setSignature(null);
+//				}
+			}
+			
+			
+			
+			//postcondition
+			BigraphWrapper post = act.getPostcondition();
+			
+			if(post!=null) {
+				post.setBigraphObject(null);
+				post.setSignature(null);
+			}
+			
+			
+		}
+	}
 //	/**
 //	 * Finds the causal dependency chain between actions in the given incident
 //	 * trace
