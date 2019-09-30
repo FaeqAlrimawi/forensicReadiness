@@ -22,11 +22,11 @@
 
 <BorderPane minHeight="650.0" minWidth="900.0" prefHeight="775.0" prefWidth="1453.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.analysis.TraceViewerInSystemController">
    <center>
-      <SplitPane dividerPositions="0.17091660923501034">
+      <SplitPane fx:id="splitPaneTraceView" dividerPositions="0.17091660923501034">
          <items>
             <VBox minHeight="10.0" minWidth="10.0" prefHeight="709.0" prefWidth="322.0" spacing="5.0">
                <children>
-                  <SplitPane dividerPositions="0.4031563845050215, 0.6513629842180775" orientation="VERTICAL" prefHeight="699.0" prefWidth="209.0">
+                  <SplitPane fx:id="splitPaneTraceDetails" dividerPositions="0.4031563845050215, 0.6513629842180775" orientation="VERTICAL" prefHeight="699.0" prefWidth="209.0">
                     <items>
                         <VBox prefHeight="266.0" prefWidth="237.0" spacing="5.0">
                            <children>

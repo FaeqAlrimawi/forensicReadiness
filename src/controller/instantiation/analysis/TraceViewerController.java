@@ -40,6 +40,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
@@ -54,6 +55,13 @@ import javafx.stage.FileChooser;
 
 public class TraceViewerController implements TraceMinerListener {
 
+	@FXML
+	private SplitPane splitPaneRoot;
+	
+	@FXML
+	private SplitPane splitPaneResult;
+	
+	
 	@FXML
 	private Label lblSaved;
 
@@ -261,6 +269,9 @@ public class TraceViewerController implements TraceMinerListener {
 	StateViewerController stateViewerController;
 
 	private String traceExampleFile = "resources/example/traces_10K.json";
+	
+	private URL splitPaneStyle = TraceViewerController.class.getClassLoader().getResource("resources/styles/splitpane.css");
+	
 
 	@FXML
 	public void initialize() {
@@ -449,6 +460,11 @@ public class TraceViewerController implements TraceMinerListener {
 		// set list view
 		listViewTraces.setCellFactory(tracesListView -> new TaskCell(tracesMiner, listViewTraces));
 
+		//set style of splitter
+		if(splitPaneStyle!=null) {
+			splitPaneRoot.getStylesheets().add(splitPaneStyle.toExternalForm());
+			splitPaneResult.getStylesheets().add(splitPaneStyle.toExternalForm());
+		}
 	}
 
 	protected List<Integer> analyseFilterSearchQuery(String searchQuery) {

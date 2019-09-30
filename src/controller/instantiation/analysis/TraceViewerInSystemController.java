@@ -47,6 +47,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -69,6 +70,12 @@ import net.sf.saxon.regex.Operation.OpCapture;
 
 public class TraceViewerInSystemController {
 
+	@FXML
+	private SplitPane splitPaneTraceView;
+	
+	@FXML
+	private SplitPane splitPaneTraceDetails;
+	
 	@FXML
 	private ProgressIndicator progressIndicatorSearchTraces;
 
@@ -244,6 +251,8 @@ public class TraceViewerInSystemController {
 	// private InputStream imgDel =
 	// getClass().getResourceAsStream(imgDeletePath);
 
+	private URL splitPaneStyle = TraceViewerController.class.getClassLoader().getResource("resources/styles/splitpane.css");
+	
 	private static final String NODE_COLOUR = "white";
 	private static final String HIGHLIGHTED_NODE_COLOUR = "#efe8ff";
 	private static final String HIGHLIGHTED_END_NODE_COLOUR = "#ffb1b1";
@@ -510,6 +519,12 @@ public class TraceViewerInSystemController {
 
 			}
 		});
+		
+		//set style of splitter
+		if(splitPaneStyle!=null) {
+			splitPaneTraceDetails.getStylesheets().add(splitPaneStyle.toExternalForm());
+			splitPaneTraceView.getStylesheets().add(splitPaneStyle.toExternalForm());
+		}
 
 	}
 
