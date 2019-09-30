@@ -32,6 +32,7 @@
         <items>
           <AnchorPane minHeight="500.0" minWidth="100.0" prefHeight="888.0" prefWidth="200.0">
                <children>
+                  <Separator AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="140.0" />
                   <VBox prefHeight="453.0" prefWidth="289.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
                      <children>
                         <VBox prefHeight="109.0" prefWidth="662.0">
@@ -126,7 +127,6 @@
                               </VBox>
                            </children>
                         </VBox>
-                        <Separator prefWidth="200.0" />
                         <VBox prefHeight="314.0" prefWidth="357.0">
                            <children>
                               <Label prefHeight="34.0" prefWidth="370.0" text="Filters">
