@@ -72,10 +72,10 @@ public class TraceViewerInSystemController {
 
 	@FXML
 	private SplitPane splitPaneTraceView;
-	
+
 	@FXML
 	private SplitPane splitPaneTraceDetails;
-	
+
 	@FXML
 	private ProgressIndicator progressIndicatorSearchTraces;
 
@@ -251,8 +251,9 @@ public class TraceViewerInSystemController {
 	// private InputStream imgDel =
 	// getClass().getResourceAsStream(imgDeletePath);
 
-	private URL splitPaneStyle = TraceViewerController.class.getClassLoader().getResource("resources/styles/splitpane.css");
-	
+	private URL splitPaneStyle = TraceViewerController.class.getClassLoader()
+			.getResource("resources/styles/splitpane.css");
+
 	private static final String NODE_COLOUR = "white";
 	private static final String HIGHLIGHTED_NODE_COLOUR = "#efe8ff";
 	private static final String HIGHLIGHTED_END_NODE_COLOUR = "#ffb1b1";
@@ -519,9 +520,9 @@ public class TraceViewerInSystemController {
 
 			}
 		});
-		
-		//set style of splitter
-		if(splitPaneStyle!=null) {
+
+		// set style of splitter
+		if (splitPaneStyle != null) {
 			splitPaneTraceDetails.getStylesheets().add(splitPaneStyle.toExternalForm());
 			splitPaneTraceView.getStylesheets().add(splitPaneStyle.toExternalForm());
 		}
@@ -697,6 +698,15 @@ public class TraceViewerInSystemController {
 			trace = this.trace;
 		}
 
+		// checks if files and folders are set:
+		// system model
+		// bigrapher file
+		// incident pattern
+		// states folder
+		if (!areRequiredFilesSet()) {
+			return;
+		}
+
 		// find calusa links
 		Map<String, List<String>> causality = findCausalDependency(trace);
 
@@ -708,6 +718,137 @@ public class TraceViewerInSystemController {
 
 		showIrrelevantStatesAndActions(irrelevantStatesAndActions, trace);
 
+	}
+
+	protected boolean areRequiredFilesSet() {
+
+		// set incident pattern file
+		if (!isIncidentPatternSet()) {
+			return false;
+		}
+
+		// set system model file
+		if (!isSystemModelSet()) {
+			return false;
+		}
+
+		// checks for bigrapher file and states folder
+		if (!areRequiredFilesForCausalitySet()) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks and tries to set the bigrapher file and states folder
+	 * 
+	 * @return true if they are set, false otherwise
+	 */
+	protected boolean areRequiredFilesForCausalitySet() {
+
+		if (!isBigraphERFileSet()) {
+			return false;
+		}
+
+		if (!isStatesFolderSet()) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks if bigraphER file (*.big) is set or not. Tries to set it for once
+	 * if not succeeded then it returns false
+	 * 
+	 * @return true if set, false otherwise
+	 */
+	protected boolean isBigraphERFileSet() {
+
+		// ===check bigrapher file is loaded
+		if (miner.getBigraphERFile() == null) {
+			traceCell.selectBigraphERFile();
+		}
+
+		if (miner.getBigraphERFile() == null) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks if states folder is set or not. Tries to set it for once if not
+	 * succeeded then it returns false
+	 * 
+	 * @return true if set, false otherwise
+	 */
+	protected boolean isStatesFolderSet() {
+
+		// === check states folder loaded
+		if (miner.getStatesFolder() == null) {
+			traceCell.selectStatesFolder();
+		}
+
+		if (miner.getStatesFolder() == null) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks if system model (*.cps) is set or not. Tries to set it for once if
+	 * not succeeded then it returns false
+	 * 
+	 * @return true if set, false otherwise
+	 */
+	protected boolean isSystemModelSet() {
+
+		// set system model file
+		String systemModelFile = miner.getSystemModelFilePath();
+
+		if (systemModelFile == null || systemModelFile.isEmpty()) {
+			// load system model
+
+			traceCell.selectSystemModelFile();
+
+			systemModelFile = miner.getSystemModelFilePath();
+
+			if (systemModelFile == null || systemModelFile.isEmpty()) {
+				// if still null then return
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks if incident pattern (*.cpi) is set or not. Tries to set it for
+	 * once if not succeeded then it returns false
+	 * 
+	 * @return true if set, false otherwise
+	 */
+	protected boolean isIncidentPatternSet() {
+
+		String incidentPatternFile = miner.getIncidentPatternFilePath();
+
+		if (incidentPatternFile == null || incidentPatternFile.isEmpty()) {
+			// load incident pattern file
+
+			traceCell.selectIncidentPatternFile();
+
+			incidentPatternFile = miner.getIncidentPatternFilePath();
+
+			if (incidentPatternFile == null || incidentPatternFile.isEmpty()) {
+				// if stil null then return
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	protected void searchAddedTraces(String searchQuery, String searchField) {
@@ -2164,39 +2305,39 @@ public class TraceViewerInSystemController {
 	protected void setNodes() {
 
 		for (Entry<Integer, StackPane> nodeEntry : statesNodes.entrySet()) {
-			
-			//set style
+
+			// set style
 			StackPane node = nodeEntry.getValue();
 			int state = nodeEntry.getKey();
-			
-//			//set normal style for state
-//			node.setOpacity(1);
-////			highlightState(state, "-fx-opacity:1;");
-//			
-//			//set normal style for outgoing arrows
-//			if(statesOutgoingArrows.containsKey(state)) {
-//				for(StackPane arrowHead : statesOutgoingArrows.get(state)) {
-////					highlightArrow(arrowHead, "-fx-opacity:1;");
-//					arrowHead.setOpacity(1);
-//					//line
-//					Line line = arrowsLines.get(arrowHead);
-//					
-//					if(line!=null){
-//						line.setOpacity(1);
-//					}
-//					
-//					//label
-//					StackPane label = arrowsLabels.get(arrowHead);
-//					
-//					if(label!=null) {
-//						label.setOpacity(1);
-//						for(Node n : label.getChildren()) {
-//							n.setOpacity(1);
-//						}
-//					}
-//				}
-//			}
-			
+
+			// //set normal style for state
+			// node.setOpacity(1);
+			//// highlightState(state, "-fx-opacity:1;");
+			//
+			// //set normal style for outgoing arrows
+			// if(statesOutgoingArrows.containsKey(state)) {
+			// for(StackPane arrowHead : statesOutgoingArrows.get(state)) {
+			//// highlightArrow(arrowHead, "-fx-opacity:1;");
+			// arrowHead.setOpacity(1);
+			// //line
+			// Line line = arrowsLines.get(arrowHead);
+			//
+			// if(line!=null){
+			// line.setOpacity(1);
+			// }
+			//
+			// //label
+			// StackPane label = arrowsLabels.get(arrowHead);
+			//
+			// if(label!=null) {
+			// label.setOpacity(1);
+			// for(Node n : label.getChildren()) {
+			// n.setOpacity(1);
+			// }
+			// }
+			// }
+			// }
+
 			if (tracePane.getChildren().contains(node)) {
 				tracePane.getChildren().remove(node);
 				tracePane.getChildren().add(node);
@@ -3689,24 +3830,6 @@ public class TraceViewerInSystemController {
 			return null;
 		}
 
-		// ===check bigrapher file is loaded
-		if (miner.getBigraphERFile() == null) {
-			traceCell.selectBigraphERFile();
-		}
-
-		if (miner.getBigraphERFile() == null) {
-			return null;
-		}
-
-		// === check states folder loaded
-		if (miner.getStatesFolder() == null) {
-			traceCell.selectStatesFolder();
-		}
-
-		if (miner.getStatesFolder() == null) {
-			return null;
-		}
-
 		// key is action name that we need to find causal dependency on the
 		// action before
 		// value is a list in which at index zero is the action before (not
@@ -3955,71 +4078,6 @@ public class TraceViewerInSystemController {
 			return res;
 		}
 
-		// set incident pattern file
-		String incidentPatternFile = miner.getIncidentPatternFilePath();
-
-		if (incidentPatternFile == null || incidentPatternFile.isEmpty()) {
-			// load incident pattern file
-
-			traceCell.selectIncidentPatternFile();
-
-			incidentPatternFile = miner.getIncidentPatternFilePath();
-
-			if (incidentPatternFile == null || incidentPatternFile.isEmpty()) {
-				// if stil null then return
-				return null;
-			}
-		}
-
-		// set system model file
-		String systemModelFile = miner.getSystemModelFilePath();
-
-		if (systemModelFile == null || systemModelFile.isEmpty()) {
-			// load system model
-
-			traceCell.selectSystemModelFile();
-
-			systemModelFile = miner.getSystemModelFilePath();
-
-			if (systemModelFile == null || systemModelFile.isEmpty()) {
-				// if still null then return
-				return null;
-			}
-		}
-
-		// set states folder
-		String statesFolder = miner.getStatesFolder();
-
-		if (statesFolder == null || statesFolder.isEmpty()) {
-			// load system model
-
-			traceCell.selectStatesFolder();
-
-			statesFolder = miner.getStatesFolder();
-
-			if (statesFolder == null || statesFolder.isEmpty()) {
-				// if still null then return
-				return null;
-			}
-
-		}
-
-		// set bigraphER file
-		String bigraphERFile = miner.getBigraphERFile();
-
-		if (bigraphERFile == null || bigraphERFile.isEmpty()) {
-
-			traceCell.selectBigraphERFile();
-
-			bigraphERFile = miner.getBigraphERFile();
-
-			if (bigraphERFile == null || bigraphERFile.isEmpty()) {
-				// if still null then return
-				return null;
-			}
-
-		}
-
 		Map<Integer, String> result = miner.getStatesMatchingIncidentPatternConditions(trace);
 
 		if (result != null) {
@@ -4228,26 +4286,26 @@ public class TraceViewerInSystemController {
 		}
 
 		double opacity = 0.3;
-		String highLightStyle = "-fx-opacity:"+opacity+";";
-		
+		String highLightStyle = "-fx-opacity:" + opacity + ";";
+
 		List<Integer> traceStates = trace.getStateTransitions();
 
 		// make states grey nad update tooltip text
 		for (Entry<Integer, String> entry : irrelevantStatesAndActions.entrySet()) {
-			
+
 			int state = entry.getKey();
 			// String action = entry.getValue();
 
 			highlightState(state, highLightStyle);
 			// get state representation
-//			if (statesNodes.containsKey(state)) {
-//				StackPane stateNode = statesNodes.get(state);
-//
-//				// stateNode.setOpacity(opacity);
-//				for (Node child : stateNode.getChildren()) {
-//					child.setOpacity(opacity);
-//				}
-//			}
+			// if (statesNodes.containsKey(state)) {
+			// StackPane stateNode = statesNodes.get(state);
+			//
+			// // stateNode.setOpacity(opacity);
+			// for (Node child : stateNode.getChildren()) {
+			// child.setOpacity(opacity);
+			// }
+			// }
 
 			// get arrows
 			int stateIndex = traceStates.indexOf(state);
@@ -4259,30 +4317,30 @@ public class TraceViewerInSystemController {
 					highlightArrow(arrowHead, highLightStyle);
 					arrowHead.setOpacity(opacity);
 				}
-				
-//				if (arrowHead != null) {
-//					arrowHead.setOpacity(0);
-//
-//					for (Node child : arrowHead.getChildren())
-//						child.setOpacity(opacity);
-//
-//					// get label
-//					StackPane arrowLabel = arrowsLabels.get(arrowHead);
-//
-//					if (arrowLabel != null) {
-//						arrowLabel.setOpacity(opacity);
-//
-//						for (Node child : arrowLabel.getChildren())
-//							child.setOpacity(opacity);
-//					}
-//
-//					// get line
-//					Line arrowLine = arrowsLines.get(arrowHead);
-//
-//					if (arrowLine != null) {
-//						arrowLine.setOpacity(opacity);
-//					}
-//				}
+
+				// if (arrowHead != null) {
+				// arrowHead.setOpacity(0);
+				//
+				// for (Node child : arrowHead.getChildren())
+				// child.setOpacity(opacity);
+				//
+				// // get label
+				// StackPane arrowLabel = arrowsLabels.get(arrowHead);
+				//
+				// if (arrowLabel != null) {
+				// arrowLabel.setOpacity(opacity);
+				//
+				// for (Node child : arrowLabel.getChildren())
+				// child.setOpacity(opacity);
+				// }
+				//
+				// // get line
+				// Line arrowLine = arrowsLines.get(arrowHead);
+				//
+				// if (arrowLine != null) {
+				// arrowLine.setOpacity(opacity);
+				// }
+				// }
 			}
 		}
 

@@ -57,6 +57,9 @@ public class BigraphWrapper implements Serializable {
 	// original state that this bigraphWrapper would refer to.
 	// used when a trace is applied to this
 	private int OriginalState;
+	
+	//incident pattern condition it matches to
+	private String incidentPatternCondition;
 
 	// used to set the number of automatically created outernames for the
 	// signature of a Bigraph Object
@@ -116,6 +119,16 @@ public class BigraphWrapper implements Serializable {
 
 	}
 
+	public String getIncidentPatternCondition() {
+	
+		return incidentPatternCondition;
+	}
+	
+	public void setIncidentPatternCondition(String conditionName) {
+	
+		incidentPatternCondition = conditionName;
+	}
+	
 	public Signature getSignature() {
 		return signature;
 	}
