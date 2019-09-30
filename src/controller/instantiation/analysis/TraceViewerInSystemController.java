@@ -228,6 +228,7 @@ public class TraceViewerInSystemController {
 
 	// added trace ids
 	List<Integer> addedTracesIDs;
+
 	// key is trace id, value is arrows color
 	Map<Integer, String> highLightedTracesIDs;
 
@@ -332,6 +333,7 @@ public class TraceViewerInSystemController {
 
 	// private static final int previousStateNum = 2;
 
+	// current shown number of traces in the main filter window
 	private int currentNumberOfShownTraces = 0;
 
 	// used to indicate if a trace is temporarly added
@@ -686,17 +688,12 @@ public class TraceViewerInSystemController {
 	@FXML
 	void showCausalityChain() {
 
-		hideStatesAndActionsOccurrences();
-
-		// get selected trace from the combobox
-		Integer traceID = comboBoxAddedTraces.getSelectionModel().getSelectedItem();
-		GraphPath trace = null;
-
-		if (traceID != null) {
-			trace = miner.getTrace(traceID);
-		} else {
-			trace = this.trace;
+		if (highLightedTracesIDs == null || highLightedTracesIDs.isEmpty()) {
+			return;
 		}
+
+		/// hide actions and states labels (reset them)
+		hideStatesAndActionsOccurrences();
 
 		// checks if files and folders are set:
 		// system model
@@ -707,17 +704,22 @@ public class TraceViewerInSystemController {
 			return;
 		}
 
-		// find calusa links
-		Map<String, List<String>> causality = findCausalDependency(trace);
+		// get selected trace from shown traces
+		for (Integer traceID : highLightedTracesIDs.keySet()) {
+			GraphPath trace = null;
+			trace = miner.getTrace(traceID);
 
-		// find states matching conditions of the incident pattern
-		Map<Integer, String> stateMathcing = findStatesMatchingIncidentPatternConditions(trace);
+			// find causal links
+			Map<String, List<String>> causality = findCausalDependency(trace);
 
-		Map<Integer, String> irrelevantStatesAndActions = identifyIrrelevantStatesAndActions(causality, stateMathcing,
-				trace);
+			// find states matching conditions of the incident pattern
+			Map<Integer, String> stateMathcing = findStatesMatchingIncidentPatternConditions(trace);
 
-		showIrrelevantStatesAndActions(irrelevantStatesAndActions, trace);
+			Map<Integer, String> irrelevantStatesAndActions = identifyIrrelevantStatesAndActions(causality,
+					stateMathcing, trace);
 
+			showIrrelevantStatesAndActions(irrelevantStatesAndActions, trace);
+		}
 	}
 
 	protected boolean areRequiredFilesSet() {
@@ -1548,6 +1550,8 @@ public class TraceViewerInSystemController {
 
 		comboBoxAddedTraces.getItems().clear();
 		flowPaneTraceDetails.getChildren().clear();
+		// currentNumberOfShownTraces = 0;
+		lblNumOfHighlightedTraces.setText("");
 
 		// reset entities
 		flowPaneEntities.getChildren().clear();
@@ -3752,6 +3756,8 @@ public class TraceViewerInSystemController {
 			flowPaneTraceDetails.getChildren().remove(hbox);
 			highLightedTracesIDs.remove(traceID);
 
+			decrementNumberOfShownTracesLabel();
+
 			// update shown actions
 			showActionsInList();
 
@@ -3770,6 +3776,14 @@ public class TraceViewerInSystemController {
 		// add to the list of shown traces
 		flowPaneTraceDetails.getChildren().add(hbox);
 
+		// update number of highlighted traces
+		incrementNumberOfShownTracesLabel();
+
+		highLightedTracesIDs.put(traceID, color);
+
+	}
+
+	protected void incrementNumberOfShownTracesLabel() {
 		// update number of highlighted traces
 		Platform.runLater(new Runnable() {
 
@@ -3793,7 +3807,36 @@ public class TraceViewerInSystemController {
 			}
 		});
 
-		highLightedTracesIDs.put(traceID, color);
+	}
+
+	protected void decrementNumberOfShownTracesLabel() {
+		// update number of highlighted traces
+		Platform.runLater(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				String numStr = lblNumOfHighlightedTraces.getText();
+
+				if (numStr != null && !numStr.isEmpty()) {
+
+					try {
+						int num = Integer.parseInt(numStr);
+						num--;
+						if (num >= 0) {
+							lblNumOfHighlightedTraces.setText(num + "");
+						} else {
+							lblNumOfHighlightedTraces.setText("");
+						}
+
+					} catch (Exception e) {
+						// TODO: handle exception
+					}
+				} else {
+					lblNumOfHighlightedTraces.setText("1");
+				}
+			}
+		});
 
 	}
 

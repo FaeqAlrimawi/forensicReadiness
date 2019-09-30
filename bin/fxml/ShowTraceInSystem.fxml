@@ -50,11 +50,6 @@
                                              </font>
                                           </Label>
                                           <ComboBox fx:id="comboBoxAddedTraces" prefHeight="25.0" prefWidth="112.0" />
-                                          <Button mnemonicParsing="false" onAction="#showCausalityChain" prefHeight="25.0" prefWidth="86.0" text="analyse">
-                                             <tooltip>
-                                                <Tooltip text="Finds states matching incident pattern conditions, and also finds causal dependency. Shows causal dependency between actions. Causal dependency is defined in terms of counterfactual account, i.e.  act1 is causally dependent on act2 iff if act2 were not to occur, then act1 would not had occurred" />
-                                             </tooltip>
-                                          </Button>
                                        </children>
                                     </HBox>
                                     <HBox spacing="2.0">
@@ -73,15 +68,17 @@
                                     </ScrollPane>
                                  </children>
                               </VBox>
-                              <HBox alignment="CENTER_RIGHT" spacing="3.0">
+                              <FlowPane alignment="CENTER_RIGHT" columnHalignment="RIGHT" hgap="2.0" vgap="2.0">
                                  <children>
-                                    <Label fx:id="lblNumOfHighlightedTraces" alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="158.0" />
+                                    <Label fx:id="lblNumOfHighlightedTraces" alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="89.0" />
+                                    <Button mnemonicParsing="false" onAction="#showCausalityChain" prefHeight="25.0" prefWidth="58.0" text="analyse">
+                                       <tooltip>
+                                          <Tooltip text="Finds states matching incident pattern conditions, and also finds causal dependency. Shows causal dependency between actions. Causal dependency is defined in terms of counterfactual account, i.e.  act1 is causally dependent on act2 iff if act2 were not to occur, then act1 would not had occurred" />
+                                       </tooltip>
+                                    </Button>
                                     <Button mnemonicParsing="false" onAction="#clearHighlightedTraces" prefHeight="19.0" prefWidth="42.0" text="clear" />
                                  </children>
-                                 <padding>
-                                    <Insets right="3.0" />
-                                 </padding>
-                              </HBox>
+                              </FlowPane>
                               <VBox minWidth="10.0" prefHeight="51.0" prefWidth="317.0">
                                  <children>
                                     <CheckBox fx:id="checkboxShowOnlySelectedTrace" mnemonicParsing="false" text="Only selected trace" />
@@ -98,16 +95,16 @@
                               <Insets left="3.0" top="5.0" />
                            </padding>
                         </VBox>
-                        <VBox prefHeight="133.0" prefWidth="207.0" spacing="5.0">
+                        <VBox prefWidth="207.0" spacing="5.0">
                            <children>
                               <Label text="Actions">
                                  <font>
                                     <Font name="System Bold" size="14.0" />
                                  </font>
                               </Label>
-                              <ScrollPane fitToWidth="true" prefHeight="138.0" prefWidth="207.0" style="-fx-background-color: white;">
+                              <ScrollPane fitToWidth="true" prefHeight="145.0" prefWidth="240.0" style="-fx-background-color: white;">
                                  <content>
-                                    <FlowPane fx:id="flowPaneActions" hgap="3.0" prefHeight="136.0" prefWidth="205.0" vgap="3.0" />
+                                    <FlowPane fx:id="flowPaneActions" hgap="3.0" prefHeight="141.0" prefWidth="238.0" vgap="3.0" />
                                  </content>
                               </ScrollPane>
                            </children>
