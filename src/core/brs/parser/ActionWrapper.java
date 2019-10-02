@@ -297,7 +297,7 @@ public class ActionWrapper implements Serializable {
 				ActionChangeHolder addedContainmentChange = new ActionChangeHolder();
 
 				// set change to containment
-				addedContainmentChange.setChangeType(BigraphChangeType.CONTAINMENT);
+				addedContainmentChange.setChangeType(BigraphRelationType.CONTAINMENT);
 
 				// set operation to add
 				addedContainmentChange.setChangeOperation(BigraphChangeOperation.ADD);
@@ -318,7 +318,7 @@ public class ActionWrapper implements Serializable {
 				ActionChangeHolder removedContainmentChange = new ActionChangeHolder();
 
 				// set change to containment
-				removedContainmentChange.setChangeType(BigraphChangeType.CONTAINMENT);
+				removedContainmentChange.setChangeType(BigraphRelationType.CONTAINMENT);
 
 				// set operation to add
 				removedContainmentChange.setChangeOperation(BigraphChangeOperation.REMOVE);
@@ -341,7 +341,7 @@ public class ActionWrapper implements Serializable {
 			if (!postContainedEntities.contains(preEntity)) {
 				ActionChangeHolder remove = new ActionChangeHolder();
 
-				remove.setChangeType(BigraphChangeType.CONTAINMENT);
+				remove.setChangeType(BigraphRelationType.CONTAINMENT);
 				remove.setChangeOperation(BigraphChangeOperation.REMOVE);
 				List<String> change = new LinkedList<String>();
 				change.add(preEntity);
@@ -358,7 +358,7 @@ public class ActionWrapper implements Serializable {
 			if (!preContainedEntities.contains(postEntity)) {
 				ActionChangeHolder addition = new ActionChangeHolder();
 
-				addition.setChangeType(BigraphChangeType.CONTAINMENT);
+				addition.setChangeType(BigraphRelationType.CONTAINMENT);
 				addition.setChangeOperation(BigraphChangeOperation.ADD);
 				List<String> change = new LinkedList<String>();
 				change.add(postEntity);

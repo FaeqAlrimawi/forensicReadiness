@@ -2,6 +2,7 @@ package application;
 
 import java.net.URL;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,6 +13,8 @@ import core.brs.parser.BRSParser;
 import core.brs.parser.BRSWrapper;
 import core.brs.parser.BigraphWrapper;
 import core.brs.parser.utilities.BigraphNode;
+import core.instantiation.analysis.BigraphStructure;
+import core.instantiation.analysis.BigraphStructureAnalyser;
 import core.instantiation.analysis.TraceMiner;
 import it.uniud.mads.jlibbig.core.Node;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
@@ -65,7 +68,7 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-		 launch(args) ;
+//		 launch(args) ;
 		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor | id) | id || Room.Device.id || id";
 		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor  id) || Room ";
 		String action = "react enter_room = " + exprs + "->" + exprs2 + "@ [1,2,3];";
@@ -77,12 +80,31 @@ public class Main extends Application {
 		String bigFile = null;
 		String statesFolder = null;
 		
-//		if(bigFileURL!=null && statesFolderURL!=null) {
-//			bigFile = bigFileURL.getPath();
-//		BRSParser parser = new BRSParser();
-//		BRSWrapper brsWrapper = parser.parseBigraphERFile(bigFile);
-//		ActionWrapper act = brsWrapper.getActions().get("VisitorEnterRoom");
-//		
+		if(bigFileURL!=null) {
+			bigFile = bigFileURL.getPath();
+		BRSParser parser = new BRSParser();
+		BRSWrapper brsWrapper = parser.parseBigraphERFile(bigFile);
+		ActionWrapper act = brsWrapper.getActions().get("VisitorEnterRoom");
+		
+		BigraphWrapper pre = act.getPrecondition();
+		BigraphWrapper post = act.getPostcondition();
+		
+		BigraphStructureAnalyser analyser = new BigraphStructureAnalyser();
+		
+		List<BigraphWrapper> cons = new LinkedList<BigraphWrapper>();
+		
+		cons.add(pre);
+		cons.add(post);
+		
+		List<BigraphStructure> res = analyser.findCommonalities(cons, null);
+		
+		if(res!=null) {
+			for(BigraphStructure str : res) {
+				System.out.println(str);
+			}
+		} else{
+			System.out.println("result is null");
+		}
 //		Map<String, List<ActionChangeHolder>> changes = act.findChanges();
 //		
 //		for(Entry<String, List<ActionChangeHolder>> entry : changes.entrySet()) {
@@ -95,7 +117,7 @@ public class Main extends Application {
 //			
 //			System.out.println("=============================\n");
 //		}
-//		}
+		}
 		
 //		bigFile = bigFileURL.getPath();
 ////		BRSParser parser = new BRSParser();

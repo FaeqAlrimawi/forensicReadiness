@@ -57,8 +57,8 @@ public class BigraphWrapper implements Serializable {
 	// original state that this bigraphWrapper would refer to.
 	// used when a trace is applied to this
 	private int OriginalState;
-	
-	//incident pattern condition it matches to
+
+	// incident pattern condition it matches to
 	private String incidentPatternCondition;
 
 	// used to set the number of automatically created outernames for the
@@ -67,7 +67,7 @@ public class BigraphWrapper implements Serializable {
 
 	private static final String BIGRAPH_ROOT_CNTRL = "BigraphRoot";
 
-	// all entities (with numbering as its order in the string)
+	// all entities (with numbering as its order in the string), i.e. modified
 	private List<String> entities;
 
 	// connections as is (no modifications to the con name)
@@ -120,19 +120,19 @@ public class BigraphWrapper implements Serializable {
 	}
 
 	public String getIncidentPatternCondition() {
-	
+
 		return incidentPatternCondition;
 	}
-	
+
 	public void setIncidentPatternCondition(String conditionName) {
-	
+
 		incidentPatternCondition = conditionName;
 	}
-	
+
 	public Signature getSignature() {
 		return signature;
 	}
-	
+
 	public void setSignature(Signature sig) {
 		signature = sig;
 	}
@@ -185,12 +185,30 @@ public class BigraphWrapper implements Serializable {
 		this.entities = entities;
 	}
 
+	public void addEntity(String entityName) {
+
+		if (entities == null) {
+			return;
+		}
+
+		entities.add(entityName);
+	}
+
 	public List<String> getConnections() {
 		return connections;
 	}
 
 	public void setConnections(List<String> connections) {
 		this.connections = connections;
+	}
+
+	public void addConnection(String conName) {
+
+		if (connections == null) {
+			return;
+		}
+
+		connections.add(conName);
 	}
 
 	public List<String> getRoots() {
@@ -201,6 +219,13 @@ public class BigraphWrapper implements Serializable {
 		this.roots = roots;
 	}
 
+	public void addRoot(String root) {
+
+		if (roots != null) {
+			roots.add(root);
+		}
+	}
+
 	public Map<Entity, String> getControlMap() {
 		return controlMap;
 	}
@@ -209,6 +234,35 @@ public class BigraphWrapper implements Serializable {
 		this.controlMap = controlMap;
 	}
 
+	/**
+	 * Adds the control to the control map and also the entity name to the
+	 * entityName list
+	 * 
+	 * @param entity
+	 *            Entity object
+	 * @param entityName
+	 *            String representing the entity name (modified, i.e. not
+	 *            control)
+	 */
+	public void addControl(Entity entity, String entityName) {
+
+		if (controlMap != null) {
+			controlMap.put(entity, entityName);
+			entities.add(entityName);
+		}
+	}
+
+	public boolean hasControl(String control) {
+		
+		for(Entity ent : controlMap.keySet()) {
+			if(ent.getName().equals(control)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	public Map<String, List<String>> getContainedEntitiesMap() {
 		return containedEntitiesMap;
 	}
@@ -225,6 +279,27 @@ public class BigraphWrapper implements Serializable {
 		this.containerEntitiesMap = containerEntitiesMap;
 	}
 
+	public void addContainedEntity(String entityParent, String entityContained) {
+
+		if (containedEntitiesMap == null) {
+			return;
+		}
+
+		if (containedEntitiesMap.containsKey(entityParent)) {
+			List<String> containedEntities = containedEntitiesMap.get(entityParent);
+			containedEntities.add(entityContained);
+		} else {
+			List<String> containedEntities = new LinkedList<String>();
+			containedEntities.add(entityContained);
+			containedEntitiesMap.put(entityParent, containedEntities);
+		}
+
+		if (containedEntitiesMap.containsKey(entityParent)) {
+			// add a container relation
+			containerEntitiesMap.put(entityContained, entityParent);
+		}
+	}
+
 	public Map<String, List<String>> getConnectivityMap() {
 		return connectivityMap;
 	}
@@ -239,6 +314,39 @@ public class BigraphWrapper implements Serializable {
 
 	public void setEntityConnectivityMap(Map<String, List<String>> entityConnectivityMap) {
 		this.entityConnectivityMap = entityConnectivityMap;
+	}
+
+	public void addConnection(String conName, String end1, String end2) {
+
+		List<String> connectionEnds = new LinkedList<String>();
+
+		connectionEnds.add(end1);
+		connectionEnds.add(end2);
+
+		// all connection names
+		connections.add(conName);
+
+		// connection -> end1,end2
+		connectivityMap.put(conName, connectionEnds);
+
+		// update entity connectivity map
+		// add connectivity to end1
+		if (entityConnectivityMap.containsKey(end1)) {
+			entityConnectivityMap.get(end1).add(conName);
+		} else {
+			List<String> cons = new LinkedList<String>();
+			cons.add(conName);
+			entityConnectivityMap.put(end1, cons);
+		}
+
+		// add connectivity to end1
+		if (entityConnectivityMap.containsKey(end2)) {
+			entityConnectivityMap.get(end2).add(conName);
+		} else {
+			List<String> cons = new LinkedList<String>();
+			cons.add(conName);
+			entityConnectivityMap.put(end2, cons);
+		}
 	}
 
 	public Map<String, Boolean> getEntitySiteMap() {
@@ -367,7 +475,7 @@ public class BigraphWrapper implements Serializable {
 			// sigBuilder.add(ent.getName(), true, maxOuterNameNumber);
 
 			addChildrenNew(node, containedEntitiesMap.get(entityName), nodes, isGround);
-			
+
 			if (!isGround) {
 				// add site
 				// by defualt it has site
@@ -802,7 +910,7 @@ public class BigraphWrapper implements Serializable {
 		return bigrapher;
 	}
 
-	protected String getControl(String entityName) {
+	public String getControl(String entityName) {
 
 		for (Entry<Entity, String> entry : controlMap.entrySet()) {
 			if (entry.getValue().equals(entityName)) {

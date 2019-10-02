@@ -4,17 +4,17 @@ import java.util.List;
 
 public class ActionChangeHolder {
 	
-	private BigraphChangeType changeType;
+	private BigraphRelationType changeType;
 	private BigraphChangeOperation changeOperation;
 
 	//holds the names of entities that the change applies to
 	private List<String> changedEntities;
 
-	public BigraphChangeType getChangeType() {
+	public BigraphRelationType getChangeType() {
 		return changeType;
 	}
 
-	public void setChangeType(BigraphChangeType changeType) {
+	public void setChangeType(BigraphRelationType changeType) {
 		this.changeType = changeType;
 	}
 
