@@ -253,16 +253,16 @@ public class BigraphWrapper implements Serializable {
 	}
 
 	public boolean hasControl(String control) {
-		
-		for(Entity ent : controlMap.keySet()) {
-			if(ent.getName().equals(control)) {
+
+		for (Entity ent : controlMap.keySet()) {
+			if (ent.getName().equals(control)) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	public Map<String, List<String>> getContainedEntitiesMap() {
 		return containedEntitiesMap;
 	}
@@ -356,6 +356,12 @@ public class BigraphWrapper implements Serializable {
 	public void setEntitySiteMap(Map<String, Boolean> entitySiteMap) {
 		this.entitySiteMap = entitySiteMap;
 	}
+
+	public void addSite(String entityName, boolean hasSite) {
+
+		entitySiteMap.put(entityName, hasSite);
+	}
+	
 
 	public int getNumberOfRootSites() {
 		return numberOfRootSites;

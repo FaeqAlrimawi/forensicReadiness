@@ -68,7 +68,7 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-//		 launch(args) ;
+		 launch(args) ;
 		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor | id) | id || Room.Device.id || id";
 		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor  id) || Room ";
 		String action = "react enter_room = " + exprs + "->" + exprs2 + "@ [1,2,3];";
