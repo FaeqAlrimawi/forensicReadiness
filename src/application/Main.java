@@ -68,7 +68,9 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-		 launch(args) ;
+		
+		 launch(args);
+		 
 		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor | id) | id || Room.Device.id || id";
 		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor  id) || Room ";
 		String action = "react enter_room = " + exprs + "->" + exprs2 + "@ [1,2,3];";
@@ -78,7 +80,7 @@ public class Main extends Application {
 		URL statesFolderURL = Main.class.getResource("../resources/example/states_1000");
 		
 		String bigFile = null;
-		String statesFolder = null;
+		String statesFolder = null; 
 		
 		if(bigFileURL!=null) {
 			bigFile = bigFileURL.getPath();
@@ -105,6 +107,7 @@ public class Main extends Application {
 		} else{
 			System.out.println("result is null");
 		}
+		
 //		Map<String, List<ActionChangeHolder>> changes = act.findChanges();
 //		
 //		for(Entry<String, List<ActionChangeHolder>> entry : changes.entrySet()) {

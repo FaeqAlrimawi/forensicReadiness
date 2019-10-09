@@ -66,7 +66,6 @@ import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import net.sf.saxon.regex.Operation.OpCapture;
 
 public class TraceViewerInSystemController {
 
@@ -4150,6 +4149,8 @@ public class TraceViewerInSystemController {
 			String conditionName = entry.getValue();
 			int state = entry.getKey();
 
+//			System.out.println("entrY:: " + state + " "+ conditionName);
+			
 			Label lbl = mapStatePerc.get(state);
 
 			if (lbl != null) {
