@@ -51,6 +51,7 @@ public class ReactController {
 
 		CodeArea pCodeArea = conditionArea.createCodeArea();
 		
+		pCodeArea.setWrapText(true);
 //		pCodeArea.setEditable(false);
 		
 		StackPane codeAreaPane = new StackPane(new VirtualizedScrollPane<>(pCodeArea));
