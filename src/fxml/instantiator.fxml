@@ -130,7 +130,7 @@
                                     <Glow />
                                  </effect>
                                  <font>
-                                    <Font size="14.0" />
+                                    <Font name="System Bold" size="14.0" />
                                  </font>
                               </Button>
                            </children>
