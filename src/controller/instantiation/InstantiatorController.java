@@ -18,6 +18,7 @@ import com.eteks.sweethome3d.adaptive.forensics.SystemHandler;
 
 import controller.instantiation.analysis.TaskCell;
 import controller.utlities.IncidentAssetMap;
+import core.instantiation.analysis.TraceMiner;
 import environment.Lab;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 import ie.lero.spare.pattern_instantiation.GraphPathsAnalyser;
@@ -1070,13 +1071,18 @@ public class InstantiatorController
 			return;
 		}
 
+		//create a trace miner
+		TraceMiner miner = new TraceMiner();
+		miner.setTraces(traces);
+		miner.setCurrentShownTraces(miner.getAllTracesIDs());
+		
 		ObservableList<GraphPath> tracesObservableList;
 
 		tracesObservableList = FXCollections.observableArrayList();
 
 		tracesObservableList.addAll(traces);
 
-		listViewTraces.setCellFactory(tracesListView -> new TaskCell(listViewTraces));
+		listViewTraces.setCellFactory(tracesListView -> new TaskCell(miner,listViewTraces));
 		listViewTraces.setItems(tracesObservableList);
 
 		lblListViewTracesEmpty.setVisible(false);

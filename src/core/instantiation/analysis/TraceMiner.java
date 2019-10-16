@@ -2730,6 +2730,20 @@ public class TraceMiner {
 		resetMiner();
 	}
 
+	public void setTraces(List<GraphPath> traces) {
+		
+		if(this.traces == null) {
+			this.traces = new HashMap<Integer, GraphPath>();
+		} else { 
+			this.traces.clear();
+		}
+		
+		for(GraphPath trace : traces) {
+			this.traces.put(trace.getInstanceID(), trace);
+		}
+	}
+	
+	
 	public void resetMiner() {
 		shortestTraceIDs.clear();
 		claSPTraceIDs.clear();
@@ -3340,6 +3354,15 @@ public class TraceMiner {
 		return result;
 	}
 
+	public List<Integer> getAllTracesIDs() {
+	
+		if(traces!=null) {
+			return Arrays.asList(traces.keySet().toArray(new Integer[traces.size()]));
+		}
+		
+		return null;
+	}
+	
 	public GraphPath getTrace(int traceID) {
 
 		if (traces.containsKey(traceID)) {
