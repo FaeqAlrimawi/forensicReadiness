@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
@@ -25,7 +24,6 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
 <SplitPane dividerPositions="0.8294314381270903" maxHeight="3200.0" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.InstantiatorController">
@@ -55,64 +53,45 @@
             <items>
               <AnchorPane minWidth="230.0" prefHeight="532.0" prefWidth="383.0" SplitPane.resizableWithParent="false">
                 <children>
-                        <VBox alignment="TOP_CENTER" layoutX="22.0" layoutY="71.0" minHeight="400.0" prefHeight="461.0" prefWidth="238.0" spacing="2.0">
+                        <VBox alignment="TOP_CENTER" layoutX="22.0" layoutY="71.0" minHeight="356.0" prefHeight="498.0" prefWidth="264.0" spacing="50.0" AnchorPane.leftAnchor="22.0" AnchorPane.topAnchor="71.0">
                            <children>
-                              <AnchorPane prefHeight="34.0" prefWidth="238.0">
+                              <VBox spacing="2.0">
                                  <children>
-                                    <TextField fx:id="txtFieldIncidentPattern" prefHeight="34.0" prefWidth="238.0" promptText="Incident Pattern Model (*.cpi)" />
-                                    <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="201.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
-                                    <ImageView fx:id="imgSelectIncidentPattern" fitHeight="24.0" fitWidth="24.0" layoutX="210.0" layoutY="6.0" onMouseClicked="#selectIncidentPattern" pickOnBounds="true" preserveRatio="true">
-                                       <image>
-                                          <Image url="@../../bin/resources/images/folder.png" />
-                                       </image>
-                                       <cursor>
-                                          <Cursor fx:constant="HAND" />
-                                       </cursor>
-                                    </ImageView>
-                                 </children>
-                              </AnchorPane>
-                              <Pane prefHeight="38.0" prefWidth="238.0" />
-                              <HBox prefHeight="34.0" prefWidth="238.0">
-                                 <children>
-                                    <AnchorPane prefHeight="34.0" prefWidth="225.0">
+                                    <Label text="Incident Pattern Model (*.cpi)" />
+                                    <HBox prefHeight="44.0" prefWidth="264.0" spacing="2.0">
                                        <children>
-                                          <TextField fx:id="txtFieldSystemModel" prefHeight="34.0" prefWidth="238.0" promptText="Cyber-Physical System (*.cps)" />
-                                          <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="202.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
-                                          <ImageView fx:id="imgSelectSystemFile" fitHeight="24.0" fitWidth="24.0" layoutX="210.0" layoutY="6.0" onMouseClicked="#selectSystemFile" pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                <Image url="@../../bin/resources/images/folder.png" />
-                                             </image>
-                                             <cursor>
-                                                <Cursor fx:constant="HAND" />
-                                             </cursor>
-                                          </ImageView>
+                                          <TextField fx:id="txtFieldIncidentPattern" prefHeight="34.0" prefWidth="238.0" promptText="incidentEx.cpi" />
+                                          <Button fx:id="btnSelectIncidentPattern" mnemonicParsing="false" onAction="#selectIncidentPattern" prefHeight="34.0" prefWidth="24.0" text="..." />
                                        </children>
-                                    </AnchorPane>
+                                    </HBox>
                                  </children>
-                              </HBox>
-                              <HBox>
+                              </VBox>
+                              <VBox prefHeight="80.0" prefWidth="264.0" spacing="2.0">
                                  <children>
-                                    <CheckBox fx:id="checkboxLTSSame" mnemonicParsing="false" selected="true" text="LTS in same Folder" />
+                                    <Label text="Cyber-Physical System Model (*.cps)" />
+                                    <HBox prefHeight="41.0" prefWidth="264.0" spacing="2.0">
+                                       <children>
+                                          <TextField fx:id="txtFieldSystemModel" prefHeight="34.0" prefWidth="238.0" promptText="systemEx.cps" />
+                                          <Button fx:id="selectSystemFile" mnemonicParsing="false" onAction="#selectSystemFile" prefHeight="34.0" text="..." />
+                                       </children>
+                                    </HBox>
+                                    <CheckBox fx:id="checkboxLTSSame" mnemonicParsing="false" selected="true" text="LTS is in same Folder" />
                                  </children>
-                              </HBox>
-                              <Pane prefHeight="13.0" prefWidth="238.0" />
+                              </VBox>
                               <VBox prefHeight="172.0" prefWidth="295.0">
                                  <children>
-                                    <AnchorPane prefHeight="34.0" prefWidth="265.0">
+                                    <Label text="Labelled  Transition System (LTS) Folder" />
+                                    <HBox spacing="2.0">
                                        <children>
-                                          <TextField fx:id="textFieldSelectedStatesFolder" disable="true" prefHeight="34.0" prefWidth="238.0" promptText="LTS Folder" />
-                                          <ProgressBar fx:id="progressBarAnalyse" opacity="0.4" prefHeight="34.0" prefWidth="238.0" visible="false" />
-                                          <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="29.0" layoutX="202.0" layoutY="3.0" stroke="BLACK" strokeType="INSIDE" style="-fx-stroke-width: 0;" width="34.0" />
-                                          <ImageView fx:id="imgOpenStatesFolder" disable="true" fitHeight="24.0" fitWidth="24.0" layoutX="210.0" layoutY="6.0" onMouseClicked="#selectStatesFolder" pickOnBounds="true" preserveRatio="true">
-                                             <image>
-                                                <Image url="@../../bin/resources/images/folder.png" />
-                                             </image>
-                                             <cursor>
-                                                <Cursor fx:constant="HAND" />
-                                             </cursor>
-                                          </ImageView>
+                                          <AnchorPane prefHeight="34.0" prefWidth="265.0">
+                                             <children>
+                                                <TextField fx:id="textFieldSelectedStatesFolder" disable="true" prefHeight="34.0" prefWidth="238.0" promptText="LTS Folder" />
+                                                <ProgressBar fx:id="progressBarAnalyse" opacity="0.4" prefHeight="34.0" prefWidth="238.0" visible="false" />
+                                             </children>
+                                          </AnchorPane>
+                                          <Button fx:id="btnOpenStatesFolder" disable="true" mnemonicParsing="false" onAction="#selectStatesFolder" prefHeight="34.0" text="..." />
                                        </children>
-                                    </AnchorPane>
+                                    </HBox>
                                     <HBox alignment="CENTER_LEFT" prefHeight="34.0" prefWidth="295.0">
                                        <children>
                                           <ImageView fx:id="imgTransitionCheck" fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true" visible="false">
@@ -168,7 +147,7 @@
                            <children>
                               <HBox prefHeight="29.0" prefWidth="874.0">
                                  <children>
-                                    <ProgressIndicator fx:id="progressBar" prefHeight="19.0" prefWidth="35.0" />
+                                    <ProgressIndicator fx:id="progressBar" prefHeight="19.0" prefWidth="35.0" visible="false" />
                                     <Label fx:id="lblProgressBar" prefHeight="42.0" prefWidth="440.0" />
                                  </children>
                               </HBox>

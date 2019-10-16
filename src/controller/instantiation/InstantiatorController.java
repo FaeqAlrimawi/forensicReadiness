@@ -7,11 +7,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import com.eteks.sweethome3d.adaptive.forensics.BigrapherStatesChecker;
 import com.eteks.sweethome3d.adaptive.forensics.SystemHandler;
@@ -19,7 +16,6 @@ import com.eteks.sweethome3d.adaptive.forensics.SystemHandler;
 import controller.instantiation.analysis.TaskCell;
 import controller.utlities.IncidentAssetMap;
 import core.instantiation.analysis.TraceMiner;
-import environment.Lab;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 import ie.lero.spare.pattern_instantiation.GraphPathsAnalyser;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiationListener;
@@ -48,7 +44,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
@@ -78,8 +73,11 @@ public class InstantiatorController
 	@FXML
 	private ListView<GraphPath> listViewTraces;
 	
+//	@FXML
+//	private ImageView imgOpenStatesFolder;
 	@FXML
-	private ImageView imgOpenStatesFolder;
+	private Button btnOpenStatesFolder;
+	
 	
 	@FXML
 	private CheckBox  checkboxLTSSame;
@@ -102,8 +100,8 @@ public class InstantiatorController
 	@FXML
 	private TextField textFieldSelectedStatesFolder;
 
-	@FXML
-	private ImageView imgSelectIncidentPattern;
+//	@FXML
+//	private ImageView imgSelectIncidentPattern;
 
 	@FXML
 	private TextField txtFieldIncidentPattern;
@@ -210,10 +208,10 @@ public class InstantiatorController
 		checkboxLTSSame.setOnAction(e->{
 			if(checkboxLTSSame.isSelected()){
 				textFieldSelectedStatesFolder.setDisable(true);
-				imgOpenStatesFolder.setDisable(true);
+				btnOpenStatesFolder.setDisable(true);
 			} else {
 				textFieldSelectedStatesFolder.setDisable(false);
-				imgOpenStatesFolder.setDisable(false);
+				btnOpenStatesFolder.setDisable(false);
 			}
 		});
 		
@@ -282,7 +280,7 @@ public class InstantiatorController
 	}
 	
 	@FXML
-	void selectIncidentPattern(MouseEvent event) {
+	void selectIncidentPattern(ActionEvent event) {
 
 		FileChooser fileChooser = new FileChooser();
 
@@ -323,10 +321,12 @@ public class InstantiatorController
 	void instantiateIncidentPattern(ActionEvent event) {
 
 		createInstance(this);
+		
+		btnGenerateInstances.setDisable(true);
 	}
 
 	@FXML
-	void selectSystemFile(MouseEvent event) {
+	void selectSystemFile(ActionEvent event) {
 
 		FileChooser fileChooser = new FileChooser();
 
@@ -549,7 +549,7 @@ public class InstantiatorController
 	}
 
 	@FXML
-	void selectStatesFolder(MouseEvent event) {
+	void selectStatesFolder(ActionEvent event) {
 
 		DirectoryChooser chooser = new DirectoryChooser();
 		// chooser.setTitle("Select Folder");
@@ -976,10 +976,10 @@ public class InstantiatorController
 				if(graphAnalyser!=null){
 					lblNumOfTraces.setText("["+graphAnalyser.getPaths().size()+"]");
 					populateTracesList(graphAnalyser.getPaths());
-					
 				}
 				
 				 lblProgressBar.setText("Done!");
+				 btnGenerateInstances.setDisable(false);
 				 
 			}
 		});
