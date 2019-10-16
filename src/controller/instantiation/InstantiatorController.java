@@ -194,6 +194,7 @@ public class InstantiatorController
 	private List<GraphPath> generatedTraces;
 	
 	private String msgSelectAssetSet = "Please select Asset Sets to instantiate";
+	private String msgDone = "Done";
 	
 	public InstantiatorController() {
 		incidentNames = new LinkedList<String>();
@@ -544,7 +545,7 @@ public class InstantiatorController
 				txtAreaLog.appendText("\n");
 //				progressBar.setProgress(0);
 				progressBar.setVisible(true);
-				lblProgressBar.setText("Preparing Instantiation...");
+				updateProgressMessage("Preparing Instantiation...");
 				// lblInputFiles.setText("[Input incident file]: " +
 				// incidentPatternFilePath + " "
 				// + "[Input system file]: " + systemModelFilePath);
@@ -669,14 +670,29 @@ public class InstantiatorController
 				lblLastMsg.setTooltip(new Tooltip(msg));
 //				lblProgressBar.setText(msg);
 //				lblProgressBar.setTooltip(new Tooltip(msg));
-				if(!lblProgressBar.getText().equals(msgSelectAssetSet)) {
-					lblProgressBar.setText("Instantiating... "+msg);	
-				}
-				
+				updateProgressMessage(msg);
 				txtAreaLog.appendText(msg + newLine);
 			}
 		});
 
+	}
+	
+	protected void updateProgressMessage(String msg) {
+		
+		String currentText = lblProgressBar.getText();
+		
+		if(msg.contains(">>")) {
+			//process msg to get last part
+			String[] parts = msg.split(">>");
+			
+			msg = parts[parts.length-1];
+		}
+		
+		currentText = currentText.replace( "instantiating...", "");
+		if(currentText!= null && !(currentText.equals(msgSelectAssetSet) || currentText.equals(msgDone))) {
+			lblProgressBar.setText("instantiating... "+msg);	
+		}
+		
 	}
 
 	@Override
@@ -848,7 +864,8 @@ public class InstantiatorController
 				// TODO Auto-generated method stub
 
 				lblProgressBar.setTextFill(Color.RED);
-				lblProgressBar.setText(msgSelectAssetSet);
+				updateProgressMessage(msgSelectAssetSet);
+				
 				progressBar.setVisible(false);
 			}
 		});
@@ -889,8 +906,8 @@ public class InstantiatorController
 			public void run() {
 				// TODO Auto-generated method stub
 				lblProgressBar.setTextFill(Color.BLUE);
-
 				lblProgressBar.setText("Instantiating... ");
+				
 				progressBar.setVisible(true);
 				btnAnalyse.setDisable(true);
 			}
@@ -994,7 +1011,7 @@ public class InstantiatorController
 					btnSaveGeneratedTraces.setDisable(false);
 				}
 				
-				 lblProgressBar.setText("Done!");
+				 updateProgressMessage(msgDone);
 				 btnGenerateInstances.setDisable(false);
 				 
 			}
