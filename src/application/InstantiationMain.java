@@ -1,5 +1,6 @@
 package application;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -26,47 +27,131 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-public class Main extends Application {
+public class InstantiationMain extends Application {
 
-	private Pane layout;
+//	private Pane layout;
 
-	private SplitPane splitPaneInstantiator;
+//	private Pane pane;
 
 	@Override
 	public void start(Stage primaryStage) {
-		try {
+//		try {
 
-			FXMLLoader loader = new FXMLLoader();
+//			FXMLLoader loader = new FXMLLoader();
 
-			String traceViewerGUI = "TraceViewer.fxml";
-			String instantiatorGui = "instantiator.fxml";
-
-			URL url = Main.class.getClassLoader().getResource("fxml/" + traceViewerGUI);
-
-			if (url != null) {
-				System.out.println(url.getPath());
+			//select viewer to run
+			boolean runTraceViewer = false;
+			boolean runInstatiator = !runTraceViewer;
+			
+//			String traceViewerGUI = "TraceViewer.fxml";
+//			
+//			String instantiatorGui = "instantiator.fxml";
+			
+			if(runTraceViewer) {
+				runTraceViewer(primaryStage);
 			} else {
-				System.err.println("url is null");
+				runInstantiatorViewer(primaryStage);
 			}
-
-			loader.setLocation(url);
-
-			// Platform.setImplicitExit(false);
-
-			layout = loader.load();
-
-			Scene scene = new Scene(layout);
-
-			// scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-			primaryStage.setScene(scene);
-			primaryStage.setTitle("Incident Filter");
-			primaryStage.show();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+			
+//			URL url = ActionCatalogueEditorMain.class.getClassLoader().getResource("fxml/" + viewerToRun);
+//
+//			if (url != null) {
+//				System.out.println(url.getPath());
+//			} else {
+//				System.err.println("url is null");
+//			}
+//
+//			loader.setLocation(url);
+//
+//			// Platform.setImplicitExit(false);
+//
+//			layout = loader.load();
+//
+//			Scene scene = new Scene(layout);
+//
+//			// scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+//			primaryStage.setScene(scene);
+//			
+//			primaryStage.setTitle("Incident Filter");
+//			primaryStage.show();
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 	}
 
+	protected void runTraceViewer(Stage primaryStage) {
+		
+		FXMLLoader loader = new FXMLLoader();
+		
+		String traceViewerGUI = "TraceViewer.fxml";
+		
+		
+		URL url = InstantiationMain.class.getClassLoader().getResource("fxml/" + traceViewerGUI);
+
+		if (url != null) {
+			System.out.println(url.getPath());
+		} else {
+			System.err.println("url is null");
+			return;
+		}
+
+		loader.setLocation(url);
+
+		// Platform.setImplicitExit(false);
+
+		try {
+			Pane layout = loader.load();
+			Scene scene = new Scene(layout);
+			
+			primaryStage.setScene(scene);
+			
+			primaryStage.setTitle("Incident Filter");
+			primaryStage.show();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+	protected void runInstantiatorViewer(Stage primaryStage) {
+		
+	FXMLLoader loader = new FXMLLoader();
+		
+		String InstantiatorViewerGUI = "instantiator.fxml";
+		
+		
+		URL url = InstantiationMain.class.getClassLoader().getResource("fxml/" + InstantiatorViewerGUI);
+
+		if (url != null) {
+			System.out.println(url.getPath());
+		} else {
+			System.err.println("url is null");
+			return;
+		}
+
+		loader.setLocation(url);
+
+		// Platform.setImplicitExit(false);
+
+		try {
+			SplitPane layout = loader.load();
+			Scene scene = new Scene(layout);
+			
+			primaryStage.setScene(scene);
+			
+			primaryStage.setTitle("Incident Pattern Instantiation Executor");
+			primaryStage.show();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
 	public static void main(String[] args) {
 		
 		 launch(args);
@@ -76,8 +161,8 @@ public class Main extends Application {
 		String action = "react enter_room = " + exprs + "->" + exprs2 + "@ [1,2,3];";
 		String jsonState = "D:/Bigrapher data/lero/lero1/0.json";
 		
-		URL bigFileURL = Main.class.getResource("../resources/example/systemBigraphER.big");
-		URL statesFolderURL = Main.class.getResource("../resources/example/states_1000");
+		URL bigFileURL = ActionCatalogueEditorMain.class.getResource("../resources/example/systemBigraphER.big");
+		URL statesFolderURL = ActionCatalogueEditorMain.class.getResource("../resources/example/states_1000");
 		
 		String bigFile = null;
 		String statesFolder = null; 

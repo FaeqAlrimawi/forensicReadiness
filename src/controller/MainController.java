@@ -11,7 +11,7 @@ import com.eteks.sweethome3d.SweetHome3D;
 import com.eteks.sweethome3d.adaptive.forensics.BigrapherStatesChecker;
 import com.eteks.sweethome3d.adaptive.forensics.SystemHandler;
 
-import application.Main;
+import application.ActionCatalogueEditorMain;
 import cyberPhysical_Incident.IncidentDiagram;
 import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
@@ -440,7 +440,7 @@ public class MainController {
 			Pane layout;
 			FXMLLoader loader = new FXMLLoader();
 
-			URL url = Main.class.getResource("../fxml/LTSView.fxml");
+			URL url = ActionCatalogueEditorMain.class.getResource("../fxml/LTSView.fxml");
 
 			if (url != null) {
 				System.out.println(url.getPath());
@@ -473,7 +473,7 @@ public class MainController {
 			Pane layout;
 			FXMLLoader loader = new FXMLLoader();
 
-			URL url = Main.class.getResource("../fxml/SystemActionView.fxml");
+			URL url = ActionCatalogueEditorMain.class.getResource("../fxml/SystemActionView.fxml");
 
 			if (url != null) {
 				System.out.println(url.getPath());
