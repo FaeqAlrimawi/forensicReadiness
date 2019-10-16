@@ -53,6 +53,9 @@ public class InstantiatorController
 		implements ie.lero.spare.pattern_instantiation.IncidentPatternInstantiationListener {
 
 	@FXML
+	private Label lblLastMsg;
+	
+	@FXML
 	private Label lblSave;
 	
 	@FXML
@@ -189,6 +192,8 @@ public class InstantiatorController
 	private BigrapherStatesChecker checker;
 	
 	private List<GraphPath> generatedTraces;
+	
+	private String msgSelectAssetSet = "Please select Asset Sets to instantiate";
 	
 	public InstantiatorController() {
 		incidentNames = new LinkedList<String>();
@@ -539,7 +544,7 @@ public class InstantiatorController
 				txtAreaLog.appendText("\n");
 //				progressBar.setProgress(0);
 				progressBar.setVisible(true);
-				lblProgressBar.setText("Running...");
+				lblProgressBar.setText("Preparing Instantiation...");
 				// lblInputFiles.setText("[Input incident file]: " +
 				// incidentPatternFilePath + " "
 				// + "[Input system file]: " + systemModelFilePath);
@@ -660,6 +665,14 @@ public class InstantiatorController
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
+				lblLastMsg.setText(msg);
+				lblLastMsg.setTooltip(new Tooltip(msg));
+//				lblProgressBar.setText(msg);
+//				lblProgressBar.setTooltip(new Tooltip(msg));
+				if(!lblProgressBar.getText().equals(msgSelectAssetSet)) {
+					lblProgressBar.setText("Instantiating... "+msg);	
+				}
+				
 				txtAreaLog.appendText(msg + newLine);
 			}
 		});
@@ -835,7 +848,8 @@ public class InstantiatorController
 				// TODO Auto-generated method stub
 
 				lblProgressBar.setTextFill(Color.RED);
-				lblProgressBar.setText("Please select Asset Sets to analyse");
+				lblProgressBar.setText(msgSelectAssetSet);
+				progressBar.setVisible(false);
 			}
 		});
 	}
@@ -861,6 +875,7 @@ public class InstantiatorController
 			return;
 		}
 
+		
 		incidentInstantiator.setAssetSetsSelected(selectedSets);
 		incidentInstantiator.setThreadPoolSize(instancesSpinner.getValue());
 		incidentInstantiator.setNumberOfParallelActivities(activitiesSpinner.getValue());
@@ -873,10 +888,10 @@ public class InstantiatorController
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				lblProgressBar.setTextFill(Color.BLACK);
+				lblProgressBar.setTextFill(Color.BLUE);
 
-				lblProgressBar.setText("Analysing...");
-				
+				lblProgressBar.setText("Instantiating... ");
+				progressBar.setVisible(true);
 				btnAnalyse.setDisable(true);
 			}
 		});
@@ -976,6 +991,7 @@ public class InstantiatorController
 				if(graphAnalyser!=null){
 					lblNumOfTraces.setText("["+graphAnalyser.getPaths().size()+"]");
 					populateTracesList(graphAnalyser.getPaths());
+					btnSaveGeneratedTraces.setDisable(false);
 				}
 				
 				 lblProgressBar.setText("Done!");
