@@ -195,6 +195,7 @@ public class InstantiatorController
 	
 	private String msgSelectAssetSet = "Please select Asset Sets to instantiate";
 	private String msgDone = "Done";
+	private static final String INITIAL_LABEL = "Instantiating... ";
 	
 	public InstantiatorController() {
 		incidentNames = new LinkedList<String>();
@@ -680,6 +681,8 @@ public class InstantiatorController
 	protected void updateProgressMessage(String msg) {
 		
 		String currentText = lblProgressBar.getText();
+		 
+		currentText = currentText.replace( INITIAL_LABEL, "");
 		
 		if(msg.contains(">>")) {
 			//process msg to get last part
@@ -688,9 +691,8 @@ public class InstantiatorController
 			msg = parts[parts.length-1];
 		}
 		
-		currentText = currentText.replace( "instantiating...", "");
 		if(currentText!= null && !(currentText.equals(msgSelectAssetSet) || currentText.equals(msgDone))) {
-			lblProgressBar.setText("instantiating... "+msg);	
+			lblProgressBar.setText(INITIAL_LABEL+msg);	
 		}
 		
 	}
