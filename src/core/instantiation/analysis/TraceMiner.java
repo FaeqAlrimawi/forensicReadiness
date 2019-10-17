@@ -1467,6 +1467,8 @@ public class TraceMiner {
 
 		int minimumStates = minimumTraceLength + 1;
 
+//		System.out.println("min actions: " +minimumTraceLength);
+		
 		String separator = " ";
 		StringBuilder bldr = new StringBuilder();
 
@@ -1476,21 +1478,29 @@ public class TraceMiner {
 			shortestTraces = new HashMap<Integer, GraphPath>();
 		}
 
+		if (shortestTracesFileName != null) {
 		System.out.println(">>Identifying shortest traces in [" + instanceFileName + "]");
+		} else {
+			bldr = null;
+			System.out.println(">>Identifying shortest traces...");
+		}
 		for (GraphPath trace : traces.values()) {
 
 			if (trace.getStateTransitions().size() == minimumStates) {
 				shortestTraces.put(trace.getInstanceID(), trace);
-				bldr.append(trace.getInstanceID()).append(separator);
+				
+				if(bldr!=null) {
+					bldr.append(trace.getInstanceID()).append(separator);	
+				}
 			}
 		}
 
-		if (bldr.length() > 0) {
+		if (bldr!=null && bldr.length() > 0) {
 			bldr.deleteCharAt(bldr.length() - 1);// remove extra space
 		}
 
 		// store to file
-		if (shortestTracesFileName != null) {
+		if (shortestTracesFileName != null && bldr!=null) {
 			writeToFile(bldr.toString(), shortestTracesFileName);
 			System.out.println(">>Shortest traces IDs are stored in [" + shortestTracesFileName + "]");
 		}
@@ -3122,7 +3132,7 @@ public class TraceMiner {
 
 		for (GraphPath trace : traces.values()) {
 
-			List<String> actions = trace.getTraceActions();
+			List<String> actions = trace.getTransitionActions();
 
 			if (actions.size() < minimumTraceLength) {
 				minimumTraceLength = actions.size();

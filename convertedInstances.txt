@@ -1,3 +1,9 @@
-0	Hallway EnterRoom Visitor PhysicalConnection WorkingHours Room Context RulesKeywords NoCard PhysicalConnection Room Status_On Context RulesKeywords NoCard Visitor Hallway WorkingHours CCTV SmartLight HVAC
-1	Malware DisableHVAC HVAC RulesKeywords Server HVAC RulesKeywords Malware Server Status_Off
-2	RulesKeywords Visitor HVAC ConnectBusDevice RulesKeywords Visitor Laptop
+1 -1 64 -1 271 -1 937 -1 -2
+1 -1 63 -1 274 -1 946 -1 -2
+1 -1 62 -1 277 -1 956 -1 -2
+1 -1 59 -1 299 -1 1018 -1 -2
+11 -1 99 -1 386 -1 1284 -1 -2
+11 -1 98 -1 389 -1 1292 -1 -2
+11 -1 97 -1 392 -1 1302 -1 -2
+11 -1 94 -1 416 -1 1373 -1 -2
+11 -1 93 -1 419 -1 1382 -1 -2

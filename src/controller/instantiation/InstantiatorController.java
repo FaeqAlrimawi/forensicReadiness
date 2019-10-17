@@ -745,6 +745,11 @@ public class InstantiatorController
 		if (currentText != null && !(currentText.equals(msgSelectAssetSet) || currentText.equals(msgDone))) {
 			lblProgressBar.setText(INITIAL_LABEL + msg);
 		}
+		
+		//if select asset set, then make list border red
+		if(currentText.equals(msgSelectAssetSet)) {
+			listViewSets.setStyle("-fx-border-color:red;");
+		}
 
 	}
 
@@ -918,7 +923,7 @@ public class InstantiatorController
 
 				lblProgressBar.setTextFill(Color.RED);
 				updateProgressMessage(msgSelectAssetSet);
-
+				listViewSets.setStyle("-fx-border-color:red;");
 				progressBar.setVisible(false);
 			}
 		});
@@ -959,7 +964,7 @@ public class InstantiatorController
 				// TODO Auto-generated method stub
 				lblProgressBar.setTextFill(Color.BLUE);
 				lblProgressBar.setText("Instantiating... ");
-
+				listViewSets.setStyle(null);
 				progressBar.setVisible(true);
 				btnAnalyse.setDisable(true);
 			}

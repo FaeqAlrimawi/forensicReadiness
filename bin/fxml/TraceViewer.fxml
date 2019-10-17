@@ -26,28 +26,28 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="890.0" prefWidth="1345.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.analysis.TraceViewerController">
+<AnchorPane prefHeight="747.0" prefWidth="1046.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.analysis.TraceViewerController">
    <children>
-      <SplitPane fx:id="splitPaneRoot" dividerPositions="0.26209977661950856" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <SplitPane fx:id="splitPaneRoot" dividerPositions="0.32950191570881227" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
-          <AnchorPane minHeight="500.0" minWidth="100.0" prefHeight="888.0" prefWidth="200.0">
+          <AnchorPane minHeight="500.0" minWidth="100.0" prefHeight="745.0" prefWidth="302.0">
                <children>
                   <Separator AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="140.0" />
-                  <VBox prefHeight="453.0" prefWidth="289.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+                  <VBox prefHeight="453.0" prefWidth="311.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
                      <children>
                         <VBox prefHeight="109.0" prefWidth="662.0">
                            <children>
-                              <VBox prefHeight="128.0" prefWidth="542.0">
+                              <VBox prefHeight="129.0" prefWidth="327.0">
                                  <children>
-                                    <HBox prefHeight="29.0" prefWidth="351.0" spacing="2.0">
+                                    <HBox prefHeight="28.0" prefWidth="331.0" spacing="2.0">
                                        <children>
-                                          <Label prefHeight="34.0" prefWidth="60.0" text="Traces">
+                                          <Label prefHeight="28.0" prefWidth="56.0" text="Traces">
                                              <font>
                                                 <Font size="18.0" />
                                              </font>
                                           </Label>
                                           <TextField fx:id="textFieldSystemFile" prefHeight="29.0" prefWidth="219.0" promptText="traces file (*.json)" />
-                                          <Button alignment="TOP_CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#selectTracesFile" prefHeight="33.0" prefWidth="27.0" text="..." textAlignment="CENTER" />
+                                          <Button alignment="TOP_CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#selectTracesFile" prefHeight="28.0" prefWidth="15.0" text="..." textAlignment="CENTER" />
                                           <AnchorPane prefHeight="18.0" prefWidth="24.0">
                                              <children>
                                                 <ImageView fx:id="imgOpentracesFileEmpty" fitHeight="24.0" fitWidth="24.0" layoutY="5.0" pickOnBounds="true" preserveRatio="true" AnchorPane.topAnchor="2.0">
@@ -206,7 +206,7 @@
             </AnchorPane>
           <AnchorPane minHeight="500.0" minWidth="500.0" prefHeight="160.0" prefWidth="100.0">
                <children>
-                  <SplitPane fx:id="splitPaneResult" dividerPositions="0.6118047673098751" layoutX="33.0" layoutY="411.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <SplitPane fx:id="splitPaneResult" dividerPositions="0.5935397039030955" layoutX="33.0" layoutY="411.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <items>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                            <children>
@@ -237,14 +237,13 @@
                                           <HBox alignment="CENTER_LEFT" prefHeight="17.0" prefWidth="721.0">
                                              <children>
                                                 <Pane prefHeight="25.0" prefWidth="11.0" />
-                                                <Label prefHeight="25.0" prefWidth="56.0" text="Trace-ID  " textFill="#8a8686">
+                                                <Label prefHeight="25.0" prefWidth="73.0" text="Trace-ID  " textFill="#8a8686">
                                                    <font>
                                                       <Font name="System Bold" size="12.0" />
                                                    </font>
                                                 </Label>
                                                 <Separator orientation="VERTICAL" prefHeight="18.0" prefWidth="11.0" />
-                                                <Label prefHeight="27.0" prefWidth="424.0" text="State-number =[action name]=&gt; State-number =[action name]=&gt; ..." textFill="#8a8686" />
-                                                <Pane prefHeight="25.0" prefWidth="280.0" />
+                                                <Label prefHeight="25.0" prefWidth="455.0" text="State-number =[action name]=&gt; State-number =[action name]=&gt; ..." textFill="#8a8686" />
                                                 <TextField fx:id="textFieldSearchFiltered" prefHeight="25.0" prefWidth="197.0" promptText="Search">
                                                    <tooltip>
                                                       <Tooltip text="Search states in filtered traces (e.g., 1, 4, 6)" />
@@ -259,7 +258,7 @@
                                     </VBox>
                                  </children>
                               </VBox>
-                              <AnchorPane prefHeight="400.0" prefWidth="886.0" AnchorPane.bottomAnchor="42.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="85.0">
+                              <AnchorPane prefHeight="400.0" prefWidth="982.0" AnchorPane.bottomAnchor="42.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="85.0">
                                  <children>
                                     <ListView fx:id="listViewTraces" prefHeight="330.0" prefWidth="907.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                     <Label fx:id="lblListViewTracesEmpty" alignment="CENTER" layoutY="-38.0" prefHeight="240.0" prefWidth="893.0" text="Filtered Traces" textFill="#a19494" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -292,7 +291,7 @@
                            <children>
                               <HBox AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                                  <children>
-                                    <BarChart fx:id="barChartActions" prefHeight="340.0" prefWidth="664.0">
+                                    <BarChart fx:id="barChartActions" prefHeight="284.0" prefWidth="468.0">
                                       <xAxis>
                                         <CategoryAxis fx:id="categoryAxis" side="BOTTOM" />
                                       </xAxis>

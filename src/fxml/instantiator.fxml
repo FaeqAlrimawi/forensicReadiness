@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
@@ -27,9 +26,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<SplitPane dividerPositions="0.7908847184986595" maxHeight="3200.0" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="748.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.InstantiatorController">
+<SplitPane dividerPositions="0.8338028169014085" maxHeight="3200.0" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="712.0" prefWidth="1034.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.InstantiatorController">
    <items>
-      <VBox prefHeight="631.0" prefWidth="1198.0">
+      <VBox prefHeight="630.0" prefWidth="1032.0">
         <children>
             <MenuBar>
               <menus>
@@ -50,9 +49,9 @@
                 </Menu>
               </menus>
             </MenuBar>
-          <SplitPane dividerPositions="0.23411371237458195" focusTraversable="true" prefHeight="616.0" prefWidth="1198.0" VBox.vgrow="ALWAYS">
+          <SplitPane dividerPositions="0.2757281553398058" focusTraversable="true" prefHeight="573.0" prefWidth="1032.0" VBox.vgrow="ALWAYS">
             <items>
-              <AnchorPane minWidth="230.0" prefHeight="532.0" prefWidth="383.0" SplitPane.resizableWithParent="false">
+              <AnchorPane minWidth="230.0" prefHeight="560.0" prefWidth="248.0" SplitPane.resizableWithParent="false">
                 <children>
                         <VBox alignment="TOP_CENTER" layoutX="22.0" layoutY="71.0" minHeight="356.0" prefHeight="498.0" prefWidth="264.0" spacing="50.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="20.0">
                            <children>
@@ -141,15 +140,15 @@
                      <children>
                         <VBox layoutX="10.0" layoutY="14.0" prefHeight="543.0" prefWidth="893.0" spacing="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
                            <children>
-                              <HBox prefHeight="29.0" prefWidth="874.0">
+                              <HBox prefHeight="53.0" prefWidth="723.0" style="-fx-border-color: lightgrey;">
                                  <children>
-                                    <ProgressIndicator fx:id="progressBar" minWidth="35.0" prefHeight="19.0" prefWidth="35.0" visible="false" />
+                                    <ProgressIndicator fx:id="progressBar" minWidth="19.0" prefHeight="18.0" prefWidth="26.0" visible="false" />
                                     <Label fx:id="lblProgressBar" prefHeight="42.0" textFill="#0723f5" />
                                  </children>
                               </HBox>
                               <HBox alignment="CENTER_LEFT" prefHeight="206.0" prefWidth="894.0" spacing="15.0">
                                  <children>
-                                    <StackPane>
+                                    <StackPane prefHeight="175.0" prefWidth="455.0">
                                        <children>
                                           <TableView fx:id="tableViewMap" prefHeight="206.0" prefWidth="304.0" style="-fx-border-color: grey;">      
                             </TableView>
@@ -224,12 +223,12 @@
                                     <Separator prefWidth="200.0" />
                                     <HBox>
                                        <children>
-                                          <Label prefHeight="32.0" prefWidth="234.0" text="Generated Potential Incident Traces">
+                                          <Label prefHeight="20.0" prefWidth="227.0" text="Generated Potential Incident Traces">
                                              <font>
                                                 <Font size="14.0" />
                                              </font>
                                           </Label>
-                                          <Label fx:id="lblNumOfTraces" prefHeight="31.0" prefWidth="648.0">
+                                          <Label fx:id="lblNumOfTraces" prefHeight="20.0" prefWidth="153.0">
                                              <font>
                                                 <Font name="System Bold" size="14.0" />
                                              </font>
@@ -238,7 +237,7 @@
                                     </HBox>
                                     <HBox prefHeight="17.0" prefWidth="721.0">
                                        <children>
-                                          <Pane prefHeight="17.0" prefWidth="26.0" />
+                                          <Pane prefHeight="17.0" prefWidth="6.0" />
                                           <Label prefHeight="17.0" prefWidth="57.0" text="Trace-ID  " textFill="#8a8686">
                                              <font>
                                                 <Font name="System Bold" size="12.0" />
@@ -275,20 +274,17 @@
           </SplitPane>
         </children>
       </VBox>
-      <VBox prefHeight="111.0" prefWidth="1198.0">
+      <VBox>
          <children>
-            <HBox alignment="CENTER_LEFT" prefHeight="14.0" prefWidth="1195.0" spacing="3.0" style="-fx-background-color: white;">
+            <HBox alignment="CENTER_LEFT" prefHeight="3.0" prefWidth="1032.0" spacing="3.0" style="-fx-background-color: white;">
                <children>
-                  <Label minWidth="30.0" prefWidth="30.0" text="Log:" />
+                  <Label minWidth="24.0" prefHeight="17.0" prefWidth="24.0" text="Log:" />
                   <Label fx:id="lblLastMsg" textFill="#2c45d0" />
                </children>
-               <VBox.margin>
-                  <Insets left="3.0" />
-               </VBox.margin>
             </HBox>
-            <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" maxHeight="500.0" prefHeight="141.0" prefWidth="1198.0">
+            <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" maxHeight="500.0" prefHeight="123.0" prefWidth="1032.0">
                <content>
-                  <TextArea fx:id="txtAreaLog" editable="false" prefWidth="1196.0" />
+                  <TextArea fx:id="txtAreaLog" editable="false" prefHeight="129.0" prefWidth="1030.0" />
                </content>
             </ScrollPane>
          </children>
