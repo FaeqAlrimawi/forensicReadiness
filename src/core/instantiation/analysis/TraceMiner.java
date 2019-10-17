@@ -349,8 +349,7 @@ public class TraceMiner {
 	 * Identify relevant traces (currently defined as shortest and has common
 	 * patterns)
 	 * 
-	 * @param fileName
-	 *            given file path (*.json or a folder containing JSON files)
+	 * @param fileName given file path (*.json or a folder containing JSON files)
 	 */
 	void identifyRelevantTraces(String fileName) {
 
@@ -500,6 +499,56 @@ public class TraceMiner {
 		maximumTraceLength = -1;
 
 		traces = readInstantiatorInstancesFile(instanceFileName);
+
+		// set traces actions
+		if (tracesActionsOccurence.size() > 0) {
+			tracesActions.clear();
+			int index = 0;
+			for (String action : tracesActionsOccurence.keySet()) {
+				tracesActions.put(action, index);
+				index++;
+			}
+		}
+
+		System.out.println(">>Number of instances read = " + traces.size() + "\n>>Min trace length: "
+				+ minimumTraceLength + "\n>>Max trace length: " + maximumTraceLength + "\n>>Actions: " + tracesActions
+				+ "\n>>Occurrences: " + tracesActionsOccurence);
+
+		// used when converting traces to mining format
+		PADDING_ACTION_INT = -1 * tracesActions.size();
+
+		// System.out.println(traces.get(0).getTransitionActions());
+		if (traces == null) {
+			System.out.println("traces are null! Exiting");
+			isLoaded = false;
+			return TRACES_NOT_LOADED;
+
+		}
+
+		isLoaded = true;
+
+		return traces.size();
+
+	}
+
+	public int loadTracesFromList(List<GraphPath> newTraces) {
+
+		System.out.println(">>Reading instances from [" + instanceFileName + "]");
+
+		// load instances from file
+		// List<Integer> minMaxLengths = new LinkedList<Integer>();
+		// List<String> tracesActs = new LinkedList<String>();
+
+		// reset
+		tracesActionsOccurence.clear();
+		statesOccurrences.clear();
+
+		minimumTraceLength = 100000;
+		maximumTraceLength = -1;
+
+//		traces = readInstantiatorInstancesFile(instanceFileName);
+		setTraces(newTraces);
+		generateActionsOccurrences();
 
 		// set traces actions
 		if (tracesActionsOccurence.size() > 0) {
@@ -1648,8 +1697,8 @@ public class TraceMiner {
 		// double array)
 
 		/**
-		 * all data array should be of the same length so states that are short
-		 * than the longest are padded with -1
+		 * all data array should be of the same length so states that are short than the
+		 * longest are padded with -1
 		 **/
 		// create a text file to hold the data
 
@@ -2046,8 +2095,7 @@ public class TraceMiner {
 	/**
 	 * Finds all traces using the ClaSP algorithm (sequential mining algorithm)
 	 * 
-	 * @param tracesToAnalyse
-	 *            (indicates which traces to use for analysis
+	 * @param tracesToAnalyse (indicates which traces to use for analysis
 	 * @return
 	 */
 	public int mineClosedSequencesUsingClaSPAlgo(int tracesToAnalyse) {
@@ -2447,8 +2495,8 @@ public class TraceMiner {
 	protected void mineSequentialPatternsUsingTKSAlgo(Collection<GraphPath> traces) {
 
 		/**
-		 * http://www.philippe-fournier-viger.com/spmf/TKS.php fastest Top-K
-		 * sequential pattern recognition algo
+		 * http://www.philippe-fournier-viger.com/spmf/TKS.php fastest Top-K sequential
+		 * pattern recognition algo
 		 */
 
 		convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
@@ -2731,19 +2779,18 @@ public class TraceMiner {
 	}
 
 	public void setTraces(List<GraphPath> traces) {
-		
-		if(this.traces == null) {
+
+		if (this.traces == null) {
 			this.traces = new HashMap<Integer, GraphPath>();
-		} else { 
+		} else {
 			this.traces.clear();
 		}
-		
-		for(GraphPath trace : traces) {
+
+		for (GraphPath trace : traces) {
 			this.traces.put(trace.getInstanceID(), trace);
 		}
 	}
-	
-	
+
 	public void resetMiner() {
 		shortestTraceIDs.clear();
 		claSPTraceIDs.clear();
@@ -3053,9 +3100,49 @@ public class TraceMiner {
 
 		if (tracesActionsOccurence != null) {
 			return tracesActionsOccurence.size();
+		} else {
+
 		}
 
 		return -1;
+	}
+
+	protected void generateActionsOccurrences() {
+
+		// === defines the min and max trace lengths, and also actions occurrences in
+		// all traces
+		
+		if (traces == null) {
+			return;
+		}
+
+		tracesActionsOccurence = new HashMap<String, Integer>();
+		minimumTraceLength = 10000;
+		maximumTraceLength = -1;
+
+		for (GraphPath trace : traces.values()) {
+
+			List<String> actions = trace.getTraceActions();
+
+			if (actions.size() < minimumTraceLength) {
+				minimumTraceLength = actions.size();
+			}
+
+			if (actions.size() > maximumTraceLength) {
+				maximumTraceLength = actions.size();
+			}
+
+			for (String act : trace.getTraceActions()) {
+				if (tracesActionsOccurence.containsKey(act)) {
+					int occur = tracesActionsOccurence.get(act);
+					occur++;
+					tracesActionsOccurence.put(act, occur);
+				} else {
+					tracesActionsOccurence.put(act, 1);
+				}
+			}
+		}
+
 	}
 
 	public int getNumberOfStates() {
@@ -3355,14 +3442,14 @@ public class TraceMiner {
 	}
 
 	public List<Integer> getAllTracesIDs() {
-	
-		if(traces!=null) {
+
+		if (traces != null) {
 			return Arrays.asList(traces.keySet().toArray(new Integer[traces.size()]));
 		}
-		
+
 		return null;
 	}
-	
+
 	public GraphPath getTrace(int traceID) {
 
 		if (traces.containsKey(traceID)) {
@@ -3467,10 +3554,8 @@ public class TraceMiner {
 	/**
 	 * save a trace as a Trace object
 	 * 
-	 * @param fileName
-	 *            file path
-	 * @param tracesID
-	 *            trace ID
+	 * @param fileName file path
+	 * @param tracesID trace ID
 	 * @return
 	 */
 	public boolean saveTrace(int traceID, String fileName) {
@@ -3502,8 +3587,7 @@ public class TraceMiner {
 	/**
 	 * save a trace as a Trace object
 	 * 
-	 * @param tracesID
-	 *            trace ID
+	 * @param tracesID trace ID
 	 * @return
 	 */
 	public String saveTrace(int traceID) {
@@ -3524,10 +3608,8 @@ public class TraceMiner {
 	/**
 	 * Saves the given list of trace ids into the given folder
 	 * 
-	 * @param targetFolder
-	 *            folder to save files to
-	 * @param tracesIDs
-	 *            List of trace ids to save
+	 * @param targetFolder folder to save files to
+	 * @param tracesIDs    List of trace ids to save
 	 * @return List of trace ids that the methof Failed to save
 	 */
 	public List<Integer> saveSelectedTraces(String targetFolder, List<Integer> tracesIDs) {
@@ -3555,10 +3637,8 @@ public class TraceMiner {
 	/**
 	 * Saves the given list of trace ids into the traces folder
 	 * 
-	 * @param targetFolder
-	 *            folder to save files to
-	 * @param tracesIDs
-	 *            List of trace ids to save
+	 * @param targetFolder folder to save files to
+	 * @param tracesIDs    List of trace ids to save
 	 * @return List of trace ids that the methof Failed to save
 	 */
 	public List<Integer> saveSelectedTraces(List<Integer> tracesIDs) {
@@ -3659,17 +3739,14 @@ public class TraceMiner {
 	}
 
 	/**
-	 * Finds all entities (i.e. Classes/Controls) between all traces. It
-	 * excludes entities given in the excluding list.
+	 * Finds all entities (i.e. Classes/Controls) between all traces. It excludes
+	 * entities given in the excluding list.
 	 * 
-	 * @param traces
-	 *            The list of traces to search for common entities
-	 * @param excluding
-	 *            The list of entities to exclude
-	 * @param topK
-	 *            The top K entities to find
-	 * @return The list of top K entities in the given traces with their
-	 *         occurrence in a descending order i.e. highest to lowest
+	 * @param traces    The list of traces to search for common entities
+	 * @param excluding The list of entities to exclude
+	 * @param topK      The top K entities to find
+	 * @return The list of top K entities in the given traces with their occurrence
+	 *         in a descending order i.e. highest to lowest
 	 */
 	public List<Map.Entry<String, Long>> findAllEntities(Collection<GraphPath> traces, List<String> excluding) {
 
@@ -3705,14 +3782,10 @@ public class TraceMiner {
 	 * Finds top common entities (i.e. Classes/Controls) between all traces. It
 	 * excludes entities given in the excluding list. It limits to topK entities
 	 * 
-	 * @param traces
-	 *            The list of traces to search for common entities
-	 * @param excluding
-	 *            The list of entities to exclude
-	 * @param topK
-	 *            The top K entities to find
-	 * @return The list of top K entities in the given traces with their
-	 *         occurrence
+	 * @param traces    The list of traces to search for common entities
+	 * @param excluding The list of entities to exclude
+	 * @param topK      The top K entities to find
+	 * @return The list of top K entities in the given traces with their occurrence
 	 */
 	public List<Map.Entry<String, Long>> findTopCommonEntities(Collection<GraphPath> traces, List<String> excluding,
 			int topK) {
@@ -3746,18 +3819,13 @@ public class TraceMiner {
 	}
 
 	/**
-	 * Finds lowest common entities (i.e. Classes/Controls) between all traces.
-	 * It excludes entities given in the excluding list. It limits to topK
-	 * entities
+	 * Finds lowest common entities (i.e. Classes/Controls) between all traces. It
+	 * excludes entities given in the excluding list. It limits to topK entities
 	 * 
-	 * @param traces
-	 *            The list of traces to search for common entities
-	 * @param excluding
-	 *            The list of entities to exclude
-	 * @param topK
-	 *            The top K entities to find
-	 * @return The list of top K entities in the given traces with their
-	 *         occurrence
+	 * @param traces    The list of traces to search for common entities
+	 * @param excluding The list of entities to exclude
+	 * @param topK      The top K entities to find
+	 * @return The list of top K entities in the given traces with their occurrence
 	 */
 	public List<Map.Entry<String, Long>> findLowestCommonEntities(Collection<GraphPath> traces, List<String> excluding,
 			int topK) {
@@ -3796,8 +3864,7 @@ public class TraceMiner {
 	 * converts the given trace into a list of entities that it contains
 	 * 
 	 * @param trace
-	 * @param excluding
-	 *            The list of entities to exclude from the list
+	 * @param excluding The list of entities to exclude from the list
 	 * @return List of entities (Classes/Controls)
 	 */
 	public List<String> convertToEntities(GraphPath trace, List<String> excluding) {
@@ -3882,8 +3949,7 @@ public class TraceMiner {
 	/**
 	 * Set the path to the *.big file
 	 * 
-	 * @param bigraphERFile
-	 *            file path
+	 * @param bigraphERFile file path
 	 */
 	public void setBigraphERFile(String bigraphERFile) {
 
@@ -4049,12 +4115,10 @@ public class TraceMiner {
 
 	/**
 	 * Returns the action occurrence of the given action name. Occurrence is the
-	 * percentage of the action appearance in the given traces (i.e
-	 * tracesCategory)
+	 * percentage of the action appearance in the given traces (i.e tracesCategory)
 	 * 
 	 * @param actionName
-	 * @param tracesCategory
-	 *            (All, Shortest, Clasp)
+	 * @param tracesCategory (All, Shortest, Clasp)
 	 * @return percentage
 	 */
 	public double getActionOccurrencePercentage(String actionName, int tracesCategory) {
@@ -4213,8 +4277,7 @@ public class TraceMiner {
 	}
 
 	/**
-	 * Finds all traces that contain the given states (not necessarly
-	 * consecutive)
+	 * Finds all traces that contain the given states (not necessarly consecutive)
 	 * 
 	 * @param states
 	 * @param tracesIDsToSearch
@@ -4272,8 +4335,8 @@ public class TraceMiner {
 	}
 
 	/**
-	 * Finds all traces that have the given startState and contain the given
-	 * states (not necessarly consecutive) and ends with the endState
+	 * Finds all traces that have the given startState and contain the given states
+	 * (not necessarly consecutive) and ends with the endState
 	 * 
 	 * @param states
 	 * @param tracesIDsToSearch
@@ -4394,8 +4457,7 @@ public class TraceMiner {
 	}
 
 	/**
-	 * Finds all traces that contain the given entities (not necessarly in
-	 * order)
+	 * Finds all traces that contain the given entities (not necessarly in order)
 	 * 
 	 * @param actions
 	 * @param tracesIDsToSearch
@@ -4455,14 +4517,12 @@ public class TraceMiner {
 	}
 
 	/**
-	 * Finds the causal dependency chain between actions in the given incident
-	 * trace
+	 * Finds the causal dependency chain between actions in the given incident trace
 	 * 
-	 * @param incidentTrace
-	 *            a GraphPath object representing the potential incident
-	 * @return A map of the causal dependency between actions in the given
-	 *         potential incident. Key is the action name, value is a boolean
-	 *         whether the action depends on the previous action or not
+	 * @param incidentTrace a GraphPath object representing the potential incident
+	 * @return A map of the causal dependency between actions in the given potential
+	 *         incident. Key is the action name, value is a boolean whether the
+	 *         action depends on the previous action or not
 	 */
 	public Map<String, Boolean> findCausalDependency(GraphPath incidentTrace) {
 
@@ -4477,24 +4537,22 @@ public class TraceMiner {
 
 	/**
 	 * Determines if the action is causally dependent on the preAction Causally
-	 * dependence means that the action would not have happened if the preAction
-	 * had not happened.
+	 * dependence means that the action would not have happened if the preAction had
+	 * not happened.
 	 * 
-	 * @param preAction
-	 *            the previous action
-	 * @param action
-	 *            the action that we want to determine if it is causally
-	 *            dependent on preAction
+	 * @param preAction the previous action
+	 * @param action    the action that we want to determine if it is causally
+	 *                  dependent on preAction
 	 * @return True if action is causally dependent on the preAction. False
 	 *         otherwise
 	 */
 	public int areActionsCausallyDependent(String action, String preAction, int actionPreState, int preActionPreState) {
 
 		/**
-		 * Causally dependence is implemented by checking if the pre-condition
-		 * of the given action is matches to the state that the preAction's
-		 * pre-condition matches to. If it matches then the action is NOT
-		 * causally dependent. Otherwise, it is causally dependent
+		 * Causally dependence is implemented by checking if the pre-condition of the
+		 * given action is matches to the state that the preAction's pre-condition
+		 * matches to. If it matches then the action is NOT causally dependent.
+		 * Otherwise, it is causally dependent
 		 **/
 
 		if (action == null || preAction == null || brsWrapper == null) {
@@ -4953,10 +5011,9 @@ public class TraceMiner {
 	 * Returns a map showing the states of the given trace that match to the
 	 * incident pattern conditions
 	 * 
-	 * @param traceID
-	 *            The trace ID to look in
-	 * @return A map in which the key is the condition name in the incident
-	 *         pattern, while the value is a state in the given traces
+	 * @param traceID The trace ID to look in
+	 * @return A map in which the key is the condition name in the incident pattern,
+	 *         while the value is a state in the given traces
 	 */
 	public Map<Integer, String> getStatesMatchingIncidentPatternConditions(int traceID) {
 
@@ -4975,12 +5032,11 @@ public class TraceMiner {
 	 * Returns a map showing the states of the given trace that match to the
 	 * incident pattern conditions
 	 * 
-	 * @param trace
-	 *            The trace to look in
-	 * @return A map in which the key is the condition name in the incident
-	 *         pattern, while the value is a state in the given traces
+	 * @param trace The trace to look in
+	 * @return A map in which the key is the condition name in the incident pattern,
+	 *         while the value is a state in the given traces
 	 */
-	public Map<Integer,String> getStatesMatchingIncidentPatternConditions(GraphPath trace) {
+	public Map<Integer, String> getStatesMatchingIncidentPatternConditions(GraphPath trace) {
 
 		if (incidentPatternHandler == null) {
 			System.err.println("TraceMiner:: IncidentPatternHandler is null");
@@ -4995,14 +5051,11 @@ public class TraceMiner {
 	 * Returns a map showing the states of the given trace that match to the
 	 * incident pattern conditions
 	 * 
-	 * @param traceID
-	 *            The trace ID to look in
-	 * @param incidentPatternFilePath
-	 *            the incident pattern file path
-	 * @param systemModelFilePath
-	 *            the system model file path
-	 * @return A map in which the key is the condition name in the incident
-	 *         pattern, while the value is a state in the given traces
+	 * @param traceID                 The trace ID to look in
+	 * @param incidentPatternFilePath the incident pattern file path
+	 * @param systemModelFilePath     the system model file path
+	 * @return A map in which the key is the condition name in the incident pattern,
+	 *         while the value is a state in the given traces
 	 */
 	public Map<Integer, String> getStatesMatchingIncidentPatternConditions(int traceID, String incidentPatternFilePath,
 			String systemModelFilePath) {
@@ -5016,14 +5069,11 @@ public class TraceMiner {
 	 * Returns a map showing the states of the given trace that match to the
 	 * incident pattern conditions
 	 * 
-	 * @param trace
-	 *            The trace to look in
-	 * @param incidentPatternFilePath
-	 *            the incident pattern file path
-	 * @param systemModelFilePath
-	 *            the system model file path
-	 * @return A map in which the key is the condition name in the incident
-	 *         pattern, while the value is a state in the given traces
+	 * @param trace                   The trace to look in
+	 * @param incidentPatternFilePath the incident pattern file path
+	 * @param systemModelFilePath     the system model file path
+	 * @return A map in which the key is the condition name in the incident pattern,
+	 *         while the value is a state in the given traces
 	 */
 	public Map<Integer, String> getStatesMatchingIncidentPatternConditions(GraphPath trace,
 			String incidentPatternFilePath, String systemModelFilePath) {

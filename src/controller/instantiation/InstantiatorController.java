@@ -14,6 +14,7 @@ import com.eteks.sweethome3d.adaptive.forensics.BigrapherStatesChecker;
 import com.eteks.sweethome3d.adaptive.forensics.SystemHandler;
 
 import controller.instantiation.analysis.TaskCell;
+import controller.instantiation.analysis.TraceViewerController;
 import controller.utlities.IncidentAssetMap;
 import core.instantiation.analysis.TraceMiner;
 import ie.lero.spare.pattern_instantiation.GraphPath;
@@ -26,6 +27,9 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -48,55 +52,58 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 public class InstantiatorController
 		implements ie.lero.spare.pattern_instantiation.IncidentPatternInstantiationListener {
 
 	@FXML
+	private Button btnTraceAnalyser;
+
+	@FXML
 	private Label lblLastMsg;
-	
+
 	@FXML
 	private Label lblSave;
-	
+
 	@FXML
 	private Button btnSaveGeneratedTraces;
-	
+
 	@FXML
 	private Label lblNumOfTraces;
-	
+
 	@FXML
 	private HBox hboxLblEntityAssetSets;
-	
+
 	@FXML
 	private HBox hboxLblEntityAssetMap;
-	
+
 	@FXML
 	private Label lblListViewTracesEmpty;
-	
+
 	@FXML
 	private ListView<GraphPath> listViewTraces;
-	
+
 //	@FXML
 //	private ImageView imgOpenStatesFolder;
 	@FXML
 	private Button btnOpenStatesFolder;
-	
-	
+
 	@FXML
-	private CheckBox  checkboxLTSSame;
-	
+	private CheckBox checkboxLTSSame;
+
 	@FXML
 	private ProgressBar progressBarAnalyse;
-	
+
 	@FXML
 	private Label lblTransitionCheck;
-	
+
 	@FXML
 	private Label lblStatesCheck;
-	
+
 	@FXML
 	private ImageView imgStatesCheck;
-	
+
 	@FXML
 	private ImageView imgTransitionCheck;
 
@@ -161,18 +168,18 @@ public class InstantiatorController
 	private ListView<String> listResults;
 
 //	private ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-	
+
 	private static final String IMAGES_FOLDER = "resources/images/";
 	private static final String IMAGE_CORRECT = IMAGES_FOLDER + "correct.png";
 	private static final String IMAGE_WRONG = IMAGES_FOLDER + "wrong.png";
 	private static final int INTERVAL = 3000;
 	private static final int FILE_MENU = 0;
-	
+
 	private File incidentPatternFile;
 	private File systemFile;
 	private File selectedStatesDirectory;
 	private File selectedSaveGeneratedTracesFile;
-	
+
 	private String incidentPatternFilePath = "D:/Bigrapher data/lero/example/int.cpi";
 	private String systemModelFilePath = "D:/Bigrapher data/lero/example/lero.cps";
 	private IncidentPatternInstantiator incidentInstantiator;
@@ -188,15 +195,19 @@ public class InstantiatorController
 	private HashMap<Integer, GraphPathsAnalyser> results = new HashMap<Integer, GraphPathsAnalyser>();
 
 	private int currentSetID = -1;
-	
+
 	private BigrapherStatesChecker checker;
-	
+
 	private List<GraphPath> generatedTraces;
-	
+
 	private String msgSelectAssetSet = "Please select Asset Sets to instantiate";
 	private String msgDone = "Done";
 	private static final String INITIAL_LABEL = "Instantiating... ";
-	
+
+	private TraceMiner miner;
+	private TraceViewerController traceViewerController;
+	private Stage traceViewerStage;
+
 	public InstantiatorController() {
 		incidentNames = new LinkedList<String>();
 		assetNames = new LinkedList<String[]>();
@@ -209,11 +220,11 @@ public class InstantiatorController
 		// initialize gui if necessary
 		// ObservableList<String> items = FXCollections.observableArrayList();
 		// listResults.setItems(items);
-		
+
 		progressBar.setVisible(false);
-		
-		checkboxLTSSame.setOnAction(e->{
-			if(checkboxLTSSame.isSelected()){
+
+		checkboxLTSSame.setOnAction(e -> {
+			if (checkboxLTSSame.isSelected()) {
 				textFieldSelectedStatesFolder.setDisable(true);
 				btnOpenStatesFolder.setDisable(true);
 			} else {
@@ -221,71 +232,70 @@ public class InstantiatorController
 				btnOpenStatesFolder.setDisable(false);
 			}
 		});
-		
-		//=== for testing
+
+		// === for testing
 		incidentPatternFile = new File(incidentPatternFilePath);
 		systemFile = new File(systemModelFilePath);
 		txtFieldIncidentPattern.setText(incidentPatternFilePath);
 		txtFieldSystemModel.setText(systemModelFilePath);
-		
+
 	}
 
 	@FXML
 	void saveGeneratedTraces(ActionEvent event) {
-		
+
 		// save filtered traces
-				FileChooser fileChooser = new FileChooser();
+		FileChooser fileChooser = new FileChooser();
 
-				if (selectedSaveGeneratedTracesFile != null) {
-					fileChooser.setInitialFileName(selectedSaveGeneratedTracesFile.getName());
-					String folder = selectedSaveGeneratedTracesFile.getAbsolutePath().substring(0,
-							selectedSaveGeneratedTracesFile.getAbsolutePath().lastIndexOf(File.separator));
-					File folderF = new File(folder);
+		if (selectedSaveGeneratedTracesFile != null) {
+			fileChooser.setInitialFileName(selectedSaveGeneratedTracesFile.getName());
+			String folder = selectedSaveGeneratedTracesFile.getAbsolutePath().substring(0,
+					selectedSaveGeneratedTracesFile.getAbsolutePath().lastIndexOf(File.separator));
+			File folderF = new File(folder);
 
-					if (folderF.isDirectory()) {
-						fileChooser.setInitialDirectory(folderF);
-					}
+			if (folderF.isDirectory()) {
+				fileChooser.setInitialDirectory(folderF);
+			}
 
-				} else if(systemFile!= null) {
-					if (systemFile != null) {
-						fileChooser.setInitialFileName("traces");
-						String folder = systemFile.getAbsolutePath().substring(0,
-								systemFile.getAbsolutePath().lastIndexOf(File.separator));
-						File folderF = new File(folder);
+		} else if (systemFile != null) {
+			if (systemFile != null) {
+				fileChooser.setInitialFileName("traces");
+				String folder = systemFile.getAbsolutePath().substring(0,
+						systemFile.getAbsolutePath().lastIndexOf(File.separator));
+				File folderF = new File(folder);
 
-						if (folderF.isDirectory()) {
-							fileChooser.setInitialDirectory(folderF);
-						}
-
-					}
-
-				}
-				
-				// set extension to be of system model (.cps)
-				// fileChooser.setSelectedExtensionFilter(new ExtensionFilter("System
-				// model files (*.cps)",".cps"));
-				FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
-
-				fileChooser.getExtensionFilters().add(extFilter);
-
-				selectedSaveGeneratedTracesFile = fileChooser.showSaveDialog(null);
-
-				if (selectedSaveGeneratedTracesFile != null) {
-					// Platform.runLater(new Runnable() {
-					//
-					// @Override
-					// public void run() {
-					// // TODO Auto-generated method stub
-					//// textFieldSystemFile.setText(selectedTracesFile.getAbsolutePath());
-					// }
-					// });
-
-					saveTraces(currentSetID, generatedTraces, selectedSaveGeneratedTracesFile.getAbsolutePath());
+				if (folderF.isDirectory()) {
+					fileChooser.setInitialDirectory(folderF);
 				}
 
-				
+			}
+
+		}
+
+		// set extension to be of system model (.cps)
+		// fileChooser.setSelectedExtensionFilter(new ExtensionFilter("System
+		// model files (*.cps)",".cps"));
+		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("JSON files (*.json)", "*.json");
+
+		fileChooser.getExtensionFilters().add(extFilter);
+
+		selectedSaveGeneratedTracesFile = fileChooser.showSaveDialog(null);
+
+		if (selectedSaveGeneratedTracesFile != null) {
+			// Platform.runLater(new Runnable() {
+			//
+			// @Override
+			// public void run() {
+			// // TODO Auto-generated method stub
+			//// textFieldSystemFile.setText(selectedTracesFile.getAbsolutePath());
+			// }
+			// });
+
+			saveTraces(currentSetID, generatedTraces, selectedSaveGeneratedTracesFile.getAbsolutePath());
+		}
+
 	}
-	
+
 	@FXML
 	void selectIncidentPattern(ActionEvent event) {
 
@@ -328,7 +338,7 @@ public class InstantiatorController
 	void instantiateIncidentPattern(ActionEvent event) {
 
 		createInstance(this);
-		
+
 		btnGenerateInstances.setDisable(true);
 	}
 
@@ -510,26 +520,26 @@ public class InstantiatorController
 			@Override
 			public void run() {
 				incidentInstantiator = new IncidentPatternInstantiator();
-				if(checkboxLTSSame.isSelected()) {
-					incidentInstantiator.execute(incidentPatternFilePath, systemModelFilePath, listener);	
-				} else{
+				if (checkboxLTSSame.isSelected()) {
+					incidentInstantiator.execute(incidentPatternFilePath, systemModelFilePath, listener);
+				} else {
 					String ltsFolder = selectedStatesDirectory.getAbsolutePath();
 //					int index = systemModelFilePath.lastIndexOf(File.separator);
-					
+
 					String systemName = systemFile.getName();
 					String bigrapherFile = null;
-					
-					if(systemName.contains(".cps")) {
-						bigrapherFile = systemFile.getName().replace(".cps", ".big");	
+
+					if (systemName.contains(".cps")) {
+						bigrapherFile = systemFile.getName().replace(".cps", ".big");
 					}
-					
+
 //					if(index>0) {
 //						bigrapherFile = systemModelFilePath.replace(".cps", ".big")	
 //					}
 //					 
-					incidentInstantiator.execute(incidentPatternFilePath, systemModelFilePath, bigrapherFile, ltsFolder, listener);
+					incidentInstantiator.execute(incidentPatternFilePath, systemModelFilePath, bigrapherFile, ltsFolder,
+							listener);
 				}
-				
 
 			}
 
@@ -587,6 +597,48 @@ public class InstantiatorController
 
 	}
 
+	@FXML
+	void openInTraceAnalyser(ActionEvent e) {
+
+		
+		if (traceViewerStage == null) {
+			loadTraceViewerController();
+
+			if (traceViewerStage != null) {
+				if (miner != null) {
+					traceViewerController.setTraceMiner(miner);	
+					traceViewerController.loadTraces();
+//					traceViewerController.viewTraces(miner.getAllTracesIDs());
+				}
+
+				traceViewerStage.show();
+			}
+		} else {
+			if (!traceViewerStage.isShowing()) {
+				traceViewerStage.show();
+			}
+		}
+
+	}
+
+	private void loadTraceViewerController() {
+
+		FXMLLoader fxmlLoader = new FXMLLoader(
+				InstantiatorController.class.getClassLoader().getResource("fxml/TraceViewer.fxml"));
+		Parent root;
+		try {
+			root = (Parent) fxmlLoader.load();
+			traceViewerStage = new Stage();
+			traceViewerStage.setScene(new Scene(root));
+
+			// get controller
+			traceViewerController = fxmlLoader.<TraceViewerController>getController();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	protected void checkStates() {
 
 		if (selectedStatesDirectory == null) {
@@ -609,7 +661,7 @@ public class InstantiatorController
 		progressBarAnalyse.setVisible(true);
 
 	}
-	
+
 	protected void doneStateChecking(int result) {
 
 		progressBarAnalyse.setVisible(false);
@@ -638,7 +690,6 @@ public class InstantiatorController
 
 	}
 
-	
 	@Override
 	public void updateProgress(int progress) {
 		// TODO Auto-generated method stub
@@ -677,29 +728,29 @@ public class InstantiatorController
 		});
 
 	}
-	
+
 	protected void updateProgressMessage(String msg) {
-		
+
 		String currentText = lblProgressBar.getText();
-		 
-		currentText = currentText.replace( INITIAL_LABEL, "");
-		
-		if(msg.contains(">>")) {
-			//process msg to get last part
+
+		currentText = currentText.replace(INITIAL_LABEL, "");
+
+		if (msg.contains(">>")) {
+			// process msg to get last part
 			String[] parts = msg.split(">>");
-			
-			msg = parts[parts.length-1];
+
+			msg = parts[parts.length - 1];
 		}
-		
-		if(currentText!= null && !(currentText.equals(msgSelectAssetSet) || currentText.equals(msgDone))) {
-			lblProgressBar.setText(INITIAL_LABEL+msg);	
+
+		if (currentText != null && !(currentText.equals(msgSelectAssetSet) || currentText.equals(msgDone))) {
+			lblProgressBar.setText(INITIAL_LABEL + msg);
 		}
-		
+
 	}
 
 	@Override
 	public void updateAssetMapInfo(String msg) {
-		
+
 		hboxLblEntityAssetMap.setVisible(false);
 		Platform.runLater(new Runnable() {
 			@Override
@@ -755,10 +806,10 @@ public class InstantiatorController
 	public void updateAssetSetInfo(LinkedList<String[]> assetSets) {
 		// TODO Auto-generated method stub
 
-		//hide label
+		// hide label
 //		lbl.setVisible(false);
 		hboxLblEntityAssetSets.setVisible(false);
-		
+
 		Platform.runLater(new Runnable() {
 
 			@Override
@@ -867,7 +918,7 @@ public class InstantiatorController
 
 				lblProgressBar.setTextFill(Color.RED);
 				updateProgressMessage(msgSelectAssetSet);
-				
+
 				progressBar.setVisible(false);
 			}
 		});
@@ -894,7 +945,6 @@ public class InstantiatorController
 			return;
 		}
 
-		
 		incidentInstantiator.setAssetSetsSelected(selectedSets);
 		incidentInstantiator.setThreadPoolSize(instancesSpinner.getValue());
 		incidentInstantiator.setNumberOfParallelActivities(activitiesSpinner.getValue());
@@ -909,7 +959,7 @@ public class InstantiatorController
 				// TODO Auto-generated method stub
 				lblProgressBar.setTextFill(Color.BLUE);
 				lblProgressBar.setText("Instantiating... ");
-				
+
 				progressBar.setVisible(true);
 				btnAnalyse.setDisable(true);
 			}
@@ -992,12 +1042,12 @@ public class InstantiatorController
 	@Override
 	public void updateResult(int setID, GraphPathsAnalyser graphAnalyser, String outputFile, String timeConsumed) {
 		// TODO Auto-generated method stub
-		
+
 		results.put(setID, graphAnalyser);
 		currentSetID = setID;
-		
+
 		progressBar.setVisible(false);
-		
+
 		String strResult = "Set[" + setID + "] finished execution successfully. Execution time: " + timeConsumed;
 
 		Platform.runLater(new Runnable() {
@@ -1007,15 +1057,16 @@ public class InstantiatorController
 				// TODO Auto-generated method stub
 				// lblProgressBar.setTextFill(Color.BLACK);
 //				listResults.getItems().add(strResult);
-				if(graphAnalyser!=null){
-					lblNumOfTraces.setText("["+graphAnalyser.getPaths().size()+"]");
+				if (graphAnalyser != null) {
+					lblNumOfTraces.setText("[" + graphAnalyser.getPaths().size() + "]");
 					populateTracesList(graphAnalyser.getPaths());
 					btnSaveGeneratedTraces.setDisable(false);
+					btnTraceAnalyser.setDisable(false);
 				}
-				
-				 updateProgressMessage(msgDone);
-				 btnGenerateInstances.setDisable(false);
-				 
+
+				updateProgressMessage(msgDone);
+				btnGenerateInstances.setDisable(false);
+
 			}
 		});
 
@@ -1062,7 +1113,7 @@ public class InstantiatorController
 		});
 
 	}
-	
+
 	protected void updateImage(String imgPath, ImageView imgView) {
 
 		if (imgView == null) {
@@ -1095,9 +1146,9 @@ public class InstantiatorController
 		}
 
 	}
-	
+
 	protected void populateTracesList(List<GraphPath> traces) {
-		
+
 		if (traces == null || traces.isEmpty()) {
 			lblListViewTracesEmpty.setVisible(true);
 			generatedTraces = traces;
@@ -1106,55 +1157,55 @@ public class InstantiatorController
 			return;
 		}
 
-		//create a trace miner
-		TraceMiner miner = new TraceMiner();
-		miner.setTraces(traces);
+		// create a trace miner
+		miner = new TraceMiner();
+		miner.loadTracesFromList(traces);
 		miner.setCurrentShownTraces(miner.getAllTracesIDs());
-		
+
 		ObservableList<GraphPath> tracesObservableList;
 
 		tracesObservableList = FXCollections.observableArrayList();
 
 		tracesObservableList.addAll(traces);
 
-		listViewTraces.setCellFactory(tracesListView -> new TaskCell(miner,listViewTraces));
+		listViewTraces.setCellFactory(tracesListView -> new TaskCell(miner, listViewTraces));
 		listViewTraces.setItems(tracesObservableList);
 
 		lblListViewTracesEmpty.setVisible(false);
-		
+
 		generatedTraces = traces;
-		
+
 	}
-	
-	protected void saveTraces(int setID, List<GraphPath> traces, String fileName ) {
+
+	protected void saveTraces(int setID, List<GraphPath> traces, String fileName) {
 
 		if (fileName == null || traces == null) {
 			return;
 		}
 
 		final boolean isSuccessful = incidentInstantiator.saveGeneratedTraces(setID, traces, fileName);
-		
-		Platform.runLater(new Runnable() {	
+
+		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
 				String result = "";
-				if(isSuccessful) {
+				if (isSuccessful) {
 					result = "Saved!";
-				} else{
+				} else {
 					result = "Not saved!";
 				}
-				
+
 				// TODO Auto-generated method stub
 				lblSave.setText(result);
 			}
 		});
 		Timer t = new Timer();
 		t.schedule(new TimerTask() {
-			
+
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				Platform.runLater(new Runnable() {	
+				Platform.runLater(new Runnable() {
 					@Override
 					public void run() {
 						// TODO Auto-generated method stub
@@ -1163,7 +1214,7 @@ public class InstantiatorController
 				});
 			}
 		}, 3000);
-		
+
 //		executor.submit(new Runnable() {
 //
 //			@Override

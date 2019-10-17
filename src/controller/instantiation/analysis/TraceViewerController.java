@@ -749,6 +749,11 @@ public class TraceViewerController implements TraceMinerListener {
 
 	}
 
+	public void setTraceMiner(TraceMiner traceMiner) {
+		
+		this.tracesMiner = traceMiner;
+	}
+	
 	protected void saveSelectedTracesAsObjects(List<Integer> tracesIDs) {
 
 		if (tracesIDs == null || tracesMiner == null) {
@@ -965,7 +970,7 @@ public class TraceViewerController implements TraceMinerListener {
 		// set file in miner
 		tracesMiner.setTracesFile(filePath);
 
-		System.out.println("set file path " + filePath);
+//		System.out.println("set file path " + filePath);
 		numberOfTraces = tracesMiner.loadTracesFromFile();
 
 		boolean isLoaded = false;
@@ -981,6 +986,42 @@ public class TraceViewerController implements TraceMinerListener {
 		return isLoaded;
 	}
 
+	public boolean loadTraces() {
+
+		if(tracesMiner==null) {
+			System.err.println("Trace Miner object is NULL");
+			return false;
+		}
+		// reset if already loaded something before
+		resetLoadingGUI();
+
+		resetFilterGUI();
+
+		// reset data
+		shownFitleredTraces = null;
+
+		viewTraces(tracesMiner.getAllTracesIDs());
+		// set file in miner
+//		tracesMiner.setTracesFile(filePath);
+
+//		System.out.println("set file path " + filePath);
+//		numberOfTraces = tracesMiner.loadTracesFromFile();
+
+		numberOfTraces = tracesMiner.getNumberOfTraces();
+		
+		boolean isLoaded = false;
+		if (numberOfTraces == TraceMiner.TRACES_NOT_LOADED) {
+
+			isLoaded = false;
+		} else {
+			isLoaded = true;
+		}
+
+		setupGUIpostLoading(isLoaded);
+
+		return isLoaded;
+	}
+	
 	protected void setupGUIpostLoading(boolean isLoaded) {
 
 		if (isLoaded) {
@@ -1206,7 +1247,7 @@ public class TraceViewerController implements TraceMinerListener {
 
 		String selectedFilter = comboBoxFilter.getSelectionModel().getSelectedItem();
 
-		if (selectedFilter.equals(CUSTOMISE)) {
+		if (selectedFilter!=null && selectedFilter.equals(CUSTOMISE)) {
 			customisePane.setDisable(false);
 		}
 
@@ -1796,7 +1837,7 @@ public class TraceViewerController implements TraceMinerListener {
 		});
 	}
 
-	protected void viewTraces(List<Integer> tracesIDs) {
+	public void viewTraces(List<Integer> tracesIDs) {
 
 		if (tracesIDs == null) {
 			System.err.println("traces ids list is null");
