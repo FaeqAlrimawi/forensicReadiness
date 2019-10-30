@@ -40,7 +40,7 @@ public class InstantiationMain extends Application {
 //			FXMLLoader loader = new FXMLLoader();
 
 			//select viewer to run
-			boolean runTraceViewer = false;
+			boolean runTraceViewer = true;
 			boolean runInstatiator = !runTraceViewer;
 			
 //			String traceViewerGUI = "TraceViewer.fxml";

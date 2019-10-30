@@ -760,8 +760,8 @@ public class TraceViewerInSystemController {
 	}
 
 	/**
-	 * Checks if bigraphER file (*.big) is set or not. Tries to set it for once
-	 * if not succeeded then it returns false
+	 * Checks if bigraphER file (*.big) is set or not. Tries to set it for once if
+	 * not succeeded then it returns false
 	 * 
 	 * @return true if set, false otherwise
 	 */
@@ -800,8 +800,8 @@ public class TraceViewerInSystemController {
 	}
 
 	/**
-	 * Checks if system model (*.cps) is set or not. Tries to set it for once if
-	 * not succeeded then it returns false
+	 * Checks if system model (*.cps) is set or not. Tries to set it for once if not
+	 * succeeded then it returns false
 	 * 
 	 * @return true if set, false otherwise
 	 */
@@ -827,8 +827,8 @@ public class TraceViewerInSystemController {
 	}
 
 	/**
-	 * Checks if incident pattern (*.cpi) is set or not. Tries to set it for
-	 * once if not succeeded then it returns false
+	 * Checks if incident pattern (*.cpi) is set or not. Tries to set it for once if
+	 * not succeeded then it returns false
 	 * 
 	 * @return true if set, false otherwise
 	 */
@@ -942,8 +942,7 @@ public class TraceViewerInSystemController {
 	/**
 	 * Finds all traces which contain all given actions
 	 * 
-	 * @param actionNames
-	 *            actions to search for in a trace
+	 * @param actionNames actions to search for in a trace
 	 */
 	protected List<Integer> searchForActions(List<String> actionNames) {
 
@@ -961,8 +960,7 @@ public class TraceViewerInSystemController {
 	/**
 	 * Finds all traces which contain all given entities
 	 * 
-	 * @param actionNames
-	 *            actions to search for in a trace
+	 * @param actionNames actions to search for in a trace
 	 */
 	protected List<Integer> searchForEntities(List<String> entityNames) {
 
@@ -988,8 +986,7 @@ public class TraceViewerInSystemController {
 	/**
 	 * Finds all traces which contain all given states
 	 * 
-	 * @param actionNames
-	 *            actions to search for in a trace
+	 * @param actionNames actions to search for in a trace
 	 */
 	protected List<Integer> searchForStates(List<String> states) {
 
@@ -1043,8 +1040,7 @@ public class TraceViewerInSystemController {
 	/**
 	 * Creates a context menu fo rthe commands that can be performed on a node
 	 * 
-	 * @param stateStack
-	 *            the node
+	 * @param stateStack the node
 	 * @return
 	 */
 	protected ContextMenu createNodeContextMenu(StackPane stateStack) {
@@ -1139,8 +1135,8 @@ public class TraceViewerInSystemController {
 	}
 
 	/**
-	 * Shows all traces ids that are in the added traces (currently in the list
-	 * of traces) which the given node is part of
+	 * Shows all traces ids that are in the added traces (currently in the list of
+	 * traces) which the given node is part of
 	 * 
 	 * @param node
 	 */
@@ -1575,8 +1571,8 @@ public class TraceViewerInSystemController {
 	}
 
 	/**
-	 * Checks whether the given two states have an arrow drawn between them in
-	 * the view
+	 * Checks whether the given two states have an arrow drawn between them in the
+	 * view
 	 * 
 	 * @param startState
 	 * @param endState
@@ -2489,10 +2485,8 @@ public class TraceViewerInSystemController {
 	/**
 	 * adds all partial traces between from and end states
 	 * 
-	 * @param fromState
-	 *            start state
-	 * @param endState
-	 *            end state
+	 * @param fromState start state
+	 * @param endState  end state
 	 */
 	protected List<Integer> getAllTracesFromTo(int fromState, int endState) {
 
@@ -2699,14 +2693,12 @@ public class TraceViewerInSystemController {
 	}
 
 	/**
-	 * Highlights the trace with the given ID using the given styles for the
-	 * nodes (circles) and arrows.
+	 * Highlights the trace with the given ID using the given styles for the nodes
+	 * (circles) and arrows.
 	 * 
 	 * @param traceID
-	 * @param nodeHighLightStyle
-	 *            Node style
-	 * @param arrowHighLightStyle
-	 *            arrow style (i.e. line)
+	 * @param nodeHighLightStyle  Node style
+	 * @param arrowHighLightStyle arrow style (i.e. line)
 	 */
 	protected void highlightTrace(int traceID, String nodeHighLightStyle, String arrowHighLightStyle) {
 
@@ -2944,8 +2936,8 @@ public class TraceViewerInSystemController {
 	}
 
 	/**
-	 * adds the given trace to the trace view. IF new states and actions are
-	 * added then shown, if already exist then not changed
+	 * adds the given trace to the trace view. IF new states and actions are added
+	 * then shown, if already exist then not changed
 	 * 
 	 * @param newTrace
 	 */
@@ -3635,8 +3627,8 @@ public class TraceViewerInSystemController {
 	}
 
 	/**
-	 * Shows the trace with the given id in the viewer (as a sequence and as in
-	 * the flowpane)
+	 * Shows the trace with the given id in the viewer (as a sequence and as in the
+	 * flowpane)
 	 * 
 	 * @param traceID
 	 */
@@ -3858,11 +3850,10 @@ public class TraceViewerInSystemController {
 	/**
 	 * Find if two actions are causally dependent
 	 * 
-	 * @return A map in which the key is the action name, and the value is a
-	 *         list of strings where index [0] holds the previous action in the
-	 *         trace that the key-action has a causal dependency on, and index
-	 *         [1] holds the level of dependency (i.e. necessarily dependent or
-	 *         not)
+	 * @return A map in which the key is the action name, and the value is a list of
+	 *         strings where index [0] holds the previous action in the trace that
+	 *         the key-action has a causal dependency on, and index [1] holds the
+	 *         level of dependency (i.e. necessarily dependent or not)
 	 */
 	protected Map<String, List<String>> findCausalDependency(GraphPath trace) {
 
@@ -3904,8 +3895,9 @@ public class TraceViewerInSystemController {
 				}
 
 				int preState = states.get(j - 1);
+//				int postState = states.get(j);
 				int actionPreState = states.get(j);
-				// int actionPostState = states.get(j + 1);
+//				 int actionPostState = states.get(j + 1);
 				// int preState = trace.getStateTransitions() != null ?
 				// trace.getStateTransitions().get(1) : -1;
 
@@ -3916,7 +3908,10 @@ public class TraceViewerInSystemController {
 				String action1 = actions.get(j - 1);
 				// String action1 = actions.get(1);
 
-				int dependentResult = miner.areActionsCausallyDependent(action2, action1, actionPreState, preState);
+				// last two parameters can be removed. They are used for testing (original method
+				// implementation requires change)
+				int dependentResult = miner.areActionsCausallyDependent(action2, action1, actionPreState, preState,
+						originalPreState, originalPostState);
 
 				switch (dependentResult) {
 
@@ -4036,7 +4031,8 @@ public class TraceViewerInSystemController {
 
 		// get the container of the arrow label
 		Node container = actionArrowLabels.getChildren() != null && actionArrowLabels.getChildren().size() > 0
-				? actionArrowLabels.getChildren().get(0) : null;
+				? actionArrowLabels.getChildren().get(0)
+				: null;
 
 		// childern contain the label for the perc
 		List<Node> children = null;
@@ -4103,8 +4099,8 @@ public class TraceViewerInSystemController {
 	 * conditions
 	 * 
 	 * @param trace
-	 * @return A map in which the key is a incident pattern condition name, and
-	 *         the value is the state in the trace that matches it
+	 * @return A map in which the key is a incident pattern condition name, and the
+	 *         value is the state in the trace that matches it
 	 */
 	protected Map<Integer, String> findStatesMatchingIncidentPatternConditions(GraphPath trace) {
 
@@ -4133,8 +4129,7 @@ public class TraceViewerInSystemController {
 	}
 
 	/**
-	 * Shows the result of states matching incident pattern conditions in the
-	 * viewer
+	 * Shows the result of states matching incident pattern conditions in the viewer
 	 * 
 	 * @param conditionsMatchingStatesMap
 	 */
@@ -4150,7 +4145,7 @@ public class TraceViewerInSystemController {
 			int state = entry.getKey();
 
 //			System.out.println("entrY:: " + state + " "+ conditionName);
-			
+
 			Label lbl = mapStatePerc.get(state);
 
 			if (lbl != null) {
@@ -4196,22 +4191,21 @@ public class TraceViewerInSystemController {
 	}
 
 	/**
-	 * Identifies irrelevant states and actions in the given trace using the
-	 * actions causality and state matching to conditions
+	 * Identifies irrelevant states and actions in the given trace using the actions
+	 * causality and state matching to conditions
 	 * 
-	 * @param actionsCausality
-	 *            A map showing the causality between actions, in which the key
-	 *            is action name, and value is the action on which the
-	 *            action-key has causal dependency (index-0), index-1 contains
-	 *            level of dependency
-	 * @param statesMatchingToConditions
-	 *            A map that shows the states of the trace that match the
-	 *            conditions of the incident pattern. key is state, value is
-	 *            condition name
+	 * @param actionsCausality           A map showing the causality between
+	 *                                   actions, in which the key is action name,
+	 *                                   and value is the action on which the
+	 *                                   action-key has causal dependency (index-0),
+	 *                                   index-1 contains level of dependency
+	 * @param statesMatchingToConditions A map that shows the states of the trace
+	 *                                   that match the conditions of the incident
+	 *                                   pattern. key is state, value is condition
+	 *                                   name
 	 * @param trace
-	 * @return A map which defines the state and its causing action (an action
-	 *         that the state is its post-state). key is state, value is action
-	 *         name
+	 * @return A map which defines the state and its causing action (an action that
+	 *         the state is its post-state). key is state, value is action name
 	 */
 	protected Map<Integer, String> identifyIrrelevantStatesAndActions(Map<String, List<String>> actionsCausality,
 			Map<Integer, String> statesMatchingToConditions, GraphPath trace) {
@@ -4227,14 +4221,13 @@ public class TraceViewerInSystemController {
 		// and value is state in the trace that matches the condition
 
 		/**
-		 * Irrelevant State is defined as: a state which satisfites two
-		 * conditions: (1) Does not match any of the incident pattern
-		 * conditions, (2) no next action in the trace, which has causal link to
-		 * the final state, is causally dependent on the causing-action of the
-		 * state
+		 * Irrelevant State is defined as: a state which satisfites two conditions: (1)
+		 * Does not match any of the incident pattern conditions, (2) no next action in
+		 * the trace, which has causal link to the final state, is causally dependent on
+		 * the causing-action of the state
 		 * 
-		 * Irrelevant Action: is an action in which its post-state satifies the
-		 * previous conditions
+		 * Irrelevant Action: is an action in which its post-state satifies the previous
+		 * conditions
 		 */
 
 		if (miner == null || actionsCausality == null || statesMatchingToConditions == null || trace == null) {
@@ -4743,10 +4736,8 @@ public class TraceViewerInSystemController {
 	/**
 	 * Builds a pane consisting of circle with the provided specifications.
 	 *
-	 * @param color
-	 *            Color of the circle
-	 * @param text
-	 *            Text inside the circle
+	 * @param color Color of the circle
+	 * @param text  Text inside the circle
 	 * @return Draggable pane consisting a circle.
 	 */
 	private StackPane getDot(String color, String state, String stateLabelStyle, double radius, int traceID) {
@@ -4903,16 +4894,11 @@ public class TraceViewerInSystemController {
 	/**
 	 * Builds the single directional line with pointing arrows at each end.
 	 * 
-	 * @param startDot
-	 *            Pane for considering start point
-	 * @param endDot
-	 *            Pane for considering end point
-	 * @param parent
-	 *            Parent container
-	 * @param hasEndArrow
-	 *            Specifies whether to show arrow towards end
-	 * @param hasStartArrow
-	 *            Specifies whether to show arrow towards start
+	 * @param startDot      Pane for considering start point
+	 * @param endDot        Pane for considering end point
+	 * @param parent        Parent container
+	 * @param hasEndArrow   Specifies whether to show arrow towards end
+	 * @param hasStartArrow Specifies whether to show arrow towards start
 	 */
 	private StackPane buildSingleDirectionalLine(StackPane startDot, StackPane endDot, Pane parent, boolean hasEndArrow,
 			boolean hasStartArrow, Color color, String actionName, int traceID) {
@@ -4984,10 +4970,8 @@ public class TraceViewerInSystemController {
 	/**
 	 * Builds a line between the provided start and end panes center point.
 	 *
-	 * @param startDot
-	 *            Pane for considering start point
-	 * @param endDot
-	 *            Pane for considering end point
+	 * @param startDot Pane for considering start point
+	 * @param endDot   Pane for considering end point
 	 * @return Line joining the layout center points of the provided panes.
 	 */
 	private Line getLine(StackPane startDot, StackPane endDot, Color color) {
@@ -5006,15 +4990,11 @@ public class TraceViewerInSystemController {
 	}
 
 	/**
-	 * Builds a curved line between the provided start and end panes center
-	 * point.
+	 * Builds a curved line between the provided start and end panes center point.
 	 *
-	 * @param startDot
-	 *            Pane for considering start point
-	 * @param endDot
-	 *            Pane for considering end point
-	 * @return CurvedCube joining the layout center points of the provided
-	 *         panes.
+	 * @param startDot Pane for considering start point
+	 * @param endDot   Pane for considering end point
+	 * @return CurvedCube joining the layout center points of the provided panes.
 	 */
 	private CubicCurve getCurveLine(StackPane startDot, StackPane endDot, Color color) {
 		CubicCurve line = new CubicCurve();
@@ -5103,15 +5083,11 @@ public class TraceViewerInSystemController {
 	/**
 	 * Builds an arrow on the provided line pointing towards the specified pane.
 	 *
-	 * @param toLineEnd
-	 *            Specifies whether the arrow to point towards end pane or start
-	 *            pane.
-	 * @param line
-	 *            Line joining the layout center points of the provided panes.
-	 * @param startDot
-	 *            Pane which is considered as start point of line
-	 * @param endDot
-	 *            Pane which is considered as end point of line
+	 * @param toLineEnd Specifies whether the arrow to point towards end pane or
+	 *                  start pane.
+	 * @param line      Line joining the layout center points of the provided panes.
+	 * @param startDot  Pane which is considered as start point of line
+	 * @param endDot    Pane which is considered as end point of line
 	 * @return Arrow towards the specified pane.
 	 */
 	private StackPane getArrow(boolean toLineEnd, Line line, StackPane startDot, StackPane endDot) {
@@ -5190,8 +5166,7 @@ public class TraceViewerInSystemController {
 	/**
 	 * Builds a pane at the center of the provided line.
 	 *
-	 * @param line
-	 *            Line on which the pane need to be set.
+	 * @param line Line on which the pane need to be set.
 	 * @return Pane located at the center of the provided line.
 	 */
 	private StackPane getWeight(Line line, String actionName) {

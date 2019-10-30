@@ -4534,7 +4534,7 @@ public class TraceMiner {
 	 *         incident. Key is the action name, value is a boolean whether the
 	 *         action depends on the previous action or not
 	 */
-	public Map<String, Boolean> findCausalDependency(GraphPath incidentTrace) {
+	protected Map<String, Boolean> findCausalDependency(GraphPath incidentTrace) {
 
 		if (incidentTrace == null) {
 			return null;
@@ -4556,7 +4556,7 @@ public class TraceMiner {
 	 * @return True if action is causally dependent on the preAction. False
 	 *         otherwise
 	 */
-	public int areActionsCausallyDependent(String action, String preAction, int actionPreState, int preActionPreState) {
+	public int areActionsCausallyDependent(String action, String preAction, int actionPreState, int preActionPreState, int originalPre, int originalPost) {
 
 		/**
 		 * Causally dependence is implemented by checking if the pre-condition of the
@@ -4598,9 +4598,16 @@ public class TraceMiner {
 
 		// load the previous action pre state
 		Bigraph preStateBig = loadState(preActionPreState);
+		
 
 		// load action pre state
 		Bigraph actionPreStateBig = loadState(actionPreState);
+		
+		//testinggg
+		Bigraph actionOrigPreStateBig = loadState(originalPre);
+		Bigraph actionOrigPostStateBig = loadState(originalPost);
+		
+//		Bigraph actionPostStateBig = loadState(actionPostState);
 
 		if (preStateBig == null) {
 			System.err.println("preState Bigraph object is NULL");
@@ -4661,8 +4668,32 @@ public class TraceMiner {
 		// finding causality by matching bigraphs
 		// if (!isCausallyDependent) {
 		Iterator it = matcher.match(preStateBig, actionPre).iterator();
+		
 		Iterator itAction = matcher.match(actionPreStateBig, actionPre).iterator();
+		
+		Iterator itOrigPre = matcher.match(actionOrigPreStateBig, actionPre).iterator();
+		Iterator itOrigPost = matcher.match(actionOrigPostStateBig, actionPre).iterator();
 
+		int cntOrigPost = 0;
+		int cntOrigPre = 0;
+		
+		while (itOrigPost.hasNext()) {
+			// a match means that there's no dependency
+			// return ACTIONS_NOT_CAUSALLY_DEPENDENT;
+			itOrigPost.next();
+			cntOrigPost++;
+		}
+
+		while (itOrigPre.hasNext()) {
+			// a match means that there's no dependency
+			// return ACTIONS_NOT_CAUSALLY_DEPENDENT;
+			itOrigPre.next();
+			cntOrigPre++;
+		}
+		
+		
+//		System.out.println("Orignal pre["+originalPre+"], post["+originalPost+"]: pre = " + cntOrigPre+" post = " +cntOrigPost);
+		
 		while (it.hasNext()) {
 			// a match means that there's no dependency
 			// return ACTIONS_NOT_CAUSALLY_DEPENDENT;
@@ -4682,6 +4713,7 @@ public class TraceMiner {
 			if (countPreAction == countAction) {
 				if (isNotCausallyDependentByLTS) {
 					// not causally dependent by LTS and Bigraph matching
+//					System.out.println("same cnt: " + countAction +" post-cnt: " + cntPost);
 					return NOT_CAUSALLY_DEPENDENT;
 				} else {
 					// not causally dependent only by Bigraph matching
