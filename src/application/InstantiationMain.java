@@ -156,6 +156,12 @@ public class InstantiationMain extends Application {
 		
 		 launch(args);
 		 
+		 
+		TraceMiner miner = new TraceMiner();
+		
+		//set file
+		
+		
 		String exprs = "Room{con1}.Actor | Room{con1}.(Actor | Actor | id) | id || Room.Device.id || id";
 		String exprs2 = "Room{con1}.Actor | Room{con1}.(Actor  id) || Room ";
 		String action = "react enter_room = " + exprs + "->" + exprs2 + "@ [1,2,3];";

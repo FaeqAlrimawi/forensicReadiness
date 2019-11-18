@@ -1468,7 +1468,7 @@ public class TraceMiner {
 		int minimumStates = minimumTraceLength + 1;
 
 //		System.out.println("min actions: " +minimumTraceLength);
-		
+
 		String separator = " ";
 		StringBuilder bldr = new StringBuilder();
 
@@ -1479,7 +1479,7 @@ public class TraceMiner {
 		}
 
 		if (shortestTracesFileName != null) {
-		System.out.println(">>Identifying shortest traces in [" + instanceFileName + "]");
+			System.out.println(">>Identifying shortest traces in [" + instanceFileName + "]");
 		} else {
 			bldr = null;
 			System.out.println(">>Identifying shortest traces...");
@@ -1488,19 +1488,19 @@ public class TraceMiner {
 
 			if (trace.getStateTransitions().size() == minimumStates) {
 				shortestTraces.put(trace.getInstanceID(), trace);
-				
-				if(bldr!=null) {
-					bldr.append(trace.getInstanceID()).append(separator);	
+
+				if (bldr != null) {
+					bldr.append(trace.getInstanceID()).append(separator);
 				}
 			}
 		}
 
-		if (bldr!=null && bldr.length() > 0) {
+		if (bldr != null && bldr.length() > 0) {
 			bldr.deleteCharAt(bldr.length() - 1);// remove extra space
 		}
 
 		// store to file
-		if (shortestTracesFileName != null && bldr!=null) {
+		if (shortestTracesFileName != null && bldr != null) {
 			writeToFile(bldr.toString(), shortestTracesFileName);
 			System.out.println(">>Shortest traces IDs are stored in [" + shortestTracesFileName + "]");
 		}
@@ -3121,7 +3121,7 @@ public class TraceMiner {
 
 		// === defines the min and max trace lengths, and also actions occurrences in
 		// all traces
-		
+
 		if (traces == null) {
 			return;
 		}
@@ -4556,7 +4556,8 @@ public class TraceMiner {
 	 * @return True if action is causally dependent on the preAction. False
 	 *         otherwise
 	 */
-	public int areActionsCausallyDependent(String action, String preAction, int actionPreState, int preActionPreState, int originalPre, int originalPost) {
+	public int areActionsCausallyDependent(String action, String preAction, int actionPreState, int preActionPreState,
+			int originalPre, int originalPost) {
 
 		/**
 		 * Causally dependence is implemented by checking if the pre-condition of the
@@ -4598,15 +4599,14 @@ public class TraceMiner {
 
 		// load the previous action pre state
 		Bigraph preStateBig = loadState(preActionPreState);
-		
 
 		// load action pre state
 		Bigraph actionPreStateBig = loadState(actionPreState);
-		
-		//testinggg
+
+		// testinggg
 		Bigraph actionOrigPreStateBig = loadState(originalPre);
 		Bigraph actionOrigPostStateBig = loadState(originalPost);
-		
+
 //		Bigraph actionPostStateBig = loadState(actionPostState);
 
 		if (preStateBig == null) {
@@ -4668,15 +4668,15 @@ public class TraceMiner {
 		// finding causality by matching bigraphs
 		// if (!isCausallyDependent) {
 		Iterator it = matcher.match(preStateBig, actionPre).iterator();
-		
+
 		Iterator itAction = matcher.match(actionPreStateBig, actionPre).iterator();
-		
+
 		Iterator itOrigPre = matcher.match(actionOrigPreStateBig, actionPre).iterator();
 		Iterator itOrigPost = matcher.match(actionOrigPostStateBig, actionPre).iterator();
 
 		int cntOrigPost = 0;
 		int cntOrigPre = 0;
-		
+
 		while (itOrigPost.hasNext()) {
 			// a match means that there's no dependency
 			// return ACTIONS_NOT_CAUSALLY_DEPENDENT;
@@ -4690,10 +4690,10 @@ public class TraceMiner {
 			itOrigPre.next();
 			cntOrigPre++;
 		}
-		
-		
-//		System.out.println("Orignal pre["+originalPre+"], post["+originalPost+"]: pre = " + cntOrigPre+" post = " +cntOrigPost);
-		
+
+		System.out.println("Orignal pre[" + originalPre + "], post[" + originalPost + "]: pre = " + cntOrigPre
+				+ " post = " + cntOrigPost);
+
 		while (it.hasNext()) {
 			// a match means that there's no dependency
 			// return ACTIONS_NOT_CAUSALLY_DEPENDENT;
@@ -5199,6 +5199,174 @@ public class TraceMiner {
 
 		return null;
 	}
+
+	/**
+	 * Returns the number of difference between the times the redex of the given
+	 * action is matched to the pre state and post state
+	 * 
+	 * @param action
+	 * @param originalPre
+	 * @param originalPost
+	 * @param isRedex      if true then the redex of the action is used for
+	 *                     comparison. Otherwise, the reactum is used
+	 * @return The difference. Positive represents how many mores the pre-state is
+	 *         matched in comparison to the post-state. Negative is the other way
+	 *         around. Zero, both, pre-state and post-state, have the same mathcing
+	 *         number
+	 */
+	public int getNumberOfRedexMatches(String action, int state1, int state2, boolean isRedex) {
+
+		/**
+		 * Causally dependence is implemented by checking if the pre-condition of the
+		 * given action is matches to the state that the preAction's pre-condition
+		 * matches to. If it matches then the action is NOT causally dependent.
+		 * Otherwise, it is causally dependent
+		 **/
+
+		if (action == null || brsWrapper == null) {
+			System.err.println("Error. there's a null");
+			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
+		}
+
+		ActionWrapper actionWrapper = bigraphERActions.get(action);
+
+		// ActionWrapper preActionWrapper = bigraphERActions.get(preAction);
+
+		if (actionWrapper == null) {
+			System.err.println("Error. there's a null of wrappers");
+			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
+		}
+
+		BigraphWrapper conditionWrapper = null;
+
+		if (isRedex) {
+			conditionWrapper = actionWrapper.getPrecondition();
+		} else {
+			conditionWrapper = actionWrapper.getPostcondition();
+		}
+
+		// System.out.println(preWrapper.getContainedEntitiesMap());
+		// === get Bigraph representation of the precondition of action
+		Bigraph actionCondition = conditionWrapper != null
+				? conditionWrapper.getBigraphObject(false, brsWrapper.getSignature())
+				: null;
+
+		if (actionCondition == null) {
+			System.err.println("condition of the given action [" + action + "] is NULL");
+			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
+		}
+
+		// === get preAction's precondition State as Bigraph
+		if (getStatesFolder() == null) {
+			System.err.println("States folder is missing");
+			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
+		}
+
+		// testinggg
+		Bigraph actionOrigPreStateBig = loadState(state1);
+		Bigraph actionOrigPostStateBig = loadState(state2);
+
+		// === match the action precondition to the state
+		Matcher matcher = new Matcher();
+
+		Iterator itOrigPre = matcher.match(actionOrigPreStateBig, actionCondition).iterator();
+		Iterator itOrigPost = matcher.match(actionOrigPostStateBig, actionCondition).iterator();
+
+		int cntOrigPost = 0;
+		int cntOrigPre = 0;
+
+		while (itOrigPost.hasNext()) {
+			// a match means that there's no dependency
+			// return ACTIONS_NOT_CAUSALLY_DEPENDENT;
+			itOrigPost.next();
+			cntOrigPost++;
+		}
+
+		while (itOrigPre.hasNext()) {
+			// a match means that there's no dependency
+			// return ACTIONS_NOT_CAUSALLY_DEPENDENT;
+			itOrigPre.next();
+			cntOrigPre++;
+		}
+
+		System.out.println(
+				"state [" + state1 + "] matches: " + cntOrigPre + " state [" + state2 + "] matches: " + cntOrigPost);
+
+		// action is dependent on the previous action
+
+		return (cntOrigPre - cntOrigPost);
+	}
+
+	public int getNumberOfBigraphMatches(Bigraph bigraph, int state1, int state2) {
+
+		/**
+		 * Causally dependence is implemented by checking if the pre-condition of the
+		 * given action is matches to the state that the preAction's pre-condition
+		 * matches to. If it matches then the action is NOT causally dependent.
+		 * Otherwise, it is causally dependent
+		 **/
+
+		if (bigraph == null) {
+			System.err.println("Error. there's a null");
+			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
+		}
+
+		// === get preAction's precondition State as Bigraph
+		if (getStatesFolder() == null) {
+			System.err.println("States folder is missing");
+			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
+		}
+
+		Bigraph bigState1 = loadState(state1);
+		Bigraph bigState2 = loadState(state2);
+
+		if(bigState1 == null || bigState2 == null) {
+			String error = "Error in getting a Bigraph of the states.";
+			
+			if(bigState1 == null) {
+				error+=" State1 Bigraph is Null.";
+			}
+			
+			if(bigState2 == null) {
+				error+=" State2 Bigraph is Null.";
+			}
+			
+			System.err.println(error);
+			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
+		}
+		
+		// === match the action precondition to the state
+		Matcher matcher = new Matcher();
+
+		Iterator itOrigPre = matcher.match(bigState1, bigraph).iterator();
+		Iterator itOrigPost = matcher.match(bigState2, bigraph).iterator();
+
+		int cntOrigPost = 0;
+		int cntOrigPre = 0;
+
+		while (itOrigPost.hasNext()) {
+			// a match means that there's no dependency
+			// return ACTIONS_NOT_CAUSALLY_DEPENDENT;
+			itOrigPost.next();
+			cntOrigPost++;
+		}
+
+		while (itOrigPre.hasNext()) {
+			// a match means that there's no dependency
+			// return ACTIONS_NOT_CAUSALLY_DEPENDENT;
+			itOrigPre.next();
+			cntOrigPre++;
+		}
+
+//		System.out.println(
+//				"state [" + state1 + "] matches: " + cntOrigPre + " state [" + state2 + "] matches: " + cntOrigPost);
+
+		// action is dependent on the previous action
+
+		return (cntOrigPre - cntOrigPost);
+	}
+
+	
 	// public static void main(String[] args) {
 	//
 	// TraceMiner m = new TraceMiner();
