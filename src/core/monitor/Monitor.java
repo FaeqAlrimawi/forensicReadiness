@@ -1,5 +1,6 @@
 package core.monitor;
 
+import core.brs.parser.BigraphWrapper;
 import core.instantiation.analysis.TraceMiner;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 
@@ -38,7 +39,7 @@ public class Monitor {
 	 * monitor the action and/or target it includes: monitor type/asset, and target
 	 * type/asset currently 1-change per monitor
 	 */
-	Bigraph stateToMonitor;
+	BigraphWrapper stateToMonitor;
 
 	// =====other attributes
 
@@ -110,11 +111,11 @@ public class Monitor {
 		this.cost = cost;
 	}
 
-	public Bigraph getSystemStateToMonitor() {
+	public BigraphWrapper getSystemStateToMonitor() {
 		return stateToMonitor;
 	}
 
-	public void setSystemStateToMonitor(Bigraph systemStateToMonitor) {
+	public void setSystemStateToMonitor(BigraphWrapper systemStateToMonitor) {
 		this.stateToMonitor = systemStateToMonitor;
 	}
 
@@ -142,10 +143,25 @@ public class Monitor {
 		this.miner = miner;
 	}
 
+	public void setBigraphERStatment(String bigStmt) {
+
+		if(bigStmt == null) {
+			return;
+		}
+		
+		if (stateToMonitor == null) {
+			stateToMonitor = new BigraphWrapper();
+		}
+
+		stateToMonitor.parseBigraphERCondition(bigStmt);
+	}
+
 	/**
-	 * ============= ============= MAIN FUNCTIONALITIES =============
+	 * ============= ============= MAIN METHODS =============
 	 */
 
+	// ========= Method to assess if this monitor can monitor the given actions and
+	// its per & post system states
 	// ===canMonitor():Integer. A main functionality is that to determine if this
 	// monitor can monitor a given states. To determine this is implemented by
 	// matching two states to the [systemStateToMonitor]. The two states are usually
@@ -166,39 +182,94 @@ public class Monitor {
 			System.err.println("There's no action specified to monitor.");
 			return false;
 		}
-		
-		//trace miner is needed
+
+		// trace miner is needed
 		if (miner == null) {
 			System.err.println("Trace miner instance is missing.");
 			return false;
 		}
 
-		//state to monitor is needed
-		if(stateToMonitor == null) {
+		// state to monitor is needed
+		if (stateToMonitor == null) {
 			System.err.println("No state to monitor is found.");
 			return false;
 		}
-		
+
 		// from the action we can identify the pre and post states in a given trace. So
 		// providing them as parameters may not be needed
 
-		int diff = miner.getNumberOfBigraphMatches(stateToMonitor, preState, postState);
+		int diff = miner.getNumberOfBigraphMatches(stateToMonitor.getBigraphObject(), preState, postState);
 
 		// if there's an error
 		if (diff == TraceMiner.ACTIONS_CAUSAL_DEPENDENCY_ERROR) {
 			return false;
 		}
 
-		// if the number of times the given stat to monitor is more in the post than in
+		// if the number of times the given state to monitor is more in the post than in
 		// the pre, then we consider that the monitor can monitor the change between the
 		// two states
 		if (diff > 0) {
 			return true;
 		}
-		
-		//else it cannot
+
+		// else it cannot
 
 		return false;
+	}
+
+	// ========= Method to identify specific parts of a Bigraph
+	// ===
+
+	/**
+	 * Converts the given bigraph statement into a Bigraph Object
+	 * @param bigStmt
+	 * @return
+	 */
+	public Bigraph generateBigraph(String bigStmt) {
+
+		//trace miner is needed
+		if (miner == null) {
+			System.err.println("Trace miner instance is missing.");
+			return null;
+		}
+		
+		if (stateToMonitor == null) {
+			System.err.println("BigraphER Wrapper instance is missing.");
+			return null;
+		}
+		
+		Bigraph res = null;
+	
+		//parses the given statement
+		stateToMonitor.parseBigraphERCondition(bigStmt);
+		
+		res = stateToMonitor.createBigraph(false, miner.getSignature());
+		
+		return res;
+	}
+	
+	/**
+	 * Generates a Bigraph object based on set bigraphER statement
+	 * @return Bigraph object if successful, null otherwise
+	 */
+	public Bigraph generateBigraph() {
+
+		//trace miner is needed
+		if (miner == null) {
+			System.err.println("Trace miner instance is missing.");
+			return null;
+		}
+		
+		if (stateToMonitor == null) {
+			System.err.println("BigraphER Wrapper instance is missing.");
+			return null;
+		}
+		
+		Bigraph res = null;
+		
+		res = stateToMonitor.createBigraph(false, miner.getSignature());
+		
+		return res;
 	}
 
 }
