@@ -231,7 +231,8 @@ public class Monitor {
 		
 		Bigraph big = stateToMonitor.createBigraph(false, sig);
 		
-		System.out.println(big);
+//		System.out.println(big);
+		
 		int diff = miner.getNumberOfBigraphMatches(big, preState, postState);
 
 		// if there's an error

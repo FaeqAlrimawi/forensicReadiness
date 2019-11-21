@@ -54,9 +54,9 @@ public class ReactionRuleMatchingTester {
 		// reactum of enter room action
 		String actionMonitored = "VisitorEnterRoom";
 		String postActionBig = "Hallway{hallway}.id | Room{hallway}.(Visitor.id | id)";
-		
+
 		String monitorType = "CCTV";
-		
+
 		Monitor mon = new Monitor();
 
 		mon.setTraceMiner(miner);
@@ -83,8 +83,10 @@ public class ReactionRuleMatchingTester {
 
 //		System.out.println(big);
 
-		// update reacutm with monitor info
-		postActionBig = "Hallway{hallway}.(id |" + mon.getMonitorType() + ") | Room{hallway}.(Visitor.id |"
+		// update reacutm with monitor info. the monitor type can be enriched with any
+		// connections needed by checking the signature for the type to get any
+		// outernames
+		postActionBig = "Hallway{hallway}.(id |" + mon.getMonitorType() + "{ipNet}) | Room{hallway}.(Visitor.id |"
 				+ MonitorTerms.MONITOR_TARGET_ASSET + " | id)";
 
 		mon.setBigraphERStatment(postActionBig);
@@ -93,11 +95,11 @@ public class ReactionRuleMatchingTester {
 //
 //		System.out.println(big);
 
-//		assetID = "Room33";
+//		String targetAssetID = "Office_T24";
 //		
 		int preState = 1;
-		int postState = 237;
-		
+		int postState = 238;
+
 		boolean isMonitorable = mon.canMonitor(preState, postState);
 //		
 		if (isMonitorable) {
