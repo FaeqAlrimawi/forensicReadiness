@@ -83,12 +83,15 @@ public class ReactionRuleMatchingTester {
 
 //		System.out.println(big);
 
-		// update reacutm with monitor info. the monitor type can be enriched with any
+		// update reacutm with monitor info.
+		// the monitor type can be enriched with any
 		// connections needed by checking the signature for the type to get any
 		// outernames
-		postActionBig = "Hallway{hallway}.(id |" + mon.getMonitorType() + "{ipNet}."+MonitorTerms.TAG_MONITOR+") | Room{hallway}.(Visitor.id | "
-				+ MonitorTerms.TAG_MONITOR_TARGET + ")";
-		
+		// === enrich the reacturm with monitor TAGs: one for identifying the monitor,
+		// and another for identifying the target
+		postActionBig = "Hallway{hallway}.(id |" + mon.getMonitorType() + "{ipNet}." + MonitorTerms.TAG_MONITOR
+				+ ") | Room{hallway}.(Visitor.id | " + MonitorTerms.TAG_MONITOR_TARGET + ")";
+
 		System.out.println(postActionBig);
 
 		mon.setBigraphERStatment(postActionBig);
@@ -99,11 +102,11 @@ public class ReactionRuleMatchingTester {
 
 		String targetAssetID = "Office_T24";
 		String monitorID = "CCTV1";
-		
+
 		int preState = 1;
 		int postState = 237;
 
-		boolean isMonitorable = mon.canMonitor(monitorID, targetAssetID, preState, postState);
+		boolean isMonitorable = mon.canMonitor(null, null, preState, postState);
 //		
 		if (isMonitorable) {
 			System.out.println("Yes, can monitor...");
