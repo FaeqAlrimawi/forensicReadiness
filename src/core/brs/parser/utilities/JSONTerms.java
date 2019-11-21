@@ -86,14 +86,23 @@ public class JSONTerms {
 	public static final String BIG_SEMICOLON = ";";
 	
 	//internal terms with some meaning
+	
 	//defines an action name
-	public static final String BIG_RULES_KEYWORDS = "RulesKeywords";
+	public static final String CONTROL_RULES_KEYWORDS = "RulesKeywords";
+	
+	//defines context
+	public static final String CONTROL_CONTEXT = "Context";
+	
+	//defines Asset ID
+	public static final String CONTROL_ASSET_ID = "AssetID";
+	
 
 	public static final List<String> BIG_IRRELEVANT_TERMS = new LinkedList<String>(){{
-		add("RulesKeywords");
-		add("Context");}
+		add(CONTROL_RULES_KEYWORDS);
+		add(CONTROL_CONTEXT);
+		add(CONTROL_ASSET_ID);}
 	};
-	
+
 	
 	
 }

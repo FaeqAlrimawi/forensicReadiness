@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import core.brs.parser.utilities.BigraphNode;
+import core.monitor.MonitorTerms;
 import cyberPhysical_Incident.BigraphExpression;
 import cyberPhysical_Incident.Connectivity;
 import cyberPhysical_Incident.CyberPhysicalIncidentFactory;
@@ -384,6 +385,11 @@ public class BigraphWrapper implements Serializable {
 		numberOfRootSites++;
 	}
 
+//	public String getParent(String controlName) {
+//		
+//		return containerEntitiesMap.get(controlName);
+//	}
+	
 	/**
 	 * returns a Bigraph representation of this object. If not created it will
 	 * create it and then return it
@@ -434,7 +440,8 @@ public class BigraphWrapper implements Serializable {
 	public Bigraph createBigraph(boolean isGround, Signature sig) {
 
 		signature = sig;
-
+		numOfRoots = 0;
+		
 		BigraphNode node;
 		Map<String, BigraphNode> nodes = new HashMap<String, BigraphNode>();
 		// SignatureBuilder sigBuilder = new SignatureBuilder();
@@ -452,6 +459,11 @@ public class BigraphWrapper implements Serializable {
 				continue;
 			}
 
+			//if it is irrelevant term e.g., a monitor term, then ignore
+			if(MonitorTerms.MONITOR_TERMS.contains(ent.getName())) {
+				continue;
+			}
+			
 			node = new BigraphNode();
 
 			node.setId(entityName);
@@ -727,6 +739,7 @@ public class BigraphWrapper implements Serializable {
 		}
 
 		// if the parent is a root
+//		System.out.println("="+ node.getControl()+" root:" + node.getParentRoot());
 		if (node.isParentRoot()) { // if the parent is a root
 			// System.out.println(node.getId());
 			Node n = biBuilder.addNode(node.getControl(), libBigRoots.get(node.getParentRoot()), names);

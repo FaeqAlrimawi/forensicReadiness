@@ -319,7 +319,7 @@ public class BRSParser {
 
 			} else {
 
-				if (t.token == BigraphERTokens.WORD && t.sequence.equalsIgnoreCase(JSONTerms.BIG_RULES_KEYWORDS)) {
+				if (t.token == BigraphERTokens.WORD && t.sequence.equalsIgnoreCase(JSONTerms.CONTROL_RULES_KEYWORDS)) {
 					isKeyword = true;
 				} else if (t.token == BigraphERTokens.WORD && isKeyword) {
 					actionName = t.sequence;
@@ -354,7 +354,7 @@ public class BRSParser {
 
 			} else {
 
-				if (t.token == BigraphERTokens.WORD && t.sequence.equalsIgnoreCase(JSONTerms.BIG_RULES_KEYWORDS)) {
+				if (t.token == BigraphERTokens.WORD && t.sequence.equalsIgnoreCase(JSONTerms.CONTROL_RULES_KEYWORDS)) {
 					isKeyword = true;
 				} else if (t.token == BigraphERTokens.WORD && isKeyword) {
 					actionName = t.sequence;

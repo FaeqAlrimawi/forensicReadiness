@@ -68,6 +68,7 @@ import ie.lero.spare.pattern_instantiation.GraphPath;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator.InstancesSaver;
 import ie.lero.spare.pattern_instantiation.LabelExtractor;
+import it.uniud.mads.jlibbig.core.std.Control;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
 import it.uniud.mads.jlibbig.core.std.Handle;
@@ -75,8 +76,10 @@ import it.uniud.mads.jlibbig.core.std.InnerName;
 import it.uniud.mads.jlibbig.core.std.Matcher;
 import it.uniud.mads.jlibbig.core.std.Node;
 import it.uniud.mads.jlibbig.core.std.OuterName;
+import it.uniud.mads.jlibbig.core.std.Port;
 import it.uniud.mads.jlibbig.core.std.Root;
 import it.uniud.mads.jlibbig.core.std.Signature;
+import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
 import it.uniud.mads.jlibbig.core.std.Site;
 
 public class TraceMiner {
@@ -4597,15 +4600,16 @@ public class TraceMiner {
 			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
 		}
 
+		Signature sig = brsWrapper.getSignature();
 		// load the previous action pre state
-		Bigraph preStateBig = loadState(preActionPreState);
+		Bigraph preStateBig = loadState(preActionPreState, sig);
 
 		// load action pre state
-		Bigraph actionPreStateBig = loadState(actionPreState);
+		Bigraph actionPreStateBig = loadState(actionPreState, sig);
 
 		// testinggg
-		Bigraph actionOrigPreStateBig = loadState(originalPre);
-		Bigraph actionOrigPostStateBig = loadState(originalPost);
+		Bigraph actionOrigPreStateBig = loadState(originalPre, sig);
+		Bigraph actionOrigPostStateBig = loadState(originalPost, sig);
 
 //		Bigraph actionPostStateBig = loadState(actionPostState);
 
@@ -4760,8 +4764,8 @@ public class TraceMiner {
 	// }
 	// }
 
-	public Bigraph loadState(int stateID) {
-
+	public Bigraph loadState(int stateID, Signature signature) {
+		
 		// get preAction's precondition State as Bigraph
 		if (getStatesFolder() == null) {
 			System.err.println("States folder is missing");
@@ -4776,7 +4780,7 @@ public class TraceMiner {
 			// read state from file
 			FileReader r = new FileReader(filePath);
 			state = (JSONObject) parser.parse(r);
-			Bigraph bigraph = convertJSONtoBigraph(state);
+			Bigraph bigraph = convertJSONtoBigraph(state, signature);
 			r.close();
 
 			return bigraph;
@@ -4790,7 +4794,42 @@ public class TraceMiner {
 		return null;
 	}
 
-	public Bigraph convertJSONtoBigraph(JSONObject state) {
+	public Bigraph loadState(int stateID) {
+
+		if(brsWrapper == null ) {
+			System.err.println("TraceMiner::loadState: BRS Wrapper is missing.");
+			return null;
+		}
+		
+		// get preAction's precondition State as Bigraph
+		if (getStatesFolder() == null) {
+			System.err.println("States folder is missing");
+			return null;
+		}
+
+		JSONObject state;
+		JSONParser parser = new JSONParser();
+
+		String filePath = getStatesFolder() + "/" + stateID + ".json";
+		try {
+			// read state from file
+			FileReader r = new FileReader(filePath);
+			state = (JSONObject) parser.parse(r);
+			Bigraph bigraph = convertJSONtoBigraph(state, brsWrapper.getSignature());
+			r.close();
+
+			return bigraph;
+
+		} catch (IOException | ParseException e) {
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
+			System.err.println("File [" + filePath + "] is missing.");
+		}
+
+		return null;
+	}
+	
+	public Bigraph convertJSONtoBigraph(JSONObject state, Signature signature) {
 
 		String tmp;
 		String tmpArity;
@@ -4950,13 +4989,13 @@ public class TraceMiner {
 
 		//// Create Bigraph Object \\\\\
 
-		Signature tmpSig = brsWrapper.getSignature();// getBigraphSignature();
+//		Signature tmpSig = brsWrapper.getSignature();// getBigraphSignature();
 
-		if (tmpSig == null) {
+		if (signature == null) {
 			return null;
 		}
 
-		BigraphBuilder biBuilder = new BigraphBuilder(tmpSig);
+		BigraphBuilder biBuilder = new BigraphBuilder(signature);
 
 		// create roots for the bigraph
 		for (int i = 0; i < numOfRoots; i++) {
@@ -5263,8 +5302,9 @@ public class TraceMiner {
 		}
 
 		// testinggg
-		Bigraph actionOrigPreStateBig = loadState(state1);
-		Bigraph actionOrigPostStateBig = loadState(state2);
+		Signature sig = brsWrapper.getSignature();
+		Bigraph actionOrigPreStateBig = loadState(state1, sig);
+		Bigraph actionOrigPostStateBig = loadState(state2, sig);
 
 		// === match the action precondition to the state
 		Matcher matcher = new Matcher();
@@ -5317,23 +5357,51 @@ public class TraceMiner {
 			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
 		}
 
-		Bigraph bigState1 = loadState(state1);
-		Bigraph bigState2 = loadState(state2);
+		// unify signatures
+		Signature bigSig = bigraph.getSignature();
+		Signature stateSig = brsWrapper.getSignature();
+		SignatureBuilder sigBldr = new SignatureBuilder();
 
-		if(bigState1 == null || bigState2 == null) {
+		Iterator<Control> bigControls = bigSig.iterator();
+
+		while (bigControls.hasNext()) {
+			Control ctrl = bigControls.next();
+
+			if (!stateSig.contains(ctrl.getName())) {
+				sigBldr.add(ctrl);
+			}
+		}
+
+		Iterator<Control> stateControls = stateSig.iterator();
+
+		while (stateControls.hasNext()) {
+			Control ctrl = stateControls.next();
+			sigBldr.add(ctrl);
+		}
+
+		Signature unifiedSig = sigBldr.makeSignature();
+		
+		
+		Bigraph bigState1 = loadState(state1, unifiedSig);
+		Bigraph bigState2 = loadState(state2, unifiedSig);
+
+		updateBigraphWithSignature(unifiedSig);
+		
+		if (bigState1 == null || bigState2 == null) {
 			String error = "Error in getting a Bigraph of the states.";
-			
-			if(bigState1 == null) {
-				error+=" State1 Bigraph is Null.";
+
+			if (bigState1 == null) {
+				error += " State1 Bigraph is Null.";
 			}
-			
-			if(bigState2 == null) {
-				error+=" State2 Bigraph is Null.";
+
+			if (bigState2 == null) {
+				error += " State2 Bigraph is Null.";
 			}
-			
+
 			System.err.println(error);
 			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
 		}
+
 		
 		// === match the action precondition to the state
 		Matcher matcher = new Matcher();
@@ -5366,7 +5434,27 @@ public class TraceMiner {
 		return (cntOrigPre - cntOrigPost);
 	}
 
-	
+	public Bigraph updateBigraphWithSignature(Bigraph bigraph, Signature signature) {
+		
+		//clone the given bigraph but with the new signature
+		Bigraph res = null;
+		BigraphBuilder bigBldr = new BigraphBuilder(signature);
+		
+		//controls
+		for(Node node : bigraph.getNodes()) {	
+			List<Handle> handles = new LinkedList<Handle>();
+			
+//for(Port p : node.getPorts()) {
+//	handles.add(bigBldr.addOuterName(p.getEditable().get))
+//}
+			bigBldr.addNode(node.getControl().getName(), node.getParent(), node.getPorts());
+		}
+		
+		//outernames
+		for(OuterName outer : bigraph.getOuterNames()) {
+			bigBldr.addOuterName(outer.getName());
+		}
+	}
 	// public static void main(String[] args) {
 	//
 	// TraceMiner m = new TraceMiner();
