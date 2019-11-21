@@ -9,15 +9,22 @@ public class MonitorTerms {
 	
 	
 	//indicates the target control in a given bigraph e.g., Server.Target
-	public static final String MONITOR_TARGET_ASSET = "MonitorTarget";
+	public static final String TAG_MONITOR_TARGET = "MonitorTarget_Tag";
 	
+	//indicates the monitor in a given bigraph
+	public static final String TAG_MONITOR = "Monitor_Tag";
+	
+	//used for different purposes such as signature update
 	public static final List<String> MONITOR_TERMS = new LinkedList<String>(){{
-		add(MONITOR_TARGET_ASSET);
+		add(TAG_MONITOR);
+		add(TAG_MONITOR_TARGET);
 		add(JSONTerms.CONTROL_ASSET_ID);}
 	};
 	
 	public static final List<String> MONITOR_TERMS_TO_IGNORE = new LinkedList<String>(){{
-		add(MONITOR_TARGET_ASSET);
+		add(TAG_MONITOR);
+		add(TAG_MONITOR_TARGET);
+		
 		}
 	};
 

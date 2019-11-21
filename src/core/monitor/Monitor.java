@@ -25,6 +25,14 @@ public class Monitor {
 	// if NULL, then all assets of monitor Type are monitors
 	String monitorAssetRef = null;
 
+	// a string that is used to identify the target control in the given
+	// stateToMonitor
+	String monitorTypeIdentificationName = null;
+
+	// a string that is used to identify the Asset Id control in the given
+	// stateToMonitor
+	String monitorTypeAssetIDIdentificationName = null;
+
 	// action to monitor (required)
 	String actionMonitored = "VisitorEnterRoom";
 
@@ -227,12 +235,12 @@ public class Monitor {
 		// from the action we can identify the pre and post states in a given trace. So
 		// providing them as parameters may not be needed
 
-		Signature sig= updateSignatureWithMonitorControls();
-		
+		Signature sig = updateSignatureWithMonitorControls();
+
 		Bigraph big = stateToMonitor.createBigraph(false, sig);
-		
-//		System.out.println(big);
-		
+
+		System.out.println(big);
+
 		int diff = miner.getNumberOfBigraphMatches(big, preState, postState);
 
 		// if there's an error
@@ -253,33 +261,61 @@ public class Monitor {
 	}
 
 	/**
-	 * Checks whether the given ID for the target asset can by monitored or not.
+	 * Checks whether the monitor, with the given ID, can monitor the asset, with
+	 * the given ID if the monitor ID is NULL, then the monitor will be general
+	 * (i.e. Just monitor by type) if the asset ID (or the target ID) is NULL, then
+	 * the monitor will monitor any asset with a type matching the type of the
+	 * target
 	 */
-	public boolean canMonitor(String assetID, int preState, int postState) {
-
-		if (assetID == null || assetID.isEmpty()) {
-			return false;
-		}
+	public boolean canMonitor(String monitorID, String assetID, int preState, int postState) {
 
 		if (!checkTraceMiner()) {
 			return false;
 		}
 
-		// look for the control that contains the target
-		// then add the asset id to the control by adding "AssetID.{assetID}"
-
 		if (stateToMonitor == null) {
 			return false;
 		}
 
-		CyberPhysicalIncidentFactory instance = CyberPhysicalIncidentFactory.eINSTANCE;
+		//=== update monitor id, if given
+		
+		// identify the unique name of the target
+		if (!findMonitorAssetIDUniqueName()) {
+			return false;
+		}
 
+		// update monitor id
+		monitorTypeAssetIDIdentificationName = updateEntityID(monitorID, monitorTypeIdentificationName, monitorTypeAssetIDIdentificationName);
+
+		monitorAssetRef = monitorID;
+
+		//=== update asset id, if given
 		if (!findTragetAssetIDUniqueName()) {
 			return false;
 		}
 
+		// update target id
+		targetTypeAssetIDIdentificationName = updateEntityID(assetID, targetTypeIdentificationName, targetTypeAssetIDIdentificationName);
+
+		targetEntityRef = assetID;
+
+		return canMonitor(preState, postState);
+	}
+
+	/**
+	 * Updates the given entityAssetID with the given entityID. if the entityID is
+	 * NULL then the current id is removed
+	 * 
+	 * @param entityID
+	 * @param entityAssetIDIdentificationName
+	 * @return
+	 */
+	protected String updateEntityID(String entityID, String entityTypeIdentificationName, String entityAssetIDIdentificationName) {
+
+		CyberPhysicalIncidentFactory instance = CyberPhysicalIncidentFactory.eINSTANCE;
+
 		// if not found then create a new one
-		if (targetTypeAssetIDIdentificationName == null) {
+		if (entityAssetIDIdentificationName == null) {
 
 			Random rand = new Random();
 			int tries = 10000;
@@ -301,25 +337,25 @@ public class Monitor {
 
 			if (newID == null) {
 				System.err.println("Could not create a new Asset ID.");
-				return false;
+				return null;
 			}
 
-			targetTypeAssetIDIdentificationName = newID;
+			entityAssetIDIdentificationName = newID;
 
 			// add new id to map of controls
 			Entity newEnt = instance.createEntity();
 			newEnt.setName(JSONTerms.CONTROL_ASSET_ID);
-			
+
 			stateToMonitor.addControl(newEnt, newID);
 
 			// add to target
-			stateToMonitor.addContainedEntity(targetTypeIdentificationName, newID);
+			stateToMonitor.addContainedEntity(entityTypeIdentificationName, newID);
 
 		} // If it exists, then update info
 		else {
 			// previous ID, if any
 			List<String> prevContainedEnts = stateToMonitor.getContainedEntitiesMap()
-					.get(targetTypeAssetIDIdentificationName);
+					.get(entityAssetIDIdentificationName);
 
 			// remove from the map of controls
 			if (prevContainedEnts != null && prevContainedEnts.size() > 0) {
@@ -343,8 +379,8 @@ public class Monitor {
 				}
 
 //				System.out.println("removing contianed entities of... " + targetTypeAssetIDIdentificationName);
-				stateToMonitor.getContainedEntitiesMap().put(targetTypeAssetIDIdentificationName, new LinkedList<String>());
-				
+				stateToMonitor.getContainedEntitiesMap().put(entityAssetIDIdentificationName, new LinkedList<String>());
+
 //				System.out.println("removing... " + prevID);
 				stateToMonitor.getEntities().remove(prevID);
 			}
@@ -352,26 +388,24 @@ public class Monitor {
 
 		// update to given asset id
 		// set contained entities of the AssetID control
-		List<String> containedEnts = new LinkedList<String>();
-		containedEnts.add(assetID);
+		if (entityID != null) {
+			List<String> containedEnts = new LinkedList<String>();
+			containedEnts.add(entityID);
 
-		Entity ent = instance.createEntity();
+			Entity ent = instance.createEntity();
 
-		ent.setName(assetID);
+			ent.setName(entityID);
 
-		// update the map of all entities
-		stateToMonitor.addControl(ent, assetID);
+			// update the map of all entities
+			stateToMonitor.addControl(ent, entityID);
 
-		// update AssetID contained entities
-		stateToMonitor.addContainedEntity(targetTypeAssetIDIdentificationName, assetID);
-			
-		targetEntityRef = assetID;
-		
-		return canMonitor(preState, postState);
+			// update AssetID contained entities
+			stateToMonitor.addContainedEntity(entityAssetIDIdentificationName, entityID);
+		}
 
-//		return false;
+		return entityAssetIDIdentificationName;
+
 	}
-	
 	// ========= Method to identify specific parts of a Bigraph
 	// ===
 
@@ -467,11 +501,16 @@ public class Monitor {
 				sigBldr.add(monitorCtrl, false, 0);
 			}
 
-			//add asset ref, if anny
-			if(targetEntityRef !=null && !sig.contains(targetEntityRef)) {
+			// add asset ref, if anny
+			if (targetEntityRef != null && !sig.contains(targetEntityRef)) {
 				sigBldr.add(targetEntityRef, false, 0);
 			}
-			
+
+			// add asset ref, if anny
+			if (monitorAssetRef != null && !sig.contains(monitorAssetRef)) {
+				sigBldr.add(monitorAssetRef, false, 0);
+			}
+
 			// create new sig
 			sig = sigBldr.makeSignature();
 		}
@@ -479,16 +518,14 @@ public class Monitor {
 		return sig;
 	}
 
-	
-
 	protected boolean findTragetAssetIDUniqueName() {
-		
+
 		// identify the unique name of the target tag in the wrapper
 		if (targetTypeIdentificationName == null) {
 			for (String entityID : stateToMonitor.getControlMap().values()) {
 				String control = stateToMonitor.getControl(entityID);
-				if (control.equalsIgnoreCase(MonitorTerms.MONITOR_TARGET_ASSET)) {
-					//then the parent of that entity is the target id
+				if (control.equalsIgnoreCase(MonitorTerms.TAG_MONITOR_TARGET)) {
+					// then the parent of that entity is the target id
 					String parentID = stateToMonitor.getContainerEntitiesMap().get(entityID);
 					targetTypeIdentificationName = parentID;
 					break;
@@ -496,7 +533,7 @@ public class Monitor {
 			}
 
 			if (targetTypeIdentificationName == null) {
-				System.err.println("\"" + MonitorTerms.MONITOR_TARGET_ASSET + "\" tag NOT found");
+				System.err.println("\"" + MonitorTerms.TAG_MONITOR_TARGET + "\" tag NOT found");
 				return false;
 			}
 		}
@@ -522,6 +559,62 @@ public class Monitor {
 					if (cntrl != null) {
 						if (cntrl.equalsIgnoreCase(JSONTerms.CONTROL_ASSET_ID)) {
 							targetTypeAssetIDIdentificationName = containedEntityID;
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * find the unique name of the monitor in the bigraph
+	 * 
+	 * @return
+	 */
+	protected boolean findMonitorAssetIDUniqueName() {
+
+		// identify the unique name of the target tag in the wrapper
+		if (monitorTypeIdentificationName == null) {
+			for (String entityID : stateToMonitor.getControlMap().values()) {
+				String control = stateToMonitor.getControl(entityID);
+				if (control.equalsIgnoreCase(MonitorTerms.TAG_MONITOR)) {
+					// then the parent of that entity is the target id
+					String parentID = stateToMonitor.getContainerEntitiesMap().get(entityID);
+					monitorTypeIdentificationName = parentID;
+					break;
+				}
+			}
+
+			if (monitorTypeIdentificationName == null) {
+				System.err.println("\"" + MonitorTerms.TAG_MONITOR + "\" tag NOT found");
+				return false;
+			}
+		}
+
+		// try to find the id of the AssetID control of the target
+		if (monitorTypeAssetIDIdentificationName == null) {
+			// get parent entity id
+			String parentEntityID = stateToMonitor.getContainerEntitiesMap().get(monitorTypeIdentificationName);
+
+			if (parentEntityID == null) {
+				return false;
+			}
+
+			// get contained entities in parent
+			// then identify the AssetID control, if available. If not, then add it to the
+			// parent and to the map of all entities
+			List<String> containedEntitiesIDs = stateToMonitor.getContainedEntitiesMap().get(parentEntityID);
+
+			if (containedEntitiesIDs != null) {
+				for (String containedEntityID : containedEntitiesIDs) {
+					String cntrl = stateToMonitor.getControl(containedEntityID);
+
+					if (cntrl != null) {
+						if (cntrl.equalsIgnoreCase(JSONTerms.CONTROL_ASSET_ID)) {
+							monitorTypeAssetIDIdentificationName = containedEntityID;
 							break;
 						}
 					}
