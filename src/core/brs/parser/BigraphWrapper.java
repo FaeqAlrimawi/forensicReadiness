@@ -459,11 +459,6 @@ public class BigraphWrapper implements Serializable {
 				continue;
 			}
 
-			//if it is irrelevant term e.g., a monitor term, then ignore
-			if(MonitorTerms.MONITOR_TERMS.contains(ent.getName())) {
-				continue;
-			}
-			
 			node = new BigraphNode();
 
 			node.setId(entityName);
@@ -545,10 +540,11 @@ public class BigraphWrapper implements Serializable {
 		// entities.addAll(getResource());
 		// entities.addAll(getActor());
 
-		for (Entity ent : controlMap.keySet()) {
+		for (Entity ent : controlMap.keySet()) {			
+			
 			// create a bigraph signature out of each entity and max arity
 			// number
-			System.out.println(ent);
+//			System.out.println(ent);
 			sigBuilder.add(ent.getName(), true, maxOuterNameNumber);
 
 			// addChildren(node, ent.getEntity(), nodes, sigBuilder);
@@ -826,6 +822,14 @@ public class BigraphWrapper implements Serializable {
 
 		for (String entity : entities) {
 
+			String control = getControl(entity);
+			
+			//if it is irrelevant term e.g., a monitor term, then ignore
+			if(MonitorTerms.MONITOR_TERMS_TO_IGNORE.contains(control)) {
+				continue;
+			}
+			
+			
 			isFound = false;
 			node = new BigraphNode();
 
@@ -846,7 +850,7 @@ public class BigraphWrapper implements Serializable {
 			}
 
 			// add control (currently same as the name of the entity
-			node.setControl(getControl(entity));
+			node.setControl(control);
 
 			// add connectivity (outernames)
 			if (entityConnectivityMap.get(entity) != null) {

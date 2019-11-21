@@ -227,7 +227,12 @@ public class Monitor {
 		// from the action we can identify the pre and post states in a given trace. So
 		// providing them as parameters may not be needed
 
-		int diff = miner.getNumberOfBigraphMatches(stateToMonitor.getBigraphObject(), preState, postState);
+		Signature sig= updateSignatureWithMonitorControls();
+		
+		Bigraph big = stateToMonitor.createBigraph(false, sig);
+		
+		System.out.println(big);
+		int diff = miner.getNumberOfBigraphMatches(big, preState, postState);
 
 		// if there's an error
 		if (diff == TraceMiner.ACTIONS_CAUSAL_DEPENDENCY_ERROR) {
@@ -246,117 +251,10 @@ public class Monitor {
 		return false;
 	}
 
-	// ========= Method to identify specific parts of a Bigraph
-	// ===
-
-	/**
-	 * Converts the given bigraph statement into a Bigraph Object
-	 * 
-	 * @param bigStmt
-	 * @return
-	 */
-	public Bigraph generateBigraph(String bigStmt) {
-
-		// trace miner is needed
-		if (!checkTraceMiner()) {
-			return null;
-		}
-
-		if (stateToMonitor == null) {
-			System.err.println("BigraphER Wrapper instance is missing.");
-			return null;
-		}
-
-		Bigraph res = null;
-
-		// parses the given statement
-		stateToMonitor.parseBigraphERCondition(bigStmt);
-
-		res = stateToMonitor.createBigraph(false, miner.getSignature());
-
-		return res;
-	}
-
-	/**
-	 * Generates a Bigraph object based on set bigraphER statement
-	 * 
-	 * @return Bigraph object if successful, null otherwise
-	 */
-	public Bigraph generateBigraph() {
-
-		// trace miner is needed
-		if (!checkTraceMiner()) {
-			return null;
-		}
-
-		if (stateToMonitor == null) {
-			System.err.println("BigraphER Wrapper instance is missing.");
-			return null;
-		}
-
-		Bigraph res = null;
-
-		Signature sig = updateSignatureWithMonitorControls();
-
-		res = stateToMonitor.createBigraph(false, sig);
-
-		return res;
-	}
-
-	/**
-	 * Updates the signature found in trace miner with monitor controls if they do
-	 * not exist
-	 */
-	public Signature updateSignatureWithMonitorControls() {
-
-		if (!checkTraceMiner()) {
-			return null;
-		}
-
-		Signature sig = miner.getSignature();
-
-		// if the monitor control are not added then add them to the sig by creating a
-		// new one
-
-		List<String> missingMonitorControls = new LinkedList<String>();
-
-		for (String monitorCtrl : MonitorTerms.MONITOR_TERMS) {
-			if (!sig.contains(monitorCtrl)) {
-				missingMonitorControls.add(monitorCtrl);
-			}
-		}
-
-		// there are missing controls for monitoring
-		if (!missingMonitorControls.isEmpty()) {
-			SignatureBuilder sigBldr = new SignatureBuilder();
-
-			Iterator<Control> it = sig.iterator();
-			while (it.hasNext()) {
-				Control ctrl = it.next();
-				sigBldr.add(ctrl);
-			}
-
-			// add monitor controls
-			for (String monitorCtrl : MonitorTerms.MONITOR_TERMS) {
-				sigBldr.add(monitorCtrl, false, 0);
-			}
-
-			//add asset ref, if anny
-			if(targetEntityRef !=null && !sig.contains(targetEntityRef)) {
-				sigBldr.add(targetEntityRef, false, 0);
-			}
-			
-			// create new sig
-			sig = sigBldr.makeSignature();
-		}
-
-		return sig;
-	}
-
 	/**
 	 * Checks whether the given ID for the target asset can by monitored or not.
 	 */
-	public boolean canMonitorTargetAssetWithID(String assetID, int preState, int postState) {
+	public boolean canMonitor(String assetID, int preState, int postState) {
 
 		if (assetID == null || assetID.isEmpty()) {
 			return false;
@@ -472,6 +370,115 @@ public class Monitor {
 
 //		return false;
 	}
+	
+	// ========= Method to identify specific parts of a Bigraph
+	// ===
+
+	/**
+	 * Converts the given bigraph statement into a Bigraph Object
+	 * 
+	 * @param bigStmt
+	 * @return
+	 */
+	public Bigraph generateBigraph(String bigStmt) {
+
+		// trace miner is needed
+		if (!checkTraceMiner()) {
+			return null;
+		}
+
+		if (stateToMonitor == null) {
+			System.err.println("BigraphER Wrapper instance is missing.");
+			return null;
+		}
+
+		Bigraph res = null;
+
+		// parses the given statement
+		stateToMonitor.parseBigraphERCondition(bigStmt);
+
+		res = stateToMonitor.createBigraph(false, miner.getSignature());
+
+		return res;
+	}
+
+	/**
+	 * Generates a Bigraph object based on set bigraphER statement
+	 * 
+	 * @return Bigraph object if successful, null otherwise
+	 */
+	public Bigraph generateBigraph() {
+
+		// trace miner is needed
+		if (!checkTraceMiner()) {
+			return null;
+		}
+
+		if (stateToMonitor == null) {
+			System.err.println("BigraphER Wrapper instance is missing.");
+			return null;
+		}
+
+		Bigraph res = null;
+
+		Signature sig = updateSignatureWithMonitorControls();
+
+		res = stateToMonitor.createBigraph(false, sig);
+
+		return res;
+	}
+
+	/**
+	 * Updates the signature found in trace miner with monitor controls if they do
+	 * not exist
+	 */
+	public Signature updateSignatureWithMonitorControls() {
+
+		if (!checkTraceMiner()) {
+			return null;
+		}
+
+		Signature sig = miner.getSignature();
+
+		// if the monitor control are not added then add them to the sig by creating a
+		// new one
+
+		List<String> missingMonitorControls = new LinkedList<String>();
+
+		for (String monitorCtrl : MonitorTerms.MONITOR_TERMS) {
+			if (!sig.contains(monitorCtrl)) {
+				missingMonitorControls.add(monitorCtrl);
+			}
+		}
+
+		// there are missing controls for monitoring
+		if (!missingMonitorControls.isEmpty()) {
+			SignatureBuilder sigBldr = new SignatureBuilder();
+
+			Iterator<Control> it = sig.iterator();
+			while (it.hasNext()) {
+				Control ctrl = it.next();
+				sigBldr.add(ctrl);
+			}
+
+			// add monitor controls
+			for (String monitorCtrl : MonitorTerms.MONITOR_TERMS) {
+				sigBldr.add(monitorCtrl, false, 0);
+			}
+
+			//add asset ref, if anny
+			if(targetEntityRef !=null && !sig.contains(targetEntityRef)) {
+				sigBldr.add(targetEntityRef, false, 0);
+			}
+			
+			// create new sig
+			sig = sigBldr.makeSignature();
+		}
+
+		return sig;
+	}
+
+	
 
 	protected boolean findTragetAssetIDUniqueName() {
 		

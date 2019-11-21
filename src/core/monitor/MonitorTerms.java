@@ -14,7 +14,11 @@ public class MonitorTerms {
 	public static final List<String> MONITOR_TERMS = new LinkedList<String>(){{
 		add(MONITOR_TARGET_ASSET);
 		add(JSONTerms.CONTROL_ASSET_ID);}
+	};
 	
+	public static final List<String> MONITOR_TERMS_TO_IGNORE = new LinkedList<String>(){{
+		add(MONITOR_TARGET_ASSET);
+		}
 	};
 
 }

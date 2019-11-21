@@ -54,14 +54,16 @@ public class ReactionRuleMatchingTester {
 		// reactum of enter room action
 		String actionMonitored = "VisitorEnterRoom";
 		String postActionBig = "Hallway{hallway}.id | Room{hallway}.(Visitor.id | id)";
-
+		
+		String monitorType = "CCTV";
+		
 		Monitor mon = new Monitor();
 
 		mon.setTraceMiner(miner);
 		mon.setBigraphERStatment(postActionBig);
-		mon.setMonitorType("CCTV");
+		mon.setMonitorType(monitorType);
 		mon.setActionMonitored(actionMonitored);
-		
+
 //		Bigraph big = mon.generateBigraph();
 //
 //		System.out.println(big);
@@ -72,41 +74,41 @@ public class ReactionRuleMatchingTester {
 				+ " | id)";
 
 		mon.setBigraphERStatment(postActionBig);
-		
-		//update with asset id
-		String assetID = "Room1";
-		mon.canMonitorTargetAssetWithID(assetID, 0, 1);
-		
-		Bigraph big = mon.generateBigraph();
 
-		System.out.println(big);
-		
-		
-		//update reacutm with monitor info
-		postActionBig = "Hallway{hallway}.(id |"+mon.getMonitorType()+") | Room{hallway}.(Visitor.id |" + MonitorTerms.MONITOR_TARGET_ASSET
-				+ " | id)";
-		
+		// update with asset id
+//		String assetID = "Room1";
+//		mon.canMonitor(assetID, 0, 1);
+
+//		Bigraph big = mon.generateBigraph();
+
+//		System.out.println(big);
+
+		// update reacutm with monitor info
+		postActionBig = "Hallway{hallway}.(id |" + mon.getMonitorType() + ") | Room{hallway}.(Visitor.id |"
+				+ MonitorTerms.MONITOR_TARGET_ASSET + " | id)";
+
 		mon.setBigraphERStatment(postActionBig);
-		
-		
-		big = mon.generateBigraph();
 
-		System.out.println(big);
-		
+//		big = mon.generateBigraph();
+//
+//		System.out.println(big);
+
 //		assetID = "Room33";
 //		
-		boolean isMonitorable = mon.canMonitorTargetAssetWithID(assetID, 0, 1);
-//		
-		if(isMonitorable) {
-			System.out.println("Yes can monitor...");
-		} else {
-			System.out.println("NO can monitor...");
-		}
+		int preState = 1;
+		int postState = 237;
 		
+		boolean isMonitorable = mon.canMonitor(preState, postState);
+//		
+		if (isMonitorable) {
+			System.out.println("Yes, can monitor...");
+		} else {
+			System.out.println("NO, cannot monitor...");
+		}
+
 //		 big = mon.generateBigraph();
 //
 //		System.out.println("\n\n"+big);
-		
 
 	}
 

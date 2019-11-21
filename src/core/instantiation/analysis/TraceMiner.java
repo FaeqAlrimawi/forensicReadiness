@@ -4765,7 +4765,7 @@ public class TraceMiner {
 	// }
 
 	public Bigraph loadState(int stateID, Signature signature) {
-		
+
 		// get preAction's precondition State as Bigraph
 		if (getStatesFolder() == null) {
 			System.err.println("States folder is missing");
@@ -4796,11 +4796,11 @@ public class TraceMiner {
 
 	public Bigraph loadState(int stateID) {
 
-		if(brsWrapper == null ) {
+		if (brsWrapper == null) {
 			System.err.println("TraceMiner::loadState: BRS Wrapper is missing.");
 			return null;
 		}
-		
+
 		// get preAction's precondition State as Bigraph
 		if (getStatesFolder() == null) {
 			System.err.println("States folder is missing");
@@ -4828,7 +4828,7 @@ public class TraceMiner {
 
 		return null;
 	}
-	
+
 	public Bigraph convertJSONtoBigraph(JSONObject state, Signature signature) {
 
 		String tmp;
@@ -5359,34 +5359,33 @@ public class TraceMiner {
 
 		// unify signatures
 		Signature bigSig = bigraph.getSignature();
-		Signature stateSig = brsWrapper.getSignature();
-		SignatureBuilder sigBldr = new SignatureBuilder();
+//		Signature stateSig = brsWrapper.getSignature();
+//		SignatureBuilder sigBldr = new SignatureBuilder();
+//
+//		Iterator<Control> bigControls = bigSig.iterator();
+//
+//		while (bigControls.hasNext()) {
+//			Control ctrl = bigControls.next();
+//
+//			if (!stateSig.contains(ctrl.getName())) {
+//				sigBldr.add(ctrl);
+//			}
+//		}
+//
+//		Iterator<Control> stateControls = stateSig.iterator();
+//
+//		while (stateControls.hasNext()) {
+//			Control ctrl = stateControls.next();
+//			sigBldr.add(ctrl);
+//		}
+//
+//		Signature unifiedSig = sigBldr.makeSignature();
 
-		Iterator<Control> bigControls = bigSig.iterator();
+		Bigraph bigState1 = loadState(state1, bigSig);
+		Bigraph bigState2 = loadState(state2, bigSig);
 
-		while (bigControls.hasNext()) {
-			Control ctrl = bigControls.next();
+//		updateBigraphWithSignature(unifiedSig);
 
-			if (!stateSig.contains(ctrl.getName())) {
-				sigBldr.add(ctrl);
-			}
-		}
-
-		Iterator<Control> stateControls = stateSig.iterator();
-
-		while (stateControls.hasNext()) {
-			Control ctrl = stateControls.next();
-			sigBldr.add(ctrl);
-		}
-
-		Signature unifiedSig = sigBldr.makeSignature();
-		
-		
-		Bigraph bigState1 = loadState(state1, unifiedSig);
-		Bigraph bigState2 = loadState(state2, unifiedSig);
-
-		updateBigraphWithSignature(unifiedSig);
-		
 		if (bigState1 == null || bigState2 == null) {
 			String error = "Error in getting a Bigraph of the states.";
 
@@ -5402,7 +5401,6 @@ public class TraceMiner {
 			return ACTIONS_CAUSAL_DEPENDENCY_ERROR;
 		}
 
-		
 		// === match the action precondition to the state
 		Matcher matcher = new Matcher();
 
@@ -5426,35 +5424,56 @@ public class TraceMiner {
 			cntOrigPre++;
 		}
 
-//		System.out.println(
-//				"state [" + state1 + "] matches: " + cntOrigPre + " state [" + state2 + "] matches: " + cntOrigPost);
+		System.out.println(
+				"state [" + state1 + "] matches: " + cntOrigPre + " state [" + state2 + "] matches: " + cntOrigPost);
 
 		// action is dependent on the previous action
 
-		return (cntOrigPre - cntOrigPost);
+		return (cntOrigPost - cntOrigPre);
 	}
 
-	public Bigraph updateBigraphWithSignature(Bigraph bigraph, Signature signature) {
-		
-		//clone the given bigraph but with the new signature
-		Bigraph res = null;
-		BigraphBuilder bigBldr = new BigraphBuilder(signature);
-		
-		//controls
-		for(Node node : bigraph.getNodes()) {	
-			List<Handle> handles = new LinkedList<Handle>();
-			
-//for(Port p : node.getPorts()) {
-//	handles.add(bigBldr.addOuterName(p.getEditable().get))
-//}
-			bigBldr.addNode(node.getControl().getName(), node.getParent(), node.getPorts());
-		}
-		
-		//outernames
-		for(OuterName outer : bigraph.getOuterNames()) {
-			bigBldr.addOuterName(outer.getName());
-		}
-	}
+//	public Bigraph updateBigraphWithSignature(Bigraph bigraph, Signature signature) {
+//
+//		// clone the given bigraph but with the new signature
+//		Bigraph res = null;
+//		BigraphBuilder bigBldr = new BigraphBuilder(signature);
+//
+//		// controls
+//		for (Node node : bigraph.getNodes()) {
+//			List<Handle> handles = new LinkedList<Handle>();
+//
+//			//outernames (should be)
+//			for (Port p : node.getPorts()) {
+//				handles.add(p.getHandle());
+//			}
+//			
+//			bigBldr.addNode(node.getControl().getName(), node.getParent(), handles);
+//			
+//			handles.clear();
+//		}
+//
+//		// outernames
+//		for (OuterName outer : bigraph.getOuterNames()) {
+//			bigBldr.addOuterName(outer.getName());
+//		}
+//		
+//		
+//		//innernames
+//		for(InnerName inner : bigraph.getInnerNames()) {
+//			bigBldr.addInnerName(inner.getName());
+//		}
+//		
+//		
+//		//sites
+//		for(Site s : bigraph.getSites()) {
+//			bigBldr.addSite(s.getParent());
+//		}
+//		
+//		//roots
+//		for(Root root : bigraph.getRoots()) {
+//			bigBldr.addRoot();
+//		}
+//	}
 	// public static void main(String[] args) {
 	//
 	// TraceMiner m = new TraceMiner();
