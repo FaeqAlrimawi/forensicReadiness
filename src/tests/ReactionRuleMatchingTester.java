@@ -57,70 +57,66 @@ public class ReactionRuleMatchingTester {
 
 		String monitorType = "CCTV";
 		String targetType = "Room";
-		
+
 		Monitor mon = new Monitor();
 
-		mon.setTraceMiner(miner);
-//		mon.setBigraphERStatment(postActionBig);
+		// ===set attributes of monitor
 		mon.setMonitorType(monitorType);
 		mon.setTargetType(targetType);
 		mon.setActionMonitored(actionMonitored);
-		
-//		Bigraph big = mon.generateBigraph();
-//
-//		System.out.println(big);
+		mon.setTraceMiner(miner);
 
-		// update the action reactum with asset id for the room
-		// first update the reacutm with MonitorTarget tag
-//		postActionBig = "Hallway{hallway}.id | Room{hallway}.(Visitor.id |" + MonitorTerms.TAG_MONITOR_TARGET
-//				+ " | id)";
-//
-//		mon.setBigraphERStatment(postActionBig);
-
-		// update with asset id
-//		String assetID = "Room1";
-//		mon.canMonitor(assetID, 0, 1);
-
-//		Bigraph big = mon.generateBigraph();
-
-//		System.out.println(big);
-
-		// update reacutm with monitor info.
-		// the monitor type can be enriched with any
-		// connections needed by checking the signature for the type to get any
-		// outernames
-		// === enrich the reacturm with monitor TAGs: one for identifying the monitor,
-		// and another for identifying the target
+		/*===Important: set the partial-state, which the monitor can monitor
+		 *=== This partial-state can be annotated with [monitor tags] such as
+		 *Monitor_Tag, which is used to indicate the monitor in the partial-state by
+		 *containing the tag. More tags are available in the MonitorTerms class
+		 */
 		postActionBig = "Hallway{hallway}.(id |" + mon.getMonitorType() + "{ipNet}) | Room{hallway}.(Visitor.id )";
 
 		System.out.println("\nBigraphER Statement: [" + postActionBig + "]\n");
 
 		mon.setBigraphERStatment(postActionBig);
 
-//		big = mon.generateBigraph();
-//
-//		System.out.println(big);
-
+		//===test if the monitor can monitor the specified action pre and post states
+		// in a trace
 		String targetAssetID = "Office_T24";
 		String monitorID = "CCTV1";
 
 		int preState = 1;
 		int postState = 237;
 
-		boolean isMonitorable = mon.canMonitor(monitorID, targetAssetID, preState, postState);
+		/*
+		 * === This checks whether the monitor with the given ID (monitorID) can monitor
+		 * the target with the given ID (targetAssetID) when the action takes place
+		 * through the pre and post states. can monitor is evaluated by checking whether
+		 * the monitor's partial-state is satisfied in the post-state more than in the
+		 * pre-state.
+		 */
+//		boolean isMonitorable = mon.canMonitor(monitorID, targetAssetID, preState, postState);
+
+		/*
+		 * === This checks whether the monitor with the given ID (monitorID) can monitor
+		 * an asset with the given target type, when the action takes place.
+		 */
 //		boolean isMonitorable = mon.canMonitor(monitorID, null, preState, postState);
+
+		/*
+		 * === This checks a monitor with the given type can monitor the target with the
+		 * given ID (targetAssetID), when the action takes place.
+		 */
 //		boolean isMonitorable = mon.canMonitor(null, targetAssetID, preState, postState);
-//		boolean isMonitorable = mon.canMonitor(null, null, preState, postState);
-//		
+
+		/*
+		 * === This checks a monitor with the given type can monitor the target with the
+		 * given ID (targetAssetID), when the action takes place.
+		 */
+		boolean isMonitorable = mon.canMonitor(null, null, preState, postState);
+
 		if (isMonitorable) {
 			System.out.println("Yes, can monitor...");
 		} else {
 			System.out.println("NO, cannot monitor...");
 		}
-
-//		 big = mon.generateBigraph();
-//
-//		System.out.println("\n\n"+big);
 
 	}
 
