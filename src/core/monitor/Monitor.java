@@ -192,6 +192,17 @@ public class Monitor {
 		originalStateToMonitor = bigStmt;
 
 		stateToMonitor.parseBigraphERCondition(bigStmt);
+
+		boolean isMonitorTagAvailable = findMonitorAssetIDUniqueName();
+		boolean isTargetTagAvailable = findTragetAssetIDUniqueName();
+		
+		if(!isMonitorTagAvailable) {
+			System.out.println("Monitor: Warning! Monitor tag is not found in the given bigraphER statement");
+		}
+		
+		if(!isTargetTagAvailable) {
+			System.out.println("Monitor: Warning! Target tag is not found in the given bigraphER statement");
+		}
 	}
 
 	/**
@@ -277,25 +288,28 @@ public class Monitor {
 			return false;
 		}
 
-		//=== update monitor id, if given
-		
+		// === update monitor id, if given
+
 		// identify the unique name of the target
 		if (!findMonitorAssetIDUniqueName()) {
 			return false;
 		}
 
 		// update monitor id
-		monitorTypeAssetIDIdentificationName = updateEntityID(monitorID, monitorTypeIdentificationName, monitorTypeAssetIDIdentificationName);
+		monitorTypeAssetIDIdentificationName = updateEntityID(monitorID, monitorTypeIdentificationName,
+				monitorTypeAssetIDIdentificationName);
 
+		
 		monitorAssetRef = monitorID;
 
-		//=== update asset id, if given
+		// === update asset id, if given
 		if (!findTragetAssetIDUniqueName()) {
 			return false;
 		}
 
 		// update target id
-		targetTypeAssetIDIdentificationName = updateEntityID(assetID, targetTypeIdentificationName, targetTypeAssetIDIdentificationName);
+		targetTypeAssetIDIdentificationName = updateEntityID(assetID, targetTypeIdentificationName,
+				targetTypeAssetIDIdentificationName);
 
 		targetEntityRef = assetID;
 
@@ -310,8 +324,9 @@ public class Monitor {
 	 * @param entityAssetIDIdentificationName
 	 * @return
 	 */
-	protected String updateEntityID(String entityID, String entityTypeIdentificationName, String entityAssetIDIdentificationName) {
-
+	protected String updateEntityID(String entityID, String entityTypeIdentificationName,
+			String entityAssetIDIdentificationName) {
+		
 		CyberPhysicalIncidentFactory instance = CyberPhysicalIncidentFactory.eINSTANCE;
 
 		// if not found then create a new one
@@ -378,7 +393,7 @@ public class Monitor {
 					stateToMonitor.getControlMap().remove(prevEntity);
 				}
 
-//				System.out.println("removing contianed entities of... " + targetTypeAssetIDIdentificationName);
+//				System.out.println("removing contained entities of... " + targetTypeAssetIDIdentificationName);
 				stateToMonitor.getContainedEntitiesMap().put(entityAssetIDIdentificationName, new LinkedList<String>());
 
 //				System.out.println("removing... " + prevID);
@@ -406,8 +421,6 @@ public class Monitor {
 		return entityAssetIDIdentificationName;
 
 	}
-	// ========= Method to identify specific parts of a Bigraph
-	// ===
 
 	/**
 	 * Converts the given bigraph statement into a Bigraph Object
@@ -518,6 +531,12 @@ public class Monitor {
 		return sig;
 	}
 
+	/**
+	 * Finds the unique name for the target type and also the unique name for its
+	 * AssetID control
+	 * 
+	 * @return false if target monitor tag is missing. True otherwise.
+	 */
 	protected boolean findTragetAssetIDUniqueName() {
 
 		// identify the unique name of the target tag in the wrapper
@@ -572,7 +591,7 @@ public class Monitor {
 	/**
 	 * find the unique name of the monitor in the bigraph
 	 * 
-	 * @return
+	 * @return false if Monitor tag is missing. True otherwise
 	 */
 	protected boolean findMonitorAssetIDUniqueName() {
 
@@ -621,8 +640,34 @@ public class Monitor {
 				}
 			}
 		}
-
+		
 		return true;
+	}
+
+	/**
+	 * Returns the unique name of the AssetID control for the given [asset ID]
+	 * 
+	 * @param assetID
+	 * @return
+	 */
+	protected String findAssetIDUniqueName(String assetID) {
+
+		if (stateToMonitor == null) {
+			return null;
+		}
+
+		String assetIDParent = null;
+
+		for (String entityID : stateToMonitor.getControlMap().values()) {
+			String control = stateToMonitor.getControl(entityID);
+			if (control.equalsIgnoreCase(assetID)) {
+				// then the parent of that entity is the target id
+				assetIDParent = stateToMonitor.getContainerEntitiesMap().get(entityID);
+				break;
+			}
+		}
+
+		return assetIDParent;
 	}
 
 	protected boolean checkTraceMiner() {

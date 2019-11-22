@@ -837,7 +837,7 @@ public class BigraphWrapper implements Serializable {
 
 			if (!isGround) {
 				// add site
-				// by defualt it has site
+				// by default it has site
 				node.setSite(true);
 			}
 
