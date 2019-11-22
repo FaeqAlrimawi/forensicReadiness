@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Map.Entry;
 
 import core.brs.parser.utilities.BigraphNode;
@@ -1486,9 +1487,15 @@ public class BigraphWrapper implements Serializable {
 
 		String uniqName = "";
 
-		uniqName = entity.getName() + controlNum;
+		Random rand = new Random();
+		
+		int upperLimit = 100000;
+		
+		int id = rand.nextInt(upperLimit);
+		
+		uniqName = entity.getName() +""+id;
 
-		controlNum++;
+//		controlNum++;
 
 		this.getControlMap().put(entity, uniqName);
 

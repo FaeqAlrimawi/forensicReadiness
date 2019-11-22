@@ -37,7 +37,7 @@ public class Monitor {
 	String actionMonitored = "VisitorEnterRoom";
 
 	// target type (or class) to monitor (required)
-	String targetTypeMonitored = "Server";
+	String targetType = "Server";
 
 	// a string that is used to identify the target control in the given
 	// stateToMonitor
@@ -115,12 +115,12 @@ public class Monitor {
 		this.actionMonitored = actionMonitored;
 	}
 
-	public String getTargetTypeMonitored() {
-		return targetTypeMonitored;
+	public String getTargetType() {
+		return targetType;
 	}
 
-	public void setTargetTypeMonitored(String targetTypeMonitored) {
-		this.targetTypeMonitored = targetTypeMonitored;
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
 	}
 
 	public String getTargetEntityRef() {
@@ -195,13 +195,13 @@ public class Monitor {
 
 		boolean isMonitorTagAvailable = findMonitorAssetIDUniqueName();
 		boolean isTargetTagAvailable = findTragetAssetIDUniqueName();
-		
-		if(!isMonitorTagAvailable) {
-			System.out.println("Monitor: Warning! Monitor tag is not found in the given bigraphER statement");
+
+		if (!isMonitorTagAvailable) {
+			System.out.println("*Monitor Warning! Monitor tag is not found in the given bigraphER statement");
 		}
-		
-		if(!isTargetTagAvailable) {
-			System.out.println("Monitor: Warning! Target tag is not found in the given bigraphER statement");
+
+		if (!isTargetTagAvailable) {
+			System.out.println("*Monitor Warning! Target tag is not found in the given bigraphER statement");
 		}
 	}
 
@@ -291,20 +291,24 @@ public class Monitor {
 		// === update monitor id, if given
 
 		// identify the unique name of the target
-		if (!findMonitorAssetIDUniqueName()) {
-			return false;
+
+		if (monitorID != null && !findMonitorAssetIDUniqueName()) {
+			System.out.println("*Monitor Warning! Missing a Monitor Tag. The given Monitor ID [" + monitorID
+					+ "] will be ignored.");
+//			return false;
 		}
 
 		// update monitor id
 		monitorTypeAssetIDIdentificationName = updateEntityID(monitorID, monitorTypeIdentificationName,
 				monitorTypeAssetIDIdentificationName);
 
-		
 		monitorAssetRef = monitorID;
 
 		// === update asset id, if given
-		if (!findTragetAssetIDUniqueName()) {
-			return false;
+		if (assetID != null && !findTragetAssetIDUniqueName()) {
+			System.out.println(
+					"*Monitor Warning! Missing a Target Tag. The given Asset ID [" + assetID + "] will be ignored.\n");
+//			return false;
 		}
 
 		// update target id
@@ -326,7 +330,7 @@ public class Monitor {
 	 */
 	protected String updateEntityID(String entityID, String entityTypeIdentificationName,
 			String entityAssetIDIdentificationName) {
-		
+
 		CyberPhysicalIncidentFactory instance = CyberPhysicalIncidentFactory.eINSTANCE;
 
 		// if not found then create a new one
@@ -552,8 +556,32 @@ public class Monitor {
 			}
 
 			if (targetTypeIdentificationName == null) {
-				System.err.println("\"" + MonitorTerms.TAG_MONITOR_TARGET + "\" tag NOT found");
-				return false;
+
+				boolean isUnique = true;
+
+				if (targetType != null) {
+					for (Entry<Entity, String> entry : stateToMonitor.getControlMap().entrySet()) {
+						String uniqueName = entry.getValue();
+						String control = entry.getKey() != null ? entry.getKey().getName() : null;
+
+						if (control != null && control.equalsIgnoreCase(targetType)) {
+
+							if (targetTypeIdentificationName == null) {
+								targetTypeIdentificationName = uniqueName;
+							} else {
+								// if found again then break and return that the monitor could not be identified
+								isUnique = false;
+								break;
+							}
+						}
+					}
+				}
+
+				// System.err.println("\"" + MonitorTerms.TAG_MONITOR + "\" tag NOT found");
+				if (!isUnique) {
+					return false;
+				}
+
 			}
 		}
 
@@ -596,6 +624,8 @@ public class Monitor {
 	protected boolean findMonitorAssetIDUniqueName() {
 
 		// identify the unique name of the target tag in the wrapper
+
+		// try to find the monitor in the bigraph by looking for a monitor tag
 		if (monitorTypeIdentificationName == null) {
 			for (String entityID : stateToMonitor.getControlMap().values()) {
 				String control = stateToMonitor.getControl(entityID);
@@ -607,9 +637,34 @@ public class Monitor {
 				}
 			}
 
+			// if a monitor tag is not found, then identify the monitor by finding only one
+			// control with the type of the monitor
 			if (monitorTypeIdentificationName == null) {
-				System.err.println("\"" + MonitorTerms.TAG_MONITOR + "\" tag NOT found");
-				return false;
+
+				boolean isUnique = true;
+
+				if (monitorType != null) {
+					for (Entry<Entity, String> entry : stateToMonitor.getControlMap().entrySet()) {
+						String uniqueName = entry.getValue();
+						String control = entry.getKey() != null ? entry.getKey().getName() : null;
+
+						if (control != null && control.equalsIgnoreCase(monitorType)) {
+
+							if (monitorTypeIdentificationName == null) {
+								monitorTypeIdentificationName = uniqueName;
+							} else {
+								// if found again then break and return that the monitor could not be identified
+								isUnique = false;
+								break;
+							}
+						}
+					}
+				}
+				// System.err.println("\"" + MonitorTerms.TAG_MONITOR + "\" tag NOT found");
+				if (!isUnique) {
+					return false;
+				}
+
 			}
 		}
 
@@ -640,7 +695,7 @@ public class Monitor {
 				}
 			}
 		}
-		
+
 		return true;
 	}
 

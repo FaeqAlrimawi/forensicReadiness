@@ -56,14 +56,16 @@ public class ReactionRuleMatchingTester {
 		String postActionBig = "Hallway{hallway}.id | Room{hallway}.(Visitor.id | id)";
 
 		String monitorType = "CCTV";
-
+		String targetType = "Room";
+		
 		Monitor mon = new Monitor();
 
 		mon.setTraceMiner(miner);
 //		mon.setBigraphERStatment(postActionBig);
 		mon.setMonitorType(monitorType);
+		mon.setTargetType(targetType);
 		mon.setActionMonitored(actionMonitored);
-
+		
 //		Bigraph big = mon.generateBigraph();
 //
 //		System.out.println(big);
@@ -89,10 +91,9 @@ public class ReactionRuleMatchingTester {
 		// outernames
 		// === enrich the reacturm with monitor TAGs: one for identifying the monitor,
 		// and another for identifying the target
-		postActionBig = "Hallway{hallway}.(id |" + mon.getMonitorType() + "{ipNet}." + MonitorTerms.TAG_MONITOR
-				+ ") | Room{hallway}.(Visitor.id | " + MonitorTerms.TAG_MONITOR_TARGET + ")";
+		postActionBig = "Hallway{hallway}.(id |" + mon.getMonitorType() + "{ipNet}) | Room{hallway}.(Visitor.id )";
 
-		System.out.println("\nBigraphER Statement: ["+postActionBig +"]\n");
+		System.out.println("\nBigraphER Statement: [" + postActionBig + "]\n");
 
 		mon.setBigraphERStatment(postActionBig);
 
@@ -105,8 +106,8 @@ public class ReactionRuleMatchingTester {
 
 		int preState = 1;
 		int postState = 237;
-		
-		boolean isMonitorable = mon.canMonitor(monitorID, null, preState, postState);
+
+		boolean isMonitorable = mon.canMonitor(monitorID, targetAssetID, preState, postState);
 //		boolean isMonitorable = mon.canMonitor(monitorID, null, preState, postState);
 //		boolean isMonitorable = mon.canMonitor(null, targetAssetID, preState, postState);
 //		boolean isMonitorable = mon.canMonitor(null, null, preState, postState);
