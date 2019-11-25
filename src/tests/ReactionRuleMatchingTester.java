@@ -5,6 +5,7 @@ import java.net.URL;
 import core.instantiation.analysis.TraceMiner;
 import core.monitor.Monitor;
 import core.monitor.MonitorManager;
+import core.monitor.MonitorTerms;
 
 public class ReactionRuleMatchingTester {
 
@@ -50,12 +51,13 @@ public class ReactionRuleMatchingTester {
 			return;
 		}
 		
-		String monitorID = "CCTV1";
-		
+		String monitorID1 = "CCTV1";
+		String monitorID2 = "CCTV2";
 		//####### MONITOR MANAGER
 		
 		//add monitor to manager
-		MonitorManager.addMonitor(monitorID);
+		MonitorManager.addMonitor(monitorID1);
+		MonitorManager.addMonitor(monitorID2);
 		
 		//##########################
 		
@@ -80,7 +82,7 @@ public class ReactionRuleMatchingTester {
 		 *Monitor_Tag, which is used to indicate the monitor in the partial-state by
 		 *containing the tag. More tags are available in the MonitorTerms class
 		 */
-		postActionBig = "Hallway{hallway}.(id | CCTV{ipNet}.AssetID.CCTV1) | Room{hallway}.(Visitor.id )";
+		postActionBig = "Hallway{hallway}.(id | CCTV{ipNet}.AssetID.CCTV1) | Room{hallway}.(Visitor.id ) | Room{hallway} | CCTV.AssetID.CCTV2 | Room{hallway}";
 
 		System.out.println("\nBigraphER Statement: [" + postActionBig + "]\n");
 
@@ -118,7 +120,7 @@ public class ReactionRuleMatchingTester {
 		/*
 		 * === This checks if the monitor can monitor the set target, when the action takes place.
 		 */
-		boolean isMonitorable = mon.canMonitor(preState, postState);
+		boolean isMonitorable = mon.canMonitor(targetAssetID, preState, postState);
 		
 		
 		if (isMonitorable) {

@@ -883,29 +883,62 @@ public class BRSParser {
 					} else if (isEntityJuxta) { // if entity after |
 						// then the last added entity should be remove from the
 						// root and a new entity created that combines both
-						Entity lastRoot = rootEntities.removeLast();
-						Entity newRoot = instance.createEntity();
+//						Entity lastRoot = rootEntities.removeLast();
+//						Entity newRoot = instance.createEntity();
+//
+//						newRoot.setName("Root-" + rootNum);
+//						newRoot.getEntity().add(lastRoot);
+//						newRoot.getEntity().add(tmp);
+//
+//						// ===update entities and containers
+//						addExtraRoot(newRoot.getName());
+//
+//						updateEntityContainer(entityName, newRoot.getName());
+//
+//						if (bigWrapper.getControlMap().containsKey(lastRoot)) {
+//							removeRoot(bigWrapper.getControlMap().get(lastRoot));
+//							updateEntityContainer(bigWrapper.getControlMap().get(lastRoot), newRoot.getName());
+//						}
+//
+//						// for now root is not added to all entities
+//						rootEntities.add(newRoot);
+//
+//						isEntityJuxta = false;
+//
+//						rootNum++;
+						Entity lastRoot = rootEntities.getLast();
 
-						newRoot.setName("Root-" + rootNum);
-						newRoot.getEntity().add(lastRoot);
-						newRoot.getEntity().add(tmp);
+						// if the last root is an added root, then just add the entity to it
+						if (lastRoot.getName().startsWith("Root")) {
+							lastRoot.getEntity().add(tmp);
+							updateEntityContainer(entityName, lastRoot.getName());
+							
+						} // else if the last root is an entity, then create a new root and add both to it
+						else {
+							Entity newRoot = instance.createEntity();
 
-						// ===update entities and containers
-						addExtraRoot(newRoot.getName());
+							newRoot.setName("Root-" + rootNum);
+							newRoot.getEntity().add(lastRoot);
+							newRoot.getEntity().add(tmp);
+							
+							// ===update entities and containers
+							addExtraRoot(newRoot.getName());
 
-						updateEntityContainer(entityName, newRoot.getName());
+							updateEntityContainer(entityName, newRoot.getName());
 
-						if (bigWrapper.getControlMap().containsKey(lastRoot)) {
-							removeRoot(bigWrapper.getControlMap().get(lastRoot));
-							updateEntityContainer(bigWrapper.getControlMap().get(lastRoot), newRoot.getName());
-						}
+							if (bigWrapper.getControlMap().containsKey(lastRoot)) {
+								removeRoot(bigWrapper.getControlMap().get(lastRoot));
+								updateEntityContainer(bigWrapper.getControlMap().get(lastRoot), newRoot.getName());
+							}
 
-						// for now root is not added to all entities
-						rootEntities.add(newRoot);
+							// for now root is not added to all entities
+							rootEntities.removeLast();
+							rootEntities.add(newRoot);
 
+							rootNum++;
+						}	
+						
 						isEntityJuxta = false;
-
-						rootNum++;
 					}
 
 					else { // if entity is not contained anywhere

@@ -206,7 +206,7 @@ public class Monitor {
 			if (monitorsList.size() > 1) {
 				// one monitor is required
 				// the first found is taken
-				System.out.println("Monitor Warning! more than one monitor are detected. Monitors: " + monitorsList);
+				System.out.println("*Monitor Warning! more than one monitor are detected. Monitors: " + monitorsList);
 			}
 
 			monitorAssetRef = monitorsList.get(0);
@@ -218,7 +218,7 @@ public class Monitor {
 					.get(monitorTypeAssetIDIdentificationName);
 			monitorType = stateToMonitor.getControl(monitorTypeIdentificationName);
 
-			System.out.println("Monitor found: " + monitorAssetRef + ", type: " + monitorType);
+			System.out.println("*Monitor found: " + monitorAssetRef + ", type: " + monitorType);
 
 		}
 
@@ -357,102 +357,21 @@ public class Monitor {
 //		boolean canMonitor = false;
 
 		// action is needed
-		if (actionMonitored == null || actionMonitored.isEmpty()) {
-			System.err.println("There's no action specified to monitor.");
-			return false;
-		}
-
-		// trace miner is needed
-		if (!checkTraceMiner()) {
-			return false;
-		}
-
-		// state to monitor is needed
-		if (stateToMonitor == null) {
-			System.err.println("No state to monitor is found.");
-			return false;
-		}
-
-		// from the action we can identify the pre and post states in a given trace. So
-		// providing them as parameters may not be needed
-
-		Signature sig = updateSignatureWithMonitorControls();
-
-		Bigraph big = stateToMonitor.createBigraph(false, sig);
-
-		System.out.println(big);
-
-		int diff = miner.getNumberOfBigraphMatches(big, preState, postState);
-
-		// if there's an error
-		if (diff == TraceMiner.ACTIONS_CAUSAL_DEPENDENCY_ERROR) {
-			System.err.println("Monitor Error! could not determine if monitor can monitor the given states");
-			return false;
-		}
-
-		// if the number of times the given state to monitor is more in the post than in
-		// the pre, then we consider that the monitor can monitor the change between the
-		// two states
-		if (diff > 0) {
-			return true;
-		}
-
-		// else it cannot
-
-		return false;
-	}
-
-	/**
-	 * Checks whether the monitor, with the given ID, can monitor the asset, with
-	 * the given ID if the monitor ID is NULL, then the monitor will be general
-	 * (i.e. Just monitor by type) if the asset ID (or the target ID) is NULL, then
-	 * the monitor will monitor any asset with a type matching the type of the
-	 * target
-	 */
-	public boolean canMonitor(String monitorID, String assetID, int preState, int postState) {
-
-//		if (!checkTraceMiner()) {
-//			return false;
-//		}
-//
-//		if (stateToMonitor == null) {
-//			System.err.println("There's no State for monitoring is specificed. Please set the [stateToMonitor].");
-//			return false;
-//		}
-//
-//		// action is needed
 //		if (actionMonitored == null || actionMonitored.isEmpty()) {
 //			System.err.println("There's no action specified to monitor.");
 //			return false;
 //		}
 //
-//		// === update monitor id, if given
-//
-//		// identify the unique name of the target
-//
-//		if (monitorID != null && !findMonitorAssetIDUniqueName()) {
-//			System.out.println("*Monitor Warning! Missing a Monitor Tag. The given Monitor ID [" + monitorID
-//					+ "] will be ignored.");
+//		// trace miner is needed
+//		if (!checkTraceMiner()) {
+//			return false;
 //		}
 //
-//		// update monitor id
-//		monitorTypeAssetIDIdentificationName = updateEntityID(monitorID, monitorTypeIdentificationName,
-//				monitorTypeAssetIDIdentificationName);
-//
-//		monitorAssetRef = monitorID;
-//
-//		// === update asset id, if given
-//		if (assetID != null && !findTragetAssetIDUniqueName()) {
-//			System.out.println(
-//					"*Monitor Warning! Missing a Target Tag. The given Asset ID [" + assetID + "] will be ignored.\n");
-////			return false;
+//		// state to monitor is needed
+//		if (stateToMonitor == null) {
+//			System.err.println("No state to monitor is found.");
+//			return false;
 //		}
-//
-//		// update target id
-//		targetTypeAssetIDIdentificationName = updateEntityID(assetID, targetTypeIdentificationName,
-//				targetTypeAssetIDIdentificationName);
-//
-//		targetEntityRef = assetID;
 //
 //		// from the action we can identify the pre and post states in a given trace. So
 //		// providing them as parameters may not be needed
@@ -481,8 +400,93 @@ public class Monitor {
 //		// else it cannot
 //
 //		return false;
-		
+
 		return canMonitor(monitorAssetRef, targetAssetRef, preState, postState);
+	}
+
+	/**
+	 * Checks whether the monitor, with the given ID, can monitor the asset, with
+	 * the given ID if the monitor ID is NULL, then the monitor will be general
+	 * (i.e. Just monitor by type) if the asset ID (or the target ID) is NULL, then
+	 * the monitor will monitor any asset with a type matching the type of the
+	 * target
+	 */
+	public boolean canMonitor(String monitorID, String assetID, int preState, int postState) {
+
+		if (!checkTraceMiner()) {
+			return false;
+		}
+
+		if (stateToMonitor == null) {
+			System.err.println("There's no State for monitoring is specificed. Please set the [stateToMonitor].");
+			return false;
+		}
+
+		// action is needed
+		if (actionMonitored == null || actionMonitored.isEmpty()) {
+			System.err.println("There's no action specified to monitor.");
+			return false;
+		}
+
+		// === update monitor id, if given
+
+		// identify the unique name of the target
+
+		if (monitorID != null && !findMonitorAssetIDUniqueName()) {
+			System.out.println("*Monitor Warning! Missing a Monitor Tag. The given Monitor ID [" + monitorID
+					+ "] will be ignored.");
+		}
+
+		// update monitor id
+		monitorTypeAssetIDIdentificationName = updateEntityID(monitorID, monitorTypeIdentificationName,
+				monitorTypeAssetIDIdentificationName);
+
+		monitorAssetRef = monitorID;
+
+		// === update asset id, if given
+
+		boolean isTargetFound = findTragetAssetIDUniqueName();
+		
+		if (assetID != null && !isTargetFound) {
+			System.out.println("*Monitor Warning! Missing a Target Tag. The given Asset ID [" + assetID
+					+ "] cannot be located in the given Bigraph, so it will be ignored.\n");
+//			return false;
+		}
+
+		// update target id
+		targetTypeAssetIDIdentificationName = updateEntityID(assetID, targetTypeIdentificationName,
+				targetTypeAssetIDIdentificationName);
+
+		targetAssetRef = assetID;
+
+		// from the action we can identify the pre and post states in a given trace. So
+		// providing them as parameters may not be needed
+
+		Signature sig = updateSignatureWithMonitorControls();
+
+		Bigraph big = stateToMonitor.createBigraph(false, sig);
+
+		System.out.println(big);
+
+		int diff = miner.getNumberOfBigraphMatches(big, preState, postState);
+
+		// if there's an error
+		if (diff == TraceMiner.ACTIONS_CAUSAL_DEPENDENCY_ERROR) {
+			System.err.println("Monitor Error! could not determine if monitor can monitor the given states");
+			return false;
+		}
+
+		// if the number of times the given state to monitor is more in the post than in
+		// the pre, then we consider that the monitor can monitor the change between the
+		// two states
+		if (diff > 0) {
+			return true;
+		}
+
+		// else it cannot
+
+		return false;
+
 //		return canMonitor(preState, postState);
 	}
 
@@ -746,6 +750,7 @@ public class Monitor {
 								targetTypeIdentificationName = uniqueName;
 							} else {
 								// if found again then break and return that the monitor could not be identified
+
 								isUnique = false;
 								break;
 							}
@@ -754,13 +759,15 @@ public class Monitor {
 				}
 
 				// System.err.println("\"" + MonitorTerms.TAG_MONITOR + "\" tag NOT found");
-				if (!isUnique) {
+				if (targetType == null || !isUnique) {
+					targetTypeIdentificationName = null;
 					return false;
 				}
 
 			}
 		}
 
+		System.out.println(targetTypeIdentificationName);
 		// try to find the id of the AssetID control of the target
 		if (targetTypeAssetIDIdentificationName == null) {
 			// get parent entity id
@@ -837,7 +844,8 @@ public class Monitor {
 					}
 				}
 				// System.err.println("\"" + MonitorTerms.TAG_MONITOR + "\" tag NOT found");
-				if (!isUnique) {
+				if (monitorType == null ||!isUnique) {
+					monitorTypeIdentificationName = null;
 					return false;
 				}
 

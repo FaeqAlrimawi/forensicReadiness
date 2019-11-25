@@ -110,12 +110,12 @@ public class BigraphWrapper implements Serializable {
 	// signature
 	Signature signature;
 
-	//tokenizer
+	// tokenizer
 	Tokenizer brsTokenizer;
-	
-	//for unique names
+
+	// for unique names
 	int controlNum;
-	
+
 	public BigraphWrapper() {
 		entities = new LinkedList<String>();
 		connections = new LinkedList<String>();
@@ -248,11 +248,9 @@ public class BigraphWrapper implements Serializable {
 	 * Adds the control to the control map and also the entity name to the
 	 * entityName list
 	 * 
-	 * @param entity
-	 *            Entity object
-	 * @param entityName
-	 *            String representing the entity name (modified, i.e. not
-	 *            control)
+	 * @param entity     Entity object
+	 * @param entityName String representing the entity name (modified, i.e. not
+	 *                   control)
 	 */
 	public void addControl(Entity entity, String entityName) {
 
@@ -264,6 +262,10 @@ public class BigraphWrapper implements Serializable {
 
 	public boolean hasControl(String control) {
 
+		if(control == null) {
+			return false;
+		}
+		
 		for (Entity ent : controlMap.keySet()) {
 			if (ent.getName().equals(control)) {
 				return true;
@@ -371,7 +373,6 @@ public class BigraphWrapper implements Serializable {
 
 		entitySiteMap.put(entityName, hasSite);
 	}
-	
 
 	public int getNumberOfRootSites() {
 		return numberOfRootSites;
@@ -386,20 +387,14 @@ public class BigraphWrapper implements Serializable {
 		numberOfRootSites++;
 	}
 
-//	public String getParent(String controlName) {
-//		
-//		return containerEntitiesMap.get(controlName);
-//	}
-	
+
 	/**
 	 * returns a Bigraph representation of this object. If not created it will
 	 * create it and then return it
 	 * 
-	 * @param isGrounded
-	 *            If true then the representation contains no sites. If false it
-	 *            means it can contain sites
-	 * @param sig
-	 *            Signature
+	 * @param isGrounded If true then the representation contains no sites. If false
+	 *                   it means it can contain sites
+	 * @param sig        Signature
 	 * @return Bigraph object
 	 */
 	public Bigraph getBigraphObject(boolean isGrounded, Signature sig) {
@@ -416,8 +411,8 @@ public class BigraphWrapper implements Serializable {
 
 	/**
 	 * returns a Bigraph representation of this object. If not created it will
-	 * create it and then return it. By default the Bigraph is not grounded and
-	 * the default signature is used
+	 * create it and then return it. By default the Bigraph is not grounded and the
+	 * default signature is used
 	 * 
 	 * @return Bigraph object
 	 */
@@ -442,7 +437,7 @@ public class BigraphWrapper implements Serializable {
 
 		signature = sig;
 		numOfRoots = 0;
-		
+
 		BigraphNode node;
 		Map<String, BigraphNode> nodes = new HashMap<String, BigraphNode>();
 		// SignatureBuilder sigBuilder = new SignatureBuilder();
@@ -541,8 +536,8 @@ public class BigraphWrapper implements Serializable {
 		// entities.addAll(getResource());
 		// entities.addAll(getActor());
 
-		for (Entity ent : controlMap.keySet()) {			
-			
+		for (Entity ent : controlMap.keySet()) {
+
 			// create a bigraph signature out of each entity and max arity
 			// number
 //			System.out.println(ent);
@@ -661,19 +656,17 @@ public class BigraphWrapper implements Serializable {
 		}
 
 		/*
-		 * LinkedList<String> visited = new LinkedList<String>();
-		 * for(BigraphNode nd : nodes.values()) { for(BigraphNode.OuterName ot :
-		 * nd.getOuterNamesObjects()) { if(ot.isClosed() &&
-		 * libBigOuterNames.containsKey(ot.getName()) &&
-		 * !visited.contains(ot.getName())) {
-		 * biBuilder.closeOuterName(ot.getName()); visited.add(ot.getName()); }
-		 * } }
+		 * LinkedList<String> visited = new LinkedList<String>(); for(BigraphNode nd :
+		 * nodes.values()) { for(BigraphNode.OuterName ot : nd.getOuterNamesObjects()) {
+		 * if(ot.isClosed() && libBigOuterNames.containsKey(ot.getName()) &&
+		 * !visited.contains(ot.getName())) { biBuilder.closeOuterName(ot.getName());
+		 * visited.add(ot.getName()); } } }
 		 */
 
 		// close every outername....should be removed...it is just for testing
 		/*
-		 * for(OuterName ot : libBigOuterNames.values()) {
-		 * biBuilder.closeOuterName(ot); }
+		 * for(OuterName ot : libBigOuterNames.values()) { biBuilder.closeOuterName(ot);
+		 * }
 		 */
 
 		// close innernames after creating nodes of the Bigraph
@@ -824,13 +817,12 @@ public class BigraphWrapper implements Serializable {
 		for (String entity : entities) {
 
 			String control = getControl(entity);
-			
-			//if it is irrelevant term e.g., a monitor term, then ignore
-			if(MonitorTerms.MONITOR_TERMS_TO_IGNORE.contains(control)) {
+
+			// if it is irrelevant term e.g., a monitor term, then ignore
+			if (MonitorTerms.MONITOR_TERMS_TO_IGNORE.contains(control)) {
 				continue;
 			}
-			
-			
+
 			isFound = false;
 			node = new BigraphNode();
 
@@ -1112,7 +1104,7 @@ public class BigraphWrapper implements Serializable {
 		Tokenizer brsTokenizer = new Tokenizer();
 
 		// order has importance
-		
+
 		brsTokenizer.add(BigraphERTokens.TOKEN_CONTAINMENT, BigraphERTokens.CONTAINMENT);
 		brsTokenizer.add(BigraphERTokens.TOKEN_COMPOSITION, BigraphERTokens.COMPOSITION);
 		brsTokenizer.add(BigraphERTokens.TOKEN_BIGRAPH_JUXTAPOSITION, BigraphERTokens.BIGRAPH_JUXTAPOSITION);
@@ -1131,7 +1123,7 @@ public class BigraphWrapper implements Serializable {
 
 		return brsTokenizer;
 	}
-	
+
 	public void parseBigraphERCondition(String bigrapherStatement) {
 
 		if (brsTokenizer == null) {
@@ -1168,9 +1160,14 @@ public class BigraphWrapper implements Serializable {
 
 		// ===tokenize
 		brsTokenizer.tokenize(bigrapherStatement);
-		
+
 		for (Tokenizer.Token tok : brsTokenizer.getTokens()) {
 			switch (tok.token) {
+
+//			case BigraphERTokens.SMALL_SPACE: // space
+//				System.out.println(tok.sequence);
+//				// ignore
+//				break;
 
 			case BigraphERTokens.CONTAINMENT: // .
 
@@ -1193,7 +1190,7 @@ public class BigraphWrapper implements Serializable {
 
 				// remove a container from the list of containers
 				if (!containers.isEmpty()) {
-
+//					System.out.println("!closed");
 					// check if it has site
 					if (!hasSite) {
 						containers.getFirst().setSite(null);
@@ -1203,11 +1200,17 @@ public class BigraphWrapper implements Serializable {
 					}
 
 					containers.pop();
+//					isContainment = false;
 				}
+//				else {
+//					
+//				}
 
-				if (containers.isEmpty()) {
-					// isBracketContainment = false;
-				}
+//				if (containers.isEmpty()) {
+//					// isBracketContainment = false;
+//				}
+//				isBracketContainment = false;
+//				isContainment = true;
 
 				break;
 
@@ -1219,6 +1222,7 @@ public class BigraphWrapper implements Serializable {
 				break;
 			case BigraphERTokens.BIGRAPH_JUXTAPOSITION: // ||
 
+				System.out.println("!position");
 				// next element should be a root element
 				isBigraphJuxta = true;
 
@@ -1409,29 +1413,63 @@ public class BigraphWrapper implements Serializable {
 					} else if (isEntityJuxta) { // if entity after |
 						// then the last added entity should be remove from the
 						// root and a new entity created that combines both
-						Entity lastRoot = rootEntities.removeLast();
-						Entity newRoot = instance.createEntity();
+//						Entity lastRoot = rootEntities.removeLast();
+//						Entity newRoot = instance.createEntity();
+//
+//						newRoot.setName("Root-" + rootNum);
+//						newRoot.getEntity().add(lastRoot);
+//						newRoot.getEntity().add(tmp);
+//
+//						// ===update entities and containers
+//						addExtraRoot(newRoot.getName());
+//
+//						updateEntityContainer(entityName, newRoot.getName());
+//
+//						if (this.getControlMap().containsKey(lastRoot)) {
+//							removeRoot(this.getControlMap().get(lastRoot));
+//							updateEntityContainer(this.getControlMap().get(lastRoot), newRoot.getName());
+//						}
+//
+//						// for now root is not added to all entities
+//						rootEntities.add(newRoot);
+//
+//						isEntityJuxta = false;
+//
+//						rootNum++;
 
-						newRoot.setName("Root-" + rootNum);
-						newRoot.getEntity().add(lastRoot);
-						newRoot.getEntity().add(tmp);
+						Entity lastRoot = rootEntities.getLast();
 
-						// ===update entities and containers
-						addExtraRoot(newRoot.getName());
+						// if the last root is an added root, then just add the entity to it
+						if (lastRoot.getName().startsWith("Root")) {
+							lastRoot.getEntity().add(tmp);
+							updateEntityContainer(entityName, lastRoot.getName());
+							
+						} // else if the last root is an entity, then create a new root and add both to it
+						else {
+							Entity newRoot = instance.createEntity();
 
-						updateEntityContainer(entityName, newRoot.getName());
+							newRoot.setName("Root-" + rootNum);
+							newRoot.getEntity().add(lastRoot);
+							newRoot.getEntity().add(tmp);
+							
+							// ===update entities and containers
+							addExtraRoot(newRoot.getName());
 
-						if (this.getControlMap().containsKey(lastRoot)) {
-							removeRoot(this.getControlMap().get(lastRoot));
-							updateEntityContainer(this.getControlMap().get(lastRoot), newRoot.getName());
-						}
+							updateEntityContainer(entityName, newRoot.getName());
 
-						// for now root is not added to all entities
-						rootEntities.add(newRoot);
+							if (this.getControlMap().containsKey(lastRoot)) {
+								removeRoot(this.getControlMap().get(lastRoot));
+								updateEntityContainer(this.getControlMap().get(lastRoot), newRoot.getName());
+							}
 
+							// for now root is not added to all entities
+							rootEntities.removeLast();
+							rootEntities.add(newRoot);
+
+							rootNum++;
+						}	
+						
 						isEntityJuxta = false;
-
-						rootNum++;
 					}
 
 					else { // if entity is not contained anywhere
@@ -1464,10 +1502,9 @@ public class BigraphWrapper implements Serializable {
 
 		this.setBigraphExpression(newBRS);
 
-
 //		return bigWrapper;
 	}
-	
+
 	protected void addSite(String entityName) {
 
 		if (entityName == null) {
@@ -1488,12 +1525,12 @@ public class BigraphWrapper implements Serializable {
 		String uniqName = "";
 
 		Random rand = new Random();
-		
+
 		int upperLimit = 100000;
-		
+
 		int id = rand.nextInt(upperLimit);
-		
-		uniqName = entity.getName() +""+id;
+
+		uniqName = entity.getName() + "" + id;
 
 //		controlNum++;
 
@@ -1597,7 +1634,7 @@ public class BigraphWrapper implements Serializable {
 		}
 
 	}
-	
+
 	public void printAll() {
 
 		System.out.println("//===== BRS expression");
