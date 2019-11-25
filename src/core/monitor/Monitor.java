@@ -50,7 +50,7 @@ public class Monitor {
 
 	// target asset to monitor i.e. specific entity
 	// if NULL, then all entities of target Type are monitored
-	String targetEntityRef = null;
+	String targetAssetRef = null;
 
 	// data to collect if need to monitor
 	// data represents what pieces of information need to be collected by the
@@ -124,12 +124,12 @@ public class Monitor {
 		this.targetType = targetType;
 	}
 
-	public String getTargetEntityRef() {
-		return targetEntityRef;
+	public String getTargetAssetRef() {
+		return targetAssetRef;
 	}
 
-	public void setTargetEntityRef(String targetEntityRef) {
-		this.targetEntityRef = targetEntityRef;
+	public void setTargetAssetRef(String targetAssetRef) {
+		this.targetAssetRef = targetAssetRef;
 	}
 
 	public String getDataToCollect() {
@@ -411,43 +411,89 @@ public class Monitor {
 	 */
 	public boolean canMonitor(String monitorID, String assetID, int preState, int postState) {
 
-		if (!checkTraceMiner()) {
-			return false;
-		}
-
-		if (stateToMonitor == null) {
-			return false;
-		}
-
-		// === update monitor id, if given
-
-		// identify the unique name of the target
-
-		if (monitorID != null && !findMonitorAssetIDUniqueName()) {
-			System.out.println("*Monitor Warning! Missing a Monitor Tag. The given Monitor ID [" + monitorID
-					+ "] will be ignored.");
-		}
-
-		// update monitor id
-		monitorTypeAssetIDIdentificationName = updateEntityID(monitorID, monitorTypeIdentificationName,
-				monitorTypeAssetIDIdentificationName);
-
-		monitorAssetRef = monitorID;
-
-		// === update asset id, if given
-		if (assetID != null && !findTragetAssetIDUniqueName()) {
-			System.out.println(
-					"*Monitor Warning! Missing a Target Tag. The given Asset ID [" + assetID + "] will be ignored.\n");
+//		if (!checkTraceMiner()) {
 //			return false;
-		}
+//		}
+//
+//		if (stateToMonitor == null) {
+//			System.err.println("There's no State for monitoring is specificed. Please set the [stateToMonitor].");
+//			return false;
+//		}
+//
+//		// action is needed
+//		if (actionMonitored == null || actionMonitored.isEmpty()) {
+//			System.err.println("There's no action specified to monitor.");
+//			return false;
+//		}
+//
+//		// === update monitor id, if given
+//
+//		// identify the unique name of the target
+//
+//		if (monitorID != null && !findMonitorAssetIDUniqueName()) {
+//			System.out.println("*Monitor Warning! Missing a Monitor Tag. The given Monitor ID [" + monitorID
+//					+ "] will be ignored.");
+//		}
+//
+//		// update monitor id
+//		monitorTypeAssetIDIdentificationName = updateEntityID(monitorID, monitorTypeIdentificationName,
+//				monitorTypeAssetIDIdentificationName);
+//
+//		monitorAssetRef = monitorID;
+//
+//		// === update asset id, if given
+//		if (assetID != null && !findTragetAssetIDUniqueName()) {
+//			System.out.println(
+//					"*Monitor Warning! Missing a Target Tag. The given Asset ID [" + assetID + "] will be ignored.\n");
+////			return false;
+//		}
+//
+//		// update target id
+//		targetTypeAssetIDIdentificationName = updateEntityID(assetID, targetTypeIdentificationName,
+//				targetTypeAssetIDIdentificationName);
+//
+//		targetEntityRef = assetID;
+//
+//		// from the action we can identify the pre and post states in a given trace. So
+//		// providing them as parameters may not be needed
+//
+//		Signature sig = updateSignatureWithMonitorControls();
+//
+//		Bigraph big = stateToMonitor.createBigraph(false, sig);
+//
+//		System.out.println(big);
+//
+//		int diff = miner.getNumberOfBigraphMatches(big, preState, postState);
+//
+//		// if there's an error
+//		if (diff == TraceMiner.ACTIONS_CAUSAL_DEPENDENCY_ERROR) {
+//			System.err.println("Monitor Error! could not determine if monitor can monitor the given states");
+//			return false;
+//		}
+//
+//		// if the number of times the given state to monitor is more in the post than in
+//		// the pre, then we consider that the monitor can monitor the change between the
+//		// two states
+//		if (diff > 0) {
+//			return true;
+//		}
+//
+//		// else it cannot
+//
+//		return false;
+		
+		return canMonitor(monitorAssetRef, targetAssetRef, preState, postState);
+//		return canMonitor(preState, postState);
+	}
 
-		// update target id
-		targetTypeAssetIDIdentificationName = updateEntityID(assetID, targetTypeIdentificationName,
-				targetTypeAssetIDIdentificationName);
+	/**
+	 * Checks whether this monitor can monitor the asset, with the given ID. If the
+	 * asset/target ID is NULL, then the monitor will monitor any asset with a type
+	 * matching the type of the target as set originally in the monitor
+	 */
+	public boolean canMonitor(String assetID, int preState, int postState) {
 
-		targetEntityRef = assetID;
-
-		return canMonitor(preState, postState);
+		return canMonitor(monitorAssetRef, assetID, preState, postState);
 	}
 
 	/**
@@ -649,8 +695,8 @@ public class Monitor {
 			}
 
 			// add asset ref, if anny
-			if (targetEntityRef != null && !sig.contains(targetEntityRef)) {
-				sigBldr.add(targetEntityRef, false, 0);
+			if (targetAssetRef != null && !sig.contains(targetAssetRef)) {
+				sigBldr.add(targetAssetRef, false, 0);
 			}
 
 			// add asset ref, if anny

@@ -5,8 +5,6 @@ import java.net.URL;
 import core.instantiation.analysis.TraceMiner;
 import core.monitor.Monitor;
 import core.monitor.MonitorManager;
-import core.monitor.MonitorTerms;
-import it.uniud.mads.jlibbig.core.std.Bigraph;
 
 public class ReactionRuleMatchingTester {
 
@@ -82,7 +80,7 @@ public class ReactionRuleMatchingTester {
 		 *Monitor_Tag, which is used to indicate the monitor in the partial-state by
 		 *containing the tag. More tags are available in the MonitorTerms class
 		 */
-		postActionBig = "Hallway{hallway}.(id | CCTV.{ipNet}.AssetID.CCTV1) | Room{hallway}.(Visitor.id )";
+		postActionBig = "Hallway{hallway}.(id | CCTV{ipNet}.AssetID.CCTV1) | Room{hallway}.(Visitor.id )";
 
 		System.out.println("\nBigraphER Statement: [" + postActionBig + "]\n");
 
@@ -110,19 +108,19 @@ public class ReactionRuleMatchingTester {
 		 * an asset with the given target type, when the action takes place.
 		 */
 //		boolean isMonitorable = mon.canMonitor(monitorID, null, preState, postState);
-
+		
 		/*
-		 * === This checks a monitor with the given type can monitor the target with the
+		 * === This checks if the monitor can monitor the target with the
 		 * given ID (targetAssetID), when the action takes place.
 		 */
-//		boolean isMonitorable = mon.canMonitor(null, targetAssetID, preState, postState);
+//		boolean isMonitorable = mon.canMonitor(targetAssetID, preState, postState);
 
 		/*
-		 * === This checks a monitor with the given type can monitor the target with the
-		 * given ID (targetAssetID), when the action takes place.
+		 * === This checks if the monitor can monitor the set target, when the action takes place.
 		 */
-		boolean isMonitorable = mon.canMonitor(null, null, preState, postState);
-
+		boolean isMonitorable = mon.canMonitor(preState, postState);
+		
+		
 		if (isMonitorable) {
 			System.out.println("Yes, can monitor...");
 		} else {
