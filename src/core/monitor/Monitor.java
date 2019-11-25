@@ -11,6 +11,7 @@ import core.brs.parser.utilities.JSONTerms;
 import core.instantiation.analysis.TraceMiner;
 import cyberPhysical_Incident.CyberPhysicalIncidentFactory;
 import cyberPhysical_Incident.Entity;
+import it.uniud.mads.jlibbig.core.BigraphHandler;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Control;
 import it.uniud.mads.jlibbig.core.std.Signature;
@@ -193,12 +194,43 @@ public class Monitor {
 
 		stateToMonitor.parseBigraphERCondition(bigStmt);
 
-		boolean isMonitorTagAvailable = findMonitorAssetIDUniqueName();
-		boolean isTargetTagAvailable = findTragetAssetIDUniqueName();
+		// try to find monitors from given ids
+		List<String> monitorsList = findMonitor(stateToMonitor);
 
-		if (!isMonitorTagAvailable) {
-			System.out.println("*Monitor Warning! Monitor tag is not found in the given bigraphER statement");
+		if (monitorsList != null && !monitorsList.isEmpty()) {
+
+			// if there are more than 1 monitor in the given bigrapher expression, then
+			// indicate that to the user (maybe one would be enough, but also some cases may
+			// require multiple monitors. Still, this class is about having one monitor, so
+			// one monitor is needed)
+			if (monitorsList.size() > 1) {
+				// one monitor is required
+				// the first found is taken
+				System.out.println("Monitor Warning! more than one monitor are detected. Monitors: " + monitorsList);
+			}
+
+			monitorAssetRef = monitorsList.get(0);
+
+			// get monitor unique name and type
+			monitorTypeAssetIDIdentificationName = findAssetIDUniqueName(monitorAssetRef);
+
+			monitorTypeIdentificationName = stateToMonitor.getContainerEntitiesMap()
+					.get(monitorTypeAssetIDIdentificationName);
+			monitorType = stateToMonitor.getControl(monitorTypeIdentificationName);
+
+			System.out.println("Monitor found: " + monitorAssetRef + ", type: " + monitorType);
+
 		}
+
+		if (monitorTypeIdentificationName == null || monitorTypeIdentificationName.isEmpty()) {
+			boolean isMonitorTagAvailable = findMonitorAssetIDUniqueName();
+
+			if (!isMonitorTagAvailable) {
+				System.out.println("*Monitor Warning! Monitor tag is not found in the given bigraphER statement");
+			}
+		}
+
+		boolean isTargetTagAvailable = findTragetAssetIDUniqueName();
 
 		if (!isTargetTagAvailable) {
 			System.out.println("*Monitor Warning! Target tag is not found in the given bigraphER statement");
@@ -206,8 +238,106 @@ public class Monitor {
 	}
 
 	/**
-	 * ============= ============= MAIN METHODS =============
+	 * Finds all monitors in the given bigraph wrapper and returns a list of their
+	 * IDs. All available monitors are assumed to be set in the MonitorManager class
+	 * 
+	 * @param bigWrapper
+	 * @return A list of monitor IDs that are found in the given BigrahWrapper
+	 *         object
 	 */
+	public List<String> findMonitor(BigraphWrapper bigWrapper) {
+
+		if (bigWrapper == null) {
+			return null;
+		}
+
+		// === looks for a monitor in the given bigraph wrapper
+		// it does this by finding ids for monitors, if ids are available
+
+		if (!MonitorManager.hasMonitors()) {
+			System.out.println("Monitor Manager: There are no Monitors");
+			return null;
+		}
+
+		List<String> monitorIDsFound = new LinkedList<String>();
+
+		for (Entry<Entity, String> entry : bigWrapper.getControlMap().entrySet()) {
+			Entity ent = entry.getKey();
+			String id = entry.getValue();
+
+			String control = ent.getName();
+
+			// if the control is asset id, then look for child for id
+			if (control.equalsIgnoreCase(JSONTerms.CONTROL_ASSET_ID)) {
+				List<String> assetIDList = bigWrapper.getContainedEntitiesMap().get(id);
+
+				if (assetIDList != null && !assetIDList.isEmpty()) {
+					String assetIDUniqueName = assetIDList.get(0);
+					String assetID = bigWrapper.getControl(assetIDUniqueName);
+					// if monitor is found, then ad to the list
+					if (MonitorManager.hasMonitor(assetID)) {
+						monitorIDsFound.add(assetID);
+					}
+				}
+			}
+
+		}
+
+		return monitorIDsFound;
+	}
+
+	/**
+	 * Finds all monitors in the given bigraphER expression and returns a list of
+	 * their IDs. All available monitors are assumed to be set in the MonitorManager
+	 * class
+	 * 
+	 * @param bigraphERExpression a BigraphER expression
+	 * @return A list of monitor IDs that are found in the given BigrahWrapper
+	 *         object
+	 */
+	public List<String> findMonitor(String bigraphERExpression) {
+
+		if (bigraphERExpression == null) {
+			return null;
+		}
+
+		BigraphWrapper bigWrapper = new BigraphWrapper();
+		bigWrapper.parseBigraphERCondition(bigraphERExpression);
+
+		// === looks for a monitor in the given bigraph wrapper
+		// it does this by finding ids for monitors, if ids are available
+
+		if (!MonitorManager.hasMonitors()) {
+			System.out.println("Monitor Manager: There are no Monitors");
+			return null;
+		}
+
+		List<String> monitorIDsFound = new LinkedList<String>();
+
+		for (Entry<Entity, String> entry : bigWrapper.getControlMap().entrySet()) {
+			Entity ent = entry.getKey();
+			String id = entry.getValue();
+
+			String control = ent.getName();
+
+			// if the control is asset id, then look for child for id
+			if (control.equalsIgnoreCase(JSONTerms.CONTROL_ASSET_ID)) {
+				List<String> assetIDList = bigWrapper.getContainedEntitiesMap().get(id);
+
+				if (assetIDList != null && !assetIDList.isEmpty()) {
+					String assetIDUniqueName = assetIDList.get(0);
+					String assetID = bigWrapper.getControl(assetIDUniqueName);
+					// if monitor is found, then ad to the list
+					if (MonitorManager.hasMonitor(assetID)) {
+						monitorIDsFound.add(assetID);
+					}
+				}
+			}
+
+		}
+
+		return monitorIDsFound;
+	}
 
 	// ========= Method to assess if this monitor can monitor the given actions and
 	// its per & post system states
@@ -256,6 +386,7 @@ public class Monitor {
 
 		// if there's an error
 		if (diff == TraceMiner.ACTIONS_CAUSAL_DEPENDENCY_ERROR) {
+			System.err.println("Monitor Error! could not determine if monitor can monitor the given states");
 			return false;
 		}
 
@@ -295,7 +426,6 @@ public class Monitor {
 		if (monitorID != null && !findMonitorAssetIDUniqueName()) {
 			System.out.println("*Monitor Warning! Missing a Monitor Tag. The given Monitor ID [" + monitorID
 					+ "] will be ignored.");
-//			return false;
 		}
 
 		// update monitor id

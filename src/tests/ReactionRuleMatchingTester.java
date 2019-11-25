@@ -4,6 +4,7 @@ import java.net.URL;
 
 import core.instantiation.analysis.TraceMiner;
 import core.monitor.Monitor;
+import core.monitor.MonitorManager;
 import core.monitor.MonitorTerms;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 
@@ -50,7 +51,17 @@ public class ReactionRuleMatchingTester {
 			System.err.println("TraceMiner object is null");
 			return;
 		}
-
+		
+		String monitorID = "CCTV1";
+		
+		//####### MONITOR MANAGER
+		
+		//add monitor to manager
+		MonitorManager.addMonitor(monitorID);
+		
+		//##########################
+		
+		
 		// reactum of enter room action
 		String actionMonitored = "VisitorEnterRoom";
 		String postActionBig = "Hallway{hallway}.id | Room{hallway}.(Visitor.id | id)";
@@ -61,7 +72,7 @@ public class ReactionRuleMatchingTester {
 		Monitor mon = new Monitor();
 
 		// ===set attributes of monitor
-		mon.setMonitorType(monitorType);
+//		mon.setMonitorType(monitorType);
 		mon.setTargetType(targetType);
 		mon.setActionMonitored(actionMonitored);
 		mon.setTraceMiner(miner);
@@ -71,7 +82,7 @@ public class ReactionRuleMatchingTester {
 		 *Monitor_Tag, which is used to indicate the monitor in the partial-state by
 		 *containing the tag. More tags are available in the MonitorTerms class
 		 */
-		postActionBig = "Hallway{hallway}.(id |" + mon.getMonitorType() + "{ipNet}) | Room{hallway}.(Visitor.id )";
+		postActionBig = "Hallway{hallway}.(id | CCTV.{ipNet}.AssetID.CCTV1) | Room{hallway}.(Visitor.id )";
 
 		System.out.println("\nBigraphER Statement: [" + postActionBig + "]\n");
 
@@ -80,7 +91,7 @@ public class ReactionRuleMatchingTester {
 		//===test if the monitor can monitor the specified action pre and post states
 		// in a trace
 		String targetAssetID = "Office_T24";
-		String monitorID = "CCTV1";
+		
 
 		int preState = 1;
 		int postState = 237;
