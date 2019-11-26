@@ -103,6 +103,10 @@ public class Monitor {
 	public String getMonitorAssetRef() {
 		return monitorAssetRef;
 	}
+	
+	public String getMonitorID() {
+		return monitorAssetRef;
+	}
 
 	public void setMonitorAssetRef(String monitorAssetRef) {
 		this.monitorAssetRef = monitorAssetRef;
@@ -353,53 +357,6 @@ public class Monitor {
 	// the result is then converted to Boolean (true if >0, false otherwise)
 
 	public boolean canMonitor(int preState, int postState) {
-
-//		boolean canMonitor = false;
-
-		// action is needed
-//		if (actionMonitored == null || actionMonitored.isEmpty()) {
-//			System.err.println("There's no action specified to monitor.");
-//			return false;
-//		}
-//
-//		// trace miner is needed
-//		if (!checkTraceMiner()) {
-//			return false;
-//		}
-//
-//		// state to monitor is needed
-//		if (stateToMonitor == null) {
-//			System.err.println("No state to monitor is found.");
-//			return false;
-//		}
-//
-//		// from the action we can identify the pre and post states in a given trace. So
-//		// providing them as parameters may not be needed
-//
-//		Signature sig = updateSignatureWithMonitorControls();
-//
-//		Bigraph big = stateToMonitor.createBigraph(false, sig);
-//
-//		System.out.println(big);
-//
-//		int diff = miner.getNumberOfBigraphMatches(big, preState, postState);
-//
-//		// if there's an error
-//		if (diff == TraceMiner.ACTIONS_CAUSAL_DEPENDENCY_ERROR) {
-//			System.err.println("Monitor Error! could not determine if monitor can monitor the given states");
-//			return false;
-//		}
-//
-//		// if the number of times the given state to monitor is more in the post than in
-//		// the pre, then we consider that the monitor can monitor the change between the
-//		// two states
-//		if (diff > 0) {
-//			return true;
-//		}
-//
-//		// else it cannot
-//
-//		return false;
 
 		return canMonitor(monitorAssetRef, targetAssetRef, preState, postState);
 	}
