@@ -52,13 +52,14 @@ public class ReactionRuleMatchingTester {
 		}
 		
 		String monitorID1 = "CCTV1";
-		String monitorID2 = "CCTV2";
+//		String monitorID2 = "CCTV2";
 		//####### MONITOR MANAGER
 		
 		//add monitor to manager
-		MonitorManager.addMonitor(monitorID1);
-		MonitorManager.addMonitor(monitorID2);
+//		MonitorManager.addMonitor(monitorID1);
+//		MonitorManager.addMonitor(monitorID2);
 		
+//		
 		//##########################
 		
 		
