@@ -22,5 +22,6 @@
 	<classpathentry kind="lib" path="lib/Saxon9/saxon9he.jar"/>
 	<classpathentry kind="lib" path="lib/json-20140107.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JavaFX"/>
+	<classpathentry kind="lib" path="lib/choco-solver-4.0.8.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
