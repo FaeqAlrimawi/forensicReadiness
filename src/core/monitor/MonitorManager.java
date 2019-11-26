@@ -4,8 +4,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import core.brs.parser.BigraphWrapper;
+import core.brs.parser.utilities.JSONTerms;
+import cyberPhysical_Incident.Entity;
 import environment.EnvironmentDiagram;
+import ie.lero.spare.pattern_instantiation.GraphPath;
 
 public class MonitorManager {
 
@@ -26,6 +31,7 @@ public class MonitorManager {
 	public static final int UNDETERMINED = 0;
 	public static final int CANNOT_MONITOR = -1;
 	public static final int NO_MONITORS_AVAILABLE = -2;
+	public static final int ERROR = -3;
 
 	public MonitorManager() {
 
@@ -113,6 +119,43 @@ public class MonitorManager {
 	}
 
 	/**
+	 * Determines whether the given trace can be monitored or not. A trace can be
+	 * monitored if all its actions can be monitored by at least one monitor
+	 * 
+	 * @param trace A GraphPath object representing the trace
+	 * @return an integer indicating the result. In general, a positive integer
+	 *         indicates a success, a negative indicates a problem occurred.
+	 *         Integers range from CAN_MONITOR to CANNOT_MONITOR, with states
+	 *         in-between for indicating states where, for example, it is
+	 *         UNDETERMINED or NO_MONITORS_AVAILABLE
+	 */
+	public int canMonitor(GraphPath trace) {
+
+		if (trace == null) {
+			return ERROR;
+		}
+
+		List<String> actions = trace.getTraceActions();
+		List<Integer> states = trace.getStateTransitions();
+
+		for (int i = 0; i < actions.size(); i++) {
+
+			String action = actions.get(i);
+			int preState = states.get(i);
+			int postState = states.get(i + 1);
+
+			int canMon = canMonitor(action, preState, postState);
+
+			// if there's an issue, then return the issue
+			if (canMon != CAN_MONITOR) {
+				return canMon;
+			}
+		}
+
+		return CAN_MONITOR;
+	}
+
+	/**
 	 * Determines whether the monitor with the given ID can monitor the given action
 	 * and assetID in the change (pre and post states)
 	 * 
@@ -122,8 +165,11 @@ public class MonitorManager {
 	 * @param assetID   target asset ID to monitor
 	 * @param preState  the state of the system BEFORE the action takes place
 	 * @param postState the state of the system AFTER the action takes place
-	 * @return The list of monitors that are capable of monitoring the given action,
-	 *         asset, and change
+	 * @return an integer indicating the result. In general, a positive integer
+	 *         indicates a success, a negative indicates a problem occurred.
+	 *         Integers range from CAN_MONITOR to CANNOT_MONITOR, with states
+	 *         in-between for indicating states where, for example, it is
+	 *         UNDETERMINED or NO_MONITORS_AVAILABLE
 	 */
 	public int canMonitor(String monitorID, String action, String assetID, int preState, int postState) {
 
@@ -178,8 +224,11 @@ public class MonitorManager {
 	 * @param assetID   target asset ID to monitor
 	 * @param preState  the state of the system BEFORE the action takes place
 	 * @param postState the state of the system AFTER the action takes place
-	 * @return The list of monitors that are capable of monitoring the given action,
-	 *         asset, and change
+	 * @return an integer indicating the result. In general, a positive integer
+	 *         indicates a success, a negative indicates a problem occurred.
+	 *         Integers range from CAN_MONITOR to CANNOT_MONITOR, with states
+	 *         in-between for indicating states where, for example, it is
+	 *         UNDETERMINED or NO_MONITORS_AVAILABLE
 	 */
 	public int canMonitor(String action, String assetID, int preState, int postState) {
 
@@ -187,6 +236,20 @@ public class MonitorManager {
 		return canMonitor(null, action, assetID, preState, postState);
 	}
 
+	/**
+	 * Determines whether the given action in the change (pre and post states) can
+	 * be monitored by at least 1 monitor
+	 * 
+	 * @param action    Action to monitor
+	 * @param assetID   target asset ID to monitor
+	 * @param preState  the state of the system BEFORE the action takes place
+	 * @param postState the state of the system AFTER the action takes place
+	 * @return an integer indicating the result. In general, a positive integer
+	 *         indicates a success, a negative indicates a problem occurred.
+	 *         Integers range from CAN_MONITOR to CANNOT_MONITOR, with states
+	 *         in-between for indicating states where, for example, it is
+	 *         UNDETERMINED or NO_MONITORS_AVAILABLE
+	 */
 	public int canMonitor(String action, int preState, int postState) {
 
 		return canMonitor(null, action, null, preState, postState);
@@ -240,5 +303,75 @@ public class MonitorManager {
 
 		return getCapableMonitors(action, null, preState, postState);
 
+	}
+	
+	/**
+	 * Finds all monitors in the given bigraph wrapper and returns a list of their
+	 * IDs. All available monitors are assumed to be set in the MonitorManager class
+	 * 
+	 * @param bigWrapper
+	 * @return A list of monitor IDs that are found in the given BigrahWrapper
+	 *         object
+	 */
+	public List<String> findMonitors(BigraphWrapper bigWrapper) {
+
+		if (bigWrapper == null) {
+			return null;
+		}
+
+		// === looks for a monitor in the given bigraph wrapper
+		// it does this by finding ids for monitors, if ids are available
+
+		if (!hasMonitors()) {
+//			System.out.println("Monitor Manager: There are no Monitors");
+			return null;
+		}
+
+		List<String> monitorIDsFound = new LinkedList<String>();
+
+		for (Entry<Entity, String> entry : bigWrapper.getControlMap().entrySet()) {
+			Entity ent = entry.getKey();
+			String id = entry.getValue();
+
+			String control = ent.getName();
+
+			// if the control is asset id, then look for child for id
+			if (control.equalsIgnoreCase(JSONTerms.CONTROL_ASSET_ID)) {
+				List<String> assetIDList = bigWrapper.getContainedEntitiesMap().get(id);
+
+				if (assetIDList != null && !assetIDList.isEmpty()) {
+					String assetIDUniqueName = assetIDList.get(0);
+					String assetID = bigWrapper.getControl(assetIDUniqueName);
+					// if monitor is found, then ad to the list
+					if (monitors.containsKey(assetID)) {
+						monitorIDsFound.add(assetID);
+					}
+				}
+			}
+
+		}
+
+		return monitorIDsFound;
+	}
+	
+	/**
+	 * Finds all monitors in the given bigraphER expression and returns a list of
+	 * their IDs. All available monitors are assumed to be set in the MonitorManager
+	 * class
+	 * 
+	 * @param bigraphERExpression a BigraphER expression
+	 * @return A list of monitor IDs that are found in the given BigrahWrapper
+	 *         object
+	 */
+	public List<String> findMonitors(String bigraphERExpression) {
+
+		if (bigraphERExpression == null) {
+			return null;
+		}
+
+		BigraphWrapper bigWrapper = new BigraphWrapper();
+		bigWrapper.parseBigraphERCondition(bigraphERExpression);
+	
+		return findMonitors(bigWrapper);
 	}
 }
