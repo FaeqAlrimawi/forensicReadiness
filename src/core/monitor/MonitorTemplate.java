@@ -8,11 +8,16 @@ public class MonitorTemplate {
 	 * @param monType The type of monitor to create
 	 * @return A Monitor object
 	 */
-	public Monitor createMonitor(MonitorType monType) {
+	public static Monitor createMonitor(MonitorType monType) {
+
+		if (monType == null) {
+			return null;
+		}
 
 		Monitor mon = new Monitor();
 
 		mon.setMonitorType(monType.getType());
+		mon.setTargetType(monType.getTargetType());
 		mon.setActionMonitored(monType.getActionMonitored());
 		mon.setBigraphERStatment(monType.getMonitoringExpression());
 

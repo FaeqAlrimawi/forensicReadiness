@@ -2,11 +2,15 @@ package core.monitor;
 
 public enum MonitorType {
 
-	VISITOR_ENTER_ROOM("CCTV", "VisitorEnterRoom", "Hallway{hallway}.(id | CCTV{ipNet}) | Room{hallway}.(Visitor.id)");
-	// need other types
+	VISITOR_ENTER_ROOM("CCTV", "Room", "VisitorEnterRoom",
+			"Hallway{hallway}.(id | CCTV{ipNet}) | Room{hallway}.(Visitor.id)");
+	//=== need other types
 
 	// type of monitor
 	String type;
+
+	// target to monitor
+	String targetType;
 
 	// expression that indicates what it can monitor. The expression is BigraphER
 	// expression
@@ -14,6 +18,13 @@ public enum MonitorType {
 
 	// the action that it can monitor
 	String actionMonitored;
+
+	MonitorType(String type, String targetType, String actionMonitored, String monitoringExpression) {
+		this.type = type;
+		this.targetType = targetType;
+		this.monitoringExpression = monitoringExpression;
+		this.actionMonitored = actionMonitored;
+	}
 
 	MonitorType(String type, String actionMonitored, String monitoringExpression) {
 		this.type = type;
@@ -32,6 +43,10 @@ public enum MonitorType {
 
 	String getType() {
 		return type;
+	}
+
+	String getTargetType() {
+		return targetType;
 	}
 
 	String getMonitoringExpression() {
