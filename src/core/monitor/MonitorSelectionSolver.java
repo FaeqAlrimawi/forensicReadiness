@@ -100,13 +100,22 @@ public class MonitorSelectionSolver {
 
 //		System.out.println(monitorToIDMap.values());
 		// ==dummy cost
-		int size = monitors.size();
+		int size = monitorToIDMap.size();
 		int[] cost = new int[size];
 		Random rand = new Random();
 
-		for (int i = 0; i < cost.length; i++) {
+		int i=0;
+		
+		for(Monitor m : monitorToIDMap.keySet()) {
+			
 			cost[i] = rand.nextInt(100);
+			System.out.println("c: "+cost[i]+" m: "+m.getMonitorID());
+			i++;
 		}
+//		for (int i = 0; i < cost.length; i++) {
+//			cost[i] = rand.nextInt(100);
+//			System.out.print("c: "+cost[i]+" m: ");
+//		}
 
 		// find solutions
 		// key is solution id, value is the id of the monitor
@@ -115,7 +124,13 @@ public class MonitorSelectionSolver {
 		List<String> actionNames = Lists.newArrayList(actionToIDMap.keySet());
 		
 		for (Entry<Integer, List<Integer>> solution : solutions.entrySet()) {
-			System.out.println("Solution-" + solution.getKey() +" cost = " + allSolutionsSeverity.get(solution.getKey()));
+			
+			if(allSolutionsSeverity.isEmpty()) {
+				System.out.println("Solution-" + solution.getKey());
+			} else {
+				System.out.println("Solution-" + solution.getKey() +" cost = " + allSolutionsSeverity.get(solution.getKey()));	
+			}
+			
 			int index = 0;
 			// monitors
 			for (Integer monID : solution.getValue()) {
@@ -161,9 +176,7 @@ public class MonitorSelectionSolver {
 //		this.patternMaps = patternMaps;
 		this.patternSeverityLevel = cost;
 
-		int[] actionsArray;
-//		actionsArray = getActionsArray();
-		actionsArray = actionToIDMap.values().stream().mapToInt(i -> i).toArray();
+//		int[] actionsArray = actionToIDMap.values().stream().mapToInt(i -> i).toArray();
 
 		int numOfAllMaps = 0;
 
@@ -271,7 +284,7 @@ public class MonitorSelectionSolver {
 		// ===3-at least 1 map for each pattern
 
 		// 1-no overlapping
-		model.allDifferent(monitors).post();
+//		model.allDifferent(monitors).post();
 
 		List<Constraint> consList = new LinkedList<Constraint>();
 		// essential: at least 1 map for each pattern
