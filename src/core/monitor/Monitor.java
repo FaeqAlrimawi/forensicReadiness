@@ -110,6 +110,10 @@ public class Monitor {
 	public void setMonitorAssetRef(String monitorAssetRef) {
 		this.monitorAssetRef = monitorAssetRef;
 	}
+	
+	public void setMonitorID(String monitorID) {
+		this.monitorAssetRef = monitorID;
+	}
 
 	public String getActionMonitored() {
 		return actionMonitored;
