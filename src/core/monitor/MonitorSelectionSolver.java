@@ -21,7 +21,7 @@ public class MonitorSelectionSolver {
 	// result containing integer which indicates solution id and list of
 	// integers that
 	// are the pattern maps
-	protected Map<Integer, List<int[]>> allSolutions = new HashMap<Integer, List<int[]>>();
+	protected Map<Integer, List<Integer>> allSolutions = new HashMap<Integer, List<Integer>>();
 
 	// list that contains the patterns mapped in each solution
 	// list index is a solution id and the integer array are the patterns
@@ -70,6 +70,7 @@ public class MonitorSelectionSolver {
 		int monitorID = 0;
 
 		for (Entry<String, List<Monitor>> entry : monitors.entrySet()) {
+			
 			String action = entry.getKey();
 			List<Monitor> actionMonitors = entry.getValue();
 
@@ -90,12 +91,13 @@ public class MonitorSelectionSolver {
 					monitorID++;
 					// if the monitor id already exists, then just add it to the list
 				} else {
-					actionMonitorIDs.add(monitorID);
+					actionMonitorIDs.add(monitorToIDMap.get(mon));
 				}
 			}
 
 		}
 
+//		System.out.println(monitorToIDMap.values());
 		// ==dummy cost
 		int size = monitors.size();
 		int[] cost = new int[size];
@@ -106,13 +108,27 @@ public class MonitorSelectionSolver {
 		}
 
 		// find solutions
-		findSolutions(cost);
+		// key is solution id, value is the id of the monitor
+		Map<Integer, List<Integer>> solutions = findSolutions(cost);
 
-		List<Monitor> solution = new LinkedList<Monitor>();
+		for (Entry<Integer, List<Integer>> solution : solutions.entrySet()) {
+			System.out.println("Solution-" + solution.getKey());
 
-//		CPSolver solver = new CPSolver();
+			// monitors
+			for (Integer monID : solution.getValue()) {
 
-		return solution;
+				for (Entry<Monitor, Integer> id : monitorToIDMap.entrySet()) {
+					if (id.getValue().equals(monID)) {
+						System.out.println("\t" + id.getKey().getMonitorID());
+						break;
+					}
+				}
+
+			}
+
+		}
+
+		return null;
 	}
 
 	protected int[] getActionsArray() {
@@ -135,7 +151,7 @@ public class MonitorSelectionSolver {
 //		return actionsArray.stream().mapToInt(i -> i).toArray();
 	}
 
-	public Map<Integer, List<int[]>> findSolutions(int[] cost) {
+	public Map<Integer, List<Integer>> findSolutions(int[] cost) {
 
 		// numberOfActions could be defined as the max number of the maps
 
@@ -159,9 +175,9 @@ public class MonitorSelectionSolver {
 		IntVar costSum = null;
 
 		int numOfActions = actionToIDMap.size();
-		SetVar[][] possibleActionsMaps = new SetVar[numOfActions][];
+		int[][] possibleMonitorsPerActionMaps = new int[numOfActions][];
 
-		SetVar[] monitors = null;
+		IntVar[] monitors = null;
 		boolean isSolutionfound = false;
 
 		// actual severity array, assuming its embedded in the argument
@@ -193,120 +209,137 @@ public class MonitorSelectionSolver {
 
 		// =============look for
 		// solution==========================================
-		while (currentNumOfMonitors > 0) {
+//		while (currentNumOfMonitors > 0) {
 
-			model = new Model("Action-Monitor Model");
+		model = new Model("Action-Monitor Model");
 
-			// ============Defining Variables======================//
-			monitors = new SetVar[currentNumOfMonitors];
-			IntVar[] monitorCost = new IntVar[currentNumOfMonitors];
-			int[] coeffs = null;
-			if (MonitorSelectionSolver.MAXIMISE) {
-				// used to update severity values
-				coeffs = new int[currentNumOfMonitors];
-				Arrays.fill(coeffs, 1); // coeff is 1
+		// ============Defining Variables======================//
+		monitors = new IntVar[numOfActions];
+		IntVar[] monitorCost = new IntVar[numOfActions];
+		int[] coeffs = null;
+		if (MonitorSelectionSolver.MAXIMISE) {
+			// used to update severity values
+			coeffs = new int[currentNumOfMonitors];
+			Arrays.fill(coeffs, 1); // coeff is 1
 
-				// defines severity for a solution
-				costSum = model.intVar("cost_sum", 0, sumCost);
-			}
-			// each pattern has as domain values the range from {} to
-			// {actions in maps}
-			for (int i = 0; i < currentNumOfMonitors; i++) {
-				monitors[i] = model.setVar("monitor-" + i, new int[] {}, actionsArray);
-
-				if (MonitorSelectionSolver.MAXIMISE) {
-					monitorCost[i] = model.intVar("monitor_" + i + "_cost", minCost, maxCost);
-				}
-			}
-
-			int indexAction = 0;
-
-			for (Entry<Integer, List<Integer>> entry : convertedMap.entrySet()) {
-				List<Integer> list = entry.getValue();
-				possibleActionsMaps[indexAction] = new SetVar[list.size()];
-				for (int indexMonitor = 0; indexMonitor < list.size(); indexMonitor++) {
-					possibleActionsMaps[indexAction][indexMonitor] = model
-							.setVar("map" + indexAction + "-" + indexMonitor, list.get(indexMonitor));
-					// index++;
-				}
-				indexAction++;
-			}
-
-			// ============Defining Constraints======================//
-			// ===1-No overlapping between maps
-			// ===2-A map should be one of the defined maps by the variable
-			// possiblePatternMaps
-			// ===3-at least 1 map for each pattern
-
-			// 1-no overlapping
-			model.allDisjoint(monitors).post();
-
-			List<Constraint> consList = new LinkedList<Constraint>();
-			// essential: at least 1 map for each pattern
-			for (int i = 0; i < monitors.length; i++) {
-				for (int j = 0; j < possibleActionsMaps.length; j++) {
-
-					// pattern map should be a one of the found maps
-					Constraint patternMember = model.member(possibleActionsMaps[j], monitors[i]);
-					consList.add(patternMember);
-
-					// the severity of the pattern should equal to the pattern
-					// severity specified in the argument
-					if (MonitorSelectionSolver.MAXIMISE) {
-						model.ifThen(patternMember, model.arithm(monitorCost[i], "=", cost[j]));
-					}
-				}
-
-				Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
-				model.or(res).post();
-				consList.clear();
-			}
-
-			if (MonitorSelectionSolver.MAXIMISE) {
-				model.scalar(monitorCost, coeffs, "=", costSum).post();
-				model.setObjective(Model.MAXIMIZE, costSum);
-			}
-
-			// ============Finding solutions======================//
-			solver = model.getSolver();
-			SetVar uniq;
-			solutions = new LinkedList<Solution>();
-			List<Integer> vals = new LinkedList<Integer>();
-
-			while (solver.solve()) {
-
-				vals.clear();
-
-				// add the current solution to the solutions list
-				solutions.add(new Solution(model).record());
-
-				// get the new solution
-				for (int i = 0; i < currentNumOfMonitors; i++) {
-					vals.addAll(Arrays.stream(monitors[i].getValue().toArray()).boxed().collect(Collectors.toList()));
-				}
-
-				// create a setVar of the new solution
-				// uniq = model.setVar(vals.stream().mapToInt(i ->
-				// i).toArray());
-
-				// add a constraint that next solution should be different from
-				// this
-				// model.not(model.union(monitors, uniq)).post();
-
-				// add a constraint that next solution should have equal or more
-				// actions
-				// could be implemented..?
-
-				isSolutionfound = true;
-				// break;
-			}
-
-			if (isSolutionfound) {
-				break;
-			}
-
-			currentNumOfMonitors--;
+			// defines severity for a solution
+			costSum = model.intVar("cost_sum", 0, sumCost);
 		}
+		// each pattern has as domain values the range from {} to
+		// {actions in maps}
+		int [] monsIDs = monitorToIDMap.values().stream().mapToInt((Integer k) -> k.intValue()).toArray();
+//		for (int i = 0; i < monitorToIDMap.size(); i++) {
+//			System.out.print(monsIDs[i]+"==");
+//		}
+		
+		for (int i = 0; i < numOfActions; i++) {
+			monitors[i] = model.intVar("monitor-" + i, monsIDs);
+
+			if (MonitorSelectionSolver.MAXIMISE) {
+				monitorCost[i] = model.intVar("monitor_" + i + "_cost", minCost, maxCost);
+			}
+		}
+
+		int indexAction = 0;
+
+		for (Entry<Integer, List<Integer>> entry : convertedMap.entrySet()) {
+			List<Integer> list = entry.getValue();
+			possibleMonitorsPerActionMaps[indexAction] = new int[list.size()];
+			for (int indexMonitor = 0; indexMonitor < list.size(); indexMonitor++) {
+//				System.out.println("indexAction = " + indexAction + " indexMonitor = " + indexMonitor + " value = " + list.get(indexMonitor));
+				possibleMonitorsPerActionMaps[indexAction][indexMonitor] = list.get(indexMonitor);
+				// index++;
+			}
+			
+			indexAction++;
+		}
+
+		for(int i=0;i<possibleMonitorsPerActionMaps.length;i++) {
+			for(int j=0;j<possibleMonitorsPerActionMaps[i].length;j++) {
+				System.out.print(possibleMonitorsPerActionMaps[i][j]+"-");
+			}
+			System.out.println();
+		}
+		
+		// ============Defining Constraints======================//
+		// ===1-No overlapping between maps
+		// ===2-A map should be one of the defined maps by the variable
+		// possiblePatternMaps
+		// ===3-at least 1 map for each pattern
+
+		// 1-no overlapping
+		model.allDifferent(monitors).post();
+
+		List<Constraint> consList = new LinkedList<Constraint>();
+		// essential: at least 1 map for each pattern
+		for (int i = 0; i < monitors.length; i++) {
+//			for (int j = 0; j < possibleActionsMaps.length; j++) {
+
+				// pattern map should be a one of the found maps
+
+				Constraint correctActionMonitor = model.element(monitors[i], possibleMonitorsPerActionMaps[i], model.intVar(i));
+
+				correctActionMonitor.post();
+//				consList.add(correctActionMonitor);
+
+				// the severity of the pattern should equal to the pattern
+				// severity specified in the argument
+				if (MonitorSelectionSolver.MAXIMISE) {
+					model.ifThen(correctActionMonitor, model.arithm(monitorCost[i], "=", cost[i]));
+				}
+//			}
+//					Constraint patternMember = model.member(possibleActionsMaps[j], monitors[i]);
+
+			Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
+//			model.or(res).post();
+			consList.clear();
+		}
+
+		if (MonitorSelectionSolver.MAXIMISE) {
+			model.scalar(monitorCost, coeffs, "=", costSum).post();
+			model.setObjective(Model.MAXIMIZE, costSum);
+		}
+
+		// ============Finding solutions======================//
+		solver = model.getSolver();
+		SetVar uniq;
+		solutions = new LinkedList<Solution>();
+		List<Integer> vals = new LinkedList<Integer>();
+
+		while (solver.solve()) {
+
+			vals.clear();
+
+			// add the current solution to the solutions list
+			solutions.add(new Solution(model).record());
+
+			// get the new solution
+//			for (int i = 0; i < numOfActions; i++) {
+//				vals.add(monitors[i].getValue());
+//			}
+
+			// create a setVar of the new solution
+			// uniq = model.setVar(vals.stream().mapToInt(i ->
+			// i).toArray());
+
+			// add a constraint that next solution should be different from
+			// this
+			// model.not(model.union(monitors, uniq)).post();
+
+			// add a constraint that next solution should have equal or more
+			// actions
+			// could be implemented..?
+
+			isSolutionfound = true;
+			// break;
+		}
+
+//			if (isSolutionfound) {
+//				break;
+//			}
+
+		currentNumOfMonitors--;
+//		}
 
 		analyseSolutions(solutions, monitors, costSum);
 
@@ -489,17 +522,17 @@ public class MonitorSelectionSolver {
 //		return this.allSolutions;
 //	}
 
-	protected Map<Integer, List<int[]>> analyseSolutions(List<Solution> solutions, SetVar[] monitors,
+	protected Map<Integer, List<Integer>> analyseSolutions(List<Solution> solutions, IntVar[] monitors,
 			IntVar severitySum) {
 
 		for (int j = 0; j < solutions.size(); j++) {
 
 			Solution sol = solutions.get(j);
 
-			List<int[]> solVals = new LinkedList<int[]>();
+			List<Integer> solVals = new LinkedList<Integer>();
 
 			for (int i = 0; i < monitors.length; i++) {
-				solVals.add(sol.getSetVal(monitors[i]));
+				solVals.add(sol.getIntVal(monitors[i]));
 			}
 
 			// get patterns and maps ids used in this solution
