@@ -15,6 +15,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.testng.collections.Lists;
 
 public class MonitorSelectionSolver {
 
@@ -111,19 +112,21 @@ public class MonitorSelectionSolver {
 		// key is solution id, value is the id of the monitor
 		Map<Integer, List<Integer>> solutions = findSolutions(cost);
 
+		List<String> actionNames = Lists.newArrayList(actionToIDMap.keySet());
+		
 		for (Entry<Integer, List<Integer>> solution : solutions.entrySet()) {
 			System.out.println("Solution-" + solution.getKey());
-
+			int index = 0;
 			// monitors
 			for (Integer monID : solution.getValue()) {
-
+				
 				for (Entry<Monitor, Integer> id : monitorToIDMap.entrySet()) {
 					if (id.getValue().equals(monID)) {
-						System.out.println("\t" + id.getKey().getMonitorID());
+						System.out.println("\t" + id.getKey().getMonitorID() + " action: " +actionNames.get(index));
 						break;
 					}
 				}
-
+				index++;
 			}
 
 		}
@@ -254,12 +257,12 @@ public class MonitorSelectionSolver {
 			indexAction++;
 		}
 
-		for(int i=0;i<possibleMonitorsPerActionMaps.length;i++) {
-			for(int j=0;j<possibleMonitorsPerActionMaps[i].length;j++) {
-				System.out.print(possibleMonitorsPerActionMaps[i][j]+"-");
-			}
-			System.out.println();
-		}
+//		for(int i=0;i<possibleMonitorsPerActionMaps.length;i++) {
+//			for(int j=0;j<possibleMonitorsPerActionMaps[i].length;j++) {
+//				System.out.print(possibleMonitorsPerActionMaps[i][j]+"-");
+//			}
+//			System.out.println();
+//		}
 		
 		// ============Defining Constraints======================//
 		// ===1-No overlapping between maps
@@ -273,25 +276,25 @@ public class MonitorSelectionSolver {
 		List<Constraint> consList = new LinkedList<Constraint>();
 		// essential: at least 1 map for each pattern
 		for (int i = 0; i < monitors.length; i++) {
-//			for (int j = 0; j < possibleActionsMaps.length; j++) {
+			for (int j = 0; j < possibleMonitorsPerActionMaps[i].length; j++) {
 
 				// pattern map should be a one of the found maps
 
-				Constraint correctActionMonitor = model.element(monitors[i], possibleMonitorsPerActionMaps[i], model.intVar(i));
+				Constraint correctActionMonitor = model.element(monitors[i], possibleMonitorsPerActionMaps[i], model.intVar(j));
 
-				correctActionMonitor.post();
-//				consList.add(correctActionMonitor);
+//				correctActionMonitor.post();
+				consList.add(correctActionMonitor);
 
 				// the severity of the pattern should equal to the pattern
 				// severity specified in the argument
 				if (MonitorSelectionSolver.MAXIMISE) {
 					model.ifThen(correctActionMonitor, model.arithm(monitorCost[i], "=", cost[i]));
 				}
-//			}
+			}
 //					Constraint patternMember = model.member(possibleActionsMaps[j], monitors[i]);
 
 			Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
-//			model.or(res).post();
+			model.or(res).post();
 			consList.clear();
 		}
 
@@ -299,6 +302,7 @@ public class MonitorSelectionSolver {
 			model.scalar(monitorCost, coeffs, "=", costSum).post();
 			model.setObjective(Model.MAXIMIZE, costSum);
 		}
+		
 
 		// ============Finding solutions======================//
 		solver = model.getSolver();
