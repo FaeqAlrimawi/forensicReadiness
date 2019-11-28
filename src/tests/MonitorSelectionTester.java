@@ -21,16 +21,16 @@ public class MonitorSelectionTester {
 
 		// dummy map...
 		// key is action, value is the list of monitors that can monitor that action
-		int numOfMonitors = 7;
-		int numOfActions = 3;
+		int numOfMonitors = 25;
+		int numOfActions = 15;
 
 		Map<String, List<Monitor>> actionsMonitors = createDummyActionMonitorMap(numOfActions, numOfMonitors);
 
 		printMap(actionsMonitors);
 
-		boolean isOptimal = false;
+		boolean isOptimal = true;
 		boolean allDifferent = false;
-		boolean isMinimum = false;
+		boolean isMinimum = true;
 		
 		int tries = 5;
 
