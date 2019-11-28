@@ -19,11 +19,6 @@ import org.testng.collections.Lists;
 
 public class MonitorSelectionSolver {
 
-	// result containing integer which indicates solution id and list of
-	// integers that
-	// are the pattern maps
-	protected Map<Integer, List<Integer>> allSolutions = new HashMap<Integer, List<Integer>>();
-
 	// list that contains the sum of cost for each solution
 	// index is a solution id and the integer value is the cost sum
 	protected List<Integer> allSolutionsCost = new LinkedList<Integer>();
@@ -34,8 +29,8 @@ public class MonitorSelectionSolver {
 	protected int optimalSolutionSeverity;
 	protected int[] patternSeverityLevel;
 
-	// given
-//	protected Map<Integer, List<int[]>> patternMaps;
+	// input
+	Map<String, List<Monitor>> monitors;
 
 	// convert the given map into a map that can be used by the solver
 	// key is an integer indicating the position (index) referring to action
@@ -43,11 +38,24 @@ public class MonitorSelectionSolver {
 	// can monitor the given action index
 	Map<Integer, List<Integer>> convertedMap = new HashMap<Integer, List<Integer>>();
 
+	// the first index indicates an action and the second is the monitor. The value
+	// held is a monitor ID
+	int[][] actionMonitorMatrix;
+
 	// key is a monitor and value is its id
 	Map<Monitor, Integer> monitorToIDMap = new HashMap<Monitor, Integer>();
 
+	// result containing integer which indicates solution id and list of
+	// integers that
+	// are the pattern maps
+	protected Map<Integer, List<Integer>> allSolutions = new HashMap<Integer, List<Integer>>();
+
+	// all solutions. Same as allSolutions map but converted into MonitorSolution
+	// list
+	List<MonitorSolution> solutionsFound = new LinkedList<MonitorSolution>();
+
 	// key is an action and the value is its id
-	Map<String, Integer> actionToIDMap = new HashMap<String, Integer>();
+	Map<Integer, String> actionToIDMap = new HashMap<Integer, String>();
 
 	// key is monitor id and value is cost
 	Map<Integer, Integer> monitorsCosts = new HashMap<Integer, Integer>();
@@ -58,15 +66,16 @@ public class MonitorSelectionSolver {
 	// if true then it finds different monitors for different actions
 	static boolean ALLDIFFIERENT = true;
 
-	public List<Monitor> solve(Map<String, List<Monitor>> monitors) {
+	public List<MonitorSolution> solve(Map<String, List<Monitor>> monitors) {
 
 		if (monitors == null || monitors.isEmpty()) {
 			return null;
 		}
 
-		convertedMap.clear();
-		monitorToIDMap.clear();
-		actionToIDMap.clear();
+		// reset variables
+		reset();
+
+		this.monitors = monitors;
 
 		// ====create ids for actions and monitors
 		int actionID = 0;
@@ -79,101 +88,153 @@ public class MonitorSelectionSolver {
 
 			List<Integer> actionMonitorIDs = new LinkedList<Integer>();
 
-			actionToIDMap.put(action, actionID);
+			actionToIDMap.put(actionID, action);
 
 			convertedMap.put(actionID, actionMonitorIDs);
 
 			actionID++;
 
+			// monitor id and cost
 			for (Monitor mon : actionMonitors) {
 				// if the monitor has no id, then create one and then add the id to the list of
 				// monitor ids for the current action
 				if (!monitorToIDMap.containsKey(mon)) {
 					monitorToIDMap.put(mon, monitorID);
 					actionMonitorIDs.add(monitorID);
+
+					// cost
+					monitorsCosts.put(monitorID, (int) mon.getCost());
+
 					monitorID++;
 					// if the monitor id already exists, then just add it to the list
 				} else {
 					actionMonitorIDs.add(monitorToIDMap.get(mon));
+
+					// cost
+					monitorsCosts.put(monitorID, (int) mon.getCost());
 				}
+
+				// cost
+
 			}
 
 		}
 
-//		System.out.println(monitorToIDMap.values());
-		// ==dummy cost
-		monitorToIDMap.size();
-
-		Random rand = new Random();
-
-		for (Monitor m : monitorToIDMap.keySet()) {
-
-			int randCost = rand.nextInt(100);
-
-			monitorsCosts.put(monitorToIDMap.get(m), randCost);
-
-			System.out.println("c: " + randCost + " m: " + m.getMonitorID());
-		}
+		// get action-monitor matrix
+		actionMonitorMatrix = generateActionMonitorMatrix();
 
 		// find solutions
 		// key is solution id, value is the id of the monitor
 		findSolutions();
 
-		List<String> actionNames = Lists.newArrayList(actionToIDMap.keySet());
+		getFoundSolutions();
 
-		if(allSolutions!=null && !allSolutions.isEmpty()) {
-			for (Entry<Integer, List<Integer>> solution : allSolutions.entrySet()) {
+		return solutionsFound;
+	}
 
-				if (allSolutionsCost.isEmpty()) {
-					System.out.println("Solution-" + solution.getKey());
-				} else {
-					System.out.println(
-							"Solution-" + solution.getKey() + " cost = " + allSolutionsCost.get(solution.getKey()));
-				}
+	protected void reset() {
+		allSolutions.clear();
+		solutionsFound.clear();
+		convertedMap.clear();
+		monitorToIDMap.clear();
+		actionToIDMap.clear();
 
-				int index = 0;
-				// monitors
-				for (Integer monID : solution.getValue()) {
+	}
 
-					for (Entry<Monitor, Integer> id : monitorToIDMap.entrySet()) {
-						if (id.getValue().equals(monID)) {
-							System.out.println("\t" + id.getKey().getMonitorID() + " action: " + actionNames.get(index));
-							break;
-						}
-					}
-					index++;
-				}
+	protected int[][] generateActionMonitorMatrix() {
 
+		int numOfActions = convertedMap.size();
+		int[][] possibleMonitorsPerActionMaps = new int[numOfActions][];
+
+		int indexAction = 0;
+
+		for (Entry<Integer, List<Integer>> entry : convertedMap.entrySet()) {
+			List<Integer> list = entry.getValue();
+			possibleMonitorsPerActionMaps[indexAction] = new int[list.size()];
+			for (int indexMonitor = 0; indexMonitor < list.size(); indexMonitor++) {
+//			System.out.println("indexAction = " + indexAction + " indexMonitor = " + indexMonitor + " value = " + list.get(indexMonitor));
+				possibleMonitorsPerActionMaps[indexAction][indexMonitor] = list.get(indexMonitor);
+				// index++;
 			}
-		} else {
-			System.out.println("No solution found!");
-			
-		}
-		
 
-		return null;
+			indexAction++;
+		}
+
+		return possibleMonitorsPerActionMaps;
 	}
 
 	/**
 	 * returns all solutions found
-	 * @return A map in which the key is a solution number (or ID) and the value is a list of the monitors 
+	 * 
+	 * @return A map in which the key is a solution number (or ID) and the value is
+	 *         a list of the monitors
 	 */
-	public List<Map<String, Monitor>> getFoundSolutions() {
-	
-		List<Map<String, Monitor>> solutionsFound = new LinkedList<Map.Entry<String,Monitor>>();
-		
-		for(Entry<Integer, List<Integer>> solution : allSolutions.entrySet()) {
-			
-			
+	public List<MonitorSolution> getFoundSolutions() {
+
+		if (!solutionsFound.isEmpty()) {
+			return solutionsFound;
 		}
-		
+
+		int actionIndex = 0;
+//		int solutionIndex = 0;
+
+		List<String> actions = new LinkedList<String>();
+
+		for (Integer actionID : convertedMap.keySet()) {
+			actions.add(actionToIDMap.get(actionID));
+		}
+
+		for (Entry<Integer, List<Integer>> solution : allSolutions.entrySet()) {
+
+			int solID = solution.getKey();
+			List<Integer> monitorIDs = solution.getValue();
+
+			// new solution
+			MonitorSolution monSol = new MonitorSolution();
+
+			// reset
+			actionIndex = 0;
+
+			// set id
+			monSol.setSolutionID(solID);
+
+			// get action name and monitor for the given monitor ID
+			for (Integer monID : monitorIDs) {
+				// **sequence of monitors indicate sequence of actions
+
+				String actionName = actions.get(actionIndex);
+				Monitor mon = getMonitor(monID);
+
+				monSol.addActionMonitor(actionName, mon);
+
+				actionIndex++;
+			}
+
+			// set cost
+			if (allSolutionsCost.size() > solID) {
+				monSol.setCost(allSolutionsCost.get(solID));
+			}
+
+			solutionsFound.add(monSol);
+		}
+
 		return solutionsFound;
 	}
-	
-	
+
+	protected Monitor getMonitor(int monitorID) {
+
+		for (Entry<Monitor, Integer> entry : monitorToIDMap.entrySet()) {
+			if (entry.getValue().equals(monitorID)) {
+				return entry.getKey();
+			}
+		}
+
+		return null;
+	}
+
 	protected int[] getActionsArray() {
 
-		return actionToIDMap.values().stream().mapToInt(i -> i).toArray();
+		return actionToIDMap.keySet().stream().mapToInt(i -> i).toArray();
 
 //		List<Integer> actionsArray = new LinkedList<Integer>();
 //
@@ -213,7 +274,7 @@ public class MonitorSelectionSolver {
 		IntVar costSum = null;
 
 		int numOfActions = actionToIDMap.size();
-		int[][] possibleMonitorsPerActionMaps = new int[numOfActions][];
+//		int[][] possibleMonitorsPerActionMaps = new int[numOfActions][];
 
 		IntVar[] monitors = null;
 		boolean isSolutionfound = false;
@@ -279,20 +340,6 @@ public class MonitorSelectionSolver {
 			}
 		}
 
-		int indexAction = 0;
-
-		for (Entry<Integer, List<Integer>> entry : convertedMap.entrySet()) {
-			List<Integer> list = entry.getValue();
-			possibleMonitorsPerActionMaps[indexAction] = new int[list.size()];
-			for (int indexMonitor = 0; indexMonitor < list.size(); indexMonitor++) {
-//				System.out.println("indexAction = " + indexAction + " indexMonitor = " + indexMonitor + " value = " + list.get(indexMonitor));
-				possibleMonitorsPerActionMaps[indexAction][indexMonitor] = list.get(indexMonitor);
-				// index++;
-			}
-
-			indexAction++;
-		}
-
 //		for(int i=0;i<possibleMonitorsPerActionMaps.length;i++) {
 //			for(int j=0;j<possibleMonitorsPerActionMaps[i].length;j++) {
 //				System.out.print(possibleMonitorsPerActionMaps[i][j]+"-");
@@ -314,12 +361,11 @@ public class MonitorSelectionSolver {
 		List<Constraint> consList = new LinkedList<Constraint>();
 		// essential: at least 1 map for each pattern
 		for (int i = 0; i < monitors.length; i++) {
-			for (int j = 0; j < possibleMonitorsPerActionMaps[i].length; j++) {
+			for (int j = 0; j < actionMonitorMatrix[i].length; j++) {
 
 				// pattern map should be a one of the found maps
 
-				Constraint correctActionMonitor = model.element(monitors[i], possibleMonitorsPerActionMaps[i],
-						model.intVar(j));
+				Constraint correctActionMonitor = model.element(monitors[i], actionMonitorMatrix[i], model.intVar(j));
 
 				consList.add(correctActionMonitor);
 
@@ -327,7 +373,7 @@ public class MonitorSelectionSolver {
 				// severity specified in the argument
 				if (MonitorSelectionSolver.MINIMISE) {
 					model.ifThen(correctActionMonitor,
-							model.arithm(monitorCost[i], "=", monitorsCosts.get(possibleMonitorsPerActionMaps[i][j])));
+							model.arithm(monitorCost[i], "=", monitorsCosts.get(actionMonitorMatrix[i][j])));
 				}
 			}
 

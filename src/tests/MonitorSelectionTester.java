@@ -9,8 +9,11 @@ import java.util.Random;
 
 import core.monitor.Monitor;
 import core.monitor.MonitorSelectionSolver;
+import core.monitor.MonitorSolution;
 
 public class MonitorSelectionTester {
+
+	protected List<Monitor> monitors = new LinkedList<Monitor>();
 
 	protected void testMonitorSelectionSolver() {
 
@@ -18,8 +21,8 @@ public class MonitorSelectionTester {
 
 		// dummy map...
 		// key is action, value is the list of monitors that can monitor that action
-		int numOfMonitors = 10;
-		int numOfActions = 15;
+		int numOfMonitors = 14;
+		int numOfActions = 10;
 
 		Map<String, List<Monitor>> actionsMonitors = createDummyActionMonitorMap(numOfActions, numOfMonitors);
 
@@ -32,34 +35,45 @@ public class MonitorSelectionTester {
 			for (Monitor mon : entry.getValue()) {
 				System.out.println("\t" + mon.getMonitorID());
 			}
-			
+
 			System.out.println();
 		}
+
+		List<MonitorSolution> solutions = solver.solve(actionsMonitors);
 		
-		solver.solve(actionsMonitors);
+		if (solutions != null && !solutions.isEmpty()) {
+			for (MonitorSolution sol : solutions) {
+				sol.print();
+			}
+		} else {
+			System.out.println("No solution found!");
+		}
 	}
 
 	protected Map<String, List<Monitor>> createDummyActionMonitorMap(int numOfActions, int numOfMonitors) {
+
 		// dummy map...
+
 		// key is action, value is the list of monitors that can monitor that action
 		Map<String, List<Monitor>> actionsMonitors = new HashMap<String, List<Monitor>>();
 
-		List<Monitor> monitors = new LinkedList<Monitor>();
+		Random rand = new Random();
 
-//				int numOfMonitors = 5;
-//				int numOfActions = 5;
+		int maxCost = 100;
 
 		// create monitors
 		for (int i = 0; i < numOfMonitors; i++) {
 			Monitor mon = new Monitor();
+
 			mon.setMonitorID("monitor-" + i);
+
+			// set random cost
+			int randCost = rand.nextInt(maxCost);
+			mon.setCost(randCost);
 
 			monitors.add(mon);
 
 		}
-
-		Random rand = new Random();
-		Random rand2 = new Random();
 
 		// create the actions and their dummy map to monitors
 		for (int i = 0; i < numOfActions; i++) {
@@ -71,7 +85,8 @@ public class MonitorSelectionTester {
 			actionsMonitors.put(actionName, mons);
 
 			// create monitors to map to
-			// the length of the list of monitors is randomly assigned a length between 1 and the number of monitors
+			// the length of the list of monitors is randomly assigned a length between 1
+			// and the number of monitors
 			int listSize = 1 + rand.nextInt(numOfMonitors);
 
 			// the monitor can be selected randomly from the list
