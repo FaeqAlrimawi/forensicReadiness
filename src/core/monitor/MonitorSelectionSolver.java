@@ -68,13 +68,13 @@ public class MonitorSelectionSolver {
 	// if true then it finds different monitors for different actions
 	boolean isAllDifferent = true;
 
-	//variables used for finding a solution
-	//sum of cost of a solution
+	// variables used for finding a solution
+	// sum of cost of a solution
 	IntVar costSum = null;
-	
-	//monitors variables
+
+	// monitors variables
 	IntVar[] monitorsVars = null;
-	
+
 	public MonitorSelectionSolver() {
 		convertedMap = new HashMap<Integer, List<Integer>>();
 		monitorToIDMap = new HashMap<Monitor, Integer>();
@@ -327,7 +327,7 @@ public class MonitorSelectionSolver {
 	}
 
 	protected Model createSolverModel() {
-		
+
 		Model model = null;
 		monitorsVars = null;
 		costSum = null;
@@ -412,7 +412,8 @@ public class MonitorSelectionSolver {
 
 				// pattern map should be a one of the found maps
 
-				Constraint correctActionMonitor = model.element(monitorsVars[i], actionMonitorMatrix[i], model.intVar(j));
+				Constraint correctActionMonitor = model.element(monitorsVars[i], actionMonitorMatrix[i],
+						model.intVar(j));
 
 				consList.add(correctActionMonitor);
 
@@ -437,7 +438,7 @@ public class MonitorSelectionSolver {
 
 		return model;
 	}
-	
+
 	protected Map<Integer, List<Integer>> findSolutions() {
 
 		// ============Finding solutions======================//
@@ -445,9 +446,9 @@ public class MonitorSelectionSolver {
 		Solver solver = null;
 //		IntVar costSum = null;
 //		IntVar[] monitors = null;
-		
+
 		Model model = createSolverModel();
-			
+
 		solver = model.getSolver();
 		solutions = new LinkedList<Solution>();
 
@@ -462,18 +463,22 @@ public class MonitorSelectionSolver {
 		return allSolutions;
 	}
 
-
 	protected Map<Integer, List<Integer>> findOptimalSolution() {
-		
+
 		// ============Finding solutions======================//
 		List<Solution> solutions = new LinkedList<Solution>();
 		Solver solver = null;
-		
-		Model model = createSolverModel();
-		
-		solver = model.getSolver();
 
-		Solution solution = solver.findOptimalSolution(costSum, Model.MINIMIZE);
+		Model model = createSolverModel();
+
+		solver = model.getSolver();
+		Solution solution;
+
+		if (costSum == null) {
+			costSum = model.intVar(0);
+		}
+
+		solution = solver.findOptimalSolution(costSum, Model.MINIMIZE);
 
 		solutions.add(solution);
 
@@ -481,8 +486,7 @@ public class MonitorSelectionSolver {
 
 		return this.allSolutions;
 	}
-	
-	
+
 	protected Map<Integer, List<Integer>> analyseSolutions(List<Solution> solutions) {
 
 		for (int j = 0; j < solutions.size(); j++) {
@@ -511,6 +515,5 @@ public class MonitorSelectionSolver {
 
 		return allSolutions;
 	}
-
 
 }

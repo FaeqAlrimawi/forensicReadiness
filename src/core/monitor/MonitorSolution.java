@@ -37,6 +37,11 @@ public class MonitorSolution {
 	}
 
 	public int getCost() {
+
+		if (cost == 0) {
+			cost = getCalculatedCost();
+		}
+
 		return cost;
 	}
 
@@ -67,6 +72,19 @@ public class MonitorSolution {
 		return false;
 	}
 
+	protected int getCalculatedCost() {
+
+		int cost = 0;
+
+		if (actionMonitors != null) {
+			for (Monitor mon : actionMonitors.values()) {
+				cost += mon.getCost();
+			}
+		}
+
+		return cost;
+	}
+
 	public String toString() {
 
 		StringBuilder bldr = new StringBuilder();
@@ -74,7 +92,8 @@ public class MonitorSolution {
 		String newLine = System.getProperty("line.separator");
 
 		// id and cost
-		bldr.append("Solution ID: ").append(solutionID).append(" Cost: ").append(cost).append(newLine).append(newLine);
+		bldr.append("Solution ID: ").append(solutionID).append(" Total-Cost: ").append(getCost()).append(newLine)
+				.append(newLine);
 
 		// solution (e.g., *Action: action1 ^Monitor: monitor1 (cost: 43)
 		bldr.append("{MonitorID ==> ActionName (cost)}").append(newLine);

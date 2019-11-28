@@ -28,14 +28,14 @@ public class MonitorSelectionTester {
 
 		printMap(actionsMonitors);
 
-		boolean isOptimal = true;
-		boolean allDifferent = true;
-		boolean isMinimum = true;
+		boolean isOptimal = false;
+		boolean allDifferent = false;
+		boolean isMinimum = false;
 		
-		int tries = 2;
+		int tries = 5;
 
 		for (int i = 0; i < tries; i++) {
-			System.out.println("Try [" + i + "]");
+			System.out.println("Try [" + i + "] isOptimal = " + isOptimal + ", All-Different = " + allDifferent + ", isMinimum = " + isMinimum);
 			
 			List<MonitorSolution> solutions = solver.solve(actionsMonitors, isOptimal, allDifferent, isMinimum);
 
@@ -106,18 +106,22 @@ public class MonitorSelectionTester {
 
 	protected void printMap(Map<String, List<Monitor>> actionsMonitors) {
 		
+		System.out.println("==== GENERATED MAP ====");
 		for (Entry<String, List<Monitor>> entry : actionsMonitors.entrySet()) {
 
 			// action
-			System.out.println("Action: " + entry.getKey());
+			System.out.print("Action [" + entry.getKey() +"]: ");
 //			System.out.println("\tMonitors: ");
 			// monitors
+	
 			for (Monitor mon : entry.getValue()) {
-				System.out.println("\t" + mon.getMonitorID() + " (" + mon.getCost()+")");
+				System.out.print(mon.getMonitorID() + " (" + mon.getCost()+") -- ");
 			}
 
 			System.out.println();
 		}
+		
+		System.out.println("=======================\n");
 	}
 	
 	public static void main(String[] args) {
