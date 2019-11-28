@@ -21,39 +21,43 @@ public class MonitorSelectionTester {
 
 		// dummy map...
 		// key is action, value is the list of monitors that can monitor that action
-		int numOfMonitors = 14;
-		int numOfActions = 10;
+		int numOfMonitors = 7;
+		int numOfActions = 3;
 
 		Map<String, List<Monitor>> actionsMonitors = createDummyActionMonitorMap(numOfActions, numOfMonitors);
 
-		for (Entry<String, List<Monitor>> entry : actionsMonitors.entrySet()) {
+		printMap(actionsMonitors);
 
-			// action
-			System.out.println("Action: " + entry.getKey());
-//			System.out.println("\tMonitors: ");
-			// monitors
-			for (Monitor mon : entry.getValue()) {
-				System.out.println("\t" + mon.getMonitorID());
-			}
-
-			System.out.println();
-		}
-
-		List<MonitorSolution> solutions = solver.solve(actionsMonitors);
+		boolean isOptimal = true;
+		boolean allDifferent = true;
+		boolean isMinimum = true;
 		
-		if (solutions != null && !solutions.isEmpty()) {
-			for (MonitorSolution sol : solutions) {
-				sol.print();
+		int tries = 2;
+
+		for (int i = 0; i < tries; i++) {
+			System.out.println("Try [" + i + "]");
+			
+			List<MonitorSolution> solutions = solver.solve(actionsMonitors, isOptimal, allDifferent, isMinimum);
+
+			if (solutions != null && !solutions.isEmpty()) {
+				for (MonitorSolution sol : solutions) {
+					sol.print();
+				}
+			} else {
+				System.out.println("No solution found!");
 			}
-		} else {
-			System.out.println("No solution found!");
+
+			actionsMonitors = createDummyActionMonitorMap(numOfActions, numOfMonitors);
+
 		}
+
 	}
 
 	protected Map<String, List<Monitor>> createDummyActionMonitorMap(int numOfActions, int numOfMonitors) {
 
 		// dummy map...
-
+		monitors.clear();
+		
 		// key is action, value is the list of monitors that can monitor that action
 		Map<String, List<Monitor>> actionsMonitors = new HashMap<String, List<Monitor>>();
 
@@ -100,6 +104,22 @@ public class MonitorSelectionTester {
 		return actionsMonitors;
 	}
 
+	protected void printMap(Map<String, List<Monitor>> actionsMonitors) {
+		
+		for (Entry<String, List<Monitor>> entry : actionsMonitors.entrySet()) {
+
+			// action
+			System.out.println("Action: " + entry.getKey());
+//			System.out.println("\tMonitors: ");
+			// monitors
+			for (Monitor mon : entry.getValue()) {
+				System.out.println("\t" + mon.getMonitorID() + " (" + mon.getCost()+")");
+			}
+
+			System.out.println();
+		}
+	}
+	
 	public static void main(String[] args) {
 
 		MonitorSelectionTester tester = new MonitorSelectionTester();

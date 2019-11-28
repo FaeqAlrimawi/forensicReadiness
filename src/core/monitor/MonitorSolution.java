@@ -77,7 +77,7 @@ public class MonitorSolution {
 		bldr.append("Solution ID: ").append(solutionID).append(" Cost: ").append(cost).append(newLine).append(newLine);
 
 		// solution (e.g., *Action: action1 ^Monitor: monitor1 (cost: 43)
-		bldr.append("MonitorID ==> ActionName (cost)").append(newLine);
+		bldr.append("{MonitorID ==> ActionName (cost)}").append(newLine);
 
 		for (Entry<String, Monitor> entry : actionMonitors.entrySet()) {
 			String actionName = entry.getKey();
