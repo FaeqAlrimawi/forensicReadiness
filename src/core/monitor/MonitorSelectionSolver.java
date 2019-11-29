@@ -33,6 +33,7 @@ public class MonitorSelectionSolver {
 	// the first index indicates an action and the second is the monitor. The value
 	// held is a monitor ID
 	int[][] actionMonitorMatrix;
+	int[][] actionMonitorCostMatrix;
 
 	// key is a monitor and value is its id
 	Map<Monitor, Integer> monitorToIDMap;
@@ -166,7 +167,7 @@ public class MonitorSelectionSolver {
 		}
 
 		// get action-monitor matrix
-		actionMonitorMatrix = generateActionMonitorMatrix();
+		generateActionMonitorMatrix();
 
 		// find solutions
 		// key is solution id, value is the id of the monitor
@@ -226,26 +227,39 @@ public class MonitorSelectionSolver {
 	 * (or its position in the sequence of actions, while the second index indicates
 	 * the monitor ID. The value given for a particular position is a monitor ID
 	 */
-	protected int[][] generateActionMonitorMatrix() {
+	protected void generateActionMonitorMatrix() {
 
 		int numOfActions = convertedMap.size();
-		int[][] possibleMonitorsPerActionMaps = new int[numOfActions][];
+
+		// monitors
+		actionMonitorMatrix = new int[numOfActions][];
+
+		// monitors cost
+		actionMonitorCostMatrix = new int[numOfActions][];
 
 		int indexAction = 0;
 
 		for (Entry<Integer, List<Integer>> entry : convertedMap.entrySet()) {
+
 			List<Integer> list = entry.getValue();
-			possibleMonitorsPerActionMaps[indexAction] = new int[list.size()];
+
+			// monitor
+			actionMonitorMatrix[indexAction] = new int[list.size()];
+
+			// cost
+			actionMonitorCostMatrix[indexAction] = new int[list.size()];
+
 			for (int indexMonitor = 0; indexMonitor < list.size(); indexMonitor++) {
-//			System.out.println("indexAction = " + indexAction + " indexMonitor = " + indexMonitor + " value = " + list.get(indexMonitor));
-				possibleMonitorsPerActionMaps[indexAction][indexMonitor] = list.get(indexMonitor);
-				// index++;
+
+				int monID = list.get(indexMonitor);
+
+				actionMonitorMatrix[indexAction][indexMonitor] = monID;
+				actionMonitorCostMatrix[indexAction][indexMonitor] = monitorsCosts.get(monID);
 			}
 
 			indexAction++;
 		}
 
-		return possibleMonitorsPerActionMaps;
 	}
 
 	/**
@@ -367,34 +381,13 @@ public class MonitorSelectionSolver {
 			costSum = model.intVar("cost_sum", 0, sumCost);
 		}
 
-		int maxCostPerAction = 0;
-		int minCostPerAction = 0;
-
 		// create monitor variables
 		for (int i = 0; i < numOfActions; i++) {
 			monitorsVars[i] = model.intVar("monitor-" + i, actionMonitorMatrix[i]);
 
-			maxCostPerAction = 0;
-			minCostPerAction = 0;
-
-			for (int j = 0; j < actionMonitorMatrix[i].length; j++) {
-
-				int monCost = monitorsCosts.get(actionMonitorMatrix[i][j]);
-
-				// set max cost for the monitor of this action
-				if (monCost > maxCostPerAction) {
-					maxCostPerAction = monCost;
-				}
-
-				// set min cost for the monitor of this action
-				if (monCost < minCostPerAction) {
-					minCostPerAction = monCost;
-				}
-			}
-
 			// cost
 			if (isMinimal) {
-				monitorCost[i] = model.intVar("monitor_" + i + "_cost", minCostPerAction, maxCostPerAction);
+				monitorCost[i] = model.intVar("monitor_" + i + "_cost", actionMonitorCostMatrix[i]);
 			}
 		}
 
