@@ -61,7 +61,7 @@ public class ReactionRuleMatchingTester {
 
 		String monitorID1 = "CCTV1";
 
-		Monitor mon = MonitorTemplateFactory.eInstance.createMonitor(MonitorTemplate.VISITOR_ENTER_ROOM, monitorID1);
+		Monitor mon = MonitorTemplateFactory.eInstance.createMonitor(actionMonitored, monitorID1);
 
 		mon.print();
 		// ===set attributes of monitor

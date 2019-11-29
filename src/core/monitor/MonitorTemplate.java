@@ -1,12 +1,11 @@
 package core.monitor;
 
-public enum MonitorTemplate {
+public class MonitorTemplate {
 
-	VISITOR_ENTER_ROOM("CCTV", "Room", "VisitorEnterRoom",
-			"Hallway{hallway}.(id | CCTV{ipNet}) | Room{hallway}.(Visitor.id)");
+//	VISITOR_ENTER_ROOM("CCTV", "Room", "VisitorEnterRoom",
+//			"Hallway{hallway}.(id | CCTV{ipNet}) | Room{hallway}.(Visitor.id)");
 	
-	//=== need other types
-
+	
 	// type of monitor
 	String type;
 
@@ -20,25 +19,25 @@ public enum MonitorTemplate {
 	// the action that it can monitor
 	String actionMonitored;
 
-	MonitorTemplate(String type, String targetType, String actionMonitored, String monitoringExpression) {
+	public MonitorTemplate(String type, String targetType, String actionMonitored, String monitoringExpression) {
 		this.type = type;
 		this.targetType = targetType;
 		this.monitoringExpression = monitoringExpression;
 		this.actionMonitored = actionMonitored;
 	}
 
-	MonitorTemplate(String type, String actionMonitored, String monitoringExpression) {
+	public MonitorTemplate(String type, String actionMonitored, String monitoringExpression) {
 		this.type = type;
 		this.monitoringExpression = monitoringExpression;
 		this.actionMonitored = actionMonitored;
 	}
 
-	MonitorTemplate(String type, String monitoringExpression) {
+	public MonitorTemplate(String type, String monitoringExpression) {
 		this.type = type;
 		this.monitoringExpression = monitoringExpression;
 	}
 
-	MonitorTemplate(String type) {
+	public MonitorTemplate(String type) {
 		this.type = type;
 	}
 
