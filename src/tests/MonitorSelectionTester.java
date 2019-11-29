@@ -21,20 +21,23 @@ public class MonitorSelectionTester {
 
 		// dummy map...
 		// key is action, value is the list of monitors that can monitor that action
-		int numOfMonitors = 25;
-		int numOfActions = 15;
+		int numOfMonitors = 8;
+		int numOfActions = 3;
 
 		Map<String, List<Monitor>> actionsMonitors = createDummyActionMonitorMap(numOfActions, numOfMonitors);
 
-		printMap(actionsMonitors);
+//		printMap(actionsMonitors);
 
 		boolean isOptimal = true;
-		boolean allDifferent = false;
+		boolean allDifferent = true;
 		boolean isMinimum = true;
 		
 		int tries = 5;
 
 		for (int i = 0; i < tries; i++) {
+			
+			printMap(actionsMonitors);
+			
 			System.out.println("Try [" + i + "] isOptimal = " + isOptimal + ", All-Different = " + allDifferent + ", isMinimum = " + isMinimum);
 			
 			List<MonitorSolution> solutions = solver.solve(actionsMonitors, isOptimal, allDifferent, isMinimum);
@@ -47,7 +50,8 @@ public class MonitorSelectionTester {
 				System.out.println("No solution found!");
 			}
 
-			actionsMonitors = createDummyActionMonitorMap(numOfActions, numOfMonitors);
+			actionsMonitors = createDummyActionMonitorMap(numOfActions, numOfMonitors);			
+
 
 		}
 

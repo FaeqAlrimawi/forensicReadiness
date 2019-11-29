@@ -96,13 +96,13 @@ public class MonitorSolution {
 				.append(newLine);
 
 		// solution (e.g., *Action: action1 ^Monitor: monitor1 (cost: 43)
-		bldr.append("{MonitorID ==> ActionName (cost)}").append(newLine);
+		bldr.append("{ActionName ==> MonitorID (cost)}").append(newLine);
 
 		for (Entry<String, Monitor> entry : actionMonitors.entrySet()) {
 			String actionName = entry.getKey();
 			Monitor monitor = entry.getValue();
 
-			bldr.append(monitor.getMonitorID()).append(" ==> ").append(actionName).append(" (")
+			bldr.append(actionName).append(" ==> ").append(monitor.getMonitorID()).append(" (")
 					.append(monitor.getCost()).append(")").append(newLine);
 		}
 

@@ -334,24 +334,13 @@ public class MonitorSelectionSolver {
 
 		int numOfActions = actionsSequence.size();
 
-//		IntVar[] monitors = null;
-//		boolean isSolutionfound = false;
-
 		// actual severity array, assuming its embedded in the argument
 		// variable
-		int minCost = 0;
-		int maxCost = 0;
 		int sumCost = 0;
 
 		for (Integer monitorCost : monitorsCosts.values()) {
 			sumCost += monitorCost;
-
-			if (monitorCost > maxCost) {
-				maxCost = monitorCost;
-			}
 		}
-
-		maxCost++;
 
 		if (sumCost == 0) {
 			sumCost = 1;
@@ -374,21 +363,38 @@ public class MonitorSelectionSolver {
 			coeffs = new int[numOfActions];
 			Arrays.fill(coeffs, 1); // coeff is 1
 
-			// defines severity for a solution
+			// defines cost for a solution
 			costSum = model.intVar("cost_sum", 0, sumCost);
 		}
 
-		// each pattern has as domain values the range from {} to
-		// {actions in maps}
-		int[] monsIDs = monitorToIDMap.values().stream().mapToInt((Integer k) -> k.intValue()).toArray();
+		int maxCostPerAction = 0;
+		int minCostPerAction = 0;
 
 		// create monitor variables
 		for (int i = 0; i < numOfActions; i++) {
-			monitorsVars[i] = model.intVar("monitor-" + i, monsIDs);
+			monitorsVars[i] = model.intVar("monitor-" + i, actionMonitorMatrix[i]);
+
+			maxCostPerAction = 0;
+			minCostPerAction = 0;
+
+			for (int j = 0; j < actionMonitorMatrix[i].length; j++) {
+
+				int monCost = monitorsCosts.get(actionMonitorMatrix[i][j]);
+
+				// set max cost for the monitor of this action
+				if (monCost > maxCostPerAction) {
+					maxCostPerAction = monCost;
+				}
+
+				// set min cost for the monitor of this action
+				if (monCost < minCostPerAction) {
+					minCostPerAction = monCost;
+				}
+			}
 
 			// cost
 			if (isMinimal) {
-				monitorCost[i] = model.intVar("monitor_" + i + "_cost", minCost, maxCost);
+				monitorCost[i] = model.intVar("monitor_" + i + "_cost", minCostPerAction, maxCostPerAction);
 			}
 		}
 
