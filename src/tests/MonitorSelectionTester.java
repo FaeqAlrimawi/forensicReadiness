@@ -21,8 +21,8 @@ public class MonitorSelectionTester {
 
 		// dummy map...
 		// key is action, value is the list of monitors that can monitor that action
-		int numOfMonitors = 50;
-		int numOfActions = 15;
+		int numOfMonitors = 15;
+		int numOfActions = 5;
 
 		Map<String, List<Monitor>> actionsMonitors = createDummyActionMonitorMap(numOfActions, numOfMonitors);
 

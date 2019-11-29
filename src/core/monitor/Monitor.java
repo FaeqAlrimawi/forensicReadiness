@@ -15,6 +15,7 @@ import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Control;
 import it.uniud.mads.jlibbig.core.std.Signature;
 import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
+import net.sf.saxon.functions.SystemProperty;
 
 public class Monitor {
 
@@ -102,7 +103,7 @@ public class Monitor {
 	public String getMonitorAssetRef() {
 		return monitorAssetRef;
 	}
-	
+
 	public String getMonitorID() {
 		return monitorAssetRef;
 	}
@@ -110,7 +111,7 @@ public class Monitor {
 	public void setMonitorAssetRef(String monitorAssetRef) {
 		this.monitorAssetRef = monitorAssetRef;
 	}
-	
+
 	public void setMonitorID(String monitorID) {
 		this.monitorAssetRef = monitorID;
 	}
@@ -193,49 +194,21 @@ public class Monitor {
 			return;
 		}
 
-		if (stateToMonitor == null) {
-			stateToMonitor = new BigraphWrapper();
-		}
+//		if (stateToMonitor == null) {
+		stateToMonitor = new BigraphWrapper();
+//		}
 
 		originalStateToMonitor = bigStmt;
 
 		stateToMonitor.parseBigraphERCondition(bigStmt);
 
-		// try to find monitors from given ids
-//		List<String> monitorsList = findMonitor(stateToMonitor);
+//		if (monitorTypeIdentificationName == null || monitorTypeIdentificationName.isEmpty()) {
+		boolean isMonitorTagAvailable = findMonitorAssetIDUniqueName();
 
-//		if (monitorsList != null && !monitorsList.isEmpty()) {
-//
-//			// if there are more than 1 monitor in the given bigrapher expression, then
-//			// indicate that to the user (maybe one would be enough, but also some cases may
-//			// require multiple monitors. Still, this class is about having one monitor, so
-//			// one monitor is needed)
-//			if (monitorsList.size() > 1) {
-//				// one monitor is required
-//				// the first found is taken
-//				System.out.println("*Monitor Warning! more than one monitor are detected. Monitors: " + monitorsList);
-//			}
-//
-//			monitorAssetRef = monitorsList.get(0);
-//
-//			// get monitor unique name and type
-//			monitorTypeAssetIDIdentificationName = findAssetIDUniqueName(monitorAssetRef);
-//
-//			monitorTypeIdentificationName = stateToMonitor.getContainerEntitiesMap()
-//					.get(monitorTypeAssetIDIdentificationName);
-//			monitorType = stateToMonitor.getControl(monitorTypeIdentificationName);
-//
-//			System.out.println("*Monitor found: " + monitorAssetRef + ", type: " + monitorType);
-//
-//		}
-
-		if (monitorTypeIdentificationName == null || monitorTypeIdentificationName.isEmpty()) {
-			boolean isMonitorTagAvailable = findMonitorAssetIDUniqueName();
-
-			if (!isMonitorTagAvailable) {
-				System.out.println("*Monitor Warning! Monitor tag is not found in the given bigraphER statement");
-			}
+		if (!isMonitorTagAvailable) {
+			System.out.println("*Monitor Warning! Monitor tag is not found in the given bigraphER statement");
 		}
+//		}
 
 		boolean isTargetTagAvailable = findTragetAssetIDUniqueName();
 
@@ -243,91 +216,6 @@ public class Monitor {
 			System.out.println("*Monitor Warning! Target tag is not found in the given bigraphER statement");
 		}
 	}
-
-//	public List<String> findMonitor(BigraphWrapper bigWrapper) {
-//
-//		if (bigWrapper == null) {
-//			return null;
-//		}
-//
-//		// === looks for a monitor in the given bigraph wrapper
-//		// it does this by finding ids for monitors, if ids are available
-//
-//		if (!MonitorManager.hasMonitors()) {
-//			System.out.println("Monitor Manager: There are no Monitors");
-//			return null;
-//		}
-//
-//		List<String> monitorIDsFound = new LinkedList<String>();
-//
-//		for (Entry<Entity, String> entry : bigWrapper.getControlMap().entrySet()) {
-//			Entity ent = entry.getKey();
-//			String id = entry.getValue();
-//
-//			String control = ent.getName();
-//
-//			// if the control is asset id, then look for child for id
-//			if (control.equalsIgnoreCase(JSONTerms.CONTROL_ASSET_ID)) {
-//				List<String> assetIDList = bigWrapper.getContainedEntitiesMap().get(id);
-//
-//				if (assetIDList != null && !assetIDList.isEmpty()) {
-//					String assetIDUniqueName = assetIDList.get(0);
-//					String assetID = bigWrapper.getControl(assetIDUniqueName);
-//					// if monitor is found, then ad to the list
-//					if (MonitorManager.hasMonitor(assetID)) {
-//						monitorIDsFound.add(assetID);
-//					}
-//				}
-//			}
-//
-//		}
-//
-//		return monitorIDsFound;
-//	}
-	
-//	public List<String> findMonitor(String bigraphERExpression) {
-//
-//		if (bigraphERExpression == null) {
-//			return null;
-//		}
-//
-//		BigraphWrapper bigWrapper = new BigraphWrapper();
-//		bigWrapper.parseBigraphERCondition(bigraphERExpression);
-//
-//		// === looks for a monitor in the given bigraph wrapper
-//		// it does this by finding ids for monitors, if ids are available
-//
-//		if (!MonitorManager.hasMonitors()) {
-//			System.out.println("Monitor Manager: There are no Monitors");
-//			return null;
-//		}
-//
-//		List<String> monitorIDsFound = new LinkedList<String>();
-//
-//		for (Entry<Entity, String> entry : bigWrapper.getControlMap().entrySet()) {
-//			Entity ent = entry.getKey();
-//			String id = entry.getValue();
-//
-//			String control = ent.getName();
-//
-//			// if the control is asset id, then look for child for id
-//			if (control.equalsIgnoreCase(JSONTerms.CONTROL_ASSET_ID)) {
-//				List<String> assetIDList = bigWrapper.getContainedEntitiesMap().get(id);
-//
-//				if (assetIDList != null && !assetIDList.isEmpty()) {
-//					String assetIDUniqueName = assetIDList.get(0);
-//					String assetID = bigWrapper.getControl(assetIDUniqueName);
-//					// if monitor is found, then ad to the list
-//					if (MonitorManager.hasMonitor(assetID)) {
-//						monitorIDsFound.add(assetID);
-//					}
-//				}
-//			}
-//
-//		}
-//
-//		return monitorIDsFound;
-//	}
 
 	// ========= Method to assess if this monitor can monitor the given actions and
 	// its per & post system states
@@ -389,7 +277,7 @@ public class Monitor {
 		// === update asset id, if given
 
 		boolean isTargetFound = findTragetAssetIDUniqueName();
-		
+
 		if (assetID != null && !isTargetFound) {
 			System.out.println("*Monitor Warning! Missing a Target Tag. The given Asset ID [" + assetID
 					+ "] cannot be located in the given Bigraph, so it will be ignored.\n");
@@ -710,7 +598,7 @@ public class Monitor {
 			}
 		}
 
-		System.out.println(targetTypeIdentificationName);
+//		System.out.println(targetTypeIdentificationName);
 		// try to find the id of the AssetID control of the target
 		if (targetTypeAssetIDIdentificationName == null) {
 			// get parent entity id
@@ -774,8 +662,9 @@ public class Monitor {
 						String uniqueName = entry.getValue();
 						String control = entry.getKey() != null ? entry.getKey().getName() : null;
 
+					
 						if (control != null && control.equalsIgnoreCase(monitorType)) {
-
+							
 							if (monitorTypeIdentificationName == null) {
 								monitorTypeIdentificationName = uniqueName;
 							} else {
@@ -786,15 +675,16 @@ public class Monitor {
 						}
 					}
 				}
-				// System.err.println("\"" + MonitorTerms.TAG_MONITOR + "\" tag NOT found");
-				if (monitorType == null ||!isUnique) {
+				
+				if (monitorType == null || !isUnique) {
+					
 					monitorTypeIdentificationName = null;
 					return false;
 				}
 
 			}
 		}
-
+		
 		// try to find the id of the AssetID control of the target
 		if (monitorTypeAssetIDIdentificationName == null) {
 			// get parent entity id
@@ -860,5 +750,33 @@ public class Monitor {
 		}
 
 		return true;
+	}
+
+	public String toString() {
+
+		StringBuilder bldr = new StringBuilder();
+
+		String newLine = System.getProperty("line.separator");
+
+		// id
+		bldr.append("Monitor-ID: ").append(monitorAssetRef).append(newLine);
+
+		// type
+		bldr.append("-Type: ").append(monitorType).append(newLine);
+
+		// action monitored
+		bldr.append("-Action monitored: ").append(actionMonitored).append(newLine);
+
+		// target & type
+		bldr.append("-Target Asset: ").append(targetAssetRef).append(" Type: ").append(targetType).append(newLine);
+
+		// cost
+		bldr.append("-Cost: ").append(cost).append(newLine);
+
+		return bldr.toString();
+	}
+
+	public void print() {
+		System.out.println(toString());
 	}
 }

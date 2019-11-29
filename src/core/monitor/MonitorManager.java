@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 
 import core.brs.parser.BigraphWrapper;
 import core.brs.parser.utilities.JSONTerms;
@@ -55,10 +56,29 @@ public class MonitorManager {
 
 		String monitorID = monitor.getMonitorID();
 
+		// create new id
 		if (monitorID == null) {
-			return false;
-		}
+			Random rand = new Random();
 
+			int tries = 1000;
+
+			while (tries > 0) {
+				monitorID = "monitor-" + rand.nextInt(10000);
+
+				if (!monitors.containsKey(monitorID)) {
+					break;
+				}
+
+				tries--;
+			}
+
+			if (monitorID == null) {
+				return false;
+			}
+
+			monitor.setMonitorID(monitorID);
+		}
+		
 		if (!monitors.containsKey(monitorID)) {
 			monitors.put(monitorID, monitor);
 		}
@@ -304,7 +324,7 @@ public class MonitorManager {
 		return getCapableMonitors(action, null, preState, postState);
 
 	}
-	
+
 	/**
 	 * Finds all monitors in the given bigraph wrapper and returns a list of their
 	 * IDs. All available monitors are assumed to be set in the MonitorManager class
@@ -353,7 +373,7 @@ public class MonitorManager {
 
 		return monitorIDsFound;
 	}
-	
+
 	/**
 	 * Finds all monitors in the given bigraphER expression and returns a list of
 	 * their IDs. All available monitors are assumed to be set in the MonitorManager
@@ -371,7 +391,7 @@ public class MonitorManager {
 
 		BigraphWrapper bigWrapper = new BigraphWrapper();
 		bigWrapper.parseBigraphERCondition(bigraphERExpression);
-	
+
 		return findMonitors(bigWrapper);
 	}
 }

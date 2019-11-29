@@ -755,6 +755,7 @@ public class BigraphWrapper implements Serializable {
 		// then the rest of outernames will be defined as links (i.e. XX:e)
 		// System.out.println("*node: " + node.getId() + " ctrl: " +
 		// node.getControl());
+		
 		Node n = biBuilder.addNode(node.getControl(),
 				createNode(node.getParent(), biBuilder, libBigRoots, outerNames, nodes), names);
 

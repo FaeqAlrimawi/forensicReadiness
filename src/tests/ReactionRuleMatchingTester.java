@@ -5,7 +5,8 @@ import java.net.URL;
 import core.instantiation.analysis.TraceMiner;
 import core.monitor.Monitor;
 import core.monitor.MonitorManager;
-import core.monitor.MonitorTerms;
+import core.monitor.MonitorTemplate;
+import core.monitor.MonitorTemplateFactory;
 
 public class ReactionRuleMatchingTester {
 
@@ -50,19 +51,7 @@ public class ReactionRuleMatchingTester {
 			System.err.println("TraceMiner object is null");
 			return;
 		}
-		
-		String monitorID1 = "CCTV1";
-//		String monitorID2 = "CCTV2";
-		//####### MONITOR MANAGER
-		
-		//add monitor to manager
-//		MonitorManager.addMonitor(monitorID1);
-//		MonitorManager.addMonitor(monitorID2);
-		
-//		
-		//##########################
-		
-		
+
 		// reactum of enter room action
 		String actionMonitored = "VisitorEnterRoom";
 		String postActionBig = "Hallway{hallway}.id | Room{hallway}.(Visitor.id | id)";
@@ -70,29 +59,37 @@ public class ReactionRuleMatchingTester {
 		String monitorType = "CCTV";
 		String targetType = "Room";
 
-		Monitor mon = new Monitor();
+		String monitorID1 = "CCTV1";
 
+		Monitor mon = MonitorTemplateFactory.eInstance.createMonitor(MonitorTemplate.VISITOR_ENTER_ROOM, monitorID1);
+
+		mon.print();
 		// ===set attributes of monitor
 //		mon.setMonitorType(monitorType);
-		mon.setTargetType(targetType);
-		mon.setActionMonitored(actionMonitored);
+//		mon.setTargetType(targetType);
+//		mon.setActionMonitored(actionMonitored);
 		mon.setTraceMiner(miner);
 
-		/*===Important: set the partial-state, which the monitor can monitor
-		 *=== This partial-state can be annotated with [monitor tags] such as
-		 *Monitor_Tag, which is used to indicate the monitor in the partial-state by
-		 *containing the tag. More tags are available in the MonitorTerms class
+		/*
+		 * ===Important: set the partial-state, which the monitor can monitor === This
+		 * partial-state can be annotated with [monitor tags] such as Monitor_Tag, which
+		 * is used to indicate the monitor in the partial-state by containing the tag.
+		 * More tags are available in the MonitorTerms class
 		 */
-		postActionBig = "Hallway{hallway}.(id | CCTV{ipNet}.AssetID.CCTV1) | Room{hallway}.(Visitor.id ) | Room{hallway} | CCTV.AssetID.CCTV2 | Room{hallway}";
+		postActionBig = "Hallway{hallway}.(id | CCTV{ipNet}) | Room{hallway}.(Visitor.id)";
 
 		System.out.println("\nBigraphER Statement: [" + postActionBig + "]\n");
 
 		mon.setBigraphERStatment(postActionBig);
 
-		//===test if the monitor can monitor the specified action pre and post states
+		// === create a monitor manager which can be used to find monitors
+		MonitorManager mngr = new MonitorManager();
+
+		mngr.addMonitor(mon);
+
+		// ===test if the monitor can monitor the specified action pre and post states
 		// in a trace
 		String targetAssetID = "Office_T24";
-		
 
 		int preState = 1;
 		int postState = 237;
@@ -111,24 +108,50 @@ public class ReactionRuleMatchingTester {
 		 * an asset with the given target type, when the action takes place.
 		 */
 //		boolean isMonitorable = mon.canMonitor(monitorID, null, preState, postState);
-		
+
 		/*
-		 * === This checks if the monitor can monitor the target with the
-		 * given ID (targetAssetID), when the action takes place.
+		 * === This checks if the monitor can monitor the target with the given ID
+		 * (targetAssetID), when the action takes place.
 		 */
 //		boolean isMonitorable = mon.canMonitor(targetAssetID, preState, postState);
 
 		/*
-		 * === This checks if the monitor can monitor the set target, when the action takes place.
+		 * === This checks if the monitor can monitor the set target, when the action
+		 * takes place.
 		 */
-		boolean isMonitorable = mon.canMonitor(targetAssetID, preState, postState);
-		
-		
-		if (isMonitorable) {
+//		boolean isMonitorable = mon.canMonitor(targetAssetID, preState, postState);
+
+		int monitorResult = mngr.canMonitor(actionMonitored, preState, postState);
+
+		switch (monitorResult) {
+		case MonitorManager.CAN_MONITOR:
 			System.out.println("Yes, can monitor...");
-		} else {
+			break;
+
+		case MonitorManager.CANNOT_MONITOR:
 			System.out.println("NO, cannot monitor...");
+			break;
+
+		case MonitorManager.NO_MONITORS_AVAILABLE:
+			System.out.println("NO monitors available to monitor the given action...");
+			break;
+
+		case MonitorManager.UNDETERMINED:
+			System.out.println("Cannot determine...");
+			break;
+
+		case MonitorManager.ERROR:
+			System.out.println("Error occurred");
+			break;
+
+		default:
+			break;
 		}
+//		if (isMonitorable) {
+//			System.out.println("Yes, can monitor...");
+//		} else {
+//			System.out.println("NO, cannot monitor...");
+//		}
 
 	}
 
