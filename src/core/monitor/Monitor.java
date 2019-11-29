@@ -202,6 +202,9 @@ public class Monitor {
 
 		stateToMonitor.parseBigraphERCondition(bigStmt);
 
+		monitorTypeIdentificationName = null;
+		targetTypeIdentificationName = null;
+		
 //		if (monitorTypeIdentificationName == null || monitorTypeIdentificationName.isEmpty()) {
 		boolean isMonitorTagAvailable = findMonitorAssetIDUniqueName();
 
@@ -602,16 +605,16 @@ public class Monitor {
 		// try to find the id of the AssetID control of the target
 		if (targetTypeAssetIDIdentificationName == null) {
 			// get parent entity id
-			String parentEntityID = stateToMonitor.getContainerEntitiesMap().get(targetTypeIdentificationName);
-
-			if (parentEntityID == null) {
-				return false;
-			}
+//			String parentEntityID = stateToMonitor.getContainerEntitiesMap().get(targetTypeIdentificationName);
+//
+//			if (parentEntityID == null) {
+//				return false;
+//			}
 
 			// get contained entities in parent
 			// then identify the AssetID control, if available. If not, then add it to the
 			// parent and to the map of all entities
-			List<String> containedEntitiesIDs = stateToMonitor.getContainedEntitiesMap().get(parentEntityID);
+			List<String> containedEntitiesIDs = stateToMonitor.getContainedEntitiesMap().get(targetTypeIdentificationName);
 
 			if (containedEntitiesIDs != null) {
 				for (String containedEntityID : containedEntitiesIDs) {
@@ -686,18 +689,45 @@ public class Monitor {
 		}
 		
 		// try to find the id of the AssetID control of the target
+//		if (monitorTypeAssetIDIdentificationName == null) {
+//			// get parent entity id
+//			String parentEntityID = stateToMonitor.getContainerEntitiesMap().get(monitorTypeIdentificationName);
+//
+//			if (parentEntityID == null) {
+//				return false;
+//			}
+//
+//			// get contained entities in parent
+//			// then identify the AssetID control, if available. If not, then add it to the
+//			// parent and to the map of all entities
+//			List<String> containedEntitiesIDs = stateToMonitor.getContainedEntitiesMap().get(parentEntityID);
+//
+//			if (containedEntitiesIDs != null) {
+//				for (String containedEntityID : containedEntitiesIDs) {
+//					String cntrl = stateToMonitor.getControl(containedEntityID);
+//
+//					if (cntrl != null) {
+//						if (cntrl.equalsIgnoreCase(JSONTerms.CONTROL_ASSET_ID)) {
+//							monitorTypeAssetIDIdentificationName = containedEntityID;
+//							break;
+//						}
+//					}
+//				}
+//			}
+//		}
+		
 		if (monitorTypeAssetIDIdentificationName == null) {
 			// get parent entity id
-			String parentEntityID = stateToMonitor.getContainerEntitiesMap().get(monitorTypeIdentificationName);
-
-			if (parentEntityID == null) {
-				return false;
-			}
+//			String parentEntityID = stateToMonitor.getContainerEntitiesMap().get(monitorTypeIdentificationName);
+//
+//			if (parentEntityID == null) {
+//				return false;
+//			}
 
 			// get contained entities in parent
 			// then identify the AssetID control, if available. If not, then add it to the
 			// parent and to the map of all entities
-			List<String> containedEntitiesIDs = stateToMonitor.getContainedEntitiesMap().get(parentEntityID);
+			List<String> containedEntitiesIDs = stateToMonitor.getContainedEntitiesMap().get(monitorTypeIdentificationName);
 
 			if (containedEntitiesIDs != null) {
 				for (String containedEntityID : containedEntitiesIDs) {
