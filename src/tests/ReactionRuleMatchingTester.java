@@ -121,7 +121,7 @@ public class ReactionRuleMatchingTester {
 		 */
 //		boolean isMonitorable = mon.canMonitor(targetAssetID, preState, postState);
 
-		int monitorResult = mngr.canMonitor(actionMonitored, preState, postState);
+		int monitorResult = mngr.canMonitor(actionMonitored, targetAssetID, preState, postState);
 
 		switch (monitorResult) {
 		case MonitorManager.CAN_MONITOR:
