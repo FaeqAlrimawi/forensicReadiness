@@ -53,13 +53,13 @@ public class ReactionRuleMatchingTester {
 		}
 
 		// reactum of enter room action
-		String actionMonitored = "VisitorEnterRoom";
-		String postActionBig = "Hallway{hallway}.id | Room{hallway}.(Visitor.id | id)";
-
-		String monitorType = "CCTV";
-		String targetType = "Room";
-
-		String monitorID1 = "CCTV1";
+//		String actionMonitored = "VisitorEnterRoom";
+//		String postActionBig = "Hallway{hallway}.id | Room{hallway}.(Visitor.id | id)";
+//
+//		String monitorType = "CCTV";
+//		String targetType = "Room";
+//
+//		String monitorID1 = "CCTV1";
 
 //		Monitor mon = MonitorTemplateFactory.eInstance.createMonitor(actionMonitored, monitorID1);
 
@@ -92,11 +92,11 @@ public class ReactionRuleMatchingTester {
 		mngr.setTraceMiner(miner);
 		// ===test if the monitor can monitor the specified action pre and post states
 		// in a trace
+		String actionMonitored = "VisitorEnterRoom";
 		String targetAssetID = "Office_T24";
 
 		int preState = 1;
 		int postState = 237;
-
 
 		/*
 		 * === This checks whether the monitor with the given ID (monitorID) can monitor
@@ -151,11 +151,6 @@ public class ReactionRuleMatchingTester {
 		default:
 			break;
 		}
-//		if (isMonitorable) {
-//			System.out.println("Yes, can monitor...");
-//		} else {
-//			System.out.println("NO, cannot monitor...");
-//		}
 
 	}
 
