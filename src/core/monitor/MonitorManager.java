@@ -37,6 +37,9 @@ public class MonitorManager {
 	// can be used to fill the monitors list
 	EnvironmentDiagram systemModel;
 
+	// trace miner containing info about the location of states and signature
+	TraceMiner miner;
+
 	// values for canMonitor method
 	public static final int CAN_MONITOR = 1;
 	public static final int UNDETERMINED = 0;
@@ -127,7 +130,11 @@ public class MonitorManager {
 		return false;
 	}
 
-	
+	public void setTraceMiner(TraceMiner miner) {
+
+		this.miner = miner;
+	}
+
 	public boolean loadFactoryMonitors(TraceMiner miner) {
 
 		// loads monitors defined by templates in the factory
@@ -137,24 +144,24 @@ public class MonitorManager {
 		Map<String, Monitor> factoryMonitors = instace.createAllMonitors();
 
 		if (factoryMonitors != null) {
-			
-			for(Entry<String, Monitor> entry : factoryMonitors.entrySet()) {
+
+			for (Entry<String, Monitor> entry : factoryMonitors.entrySet()) {
 				Monitor mon = entry.getValue();
-				
+
 				mon.setTraceMiner(miner);
-				
+
 				monitors.put(entry.getKey(), mon);
 			}
 		}
 
 		return false;
 	}
-	
+
 	public Monitor getMonitor(String action) {
-	
+
 		return monitors.get(action);
 	}
-	
+
 	public boolean hasMonitors() {
 
 		return !monitors.isEmpty();
@@ -240,13 +247,16 @@ public class MonitorManager {
 	 * @param assetID   target asset ID to monitor
 	 * @param preState  the state of the system BEFORE the action takes place
 	 * @param postState the state of the system AFTER the action takes place
+	 * @param miner     TraceMiner object that contain info about the folder that
+	 *                  contains the states
 	 * @return an integer indicating the result. In general, a positive integer
 	 *         indicates a success, a negative indicates a problem occurred.
 	 *         Integers range from CAN_MONITOR to CANNOT_MONITOR, with states
 	 *         in-between for indicating states where, for example, it is
 	 *         UNDETERMINED or NO_MONITORS_AVAILABLE
 	 */
-	public int canMonitor(String monitorID, String action, String assetID, int preState, int postState) {
+	public int canMonitor(String monitorID, String action, String assetID, int preState, int postState,
+			TraceMiner miner) {
 
 		// if there are no monitors then return no monitors available
 		if (monitors == null || monitors.isEmpty()) {
@@ -259,7 +269,7 @@ public class MonitorManager {
 
 				// if the monitor can monitor the given action then, check the states
 				if (action.equals(monitor.getActionMonitored())) {
-					boolean canMon = monitor.canMonitor(assetID, preState, postState);
+					boolean canMon = monitor.canMonitor(assetID, preState, postState, miner);
 
 					if (canMon) {
 						return CAN_MONITOR;
@@ -292,6 +302,52 @@ public class MonitorManager {
 	}
 
 	/**
+	 * Determines whether the monitor with the given ID can monitor the given action
+	 * and assetID in the change (pre and post states)
+	 * 
+	 * @param monitorId Monitor ID that is required to monitor the given action and
+	 *                  asset in the change
+	 * @param action    Action to monitor
+	 * @param assetID   target asset ID to monitor
+	 * @param preState  the state of the system BEFORE the action takes place
+	 * @param postState the state of the system AFTER the action takes place
+	 * @param miner     TraceMiner object that contain info about the folder that
+	 *                  contains the states
+	 * @return an integer indicating the result. In general, a positive integer
+	 *         indicates a success, a negative indicates a problem occurred.
+	 *         Integers range from CAN_MONITOR to CANNOT_MONITOR, with states
+	 *         in-between for indicating states where, for example, it is
+	 *         UNDETERMINED or NO_MONITORS_AVAILABLE
+	 */
+	public int canMonitor(String monitorID, String action, String assetID, int preState, int postState) {
+	
+		return canMonitor(monitorID, action, assetID, preState, postState, miner);
+		
+	}
+	/**
+	 * Determines whether the given action and assetID in the change (pre and post
+	 * states) can be monitored by at least 1 monitor
+	 * 
+	 * @param action    Action to monitor
+	 * @param assetID   target asset ID to monitor
+	 * @param preState  the state of the system BEFORE the action takes place
+	 * @param postState the state of the system AFTER the action takes place
+	 * @param miner     TraceMiner object that contain info about the folder that
+	 *                  contains the states
+	 * @return an integer indicating the result. In general, a positive integer
+	 * 
+	 *         indicates a success, a negative indicates a problem occurred.
+	 *         Integers range from CAN_MONITOR to CANNOT_MONITOR, with states
+	 *         in-between for indicating states where, for example, it is
+	 *         UNDETERMINED or NO_MONITORS_AVAILABLE
+	 */
+	public int canMonitor(String action, String assetID, int preState, int postState, TraceMiner miner) {
+
+		// if there are no monitors then return no monitors available
+		return canMonitor(null, action, assetID, preState, postState, miner);
+	}
+
+	/**
 	 * Determines whether the given action and assetID in the change (pre and post
 	 * states) can be monitored by at least 1 monitor
 	 * 
@@ -308,7 +364,29 @@ public class MonitorManager {
 	public int canMonitor(String action, String assetID, int preState, int postState) {
 
 		// if there are no monitors then return no monitors available
-		return canMonitor(null, action, assetID, preState, postState);
+		return canMonitor(null, action, assetID, preState, postState, miner);
+	}
+
+	/**
+	 * Determines whether the given action in the change (pre and post states) can
+	 * be monitored by at least 1 monitor
+	 * 
+	 * @param action    Action to monitor
+	 * @param assetID   target asset ID to monitor
+	 * @param preState  the state of the system BEFORE the action takes place
+	 * @param postState the state of the system AFTER the action takes place
+	 * @param miner     TraceMiner object that contain info about the folder that
+	 *                  contains the states
+	 * @return an integer indicating the result. In general, a positive integer
+	 *         indicates a success, a negative indicates a problem occurred.
+	 *         Integers range from CAN_MONITOR to CANNOT_MONITOR, with states
+	 *         in-between for indicating states where, for example, it is
+	 *         UNDETERMINED or NO_MONITORS_AVAILABLE
+	 */
+	public int canMonitor(String action, int preState, int postState, TraceMiner miner) {
+
+		return canMonitor(null, action, null, preState, postState, miner);
+
 	}
 
 	/**
@@ -327,7 +405,7 @@ public class MonitorManager {
 	 */
 	public int canMonitor(String action, int preState, int postState) {
 
-		return canMonitor(null, action, null, preState, postState);
+		return canMonitor(null, action, null, preState, postState, miner);
 
 	}
 

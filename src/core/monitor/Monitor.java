@@ -246,6 +246,14 @@ public class Monitor {
 		return canMonitor(monitorAssetRef, targetAssetRef, preState, postState);
 	}
 
+	public boolean canMonitor(String monitorID, String assetID, int preState, int postState, TraceMiner miner) {
+
+		this.miner = miner;
+
+		return canMonitor(monitorID, assetID, preState, postState);
+
+	}
+
 	/**
 	 * Checks whether the monitor, with the given ID, can monitor the asset, with
 	 * the given ID if the monitor ID is NULL, then the monitor will be general
@@ -308,7 +316,7 @@ public class Monitor {
 
 		Bigraph big = stateToMonitor.createBigraph(false, sig);
 
-		System.out.println(big);
+//		System.out.println(big);
 
 		int diff = miner.getNumberOfBigraphMatches(big, preState, postState);
 
@@ -339,6 +347,17 @@ public class Monitor {
 	 */
 	public boolean canMonitor(String assetID, int preState, int postState) {
 
+		return canMonitor(monitorAssetRef, assetID, preState, postState);
+	}
+	
+	/**
+	 * Checks whether this monitor can monitor the asset, with the given ID. If the
+	 * asset/target ID is NULL, then the monitor will monitor any asset with a type
+	 * matching the type of the target as set originally in the monitor
+	 */
+	public boolean canMonitor(String assetID, int preState, int postState, TraceMiner miner) {
+
+		this.miner = miner;
 		return canMonitor(monitorAssetRef, assetID, preState, postState);
 	}
 

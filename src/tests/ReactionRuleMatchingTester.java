@@ -88,8 +88,8 @@ public class ReactionRuleMatchingTester {
 //		mngr.addMonitor(mon);
 
 		//or you can just load monitors defined by the factory
-		mngr.loadFactoryMonitors(miner);
-		
+		mngr.loadFactoryMonitors();
+		mngr.setTraceMiner(miner);
 		// ===test if the monitor can monitor the specified action pre and post states
 		// in a trace
 		String targetAssetID = "Office_T24";
