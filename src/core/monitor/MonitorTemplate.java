@@ -1,5 +1,7 @@
 package core.monitor;
 
+import cyberPhysical_Incident.BigraphExpression;
+
 public class MonitorTemplate {
 
 //	VISITOR_ENTER_ROOM("CCTV", "Room", "VisitorEnterRoom",
@@ -14,27 +16,36 @@ public class MonitorTemplate {
 
 	// expression that indicates what it can monitor. The expression is BigraphER
 	// expression
-	String monitoringExpression;
+	String bigraphERmonitoringExpression;
 
+	BigraphExpression ownMonitoringExpression;
+	
 	// the action that it can monitor
 	String actionMonitored;
 
 	public MonitorTemplate(String type, String targetType, String actionMonitored, String monitoringExpression) {
 		this.type = type;
 		this.targetType = targetType;
-		this.monitoringExpression = monitoringExpression;
+		this.bigraphERmonitoringExpression = monitoringExpression;
 		this.actionMonitored = actionMonitored;
 	}
 
+	public MonitorTemplate(String type, String targetType, String actionMonitored, BigraphExpression monitoringExpression) {
+		this.type = type;
+		this.targetType = targetType;
+		this.ownMonitoringExpression = monitoringExpression;
+		this.actionMonitored = actionMonitored;
+	}
+	
 	public MonitorTemplate(String type, String actionMonitored, String monitoringExpression) {
 		this.type = type;
-		this.monitoringExpression = monitoringExpression;
+		this.bigraphERmonitoringExpression = monitoringExpression;
 		this.actionMonitored = actionMonitored;
 	}
 
 	public MonitorTemplate(String type, String monitoringExpression) {
 		this.type = type;
-		this.monitoringExpression = monitoringExpression;
+		this.bigraphERmonitoringExpression = monitoringExpression;
 	}
 
 	public MonitorTemplate(String type) {
@@ -49,11 +60,16 @@ public class MonitorTemplate {
 		return targetType;
 	}
 
-	String getMonitoringExpression() {
-		return monitoringExpression;
+	String getBigraphERMonitoringExpression() {
+		return bigraphERmonitoringExpression;
 	}
 
 	String getActionMonitored() {
 		return actionMonitored;
 	}
+
+	public BigraphExpression getOwnMonitoringExpression() {
+		return ownMonitoringExpression;
+	}
+	
 }

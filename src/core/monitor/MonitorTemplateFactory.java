@@ -21,15 +21,40 @@ public class MonitorTemplateFactory {
 		templates = new HashMap<String, MonitorTemplate>();
 
 		// create templates
+		String monitorType = null;
+		String targetType = null;
+		String action = null;
+		String stateToMonitor = null;
 
 		// === visitor enter room template
-		MonitorTemplate temp = new MonitorTemplate("CCTV", "Room", "VisitorEnterRoom",
-				"Hallway{hallway}.(id | CCTV{ipNet}) | Room{hallway}.(Visitor.id)");
+		monitorType = "CCTV";
+		targetType = "Room";
+		action = "VisitorEnterRoom";
+		stateToMonitor = "Hallway{hallway}.(id | CCTV{ipNet}) | Room{hallway}.(Visitor.id)";
 
-		templates.put("VisitorEnterRoom", temp);
+		createTemplate(monitorType, targetType, action, stateToMonitor);
+		
+		// monitor data sent to a bus network.
+		// Monitor type is DigitalProcess
+		// the monitor can monitor the busnetwork if it can get a copy of the data
+		// received by the busnetwork, then analyse it
+		monitorType = "DigitalProcess";
+		targetType = "BusNetwork";
+		action = "SendData";
+		stateToMonitor = "BusNetwor{bus}.Data | DigitalProcess{bus}.Data";
 
-	} 
+		createTemplate(monitorType, targetType, action, stateToMonitor);
 
+	}
+
+	protected void createTemplate (String monitorType, String targetType, String action, String stateToMonitor) {
+	
+		MonitorTemplate monitorTemplateVisitorEnterRoom = new MonitorTemplate(monitorType, targetType, action,
+				stateToMonitor);
+
+		templates.put(action, monitorTemplateVisitorEnterRoom);
+	}
+	
 	public boolean addTemplate(MonitorTemplate template) {
 
 		if (template == null) {
@@ -64,18 +89,18 @@ public class MonitorTemplateFactory {
 	}
 
 	public Map<String, Monitor> createAllMonitors() {
-		
+
 		Map<String, Monitor> monitors = new HashMap<String, Monitor>();
-		
-		for(String monName : templates.keySet()) {
+
+		for (String monName : templates.keySet()) {
 			Monitor mon = createMonitor(monName);
-			
+
 			monitors.put(monName, mon);
 		}
-		
+
 		return monitors;
 	}
-	
+
 	/**
 	 * Creates a Monitor object with the given type
 	 * 
@@ -95,7 +120,7 @@ public class MonitorTemplateFactory {
 		mon.setMonitorType(monitorTemplate.getType());
 		mon.setTargetType(monitorTemplate.getTargetType());
 		mon.setActionMonitored(monitorTemplate.getActionMonitored());
-		mon.setBigraphERStatment(monitorTemplate.getMonitoringExpression());
+		mon.setBigraphERStatment(monitorTemplate.getBigraphERMonitoringExpression());
 
 		return mon;
 	}
@@ -114,14 +139,14 @@ public class MonitorTemplateFactory {
 		}
 
 		MonitorTemplate monitorTemplate = templates.get(templateName);
-		
+
 		Monitor mon = new Monitor();
 
 		mon.setMonitorID(id);
 		mon.setMonitorType(monitorTemplate.getType());
 		mon.setTargetType(monitorTemplate.getTargetType());
 		mon.setActionMonitored(monitorTemplate.getActionMonitored());
-		mon.setBigraphERStatment(monitorTemplate.getMonitoringExpression());
+		mon.setBigraphERStatment(monitorTemplate.getBigraphERMonitoringExpression());
 
 		return mon;
 	}

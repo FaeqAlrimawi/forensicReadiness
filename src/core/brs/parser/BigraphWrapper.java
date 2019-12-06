@@ -1124,7 +1124,7 @@ public class BigraphWrapper implements Serializable {
 
 		return brsTokenizer;
 	}
-
+	
 	public void parseBigraphERCondition(String bigrapherStatement) {
 
 		if (brsTokenizer == null) {

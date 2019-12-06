@@ -15,8 +15,16 @@ import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Control;
 import it.uniud.mads.jlibbig.core.std.Signature;
 import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
-import net.sf.saxon.functions.SystemProperty;
 
+/**
+ * A class that defines the attributes and and methods for a monitor. For a
+ * monitor to be properly defined it needs to have: 1) type (e.g., CCTV), 2)
+ * stateToMonitor (i.e. the state that indicates that the monitor can perform
+ * the monitoring).
+ * 
+ * @author Faeq Alrimawi
+ *
+ */
 public class Monitor {
 
 	// monitor type (or Class) (required)
@@ -204,7 +212,7 @@ public class Monitor {
 
 		monitorTypeIdentificationName = null;
 		targetTypeIdentificationName = null;
-		
+
 //		if (monitorTypeIdentificationName == null || monitorTypeIdentificationName.isEmpty()) {
 		boolean isMonitorTagAvailable = findMonitorAssetIDUniqueName();
 
@@ -614,7 +622,8 @@ public class Monitor {
 			// get contained entities in parent
 			// then identify the AssetID control, if available. If not, then add it to the
 			// parent and to the map of all entities
-			List<String> containedEntitiesIDs = stateToMonitor.getContainedEntitiesMap().get(targetTypeIdentificationName);
+			List<String> containedEntitiesIDs = stateToMonitor.getContainedEntitiesMap()
+					.get(targetTypeIdentificationName);
 
 			if (containedEntitiesIDs != null) {
 				for (String containedEntityID : containedEntitiesIDs) {
@@ -665,9 +674,8 @@ public class Monitor {
 						String uniqueName = entry.getValue();
 						String control = entry.getKey() != null ? entry.getKey().getName() : null;
 
-					
 						if (control != null && control.equalsIgnoreCase(monitorType)) {
-							
+
 							if (monitorTypeIdentificationName == null) {
 								monitorTypeIdentificationName = uniqueName;
 							} else {
@@ -678,16 +686,16 @@ public class Monitor {
 						}
 					}
 				}
-				
+
 				if (monitorType == null || !isUnique) {
-					
+
 					monitorTypeIdentificationName = null;
 					return false;
 				}
 
 			}
 		}
-		
+
 		// try to find the id of the AssetID control of the target
 //		if (monitorTypeAssetIDIdentificationName == null) {
 //			// get parent entity id
@@ -715,7 +723,7 @@ public class Monitor {
 //				}
 //			}
 //		}
-		
+
 		if (monitorTypeAssetIDIdentificationName == null) {
 			// get parent entity id
 //			String parentEntityID = stateToMonitor.getContainerEntitiesMap().get(monitorTypeIdentificationName);
@@ -727,7 +735,8 @@ public class Monitor {
 			// get contained entities in parent
 			// then identify the AssetID control, if available. If not, then add it to the
 			// parent and to the map of all entities
-			List<String> containedEntitiesIDs = stateToMonitor.getContainedEntitiesMap().get(monitorTypeIdentificationName);
+			List<String> containedEntitiesIDs = stateToMonitor.getContainedEntitiesMap()
+					.get(monitorTypeIdentificationName);
 
 			if (containedEntitiesIDs != null) {
 				for (String containedEntityID : containedEntitiesIDs) {

@@ -13,6 +13,13 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.IntVar;
 
+/**
+ * A class that finds a solution(s) to a given set of actions and their
+ * potential monitors. It returns solutions as {@link MonitorSolution} objects.
+ * 
+ * @author Faeq
+ *
+ */
 public class MonitorSelectionSolver {
 
 //	protected List<int[]> optimalSolution;

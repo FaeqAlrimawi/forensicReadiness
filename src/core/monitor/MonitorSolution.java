@@ -4,6 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+/**
+ * A class that represents a solution found by the
+ * {@link MonitorSelectionSolver}. A solution contains informations such as
+ * solution ID; a map in which the key is action name and value is the
+ * monitor that can monitor the action; and cost 
+ * 
+ * @author Faeq
+ *
+ */
 public class MonitorSolution {
 
 	// solution id

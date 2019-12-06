@@ -61,14 +61,14 @@ public class ReactionRuleMatchingTester {
 
 		String monitorID1 = "CCTV1";
 
-		Monitor mon = MonitorTemplateFactory.eInstance.createMonitor(actionMonitored, monitorID1);
+//		Monitor mon = MonitorTemplateFactory.eInstance.createMonitor(actionMonitored, monitorID1);
 
-		mon.print();
+//		mon.print();
 		// ===set attributes of monitor
 //		mon.setMonitorType(monitorType);
 //		mon.setTargetType(targetType);
 //		mon.setActionMonitored(actionMonitored);
-		mon.setTraceMiner(miner);
+//		mon.setTraceMiner(miner);
 
 		/*
 		 * ===Important: set the partial-state, which the monitor can monitor === This
@@ -76,23 +76,27 @@ public class ReactionRuleMatchingTester {
 		 * is used to indicate the monitor in the partial-state by containing the tag.
 		 * More tags are available in the MonitorTerms class
 		 */
-		postActionBig = "Hallway{hallway}.(id | CCTV{ipNet}) | Room{hallway}.(Visitor.id)";
+//		postActionBig = "Hallway{hallway}.(id | CCTV{ipNet}) | Room{hallway}.(Visitor.id)";
 
-		System.out.println("\nBigraphER Statement: [" + postActionBig + "]\n");
+//		System.out.println("\nBigraphER Statement: [" + postActionBig + "]\n");
 
-		mon.setBigraphERStatment(postActionBig);
+//		mon.setBigraphERStatment(postActionBig);
 
 		// === create a monitor manager which can be used to find monitors
 		MonitorManager mngr = new MonitorManager();
 
-		mngr.addMonitor(mon);
+//		mngr.addMonitor(mon);
 
+		//or you can just load monitors defined by the factory
+		mngr.loadFactoryMonitors(miner);
+		
 		// ===test if the monitor can monitor the specified action pre and post states
 		// in a trace
 		String targetAssetID = "Office_T24";
 
 		int preState = 1;
 		int postState = 237;
+
 
 		/*
 		 * === This checks whether the monitor with the given ID (monitorID) can monitor

@@ -9,10 +9,20 @@ import java.util.Random;
 
 import core.brs.parser.BigraphWrapper;
 import core.brs.parser.utilities.JSONTerms;
+import core.instantiation.analysis.TraceMiner;
 import cyberPhysical_Incident.Entity;
 import environment.EnvironmentDiagram;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 
+/**
+ * A class that manages available monitors. One can add monitors to the manager,
+ * or create monitors from available templates. Monitor templates can be created
+ * using {@link MonitorTemplateFactory}. Monitor templates can be created using
+ * {@link MonitorTemplate}
+ * 
+ * @author Faeq
+ *
+ */
 public class MonitorManager {
 
 	// list of monitors in the system
@@ -78,7 +88,7 @@ public class MonitorManager {
 
 			monitor.setMonitorID(monitorID);
 		}
-		
+
 		if (!monitors.containsKey(monitorID)) {
 			monitors.put(monitorID, monitor);
 		}
@@ -100,6 +110,51 @@ public class MonitorManager {
 		return false;
 	}
 
+	public boolean loadFactoryMonitors() {
+
+		// loads monitors defined by templates in the factory
+
+		MonitorTemplateFactory instace = MonitorTemplateFactory.eInstance;
+
+		Map<String, Monitor> factoryMonitors = instace.createAllMonitors();
+
+		if (factoryMonitors != null) {
+			monitors.putAll(factoryMonitors);
+
+			return true;
+		}
+
+		return false;
+	}
+
+	
+	public boolean loadFactoryMonitors(TraceMiner miner) {
+
+		// loads monitors defined by templates in the factory
+
+		MonitorTemplateFactory instace = MonitorTemplateFactory.eInstance;
+
+		Map<String, Monitor> factoryMonitors = instace.createAllMonitors();
+
+		if (factoryMonitors != null) {
+			
+			for(Entry<String, Monitor> entry : factoryMonitors.entrySet()) {
+				Monitor mon = entry.getValue();
+				
+				mon.setTraceMiner(miner);
+				
+				monitors.put(entry.getKey(), mon);
+			}
+		}
+
+		return false;
+	}
+	
+	public Monitor getMonitor(String action) {
+	
+		return monitors.get(action);
+	}
+	
 	public boolean hasMonitors() {
 
 		return !monitors.isEmpty();
