@@ -5,7 +5,7 @@ import java.util.List;
 
 import core.brs.parser.utilities.JSONTerms;
 
-public class MonitorTerms {
+public interface MonitorTerms {
 	
 	
 	//indicates the target control in a given bigraph e.g., Server.Target

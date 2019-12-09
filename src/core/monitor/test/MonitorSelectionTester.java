@@ -1,4 +1,4 @@
-package tests;
+package core.monitor.test;
 
 import java.util.HashMap;
 import java.util.LinkedList;

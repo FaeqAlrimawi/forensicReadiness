@@ -320,10 +320,11 @@ public class MonitorManager {
 	 *         UNDETERMINED or NO_MONITORS_AVAILABLE
 	 */
 	public int canMonitor(String monitorID, String action, String assetID, int preState, int postState) {
-	
+
 		return canMonitor(monitorID, action, assetID, preState, postState, miner);
-		
+
 	}
+
 	/**
 	 * Determines whether the given action and assetID in the change (pre and post
 	 * states) can be monitored by at least 1 monitor
@@ -526,5 +527,21 @@ public class MonitorManager {
 		bigWrapper.parseBigraphERCondition(bigraphERExpression);
 
 		return findMonitors(bigWrapper);
+	}
+
+	public void printMonitors() {
+
+		System.out.println("===== MONITOR MANAGER =====\n");
+
+		if (!monitors.isEmpty()) {
+			for (Monitor mon : monitors.values()) {
+				System.out.println(mon.toString());
+			}
+		} else {
+			System.out.println("There are no monitors");
+
+		}
+
+		System.out.println("===== MONITOR MANAGER =====\n");
 	}
 }

@@ -1,6 +1,6 @@
 package system;
 
-public class JSONTerms {
+public interface JSONTerms {
 	
 	
 	public static final String ENTITY = "entity";

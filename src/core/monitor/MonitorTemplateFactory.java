@@ -121,7 +121,8 @@ public class MonitorTemplateFactory {
 		mon.setTargetType(monitorTemplate.getTargetType());
 		mon.setActionMonitored(monitorTemplate.getActionMonitored());
 		mon.setBigraphERStatment(monitorTemplate.getBigraphERMonitoringExpression());
-
+		mon.setCost(monitorTemplate.getCost());
+		
 		return mon;
 	}
 
