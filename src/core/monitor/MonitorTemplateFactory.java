@@ -121,6 +121,47 @@ public class MonitorTemplateFactory {
 		return templateID;
 	}
 
+	/**
+	 * Creates a new monitor template with the given parameters.
+	 * 
+	 * @param monitorType     The type of the monitor e.g., CCTV
+	 * @param actionMonitored the action name the monitor template can monitor
+	 * @param targetType      the target type to monitor e.g., Room
+	 * @param stateToMonitor  and the state to monitor expressed as a BigraphER
+	 *                        expression
+	 * @param cost            The cost of monitoring
+	 * @return {@value TemplateID} if the new template is created. {@value Null} if
+	 *         the new template could not be created.
+	 */
+	public String createTemplate(String monitorType, List<String> monitorableActions, String targetType,
+			String stateToMonitor, double cost) {
+
+		int tries = 100;
+		String templateID = null;
+
+		// ==create unique template id
+		while (tries > 0) {
+			templateID = createUniqueTemplateName(-1);
+
+			if (templateID != null) {
+				break;
+			}
+
+			tries--;
+		}
+
+		if (templateID == null) {
+			return null;
+		}
+
+		MonitorTemplate monitorTemplate = new MonitorTemplate(templateID, monitorType, monitorableActions, targetType,
+				stateToMonitor, 0);
+
+		templates.put(templateID, monitorTemplate);
+
+		return templateID;
+	}
+
 	protected String createUniqueTemplateName(int upperBound) {
 
 		// create name
@@ -171,21 +212,7 @@ public class MonitorTemplateFactory {
 	 */
 	public Monitor createMonitor(String templateName) {
 
-		if (templateName == null || !templates.containsKey(templateName)) {
-			return null;
-		}
-
-		MonitorTemplate monitorTemplate = templates.get(templateName);
-
-		Monitor mon = new Monitor();
-
-		mon.setMonitorType(monitorTemplate.getType());
-		mon.setTargetType(monitorTemplate.getTargetType());
-		mon.setActionMonitored(monitorTemplate.getActionMonitored());
-		mon.setBigraphERStatment(monitorTemplate.getBigraphERMonitoringExpression());
-		mon.setCost(monitorTemplate.getCost());
-
-		return mon;
+		return createMonitor(templateName, null);
 	}
 
 	/**
@@ -208,7 +235,7 @@ public class MonitorTemplateFactory {
 		mon.setMonitorID(id);
 		mon.setMonitorType(monitorTemplate.getType());
 		mon.setTargetType(monitorTemplate.getTargetType());
-		mon.setActionMonitored(monitorTemplate.getActionMonitored());
+		mon.setMonitorableActions(monitorTemplate.getMonitorableActions());
 		mon.setBigraphERStatment(monitorTemplate.getBigraphERMonitoringExpression());
 
 		return mon;
@@ -233,7 +260,10 @@ class MonitorTemplate {
 	BigraphExpression ownMonitoringExpression;
 
 	// the action that it can monitor
-	String actionMonitored;
+//	String actionMonitored;
+
+	// actions that can be monitored
+	List<String> monitorableActions;
 
 	// cost
 	double cost;
@@ -241,50 +271,28 @@ class MonitorTemplate {
 	// monitor ID
 	String monitorTemplateID;
 
-	protected MonitorTemplate(String monitorTemplateID, String type, String actionMonitored, String targetType,
+	protected MonitorTemplate(String monitorTemplateID, String type, List<String> monitorableActions, String targetType,
 			String monitoringExpression, double cost) {
 		this.type = type;
 		this.targetType = targetType;
 		this.bigraphERmonitoringExpression = monitoringExpression;
-		this.actionMonitored = actionMonitored;
+
+		this.monitorableActions = new LinkedList<String>(monitorableActions);
+
 		this.cost = cost;
 		this.monitorTemplateID = monitorTemplateID;
 	}
 
-//	protected MonitorTemplate(String type, String actionMonitored, String targetType, String monitoringExpression,
-//			double cost) {
-//		this.type = type;
-//		this.targetType = targetType;
-//		this.bigraphERmonitoringExpression = monitoringExpression;
-//		this.actionMonitored = actionMonitored;
-//		this.cost = cost;
-//	}
+	protected MonitorTemplate(String monitorTemplateID, String type, String actionMonitored, String targetType,
+			String monitoringExpression, double cost) {
 
-//	protected MonitorTemplate(String type, String actionMonitored, String targetType, String monitoringExpression) {
-//		this(type, actionMonitored, targetType, monitoringExpression, 0);
-//	}
+		this(monitorTemplateID, type, new LinkedList<String>() {
+			{
+				add(actionMonitored);
+			}
+		}, targetType, monitoringExpression, cost);
 
-//	public MonitorTemplate(String type, String actionMonitored, String targetType,
-//			BigraphExpression monitoringExpression) {
-//		this.type = type;
-//		this.targetType = targetType;
-//		this.ownMonitoringExpression = monitoringExpression;
-//		this.actionMonitored = actionMonitored;
-//	}
-
-//	protected MonitorTemplate(String type, String actionMonitored, String monitoringExpression) {
-//
-//		this(type, actionMonitored, null, monitoringExpression, 0);
-//	}
-
-//	public MonitorTemplate(String type, String monitoringExpression) {
-//		this.type = type;
-//		this.bigraphERmonitoringExpression = monitoringExpression;
-//	}
-
-//	public MonitorTemplate(String type) {
-//		this.type = type;
-//	}
+	}
 
 	protected String getType() {
 		return type;
@@ -298,8 +306,16 @@ class MonitorTemplate {
 		return bigraphERmonitoringExpression;
 	}
 
-	protected String getActionMonitored() {
-		return actionMonitored;
+//	protected String getActionMonitored() {
+//		if (monitorableActions.size() > 0)
+//			return monitorableActions.get(0);
+//
+//		return null;
+//	}
+
+	protected List<String> getMonitorableActions() {
+
+		return monitorableActions;
 	}
 
 //	protected  BigraphExpression getOwnMonitoringExpression() {

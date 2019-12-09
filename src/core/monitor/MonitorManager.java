@@ -204,6 +204,62 @@ public class MonitorManager {
 	 * Determines whether the given trace can be monitored or not. A trace can be
 	 * monitored if all its actions can be monitored by at least one monitor
 	 * 
+	 * @param trace                   A GraphPath object representing the trace
+	 * @param actionCannotBeMonitored if given, then it will be filled at the end of
+	 *                                the method's execution with action names, in
+	 *                                the trace, that can not be monitored, if any
+	 * @return an integer indicating the result. In general, a positive integer
+	 *         indicates a success, a negative indicates a problem occurred.
+	 *         Integers range from CAN_MONITOR to CANNOT_MONITOR, with states
+	 *         in-between for indicating states where, for example, it is
+	 *         UNDETERMINED or NO_MONITORS_AVAILABLE
+	 */
+	public int canMonitor(GraphPath trace, List<String> actionsCannotBeMonitored) {
+
+		if (trace == null) {
+			return ERROR;
+		}
+
+		if (actionsCannotBeMonitored == null) {
+			actionsCannotBeMonitored = new LinkedList<String>();
+		}
+
+		List<String> actions = trace.getTraceActions();
+		List<Integer> states = trace.getStateTransitions();
+		int canMon = -1;
+
+		for (int i = 0; i < actions.size(); i++) {
+
+			String action = actions.get(i);
+			int preState = states.get(i);
+			int postState = states.get(i + 1);
+
+//			System.out.println("Can monitor action [" + action + "] with change: pre[" + preState + "] post["
+//					+ postState + "]?");
+
+			canMon = canMonitor(action, preState, postState);
+
+			// if there's an issue, then return the issue
+			if (canMon != CAN_MONITOR) {
+				actionsCannotBeMonitored.add(action);
+//				System.out.println("Cannot Monitor");
+//				return canMon;
+			}
+
+//			System.out.println("Can monitor");
+		}
+
+		if (actionsCannotBeMonitored != null && !actionsCannotBeMonitored.isEmpty()) {
+			return CANNOT_MONITOR;
+		}
+
+		return CAN_MONITOR;
+	}
+
+	/**
+	 * Determines whether the given trace can be monitored or not. A trace can be
+	 * monitored if all its actions can be monitored by at least one monitor
+	 * 
 	 * @param trace A GraphPath object representing the trace
 	 * @return an integer indicating the result. In general, a positive integer
 	 *         indicates a success, a negative indicates a problem occurred.
@@ -228,7 +284,7 @@ public class MonitorManager {
 
 //			System.out.println("Can monitor action [" + action + "] with change: pre[" + preState + "] post["
 //					+ postState + "]?");
-			
+
 			int canMon = canMonitor(action, preState, postState);
 
 			// if there's an issue, then return the issue
@@ -236,7 +292,7 @@ public class MonitorManager {
 //				System.out.println("Cannot Monitor");
 				return canMon;
 			}
-			
+
 //			System.out.println("Can monitor");
 		}
 
@@ -274,13 +330,13 @@ public class MonitorManager {
 			for (Monitor monitor : monitors.values()) {
 
 				// if the monitor can monitor the given action then, check the states
-				if (action.equals(monitor.getActionMonitored())) {
-					boolean canMon = monitor.canMonitor(assetID, preState, postState, miner);
+//				if (action.equals(monitor.getActionMonitored())) {
+				boolean canMon = monitor.canMonitor(action, assetID, preState, postState, miner);
 
-					if (canMon) {
-						return CAN_MONITOR;
-					}
+				if (canMon) {
+					return CAN_MONITOR;
 				}
+//				}
 
 			}
 		}
@@ -295,13 +351,13 @@ public class MonitorManager {
 			}
 
 			// check if the monitor can monitor
-			if (action.equals(mon.getActionMonitored())) {
-				boolean canMon = mon.canMonitor(assetID, preState, postState);
+//			if (action.equals(mon.getActionMonitored())) {
+			boolean canMon = mon.canMonitor(action, assetID, preState, postState);
 
-				if (canMon) {
-					return CAN_MONITOR;
-				}
+			if (canMon) {
+				return CAN_MONITOR;
 			}
+//			}
 		}
 
 		return CANNOT_MONITOR;
@@ -433,12 +489,10 @@ public class MonitorManager {
 		for (Monitor monitor : monitors.values()) {
 
 			// if the monitor can monitor the given action then, check the states
-			if (action.equals(monitor.getActionMonitored())) {
-				boolean canMon = monitor.canMonitor(assetID, preState, postState);
+			boolean canMon = monitor.canMonitor(action, assetID, preState, postState);
 
-				if (canMon) {
-					capableMonitors.add(monitor);
-				}
+			if (canMon) {
+				capableMonitors.add(monitor);
 			}
 
 		}
@@ -547,6 +601,6 @@ public class MonitorManager {
 
 		}
 
-		System.out.println("===== MONITOR MANAGER =====\n");
+		System.out.println("============================\n");
 	}
 }

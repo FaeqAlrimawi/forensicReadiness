@@ -4,6 +4,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+
+import com.eteks.sweethome3d.adaptive.security.assets.AssetType;
+
 import java.util.Random;
 
 import core.brs.parser.BigraphWrapper;
@@ -43,7 +46,10 @@ public class Monitor {
 	String monitorTypeAssetIDIdentificationName = null;
 
 	// action to monitor (required)
-	String actionMonitored = "VisitorEnterRoom";
+//	String actionMonitored = "VisitorEnterRoom";
+
+	// actions monitorable
+	List<String> monitorableActions;
 
 	// target type (or class) to monitor (required)
 	String targetType = "Server";
@@ -124,12 +130,42 @@ public class Monitor {
 		this.monitorAssetRef = monitorID;
 	}
 
-	public String getActionMonitored() {
-		return actionMonitored;
+//	public String getActionMonitored() {
+//		return actionMonitored;
+//	}
+//
+//	public void setActionMonitored(String actionMonitored) {
+//		this.actionMonitored = actionMonitored;
+//	}
+
+	public List<String> getMonitorableActions() {
+		return monitorableActions;
 	}
 
-	public void setActionMonitored(String actionMonitored) {
-		this.actionMonitored = actionMonitored;
+	public void setMonitorableActions(List<String> monitorableActions) {
+		this.monitorableActions = monitorableActions;
+	}
+
+	public void addMonitorableAction(String action) {
+
+		if (monitorableActions == null) {
+			monitorableActions = new LinkedList<String>();
+		}
+
+		if (monitorableActions.contains(action)) {
+			return;
+		}
+
+		monitorableActions.add(action);
+	}
+
+	public void removeMonitorableAction(String action) {
+
+		if (monitorableActions == null || !monitorableActions.contains(action)) {
+			return;
+		}
+
+		monitorableActions.remove(action);
 	}
 
 	public String getTargetType() {
@@ -244,16 +280,16 @@ public class Monitor {
 		// result <= 0: indicates it cannot monitor the action
 		// the result is then converted to Boolean (true if >0, false otherwise)
 
-		return canMonitor(monitorAssetRef, targetAssetRef, preState, postState);
+		return canMonitor(monitorAssetRef, null, targetAssetRef, preState, postState);
 	}
 
-	public boolean canMonitor(String monitorID, String assetID, int preState, int postState, TraceMiner miner) {
-
-		this.miner = miner;
-
-		return canMonitor(monitorID, assetID, preState, postState);
-
-	}
+//	public boolean canMonitor(String monitorID, String action, int preState, int postState, TraceMiner miner) {
+//
+//		this.miner = miner;
+//
+//		return canMonitor(monitorID, action, null, preState, postState);
+//
+//	}
 
 	/**
 	 * Checks whether the monitor, with the given ID, can monitor the asset, with
@@ -262,7 +298,7 @@ public class Monitor {
 	 * the monitor will monitor any asset with a type matching the type of the
 	 * target
 	 */
-	public boolean canMonitor(String monitorID, String assetID, int preState, int postState) {
+	public boolean canMonitor(String monitorID, String action, String assetID, int preState, int postState) {
 
 		if (!checkTraceMiner()) {
 			return false;
@@ -273,9 +309,9 @@ public class Monitor {
 			return false;
 		}
 
-		// action is needed
-		if (actionMonitored == null || actionMonitored.isEmpty()) {
-			System.err.println("There's no action specified to monitor.");
+		// checks if the action is one of the actions that can be monitored
+		if (action != null && monitorableActions != null && !monitorableActions.contains(action)) {
+//			System.err.println("There's no action specified to monitor.");
 			return false;
 		}
 
@@ -342,15 +378,33 @@ public class Monitor {
 	}
 
 	/**
+	 * Checks whether the monitor, with the given ID, can monitor the asset, with
+	 * the given ID if the monitor ID is NULL, then the monitor will be general
+	 * (i.e. Just monitor by type) if the asset ID (or the target ID) is NULL, then
+	 * the monitor will monitor any asset with a type matching the type of the
+	 * target
+	 */
+//	public boolean canMonitor(String monitorID, String assetID, int preState, int postState) {
+//
+//		return canMonitor(monitorID, null, assetID, preState, postState);
+////		return canMonitor(preState, postState);
+//	}
+
+	/**
 	 * Checks whether this monitor can monitor the asset, with the given ID. If the
 	 * asset/target ID is NULL, then the monitor will monitor any asset with a type
 	 * matching the type of the target as set originally in the monitor
 	 */
 	public boolean canMonitor(String assetID, int preState, int postState) {
 
-		return canMonitor(monitorAssetRef, assetID, preState, postState);
+		return canMonitor(monitorAssetRef, null, assetID, preState, postState);
 	}
 
+	public boolean canMonitor(String action, String assetID, int preState, int postState) {
+
+		return canMonitor(monitorAssetRef, action, assetID, preState, postState);
+	}
+	
 	/**
 	 * Checks whether this monitor can monitor the asset, with the given ID. If the
 	 * asset/target ID is NULL, then the monitor will monitor any asset with a type
@@ -359,7 +413,13 @@ public class Monitor {
 	public boolean canMonitor(String assetID, int preState, int postState, TraceMiner miner) {
 
 		this.miner = miner;
-		return canMonitor(monitorAssetRef, assetID, preState, postState);
+		return canMonitor(monitorAssetRef, null, assetID, preState, postState);
+	}
+
+	public boolean canMonitor(String action, String assetID, int preState, int postState, TraceMiner miner) {
+
+		this.miner = miner;
+		return canMonitor(monitorAssetRef, action, assetID, preState, postState);
 	}
 
 	/**
@@ -824,7 +884,7 @@ public class Monitor {
 		bldr.append("-Type: ").append(monitorType).append(newLine);
 
 		// action monitored
-		bldr.append("-Action monitored: ").append(actionMonitored).append(newLine);
+		bldr.append("-Actions monitored: ").append(monitorableActions).append(newLine);
 
 		// target & type
 		bldr.append("-Target Asset: ").append(targetAssetRef).append(" Type: ").append(targetType).append(newLine);

@@ -5428,8 +5428,8 @@ public class TraceMiner {
 			cntOrigPre++;
 		}
 
-		System.out.println(
-				"state [" + state1 + "] matches: " + cntOrigPre + " state [" + state2 + "] matches: " + cntOrigPost);
+//		System.out.println(
+//				"state [" + state1 + "] matches: " + cntOrigPre + " state [" + state2 + "] matches: " + cntOrigPost);
 
 		// action is dependent on the previous action
 

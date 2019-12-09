@@ -1,6 +1,8 @@
 package core.monitor.test;
 
 import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
 
 import core.instantiation.analysis.TraceMiner;
 import core.monitor.MonitorManager;
@@ -89,11 +91,16 @@ public class MonitorTester {
 		int monitorResult = 11;
 
 		// == checking if a trace can be monitored
-		GraphPath trace = miner.getTrace(0);
+		GraphPath trace = miner.getTrace(3);
 
 		if (trace != null) {
-			System.out.println("Can monitor trace[" + trace.getInstanceID() + "] ?");
-			monitorResult = mngr.canMonitor(trace);
+			System.out.println("Can monitor trace[" + trace.getInstanceID() + "] ("+trace.toString()+")?");
+			
+			List<String> unmonitoredActions = new LinkedList<String>();
+			
+			monitorResult = mngr.canMonitor(trace, unmonitoredActions);
+			
+			System.out.println("Unmonitored Actions in the trace: "+unmonitoredActions);
 		}
 
 		// == checking if a single action can be monitored
