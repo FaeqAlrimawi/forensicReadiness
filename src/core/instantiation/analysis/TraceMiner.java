@@ -68,7 +68,6 @@ import ie.lero.spare.pattern_instantiation.GraphPath;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator.InstancesSaver;
 import ie.lero.spare.pattern_instantiation.LabelExtractor;
-import it.uniud.mads.jlibbig.core.std.Control;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
 import it.uniud.mads.jlibbig.core.std.Handle;
@@ -76,10 +75,8 @@ import it.uniud.mads.jlibbig.core.std.InnerName;
 import it.uniud.mads.jlibbig.core.std.Matcher;
 import it.uniud.mads.jlibbig.core.std.Node;
 import it.uniud.mads.jlibbig.core.std.OuterName;
-import it.uniud.mads.jlibbig.core.std.Port;
 import it.uniud.mads.jlibbig.core.std.Root;
 import it.uniud.mads.jlibbig.core.std.Signature;
-import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
 import it.uniud.mads.jlibbig.core.std.Site;
 
 public class TraceMiner {
@@ -488,7 +485,13 @@ public class TraceMiner {
 
 	public int loadTracesFromFile() {
 
-		System.out.println(">>Reading instances from [" + instanceFileName + "]");
+		return loadTracesFromFile(instanceFileName);
+
+	}
+
+	public int loadTracesFromFile(String filePath) {
+
+		System.out.println(">>Reading instances from [" + filePath + "]");
 
 		// load instances from file
 		// List<Integer> minMaxLengths = new LinkedList<Integer>();
@@ -501,7 +504,7 @@ public class TraceMiner {
 		minimumTraceLength = 100000;
 		maximumTraceLength = -1;
 
-		traces = readInstantiatorInstancesFile(instanceFileName);
+		traces = readInstantiatorInstancesFile(filePath);
 
 		// set traces actions
 		if (tracesActionsOccurence.size() > 0) {
@@ -534,6 +537,7 @@ public class TraceMiner {
 
 	}
 
+	
 	public int loadTracesFromList(List<GraphPath> newTraces) {
 
 		System.out.println(">>Reading instances from [" + instanceFileName + "]");

@@ -226,12 +226,18 @@ public class MonitorManager {
 			int preState = states.get(i);
 			int postState = states.get(i + 1);
 
+//			System.out.println("Can monitor action [" + action + "] with change: pre[" + preState + "] post["
+//					+ postState + "]?");
+			
 			int canMon = canMonitor(action, preState, postState);
 
 			// if there's an issue, then return the issue
 			if (canMon != CAN_MONITOR) {
+//				System.out.println("Cannot Monitor");
 				return canMon;
 			}
+			
+//			System.out.println("Can monitor");
 		}
 
 		return CAN_MONITOR;

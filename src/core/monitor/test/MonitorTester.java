@@ -5,6 +5,7 @@ import java.net.URL;
 import core.instantiation.analysis.TraceMiner;
 import core.monitor.MonitorManager;
 import core.monitor.MonitorTemplateFactory;
+import ie.lero.spare.pattern_instantiation.GraphPath;
 
 public class MonitorTester {
 
@@ -87,9 +88,18 @@ public class MonitorTester {
 
 		int monitorResult = 11;
 
-		System.out.println("Can monitor action [" + actionMonitored + "] with change: pre[" + preState + "] post["
-				+ postState + "]?");
-		monitorResult = mngr.canMonitor(actionMonitored, preState, postState);
+		// == checking if a trace can be monitored
+		GraphPath trace = miner.getTrace(0);
+
+		if (trace != null) {
+			System.out.println("Can monitor trace[" + trace.getInstanceID() + "] ?");
+			monitorResult = mngr.canMonitor(trace);
+		}
+
+		// == checking if a single action can be monitored
+//		System.out.println("Can monitor action [" + actionMonitored + "] with change: pre[" + preState + "] post["
+//				+ postState + "]?");
+//		monitorResult = mngr.canMonitor(actionMonitored, preState, postState);
 
 		switch (monitorResult) {
 		case MonitorManager.CAN_MONITOR:
@@ -126,11 +136,15 @@ public class MonitorTester {
 		String bigFileStr = "resources/example/systemBigraphER.big";
 		String bigFileExternalStr = "resources/example/lero_uniqueAssetID.big";
 
+		String tracesFilePath = "resources/example/traces_reduced_5k.json";
+
 		URL ltsLocation = MonitorTester.class.getClassLoader().getResource(ltsLocationExternalStr);
 		URL bigFileLocation = MonitorTester.class.getClassLoader().getResource(bigFileExternalStr);
+		URL tracesURL = MonitorTester.class.getClassLoader().getResource(tracesFilePath);
 
 		String LTS = ltsLocationExternalStr;
 		String bigFile = bigFileExternalStr;
+		String traces = tracesFilePath;
 
 		// LTS
 		if (ltsLocation != null) {
@@ -148,10 +162,19 @@ public class MonitorTester {
 			return;
 		}
 
+		// traces
+		if (tracesURL != null) {
+			traces = tracesURL.getPath();
+		} else {
+			System.err.println("Traces file is not found");
+			return;
+		}
+
 		TraceMiner miner = new TraceMiner();
 
 		miner.setBigraphERFile(bigFile);
 		miner.setStatesFolder(LTS);
+		miner.loadTracesFromFile(traces);
 
 		MonitorTester tester = new MonitorTester();
 
