@@ -4,7 +4,6 @@ import java.net.URL;
 
 import core.instantiation.analysis.TraceMiner;
 import core.monitor.MonitorManager;
-import core.monitor.MonitorTemplate;
 import core.monitor.MonitorTemplateFactory;
 
 public class MonitorTester {
@@ -34,19 +33,19 @@ public class MonitorTester {
 		String actionToMonitor = "Move";
 		String monitorExpression = "Room{con}.Visitor | Room.{con}.MotionSensor";
 
-		MonitorTemplate temp = new MonitorTemplate(monitorTempType, actionToMonitor, monitorExpression);
-
 		MonitorTemplateFactory instance = MonitorTemplateFactory.eInstance;
 
-		instance.addTemplate(temp);
+		String id = instance.createTemplate(monitorTempType, actionToMonitor, monitorExpression);
 
 		// === create a monitor manager which can be used to find monitors
 		MonitorManager mngr = new MonitorManager();
 
+		// one can add monitors
 //		mngr.addMonitor(mon);
 
-		// or you can just load monitors defined by the factory
+		// or one can just load monitors defined by the factory
 		mngr.loadFactoryMonitors();
+
 		mngr.setTraceMiner(miner);
 
 		mngr.printMonitors();
@@ -86,23 +85,27 @@ public class MonitorTester {
 		 */
 //		boolean isMonitorable = mon.canMonitor(targetAssetID, preState, postState);
 
-		int monitorResult = mngr.canMonitor(actionMonitored, targetAssetID, preState, postState);
+		int monitorResult = 11;
+
+		System.out.println("Can monitor action [" + actionMonitored + "] with change: pre[" + preState + "] post["
+				+ postState + "]?");
+		monitorResult = mngr.canMonitor(actionMonitored, preState, postState);
 
 		switch (monitorResult) {
 		case MonitorManager.CAN_MONITOR:
-			System.out.println("Yes, can monitor...");
+			System.out.println("Yes! can monitor");
 			break;
 
 		case MonitorManager.CANNOT_MONITOR:
-			System.out.println("NO, cannot monitor...");
+			System.out.println("NO! cannot monitor");
 			break;
 
 		case MonitorManager.NO_MONITORS_AVAILABLE:
-			System.out.println("NO monitors available to monitor the given action...");
+			System.out.println("NO monitors available to monitor the given action");
 			break;
 
 		case MonitorManager.UNDETERMINED:
-			System.out.println("Cannot determine...");
+			System.out.println("Cannot determine");
 			break;
 
 		case MonitorManager.ERROR:

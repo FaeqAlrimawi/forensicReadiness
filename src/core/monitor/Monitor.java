@@ -216,32 +216,33 @@ public class Monitor {
 //		if (monitorTypeIdentificationName == null || monitorTypeIdentificationName.isEmpty()) {
 		boolean isMonitorTagAvailable = findMonitorAssetIDUniqueName();
 
-		if (!isMonitorTagAvailable) {
-			System.out.println("*Monitor Warning! Monitor tag is not found in the given bigraphER statement");
-		}
+//		if (!isMonitorTagAvailable) {
+//			System.out.println("*Monitor Warning! Monitor tag is not found in the given bigraphER statement");
+//		}
 //		}
 
 		boolean isTargetTagAvailable = findTragetAssetIDUniqueName();
 
-		if (!isTargetTagAvailable) {
-			System.out.println("*Monitor Warning! Target tag is not found in the given bigraphER statement");
-		}
+//		if (!isTargetTagAvailable) {
+//			System.out.println("*Monitor Warning! Target tag is not found in the given bigraphER statement");
+//		}
 	}
 
-	// ========= Method to assess if this monitor can monitor the given actions and
-	// its per & post system states
-	// ===canMonitor():Integer. A main functionality is that to determine if this
-	// monitor can monitor a given states. To determine this is implemented by
-	// matching two states to the [systemStateToMonitor]. The two states are usually
-	// (should be?) the pre and post states (of the system) that satisfy the
-	// [action] of this monitor.
-	// the result is determined by comparing the number of times the
-	// [systemStateToMonitor] is matched in the pre and post states.
-	// result > 0: indicates it can monitor.
-	// result <= 0: indicates it cannot monitor the action
-	// the result is then converted to Boolean (true if >0, false otherwise)
-
+	/**
+	 * Assesses if this monitor can monitor the given change (per & post) in system
+	 * states.
+	 **/
 	public boolean canMonitor(int preState, int postState) {
+
+		// To determine this is implemented by
+		// matching two states to the [systemStateToMonitor]. The two states are usually
+		// (should be?) the pre and post states (of the system) that satisfy the
+		// [action] of this monitor.
+		// the result is determined by comparing the number of times the
+		// [systemStateToMonitor] is matched in the pre and post states.
+		// result > 0: indicates it can monitor.
+		// result <= 0: indicates it cannot monitor the action
+		// the result is then converted to Boolean (true if >0, false otherwise)
 
 		return canMonitor(monitorAssetRef, targetAssetRef, preState, postState);
 	}
@@ -349,7 +350,7 @@ public class Monitor {
 
 		return canMonitor(monitorAssetRef, assetID, preState, postState);
 	}
-	
+
 	/**
 	 * Checks whether this monitor can monitor the asset, with the given ID. If the
 	 * asset/target ID is NULL, then the monitor will monitor any asset with a type
@@ -827,6 +828,11 @@ public class Monitor {
 
 		// target & type
 		bldr.append("-Target Asset: ").append(targetAssetRef).append(" Type: ").append(targetType).append(newLine);
+
+		// expression
+		String exp = stateToMonitor != null ? stateToMonitor.getBigraphERString() : originalStateToMonitor;
+
+		bldr.append("-State to Monitor (expressed as BigraphER statement): ").append(exp).append(newLine);
 
 		// cost
 		bldr.append("-Cost: ").append(cost).append(newLine);

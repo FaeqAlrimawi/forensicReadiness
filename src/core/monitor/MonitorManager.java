@@ -18,7 +18,7 @@ import ie.lero.spare.pattern_instantiation.GraphPath;
  * A class that manages available monitors. One can add monitors to the manager,
  * or create monitors from available templates. Monitor templates can be created
  * using {@link MonitorTemplateFactory}. Monitor templates can be created using
- * {@link MonitorTemplate}
+ * {@link MonitorTemplateDepricated}
  * 
  * @author Faeq
  *
@@ -395,7 +395,6 @@ public class MonitorManager {
 	 * be monitored by at least 1 monitor
 	 * 
 	 * @param action    Action to monitor
-	 * @param assetID   target asset ID to monitor
 	 * @param preState  the state of the system BEFORE the action takes place
 	 * @param postState the state of the system AFTER the action takes place
 	 * @return an integer indicating the result. In general, a positive integer
