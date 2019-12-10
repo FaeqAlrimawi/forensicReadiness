@@ -31,10 +31,12 @@ public class MonitorTemplateFactory {
 		// === visitor enter room template
 		monitorType = "CCTV";
 		targetType = "Room";
-		action = "VisitorEnterRoom";
+		List<String> actions = new LinkedList<String>();
+		actions.add("VisitorEnterRoom");
+//		actions.add("TurnOnSmartTV");
 		stateToMonitor = "Hallway{hallway}.(id | CCTV{ipNet}) | Room{hallway}.(Visitor.id)";
 
-		createTemplate(monitorType, action, targetType, stateToMonitor);
+		createTemplate(monitorType, actions, targetType, stateToMonitor);
 
 		// monitor data sent to a bus network.
 		// Monitor type is DigitalProcess
@@ -77,7 +79,26 @@ public class MonitorTemplateFactory {
 	 */
 	public String createTemplate(String monitorType, String actionMonitored, String targetType, String stateToMonitor) {
 
-		return createTemplate(monitorType, actionMonitored, targetType, stateToMonitor, 0);
+		List<String> monitorableActions = new LinkedList<String>();
+		monitorableActions.add(actionMonitored);
+		
+		return createTemplate(monitorType, monitorableActions, targetType, stateToMonitor, 0);
+	}
+	
+	/**
+	 * Creates a new monitor template with the given parameters.
+	 * 
+	 * @param monitorType     The type of the monitor e.g., CCTV
+	 * @param monitorableActions A list of actions that the monitor can monitor
+	 * @param targetType      the target type to monitor e.g., Room
+	 * @param stateToMonitor  and the state to monitor expressed as a BigraphER
+	 *                        expression
+	 * @return {@value TemplateID} if the new template is created. {@value Null} if
+	 *         the new template could not be created.
+	 */
+	public String createTemplate(String monitorType, List<String> monitorableActions, String targetType, String stateToMonitor) {
+
+		return createTemplate(monitorType, monitorableActions, targetType, stateToMonitor, 0);
 	}
 
 	/**
@@ -94,38 +115,18 @@ public class MonitorTemplateFactory {
 	 */
 	public String createTemplate(String monitorType, String actionMonitored, String targetType, String stateToMonitor,
 			double cost) {
-
-		int tries = 100;
-		String templateID = null;
-
-		// ==create unique template id
-		while (tries > 0) {
-			templateID = createUniqueTemplateName(-1);
-
-			if (templateID != null) {
-				break;
-			}
-
-			tries--;
-		}
-
-		if (templateID == null) {
-			return null;
-		}
-
-		MonitorTemplate monitorTemplate = new MonitorTemplate(templateID, monitorType, actionMonitored, targetType,
-				stateToMonitor, 0);
-
-		templates.put(templateID, monitorTemplate);
-
-		return templateID;
+	
+		List<String> monitorableActions = new LinkedList<String>();
+		monitorableActions.add(actionMonitored);
+		
+		return createTemplate(monitorType, monitorableActions, targetType, stateToMonitor, cost); 
 	}
 
 	/**
 	 * Creates a new monitor template with the given parameters.
 	 * 
 	 * @param monitorType     The type of the monitor e.g., CCTV
-	 * @param actionMonitored the action name the monitor template can monitor
+	 * @param monitorableActions A list of actions that the monitor can monitor
 	 * @param targetType      the target type to monitor e.g., Room
 	 * @param stateToMonitor  and the state to monitor expressed as a BigraphER
 	 *                        expression

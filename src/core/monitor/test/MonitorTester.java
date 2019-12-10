@@ -91,7 +91,7 @@ public class MonitorTester {
 		int monitorResult = 11;
 
 		// == checking if a trace can be monitored
-		GraphPath trace = miner.getTrace(3);
+		GraphPath trace = miner.getTrace(2);
 
 		if (trace != null) {
 			System.out.println("Can monitor trace[" + trace.getInstanceID() + "] ("+trace.toString()+")?");
