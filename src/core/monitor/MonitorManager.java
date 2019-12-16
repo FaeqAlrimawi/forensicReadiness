@@ -519,6 +519,110 @@ public class MonitorManager {
 	}
 
 	/**
+	 * Determines whether the given trace can be monitored or not. A trace can be
+	 * monitored if all its actions can be monitored by at least one monitor
+	 * 
+	 * @param trace A GraphPath object representing the trace
+	 * @return an integer indicating the result. In general, a positive integer
+	 *         indicates a success, a negative indicates a problem occurred.
+	 *         Integers range from CAN_MONITOR to CANNOT_MONITOR, with states
+	 *         in-between for indicating states where, for example, it is
+	 *         UNDETERMINED or NO_MONITORS_AVAILABLE
+	 */
+	public Map<String, List<Monitor>> getCapableMonitors(GraphPath trace) {
+
+		if (trace == null) {
+			return null;
+		}
+
+		List<String> actions = trace.getTraceActions();
+		List<Integer> states = trace.getStateTransitions();
+
+		Map<String, List<Monitor>> actionsMonitorsMap = new HashMap<String, List<Monitor>>();
+
+		for (int i = 0; i < actions.size(); i++) {
+
+			String action = actions.get(i);
+			int preState = states.get(i);
+			int postState = states.get(i + 1);
+
+//			System.out.println("Can monitor action [" + action + "] with change: pre[" + preState + "] post["
+//					+ postState + "]?");
+
+			List<Monitor> mons = getCapableMonitors(action, preState, postState);
+
+			actionsMonitorsMap.put(action, mons);
+
+		}
+
+		return actionsMonitorsMap;
+	}
+
+	/**
+	 * Finds an optimal set of monitors that are can monitor the given trace. A
+	 * solution can be controlled via given parameters such as isOptimal.
+	 * 
+	 * @param trace        The trace to find a solution for
+	 * @param isOptimal    If true, then an optimal solution is found. If false then
+	 *                     it finds all solutions
+	 * @param allDifferent if true, then a solution should contain unique monitors
+	 *                     for actions. If false, then a solution can use a monitor
+	 *                     for more than one action
+	 * @param isMinimum    if true, then a minimum cost for a solution is searched.
+	 *                     If false, then cost will be ignored
+	 * @return A List of MonitorSolution objects, in which each object contains
+	 *         information about the solution (e.g., id, a monitor for each action,
+	 *         and cost for the solution)
+	 */
+	public List<MonitorSolution> findSolutionsToMonitorTrace(GraphPath trace, boolean isOptimal, boolean allDifferent,
+			boolean isMinimum) {
+
+		if (trace == null) {
+			return null;
+		}
+
+		Map<String, List<Monitor>> actionsMonitorsMap = getCapableMonitors(trace);
+
+		List<MonitorSolution> solutions = null;
+
+		if (actionsMonitorsMap != null && !actionsMonitorsMap.isEmpty()) {
+
+			MonitorSelectionSolver solver = new MonitorSelectionSolver();
+
+			solutions = solver.solve(actionsMonitorsMap, isOptimal, allDifferent, isMinimum);
+
+		}
+
+		return solutions;
+
+	}
+
+	/**
+	 * Finds an optimal set of monitors that are can monitor the given trace. A
+	 * solution is characterised by being OPTIMAL; monitors are NOT Unique, i.e. can
+	 * be used for different actions; and has minimum cost
+	 * 
+	 * @param trace The trace to find a solution for
+	 * @return A MonitorSolution object containing information about the solution
+	 *         (e.g., action and its monitor, total cost)
+	 */
+	public MonitorSolution findOptimalMonitorsForTrace(GraphPath trace) {
+
+		boolean isOptimal = true;
+		boolean allDifferent = false;
+		boolean isMinimum = true;
+
+		List<MonitorSolution> solutions = findSolutionsToMonitorTrace(trace, isOptimal, allDifferent, isMinimum);
+
+		if (solutions != null && solutions.size() > 0) {
+			return solutions.get(0);
+		}
+
+		return null;
+
+	}
+
+	/**
 	 * Finds all monitors in the given bigraph wrapper and returns a list of their
 	 * IDs. All available monitors are assumed to be set in the MonitorManager class
 	 * 

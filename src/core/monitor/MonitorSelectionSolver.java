@@ -193,7 +193,8 @@ public class MonitorSelectionSolver {
 	}
 
 	/**
-	 * Finds an OPTIMAL solution for the given actions and their monitors map
+	 * Finds an OPTIMAL solution for the given actions and their monitors map. The
+	 * solution that has Unique monitors for actions, and minimum cost
 	 * 
 	 * @param actionsMonitorsMap A map in which the key is action name and the value
 	 *                           is a list of monitors that can monitor the action

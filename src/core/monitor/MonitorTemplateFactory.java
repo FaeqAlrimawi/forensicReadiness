@@ -38,6 +38,7 @@ public class MonitorTemplateFactory {
 
 		createTemplate(monitorType, actions, targetType, stateToMonitor);
 
+		
 		// monitor data sent to a bus network.
 		// Monitor type is DigitalProcess
 		// the monitor can monitor the busnetwork if it can get a copy of the data
