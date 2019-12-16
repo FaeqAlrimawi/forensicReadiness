@@ -29,29 +29,30 @@ public class MonitorSelectionTester {
 //		printMap(actionsMonitors);
 
 		boolean isOptimal = true;
-		boolean allDifferent = true;
+		boolean allDifferent = false;
 		boolean isMinimum = true;
-		
-		int tries = 5;
+
+		int tries = 1;
 
 		for (int i = 0; i < tries; i++) {
-			
+
 			printMap(actionsMonitors);
-			
-			System.out.println("Try [" + i + "] isOptimal = " + isOptimal + ", All-Different = " + allDifferent + ", isMinimum = " + isMinimum);
-			
+
+			System.out.println("Try [" + i + "] isOptimal = " + isOptimal + ", All-Different = " + allDifferent
+					+ ", isMinimum = " + isMinimum);
+
 			List<MonitorSolution> solutions = solver.solve(actionsMonitors, isOptimal, allDifferent, isMinimum);
 
 			if (solutions != null && !solutions.isEmpty()) {
 				for (MonitorSolution sol : solutions) {
 					sol.print();
 				}
+
 			} else {
 				System.out.println("No solution found!");
 			}
 
-			actionsMonitors = createDummyActionMonitorMap(numOfActions, numOfMonitors);			
-
+			actionsMonitors = createDummyActionMonitorMap(numOfActions, numOfMonitors);
 
 		}
 
@@ -61,7 +62,7 @@ public class MonitorSelectionTester {
 
 		// dummy map...
 		monitors.clear();
-		
+
 		// key is action, value is the list of monitors that can monitor that action
 		Map<String, List<Monitor>> actionsMonitors = new HashMap<String, List<Monitor>>();
 
@@ -109,25 +110,25 @@ public class MonitorSelectionTester {
 	}
 
 	protected void printMap(Map<String, List<Monitor>> actionsMonitors) {
-		
+
 		System.out.println("==== GENERATED MAP ====");
 		for (Entry<String, List<Monitor>> entry : actionsMonitors.entrySet()) {
 
 			// action
-			System.out.print("Action [" + entry.getKey() +"]: ");
+			System.out.print("Action [" + entry.getKey() + "]: ");
 //			System.out.println("\tMonitors: ");
 			// monitors
-	
+
 			for (Monitor mon : entry.getValue()) {
-				System.out.print(mon.getMonitorID() + " (" + mon.getCost()+") -- ");
+				System.out.print(mon.getMonitorID() + " (" + mon.getCost() + ") -- ");
 			}
 
 			System.out.println();
 		}
-		
+
 		System.out.println("=======================\n");
 	}
-	
+
 	public static void main(String[] args) {
 
 		MonitorSelectionTester tester = new MonitorSelectionTester();

@@ -1,14 +1,16 @@
 package core.monitor;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 /**
  * A class that represents a solution found by the
  * {@link MonitorSelectionSolver}. A solution contains informations such as
- * solution ID; a map in which the key is action name and value is the
- * monitor that can monitor the action; and cost 
+ * solution ID; a map in which the key is action name and value is the monitor
+ * that can monitor the action; and cost
  * 
  * @author Faeq
  *
@@ -92,6 +94,81 @@ public class MonitorSolution {
 		}
 
 		return cost;
+	}
+
+	public Monitor getMonitor(String action) {
+
+		if (action == null || action.isEmpty()) {
+			return null;
+		}
+
+		return actionMonitors.get(action);
+	}
+
+	/**
+	 * Returns all action names that the given monitor can monitor
+	 * 
+	 * @param monitor Monitor object
+	 * @return List of action names that the given monitor can monitor in this
+	 *         solution
+	 */
+	public List<String> getActions(String monitorID) {
+
+		if (monitorID == null) {
+			return null;
+		}
+
+		List<String> actions = new LinkedList<String>();
+
+		for (Entry<String, Monitor> entry : actionMonitors.entrySet()) {
+			Monitor mon = entry.getValue();
+			String action = entry.getKey();
+
+			if (monitorID.equals(mon.getMonitorID())) {
+				actions.add(action);
+			}
+
+		}
+
+		return actions;
+	}
+
+	/**
+	 * Returns all action names that the given monitor can monitor
+	 * 
+	 * @param monitor Monitor object
+	 * @return List of action names that the given monitor can monitor in this
+	 *         solution
+	 */
+	public List<String> getActions(Monitor monitor) {
+
+		if (monitor == null) {
+			return null;
+		}
+
+		List<String> actions = new LinkedList<String>();
+
+		String monID = monitor.getMonitorID();
+
+		// if the monitor has an id then search using id. Otherwise, search using the
+		// object itself
+		if (monID != null) {
+
+			actions = getActions(monID);
+
+		} else {
+			for (Entry<String, Monitor> entry : actionMonitors.entrySet()) {
+				Monitor mon = entry.getValue();
+				String action = entry.getKey();
+
+				if (monitor == mon) {
+					actions.add(action);
+				}
+
+			}
+		}
+
+		return actions;
 	}
 
 	public String toString() {
