@@ -6,6 +6,7 @@ import java.util.List;
 
 import core.instantiation.analysis.TraceMiner;
 import core.monitor.MonitorManager;
+import core.monitor.MonitorSolution;
 import core.monitor.MonitorTemplateFactory;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 
@@ -99,6 +100,10 @@ public class MonitorTester {
 			List<String> unmonitoredActions = new LinkedList<String>();
 			
 			monitorResult = mngr.canMonitor(trace, unmonitoredActions);
+			
+//			MonitorSolution sol = mngr.findOptimalMonitorsForTrace(trace);
+////			
+//			System.out.println("Sol: " + sol);
 			
 			System.out.println("Unmonitored Actions in the trace: "+unmonitoredActions);
 		}

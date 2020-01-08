@@ -489,7 +489,7 @@ public class MonitorManager {
 		for (Monitor monitor : monitors.values()) {
 
 			// if the monitor can monitor the given action then, check the states
-			boolean canMon = monitor.canMonitor(action, assetID, preState, postState);
+			boolean canMon = monitor.canMonitor(action, assetID, preState, postState, miner);
 
 			if (canMon) {
 				capableMonitors.add(monitor);
@@ -587,6 +587,14 @@ public class MonitorManager {
 
 		if (actionsMonitorsMap != null && !actionsMonitorsMap.isEmpty()) {
 
+			// check that all actions have at least 1 monitor
+			if (!hasActionAMonitor(actionsMonitorsMap)) {
+//				solutions = new LinkedList<MonitorSolution>();
+//				MonitorSolution sol = new MonitorSolution();
+//				sol.setActionMonitors(actionsMonitorsMap);
+				return null;
+			}
+
 			MonitorSelectionSolver solver = new MonitorSelectionSolver();
 
 			solutions = solver.solve(actionsMonitorsMap, isOptimal, allDifferent, isMinimum);
@@ -595,6 +603,22 @@ public class MonitorManager {
 
 		return solutions;
 
+	}
+
+	protected boolean hasActionAMonitor(Map<String, List<Monitor>> actionsMonitorsMap) {
+
+		if (actionsMonitorsMap == null) {
+			return false;
+		}
+
+		for (List<Monitor> monitors : actionsMonitorsMap.values()) {
+
+			if (monitors == null || monitors.isEmpty()) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**

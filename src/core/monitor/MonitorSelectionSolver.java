@@ -168,7 +168,7 @@ public class MonitorSelectionSolver {
 
 		}
 
-		// create action sequence corresponding to the sequnce of monitors in a solution
+		// create action sequence corresponding to the sequence of monitors in a solution
 		for (Integer actID : convertedMap.keySet()) {
 			actionsSequence.add(actionToIDMap.get(actID));
 		}
