@@ -10,7 +10,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 //import com.eteks.sweethome3d.adaptive.forensics.SystemHandler;
-import com.sun.javafx.scene.control.skin.TextAreaSkin;
+import javafx.scene.control.skin.TextAreaSkin;
 
 import core.utilities.SystemMetaModelHelper;
 import javafx.event.ActionEvent;

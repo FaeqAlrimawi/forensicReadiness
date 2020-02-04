@@ -11,7 +11,7 @@ import java.util.TreeSet;
 import com.eteks.sweethome3d.adaptive.forensics.SystemHandler;
 //import com.sun.javafx.scene.control.skin.TextAreaSkin;
 //import com.sun.javafx.scene.control.skin.TextFieldSkin;
-import com.sun.javafx.scene.control.skin.TextFieldSkin;
+import javafx.scene.control.skin.TextFieldSkin;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;

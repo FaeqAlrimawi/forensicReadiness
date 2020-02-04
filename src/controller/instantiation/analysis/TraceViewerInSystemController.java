@@ -699,6 +699,14 @@ public class TraceViewerInSystemController {
 		// bigrapher file
 		// incident pattern
 		// states folder
+//		int traceID = addedTracesIDs.get(0);
+//		GraphPath randTrace = miner.getTrace(traceID);
+//		
+//		List<String> unmonitorableActions  =new LinkedList<String>();
+//		unmonitorableActions.add("EmployeeExitRoom");
+//		
+//		showMonitoring(randTrace, unmonitorableActions);
+		
 		if (!areRequiredFilesSet()) {
 			return;
 		}
@@ -3908,7 +3916,8 @@ public class TraceViewerInSystemController {
 				String action1 = actions.get(j - 1);
 				// String action1 = actions.get(1);
 
-				// last two parameters can be removed. They are used for testing (original method
+				// last two parameters can be removed. They are used for testing (original
+				// method
 				// implementation requires change)
 				int dependentResult = miner.areActionsCausallyDependent(action2, action1, actionPreState, preState,
 						originalPreState, originalPostState);
@@ -3997,69 +4006,10 @@ public class TraceViewerInSystemController {
 		// value is a list where: 0: previous action, 1: a key (currently
 		// necessarily), which represents the dependecy level
 
-		// actionprestate is the state that the precondition of the action
-		// satisfies
-		// find the line representing the action between the two states
-		StackPane actionArrowLabels = null;
-
-		List<StackPane> arrowHeads = statesOutgoingArrows.get(actionPreState);
-
-		if (arrowHeads != null) {
-			for (StackPane arw : arrowHeads) {
-				List<Integer> states = getStatesFromArrow(arw);
-
-				if (states != null && states.size() > 1) {
-					int startState = states.get(0);
-					int endState = states.get(1);
-
-					// if the arrow is found then get the line
-					if (startState == actionPreState && endState == actionPostState) {
-						// actionLbl = arrowsLines.get
-						actionArrowLabels = arrowsLabels.get(arw);
-						break;
-					}
-				}
-			}
-		} else {
-			System.err.println("outgoing arrow heads are null");
-		}
-
-		if (actionArrowLabels == null) {
-			System.err.println("action arrow labels is null");
-			return;
-		}
-
-		// get the container of the arrow label
-		Node container = actionArrowLabels.getChildren() != null && actionArrowLabels.getChildren().size() > 0
-				? actionArrowLabels.getChildren().get(0)
-				: null;
-
-		// childern contain the label for the perc
-		List<Node> children = null;
-
-		if (container instanceof VBox) {
-			children = ((VBox) container).getChildren();
-		}
-
-		if (children == null) {
-			System.err.println("children are null");
-			return;
-		}
-
-		// find the perc action label
-		List<Label> actionLbls = mapActionPerc.get(action);
-
-		Label actionLbl = null;
-
-		for (Label lbl : actionLbls) {
-
-			if (children.contains(lbl)) {
-				actionLbl = lbl;
-				break;
-			}
-		}
+		Label actionLbl = getActionPercLabel(action, actionPreState, actionPostState);
 
 		if (actionLbl == null) {
+			System.out.println("showCausality: Label for action [" + action + "] is null");
 			return;
 		}
 
@@ -4384,6 +4334,44 @@ public class TraceViewerInSystemController {
 		System.out.println("irrelevant states and actions:\n" + irrelevantStatesAndActions);
 	}
 
+	/**
+	 * Shows what actions can/cannot be monitored in a given trace. Monitoring is
+	 * indicated by adding a label to an action
+	 * 
+	 * @param trace              The trace to show the monitoring on
+	 * @param unmonitoredActions The actions in the trace that cannot be monitored
+	 */
+	protected void showMonitoring(GraphPath trace, List<String> unmonitoredActions) {
+
+		if (trace == null) {
+			return;
+		}
+
+		List<Integer> states = trace.getStateTransitions();
+		List<String> actions = trace.getTraceActions();
+
+		for (int i = 0; i < actions.size(); i++) {
+			int preState = states.get(i);
+			int postState = states.get(i + 1);
+			String action = actions.get(i);
+
+			Label actionPercLabel = getActionPercLabel(action, preState, postState);
+
+			if (actionPercLabel != null) {
+
+				// if it cannot monitor
+				if (unmonitoredActions.contains(action)) {
+					actionPercLabel.setTextFill(Color.RED);
+					actionPercLabel.setText("Cannot monitor");
+
+				} else {
+					actionPercLabel.setTextFill(Color.GREEN);
+					actionPercLabel.setText("Can monitor");
+				}
+			}
+		}
+	}
+
 	protected StackPane getArrowHead(int startState, int endState) {
 
 		List<StackPane> arrowHeads = statesOutgoingArrows.get(startState);
@@ -4401,6 +4389,56 @@ public class TraceViewerInSystemController {
 		return null;
 	}
 
+	protected Label getActionPercLabel(String action, int preState, int postState) {
+
+		// returns the label that contains the percentage value for the given action
+		// between the pre and post states
+
+		List<Label> labels = mapActionPerc.get(action);
+
+		if (labels == null) {
+			return null;
+		}
+
+		// get arrow head
+		StackPane arwHead = getArrowHead(preState, postState);
+		StackPane arwLabelPanel = arrowsLabels.get(arwHead);
+
+		Node container = arwLabelPanel.getChildren() != null && arwLabelPanel.getChildren().size() > 0
+				? arwLabelPanel.getChildren().get(0)
+				: null;
+
+		// childern contain the label for the perc
+		List<Node> children = null;
+
+		if (container instanceof VBox) {
+			children = ((VBox) container).getChildren();
+		}
+
+		if (children == null) {
+			System.err.println("children are null");
+			return null;
+		}
+
+		// find the perc action label
+		List<Label> actionLbls = mapActionPerc.get(action);
+
+		Label actionLbl = null;
+
+		for (Label lbl : actionLbls) {
+
+			if (children.contains(lbl)) {
+				actionLbl = lbl;
+				break;
+			}
+		}
+
+//		if (actionLbl == null) {
+//			return null;
+//		}
+
+		return actionLbl;
+	}
 	// protected boolean hasCausalLinksToFinalState(String action, String
 	// finalAction, GraphPath trace,
 	// Map<String, List<String>> actionsCausality) {
