@@ -255,6 +255,8 @@ public class TraceViewerInSystemController {
 	private URL splitPaneStyle = TraceViewerController.class.getClassLoader()
 			.getResource("resources/styles/splitpane.css");
 
+	private static final double NODE_RADIUS = 30;
+	
 	private static final String NODE_COLOUR = "white";
 	private static final String HIGHLIGHTED_NODE_COLOUR = "#efe8ff";
 	private static final String HIGHLIGHTED_END_NODE_COLOUR = "#ffb1b1";
@@ -262,7 +264,6 @@ public class TraceViewerInSystemController {
 	private static final Color TRACE_ARROW_COLOUR = Color.BLUE;
 	private static final String HIGHLIGHT_TRACE_ARROW_COLOUR = "blue";
 	private static final Color ADDED_NODES_ARROW_COLOUR = Color.GREY;
-	private static final double NODE_RADIUS = 25;
 	private static final String STATE_STYLE = "-fx-font-size:18px;-fx-font-weight:bold;";
 	private static final String EXTRA_STATE_STYLE = "-fx-font-size:18px;-fx-font-weight:bold; -fx-text-fill:black";
 	private static final String STATE_PERC_STYLE = "-fx-font-size:10px;-fx-text-fill:red;";
@@ -2833,7 +2834,7 @@ public class TraceViewerInSystemController {
 
 				if (nd instanceof Label) {
 					Label lbl = (Label) nd;
-					lbl.setTooltip(new Tooltip("Initial state"));
+					lbl.setTooltip(new Tooltip(startState+": Initial state"));
 				}
 			}
 		}
@@ -2851,7 +2852,7 @@ public class TraceViewerInSystemController {
 
 				if (nd instanceof Label) {
 					Label lbl = (Label) nd;
-					lbl.setTooltip(new Tooltip("Final state"));
+					lbl.setTooltip(new Tooltip(finalState+": Final state"));
 				}
 			}
 		}
@@ -4846,6 +4847,7 @@ public class TraceViewerInSystemController {
 	 */
 	private StackPane getDot(String color, String state, String stateLabelStyle, double radius, int traceID) {
 		// double radius = 50;
+			
 		double paneSize = 2 * radius;
 		StackPane dotPane = new StackPane();
 		Circle dot = new Circle();
@@ -4911,6 +4913,8 @@ public class TraceViewerInSystemController {
 		vboxLbl.getChildren().add(lblState);
 		vboxLbl.setAlignment(Pos.CENTER);
 
+//		vboxLbl.prefWidthProperty().bind(Bindings.add(0, lblState.widthProperty()));
+		
 		dotPane.getChildren().addAll(dot, vboxLbl, lblState);
 
 		dotPane.setPrefSize(paneSize, paneSize);
