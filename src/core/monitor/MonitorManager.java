@@ -154,7 +154,9 @@ public class MonitorManager {
 			}
 		}
 
-		return false;
+		this.miner = miner;
+		
+		return true;
 	}
 
 	public Monitor getMonitor(String action) {

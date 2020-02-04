@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 
 import core.brs.parser.utilities.JSONTerms;
 import core.instantiation.analysis.TraceMiner;
+import core.monitor.MonitorManager;
 import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.pattern_instantiation.GraphPath;
 import javafx.application.Platform;
@@ -344,6 +345,10 @@ public class TraceViewerInSystemController {
 	// an executor to handle threads
 	ExecutorService executor = Executors.newFixedThreadPool(4);
 
+	
+	//monitor manager to assess monitors for traces
+	private MonitorManager monitorManager;
+	
 	@FXML
 	public void initialize() {
 
@@ -530,6 +535,15 @@ public class TraceViewerInSystemController {
 
 	}
 
+	protected void initializeMonitorManager() {
+	
+		monitorManager = new MonitorManager();
+		
+		//load monitors already existing
+		monitorManager.loadFactoryMonitors(miner);
+		
+	}
+	
 	/**
 	 * Searchs for traces containing specific states
 	 * 
@@ -749,6 +763,37 @@ public class TraceViewerInSystemController {
 		return true;
 	}
 
+	@FXML
+	protected void assessMonitor() {
+	
+
+		if (highLightedTracesIDs == null || highLightedTracesIDs.isEmpty()) {
+			return;
+		}
+
+		if(monitorManager == null) {
+			initializeMonitorManager();
+		}
+		
+		if(!areRequiredFilesForMonitoringSet()) {
+			return;
+		}
+		
+		/// hide actions and states labels (reset them)
+		hideStatesAndActionsOccurrences();
+		
+		
+		List<String> unmonitoredActions = new LinkedList<String>();
+		
+		for(Integer traceID : addedTracesIDs) {
+			GraphPath trace = miner.getTrace(traceID);
+			
+			int result = monitorManager.canMonitor(trace, unmonitoredActions);
+			showMonitoring(trace, unmonitoredActions);
+		}
+		
+	}
+	
 	/**
 	 * Checks and tries to set the bigrapher file and states folder
 	 * 
@@ -767,6 +812,24 @@ public class TraceViewerInSystemController {
 		return true;
 	}
 
+	/**
+	 * Checks and tries to set the bigrapher file and states folder for monitoring
+	 * 
+	 * @return true if they are set, false otherwise
+	 */
+	protected boolean areRequiredFilesForMonitoringSet() {
+
+		if (!isBigraphERFileSet()) {
+			return false;
+		}
+
+		if (!isStatesFolderSet()) {
+			return false;
+		}
+
+		return true;
+	}
+	
 	/**
 	 * Checks if bigraphER file (*.big) is set or not. Tries to set it for once if
 	 * not succeeded then it returns false
@@ -1037,6 +1100,9 @@ public class TraceViewerInSystemController {
 		flowPaneTraceDetails.getChildren().clear();
 		lblNumOfHighlightedTraces.setText(null);
 
+		//hides actions perc and states labels
+		hideStatesAndActionsOccurrences();
+		
 		if (checkboxShowOnlySelectedTrace.isSelected()) {
 			checkboxShowOnlySelectedTrace.setSelected(false);
 		}

@@ -20,7 +20,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane minHeight="650.0" minWidth="900.0" prefHeight="775.0" prefWidth="1453.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.analysis.TraceViewerInSystemController">
+<BorderPane minHeight="650.0" minWidth="900.0" prefHeight="775.0" prefWidth="1453.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.instantiation.analysis.TraceViewerInSystemController">
    <center>
       <SplitPane fx:id="splitPaneTraceView" dividerPositions="0.17091660923501034">
          <items>
@@ -70,12 +70,13 @@
                               </VBox>
                               <FlowPane alignment="CENTER_RIGHT" columnHalignment="RIGHT" hgap="2.0" vgap="2.0">
                                  <children>
-                                    <Label fx:id="lblNumOfHighlightedTraces" alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="89.0" />
+                                    <Label fx:id="lblNumOfHighlightedTraces" alignment="TOP_RIGHT" prefHeight="21.0" prefWidth="20.0" />
                                     <Button mnemonicParsing="false" onAction="#showCausalityChain" prefHeight="25.0" prefWidth="58.0" text="analyse">
                                        <tooltip>
                                           <Tooltip text="Finds states matching incident pattern conditions, and also finds causal dependency. Shows causal dependency between actions. Causal dependency is defined in terms of counterfactual account, i.e.  act1 is causally dependent on act2 iff if act2 were not to occur, then act1 would not had occurred" />
                                        </tooltip>
                                     </Button>
+                                    <Button mnemonicParsing="false" onAction="#assessMonitor" text="Can monitor?" />
                                     <Button mnemonicParsing="false" onAction="#clearHighlightedTraces" prefHeight="19.0" prefWidth="42.0" text="clear" />
                                  </children>
                               </FlowPane>
