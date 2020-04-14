@@ -61,7 +61,7 @@ public class MonitorSelectionSolver {
 	// key is an action and the value is its id
 	Map<Integer, String> actionToIDMap;
 
-	// action sequence that correspond to the squence of monitors in a solution
+	// action sequence that correspond to the sequence of monitors in a solution
 	List<String> actionsSequence;
 
 	// key is monitor id and value is cost

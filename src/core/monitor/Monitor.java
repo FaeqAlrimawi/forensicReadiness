@@ -3,6 +3,7 @@ package core.monitor;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.eteks.sweethome3d.adaptive.security.assets.AssetType;
@@ -14,6 +15,7 @@ import core.brs.parser.utilities.JSONTerms;
 import core.instantiation.analysis.TraceMiner;
 import cyberPhysical_Incident.CyberPhysicalIncidentFactory;
 import cyberPhysical_Incident.Entity;
+import environment.Asset;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Control;
 import it.uniud.mads.jlibbig.core.std.Signature;
@@ -69,7 +71,8 @@ public class Monitor {
 	// data to collect if need to monitor
 	// data represents what pieces of information need to be collected by the
 	// monitor in order to create a "record" of the monitoring instance
-	String dataToCollect;
+	//key is unique name (asset name) and value is the asset
+	Map<String, Asset> dataToCollect;
 
 	// cost of monitoring
 	// can include the cost to operate the monitor (keep the monitor on),
@@ -184,13 +187,15 @@ public class Monitor {
 		this.targetAssetRef = targetAssetRef;
 	}
 
-	public String getDataToCollect() {
+	public Map<String, Asset> getDataToCollect() {
 		return dataToCollect;
 	}
 
-	public void setDataToCollect(String dataToCollect) {
+	public void setDataToCollect(Map<String, Asset> dataToCollect) {
 		this.dataToCollect = dataToCollect;
 	}
+	
+//	public void addDataToCollect
 
 	public double getCost() {
 		return cost;
