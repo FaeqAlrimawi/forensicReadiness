@@ -23,5 +23,13 @@
 	<classpathentry kind="lib" path="lib/json-20140107.jar"/>
 	<classpathentry kind="lib" path="lib/choco-solver-4.0.8.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JavaFX"/>
+	<classpathentry kind="lib" path="D:/javaFX_lib/javafx-sdk-19/lib/javafx.base.jar"/>
+	<classpathentry kind="lib" path="D:/javaFX_lib/javafx-sdk-19/lib/javafx.controls.jar"/>
+	<classpathentry kind="lib" path="D:/javaFX_lib/javafx-sdk-19/lib/javafx.fxml.jar"/>
+	<classpathentry kind="lib" path="D:/javaFX_lib/javafx-sdk-19/lib/javafx.graphics.jar"/>
+	<classpathentry kind="lib" path="D:/javaFX_lib/javafx-sdk-19/lib/javafx.media.jar"/>
+	<classpathentry kind="lib" path="D:/javaFX_lib/javafx-sdk-19/lib/javafx.swing.jar"/>
+	<classpathentry kind="lib" path="D:/javaFX_lib/javafx-sdk-19/lib/javafx.web.jar"/>
+	<classpathentry kind="lib" path="D:/javaFX_lib/javafx-sdk-19/lib/javafx-swt.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

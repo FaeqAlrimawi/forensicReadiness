@@ -22,7 +22,7 @@ import it.uniud.mads.jlibbig.core.std.Signature;
 import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
 
 /**
- * A class that defines the attributes and and methods for a monitor. For a
+ * A class that defines the attributes and methods for a monitor. For a
  * monitor to be properly defined it needs to have: 1) type (e.g., CCTV), 2)
  * stateToMonitor (i.e. the state that indicates that the monitor can perform
  * the monitoring).

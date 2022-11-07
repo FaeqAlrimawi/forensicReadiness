@@ -180,8 +180,8 @@ public class InstantiatorController
 	private File selectedStatesDirectory;
 	private File selectedSaveGeneratedTracesFile;
 
-	private String incidentPatternFilePath = "D:/Bigrapher data/lero/example/int.cpi";
-	private String systemModelFilePath = "D:/Bigrapher data/lero/example/lero.cps";
+	private String incidentPatternFilePath = "F:/Bigrapher data/lero/example/int.cpi";
+	private String systemModelFilePath = "F:/Bigrapher data/lero/example/lero.cps";
 	private IncidentPatternInstantiator incidentInstantiator;
 	private int numOfParallelInstances = 1;
 	private Thread instanceThread;

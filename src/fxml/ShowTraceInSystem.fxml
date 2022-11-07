@@ -76,7 +76,7 @@
                                           <Tooltip text="Finds states matching incident pattern conditions, and also finds causal dependency. Shows causal dependency between actions. Causal dependency is defined in terms of counterfactual account, i.e.  act1 is causally dependent on act2 iff if act2 were not to occur, then act1 would not had occurred" />
                                        </tooltip>
                                     </Button>
-                                    <Button mnemonicParsing="false" onAction="#assessMonitor" text="Can monitor?" />
+                                    <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="1.0" />
                                     <Button mnemonicParsing="false" onAction="#clearHighlightedTraces" prefHeight="19.0" prefWidth="42.0" text="clear" />
                                  </children>
                               </FlowPane>

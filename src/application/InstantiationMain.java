@@ -40,7 +40,7 @@ public class InstantiationMain extends Application {
 //			FXMLLoader loader = new FXMLLoader();
 
 			//select viewer to run
-			boolean runTraceViewer = true;
+			boolean runTraceViewer = false;
 			boolean runInstatiator = !runTraceViewer;
 			
 //			String traceViewerGUI = "TraceViewer.fxml";
@@ -118,9 +118,12 @@ public class InstantiationMain extends Application {
 	
 	protected void runInstantiatorViewer(Stage primaryStage) {
 		
+	
 	FXMLLoader loader = new FXMLLoader();
 		
+
 		String InstantiatorViewerGUI = "instantiator.fxml";
+		
 		
 		
 		URL url = InstantiationMain.class.getClassLoader().getResource("fxml/" + InstantiatorViewerGUI);
@@ -142,11 +145,14 @@ public class InstantiationMain extends Application {
 			
 			primaryStage.setScene(scene);
 			
+			
+			
 			primaryStage.setTitle("Incident Pattern Instantiation Executor");
 			primaryStage.show();
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+//			System.out.println("Here's the exception");
 			e.printStackTrace();
 		}
 

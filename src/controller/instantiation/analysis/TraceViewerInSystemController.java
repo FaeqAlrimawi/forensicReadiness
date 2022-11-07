@@ -764,7 +764,7 @@ public class TraceViewerInSystemController {
 		return true;
 	}
 
-	@FXML
+//	@FXML
 	protected void assessMonitor() {
 	
 

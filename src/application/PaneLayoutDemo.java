@@ -20,7 +20,6 @@ import javafx.scene.shape.Line;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 
-
 public class PaneLayoutDemo extends Application {
     double sceneX, sceneY, layoutX, layoutY;
 
