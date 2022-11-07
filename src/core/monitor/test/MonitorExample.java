@@ -95,7 +95,8 @@ public class MonitorExample {
 		GraphPath trace = miner.getTrace(2);
 
 		if (trace != null) {
-			System.out.println("Can monitor trace[" + trace.getInstanceID() + "] ("+trace.toString()+")?");
+			System.out.println("Can it monitor trace[" + trace.getInstanceID() + 
+					"] ("+trace.toSimpleString()+")?");
 			
 			List<String> unmonitoredActions = new LinkedList<String>();
 			
