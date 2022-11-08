@@ -17,8 +17,7 @@ import ie.lero.spare.pattern_instantiation.GraphPath;
 /**
  * A class that manages available monitors. One can add monitors to the manager,
  * or create monitors from available templates. Monitor templates can be created
- * using {@link MonitorTemplateFactory}. Monitor templates can be created using
- * {@link MonitorTemplateDepricated}
+ * using {@link MonitorTemplateFactory}. 
  * 
  * @author Faeq
  *
@@ -31,6 +30,8 @@ public class MonitorManager {
 
 	// holds all available monitors
 	// key is monitor ID (unique name), and value is a Monitor object
+	/** Probably need to add a new variable to distinguish between system monitors (already existing in the system model) 
+	 and factory monitors, which can be loaded to SUGGEST new ones **/
 	protected Map<String, Monitor> monitors;
 
 	// system model

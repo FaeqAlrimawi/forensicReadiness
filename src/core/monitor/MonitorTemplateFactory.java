@@ -15,6 +15,10 @@ public class MonitorTemplateFactory {
 	protected Map<String, MonitorTemplate> templates;
 
 	protected MonitorTemplateFactory() {
+		
+		/**
+		 * Ideally one would use a database and link to this to be able to load templates
+		 */
 		createTemplates();
 	}
 
@@ -242,6 +246,17 @@ public class MonitorTemplateFactory {
 
 		return mon;
 	}
+	
+	/**
+	 * Creates a monitor for each template available
+	 * @return a map where the key is a string indicating the name of the template and the value is a Monitor object 
+	 */
+	public Map<String, Monitor> createMonitorForEachTemplate() {
+		
+		//TODO: implement this method so that it creates a monitor for each template available
+		return null;
+	}
+	
 }
 
 class MonitorTemplate {
