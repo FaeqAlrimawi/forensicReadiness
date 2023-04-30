@@ -17,7 +17,7 @@ import ie.lero.spare.pattern_instantiation.GraphPath;
 /**
  * A class that manages available monitors. One can add monitors to the manager,
  * or create monitors from available templates. Monitor templates can be created
- * using {@link MonitorTemplateFactory}. 
+ * using {@link MonitorTemplateFactory}.
  * 
  * @author Faeq
  *
@@ -30,8 +30,11 @@ public class MonitorManager {
 
 	// holds all available monitors
 	// key is monitor ID (unique name), and value is a Monitor object
-	/** Probably need to add a new variable to distinguish between system monitors (already existing in the system model) 
-	 and factory monitors, which can be loaded to SUGGEST new ones **/
+	/**
+	 * Probably need to add a new variable to distinguish between system monitors
+	 * (already existing in the system model) and factory monitors, which can be
+	 * loaded to SUGGEST new ones
+	 **/
 	protected Map<String, Monitor> monitors;
 
 	// system model
@@ -118,9 +121,9 @@ public class MonitorManager {
 
 		// loads monitors defined by templates in the factory
 
-		MonitorTemplateFactory instace = MonitorTemplateFactory.eInstance;
+		MonitorTemplateFactory instance = MonitorTemplateFactory.eInstance;
 
-		Map<String, Monitor> factoryMonitors = instace.createAllMonitors();
+		Map<String, Monitor> factoryMonitors = instance.createAllMonitors();
 
 		if (factoryMonitors != null) {
 			monitors.putAll(factoryMonitors);
@@ -156,7 +159,7 @@ public class MonitorManager {
 		}
 
 		this.miner = miner;
-		
+
 		return true;
 	}
 
@@ -223,12 +226,19 @@ public class MonitorManager {
 			return ERROR;
 		}
 
+		List<String> actions = trace.getTraceActions();
+		List<Integer> states = trace.getStateTransitions();
+
+		// the last condition specifies that the # of states should be more than the #
+		// of actions in a trace (makes sense!) otherwise there's an issue in the trace
+		if (actions == null || states == null || states.size() <= actions.size()) {
+			return ERROR;
+		}
+
 		if (actionsCannotBeMonitored == null) {
 			actionsCannotBeMonitored = new LinkedList<String>();
 		}
 
-		List<String> actions = trace.getTraceActions();
-		List<Integer> states = trace.getStateTransitions();
 		int canMon = -1;
 
 		for (int i = 0; i < actions.size(); i++) {
@@ -237,16 +247,22 @@ public class MonitorManager {
 			int preState = states.get(i);
 			int postState = states.get(i + 1);
 
-//			System.out.println("Can monitor action [" + action + "] with change: pre[" + preState + "] post["
-//					+ postState + "]?");
+
+			System.out.println("MonitorManager: Can monitor action [" + action + "] with change: pre[" + preState + "] post["
+					+ postState + "]?");
 
 			canMon = canMonitor(action, preState, postState);
 
 			// if there's an issue, then return the issue
 			if (canMon != CAN_MONITOR) {
 				actionsCannotBeMonitored.add(action);
-//				System.out.println("Cannot Monitor");
+				if(canMon == CANNOT_MONITOR) {
+					System.out.println("MonitorManager: CANNOT Monitor");	
+				}
+				
 //				return canMon;
+			} else {
+				System.out.println("MonitorManager: CAN Monitor");	
 			}
 
 //			System.out.println("Can monitor");
@@ -258,7 +274,7 @@ public class MonitorManager {
 
 		return CAN_MONITOR;
 	}
-
+	
 	/**
 	 * Determines whether the given trace can be monitored or not. A trace can be
 	 * monitored if all its actions can be monitored by at least one monitor
@@ -735,3 +751,9 @@ public class MonitorManager {
 		System.out.println("============================\n");
 	}
 }
+
+
+
+
+
+

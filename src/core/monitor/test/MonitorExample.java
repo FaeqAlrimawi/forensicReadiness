@@ -123,10 +123,12 @@ public class MonitorExample {
 			System.out.println("NO! cannot monitor");
 			break;
 
-		case MonitorManager.NO_MONITORS_AVAILABLE:
+		// this means that the manager itself does not have monitors (not that there are no monitors to monitor the trace)
+		case MonitorManager.NO_MONITORS_AVAILABLE: 
 			System.out.println("NO monitors available to monitor the given action");
 			break;
 
+		// this could be the case if a monitor specified (i.e. it's id is given to check whether it can trace a given trace)
 		case MonitorManager.UNDETERMINED:
 			System.out.println("Cannot determine");
 			break;

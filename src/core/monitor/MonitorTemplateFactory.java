@@ -251,11 +251,11 @@ public class MonitorTemplateFactory {
 	 * Creates a monitor for each template available
 	 * @return a map where the key is a string indicating the name of the template and the value is a Monitor object 
 	 */
-	public Map<String, Monitor> createMonitorForEachTemplate() {
-		
-		//TODO: implement this method so that it creates a monitor for each template available
-		return null;
-	}
+//	public Map<String, Monitor> createMonitorForEachTemplate() {
+//		
+//		//TODO: implement this method so that it creates a monitor for each template available
+//		return null;
+//	}
 	
 }
 

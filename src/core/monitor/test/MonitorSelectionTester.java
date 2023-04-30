@@ -29,7 +29,7 @@ public class MonitorSelectionTester {
 //		printMap(actionsMonitors);
 
 		boolean isOptimal = true;
-		boolean allDifferent = false;
+		boolean allDifferent = true;
 		boolean isMinimum = true;
 
 		int tries = 1;
